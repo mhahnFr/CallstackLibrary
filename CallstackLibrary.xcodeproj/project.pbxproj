@@ -11,6 +11,7 @@
 /* End PBXBuildFile section */
 
 /* Begin PBXFileReference section */
+		BF5A745E28F1DB890017591A /* LICENSE */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text; path = LICENSE; sourceTree = "<group>"; };
 		BF61E8F428F1CDD30006346B /* libcallstack.a */ = {isa = PBXFileReference; explicitFileType = archive.ar; includeInIndex = 0; path = libcallstack.a; sourceTree = BUILT_PRODUCTS_DIR; };
 		BF61E8FD28F1CFF70006346B /* .gitignore */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text; path = .gitignore; sourceTree = "<group>"; };
 		BF61E8FE28F1D1200006346B /* Makefile */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.make; path = Makefile; sourceTree = "<group>"; };
@@ -31,6 +32,7 @@
 		BF61E8EB28F1CDD30006346B = {
 			isa = PBXGroup;
 			children = (
+				BF5A745E28F1DB890017591A /* LICENSE */,
 				BF61E8FD28F1CFF70006346B /* .gitignore */,
 				BF61E8FE28F1D1200006346B /* Makefile */,
 				BF61E90028F1D1300006346B /* README.md */,
