@@ -15,9 +15,9 @@
             <BuildableReference
                BuildableIdentifier = "primary"
                BlueprintIdentifier = "BF61E8F328F1CDD30006346B"
-               BuildableName = "libCallstack Library.a"
-               BlueprintName = "Callstack Library"
-               ReferencedContainer = "container:Callstack Library.xcodeproj">
+               BuildableName = "libcallstack.a"
+               BlueprintName = "CallstackLibrary"
+               ReferencedContainer = "container:CallstackLibrary.xcodeproj">
             </BuildableReference>
          </BuildActionEntry>
       </BuildActionEntries>
@@ -51,9 +51,9 @@
          <BuildableReference
             BuildableIdentifier = "primary"
             BlueprintIdentifier = "BF61E8F328F1CDD30006346B"
-            BuildableName = "libCallstack Library.a"
-            BlueprintName = "Callstack Library"
-            ReferencedContainer = "container:Callstack Library.xcodeproj">
+            BuildableName = "libcallstack.a"
+            BlueprintName = "CallstackLibrary"
+            ReferencedContainer = "container:CallstackLibrary.xcodeproj">
          </BuildableReference>
       </MacroExpansion>
    </ProfileAction>

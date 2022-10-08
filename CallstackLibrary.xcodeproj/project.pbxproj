@@ -75,9 +75,9 @@
 /* End PBXHeadersBuildPhase section */
 
 /* Begin PBXNativeTarget section */
-		BF61E8F328F1CDD30006346B /* Callstack Library */ = {
+		BF61E8F328F1CDD30006346B /* CallstackLibrary */ = {
 			isa = PBXNativeTarget;
-			buildConfigurationList = BF61E8F828F1CDD30006346B /* Build configuration list for PBXNativeTarget "Callstack Library" */;
+			buildConfigurationList = BF61E8F828F1CDD30006346B /* Build configuration list for PBXNativeTarget "CallstackLibrary" */;
 			buildPhases = (
 				BF61E8F028F1CDD30006346B /* Headers */,
 				BF61E8F128F1CDD30006346B /* Sources */,
@@ -87,7 +87,7 @@
 			);
 			dependencies = (
 			);
-			name = "Callstack Library";
+			name = CallstackLibrary;
 			productName = "Callstack Library";
 			productReference = BF61E8F428F1CDD30006346B /* libcallstack.a */;
 			productType = "com.apple.product-type.library.static";
@@ -106,7 +106,7 @@
 					};
 				};
 			};
-			buildConfigurationList = BF61E8EF28F1CDD30006346B /* Build configuration list for PBXProject "Callstack Library" */;
+			buildConfigurationList = BF61E8EF28F1CDD30006346B /* Build configuration list for PBXProject "CallstackLibrary" */;
 			compatibilityVersion = "Xcode 9.3";
 			developmentRegion = en;
 			hasScannedForEncodings = 0;
@@ -119,7 +119,7 @@
 			projectDirPath = "";
 			projectRoot = "";
 			targets = (
-				BF61E8F328F1CDD30006346B /* Callstack Library */,
+				BF61E8F328F1CDD30006346B /* CallstackLibrary */,
 			);
 		};
 /* End PBXProject section */
@@ -271,7 +271,7 @@
 /* End XCBuildConfiguration section */
 
 /* Begin XCConfigurationList section */
-		BF61E8EF28F1CDD30006346B /* Build configuration list for PBXProject "Callstack Library" */ = {
+		BF61E8EF28F1CDD30006346B /* Build configuration list for PBXProject "CallstackLibrary" */ = {
 			isa = XCConfigurationList;
 			buildConfigurations = (
 				BF61E8F628F1CDD30006346B /* Debug */,
@@ -280,7 +280,7 @@
 			defaultConfigurationIsVisible = 0;
 			defaultConfigurationName = Release;
 		};
-		BF61E8F828F1CDD30006346B /* Build configuration list for PBXNativeTarget "Callstack Library" */ = {
+		BF61E8F828F1CDD30006346B /* Build configuration list for PBXNativeTarget "CallstackLibrary" */ = {
 			isa = XCConfigurationList;
 			buildConfigurations = (
 				BF61E8F928F1CDD30006346B /* Debug */,
