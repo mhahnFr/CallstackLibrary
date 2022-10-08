@@ -7,11 +7,18 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
-		BF61E8FF28F1D1200006346B /* Makefile in Sources */ = {isa = PBXBuildFile; fileRef = BF61E8FE28F1D1200006346B /* Makefile */; };
+		BF5A746128F1DCA00017591A /* callstackInternal.h in Headers */ = {isa = PBXBuildFile; fileRef = BF5A745F28F1DCA00017591A /* callstackInternal.h */; };
+		BF5A746228F1DCA00017591A /* callstackInternal.c in Sources */ = {isa = PBXBuildFile; fileRef = BF5A746028F1DCA00017591A /* callstackInternal.c */; };
+		BF5A746428F1DD7F0017591A /* callstack.h in Headers */ = {isa = PBXBuildFile; fileRef = BF5A746328F1DD7F0017591A /* callstack.h */; };
+		BF5A746628F1E5120017591A /* callstack_type.h in Headers */ = {isa = PBXBuildFile; fileRef = BF5A746528F1E5120017591A /* callstack_type.h */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXFileReference section */
 		BF5A745E28F1DB890017591A /* LICENSE */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text; path = LICENSE; sourceTree = "<group>"; };
+		BF5A745F28F1DCA00017591A /* callstackInternal.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = callstackInternal.h; sourceTree = "<group>"; };
+		BF5A746028F1DCA00017591A /* callstackInternal.c */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.c; path = callstackInternal.c; sourceTree = "<group>"; };
+		BF5A746328F1DD7F0017591A /* callstack.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = callstack.h; sourceTree = "<group>"; };
+		BF5A746528F1E5120017591A /* callstack_type.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = callstack_type.h; sourceTree = "<group>"; };
 		BF61E8F428F1CDD30006346B /* libcallstack.a */ = {isa = PBXFileReference; explicitFileType = archive.ar; includeInIndex = 0; path = libcallstack.a; sourceTree = BUILT_PRODUCTS_DIR; };
 		BF61E8FD28F1CFF70006346B /* .gitignore */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text; path = .gitignore; sourceTree = "<group>"; };
 		BF61E8FE28F1D1200006346B /* Makefile */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.make; path = Makefile; sourceTree = "<group>"; };
@@ -53,6 +60,8 @@
 		BF61E8FB28F1CFB40006346B /* code */ = {
 			isa = PBXGroup;
 			children = (
+				BF5A745F28F1DCA00017591A /* callstackInternal.h */,
+				BF5A746028F1DCA00017591A /* callstackInternal.c */,
 			);
 			path = code;
 			sourceTree = "<group>";
@@ -60,6 +69,8 @@
 		BF61E8FC28F1CFC90006346B /* include */ = {
 			isa = PBXGroup;
 			children = (
+				BF5A746328F1DD7F0017591A /* callstack.h */,
+				BF5A746528F1E5120017591A /* callstack_type.h */,
 			);
 			path = include;
 			sourceTree = "<group>";
@@ -71,6 +82,9 @@
 			isa = PBXHeadersBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				BF5A746628F1E5120017591A /* callstack_type.h in Headers */,
+				BF5A746128F1DCA00017591A /* callstackInternal.h in Headers */,
+				BF5A746428F1DD7F0017591A /* callstack.h in Headers */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -131,7 +145,7 @@
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
-				BF61E8FF28F1D1200006346B /* Makefile in Sources */,
+				BF5A746228F1DCA00017591A /* callstackInternal.c in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
