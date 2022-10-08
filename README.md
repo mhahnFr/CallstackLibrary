@@ -8,4 +8,4 @@ _Coming soon!_
 ### Final notes
 This library is licensed under the terms of the GPL 3.0.
 
-© Copyright [mhahnFr](https://www.github.com/mhahnFr)
+© Copyright 2022 [mhahnFr](https://www.github.com/mhahnFr)
