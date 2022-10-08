@@ -34,12 +34,13 @@ struct callstack * callstack_new(void);
 /**
  * @brief Allocates an uninitialied callstack object.
  *
+ * @param size The size that should be allocated.
  * @return A newly allocated callstack object.
  */
-struct callstack * callstack_allocate(void);
+struct callstack * callstack_allocate(size_t size);
 
 /**
- * @brief Initializes the given callstack struct.
+ * @brief Initializes the given callstack object.
  *
  * @param self The callstack object.
  */
@@ -47,6 +48,8 @@ void callstack_create(struct callstack * self);
 
 /**
  * @brief Initializes the given callstack object using the given backtrace.
+ *
+ * The given callstack object has to have enough memory to hold the given backtrace.
  *
  * @param self The callstack object.
  * @param trace The backtrace, an array of return addresses.
