@@ -26,6 +26,9 @@ extern "C" {
 
 #include "callstack_type.h"
 
+#include <stddef.h>
+#include <stdbool.h>
+
 /**
  * A structure representing a callstack.
  */
@@ -51,7 +54,7 @@ struct callstack {
  *
  * @return A newly allocated callstack object.
  */
-struct callstack * callstack_generate();
+struct callstack * callstack_generate(void);
 
 /**
  * @brief Creates an array of strings out of the backtrace and returns it.

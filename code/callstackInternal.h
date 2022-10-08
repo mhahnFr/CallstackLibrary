@@ -23,13 +23,20 @@
 #include "../include/callstack.h"
 
 /**
- * @brief Allocates an unintialized callstack object.
+ * @brief Allocates and intializes a new callstack object.
  *
  * The backtrace of the caller of this function is stored.
  *
  * @return A newly allocated callstack object or NULL in case of error.
  */
-struct callstack * callstack_new();
+struct callstack * callstack_new(void);
+
+/**
+ * @brief Allocates an uninitialied callstack object.
+ *
+ * @return A newly allocated callstack object.
+ */
+struct callstack * callstack_allocate(void);
 
 /**
  * @brief Initializes the given callstack struct.
@@ -37,6 +44,16 @@ struct callstack * callstack_new();
  * @param self The callstack object.
  */
 void callstack_create(struct callstack * self);
+
+/**
+ * @brief Initializes the given callstack object using the given backtrace.
+ *
+ * @param self The callstack object.
+ * @param trace The backtrace, an array of return addresses.
+ * @param traceLength The length of the trace array.
+ */
+void callstack_createWithBacktrace(struct callstack * self,
+                                   void * trace[], size_t traceLength);
 
 /**
  * @brief Destroys the given callstack object.
