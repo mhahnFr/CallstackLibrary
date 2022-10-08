@@ -22,10 +22,39 @@
 
 #include "../include/callstack.h"
 
+/**
+ * @brief Allocates an unintialized callstack object.
+ *
+ * The backtrace of the caller of this function is stored.
+ *
+ * @return A newly allocated callstack object or NULL in case of error.
+ */
 struct callstack * callstack_new();
-void callstack_create(struct callstack *);
-void callstack_destroy(struct callstack *);
 
-enum callstack_type callstack_translate(struct callstack *);
+/**
+ * @brief Initializes the given callstack struct.
+ *
+ * @param self The callstack object.
+ */
+void callstack_create(struct callstack * self);
+
+/**
+ * @brief Destroys the given callstack object.
+ *
+ * The contents of the given object are invalidated.
+ *
+ * @param self The callstack object.
+ */
+void callstack_destroy(struct callstack * self);
+
+/**
+ * @brief Translates the given callstack object into a human readable format.
+ *
+ * Returns the status of the translation, which is also set into the given callstack object.
+ *
+ * @param self The callstack object.
+ * @return The status of the translation.
+ */
+enum callstack_type callstack_translate(struct callstack * self);
 
 #endif /* callstack_h */
