@@ -17,8 +17,8 @@
 * this library, see the file LICENSE.  If not, see <https://www.gnu.org/licenses/>.
 */
 
-#ifndef callstack_h
-#define callstack_h
+#ifndef callstackinternal_h
+#define callstackinternal_h
 
 #include "../include/callstack.h"
 
@@ -57,4 +57,4 @@ void callstack_destroy(struct callstack * self);
  */
 enum callstack_type callstack_translate(struct callstack * self);
 
-#endif /* callstack_h */
+#endif /* callstackinternal_h */
