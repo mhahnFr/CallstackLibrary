@@ -67,7 +67,7 @@ struct callstack * callstack_generate(void);
  * @param self The callstack object.
  * @return A string array consisting of human readable strings.
  */
-const char ** callstack_toArray(struct callstack * self);
+char ** callstack_toArray(struct callstack * self);
 
 /**
  * @brief Creates a single string out of the backtrace and returns it.

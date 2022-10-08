@@ -71,3 +71,30 @@ enum callstack_type callstack_translate(struct callstack * self) {
     self->translationStatus = FAILED;
     return FAILED;
 }
+
+struct callstack * callstack_generate() {
+    // TODO: Implement properly
+    return callstack_new();
+}
+
+char ** callstack_toArray(struct callstack * self) {
+    if (self->translationStatus == NONE) {
+        (void) callstack_translate(self);
+    }
+    return self->stringArray;
+}
+
+
+
+enum callstack_type callstack_getType(struct callstack * self) {
+    return self->translationStatus;
+}
+
+bool callstack_isTranslated(struct callstack * self) {
+    return self->translationStatus != NONE && self->translationStatus != FAILED;
+}
+
+void callstack_delete(struct callstack * self) {
+    callstack_destroy(self);
+    free(self);
+}
