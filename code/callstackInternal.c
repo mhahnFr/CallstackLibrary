@@ -18,7 +18,7 @@
  */
 
 #include "callstackInternal.h"
-#include "defs.h"
+#include "../include/defs.h"
 
 #include <stdlib.h>
 #include <string.h>
