@@ -20,6 +20,9 @@
 #ifndef defs_h
 #define defs_h
 
+#include <stdbool.h>
+#include <stddef.h>
+
 #ifndef CALLSTACK_BACKTRACE_SIZE
  #define CALLSTACK_BACKTRACE_SIZE 128
 #endif

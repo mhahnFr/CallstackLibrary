@@ -24,10 +24,8 @@
 extern "C" {
 #endif
 
+#include "defs.h"
 #include "callstack_type.h"
-
-#include <stddef.h>
-#include <stdbool.h>
 
 /**
  * A structure representing a callstack.
@@ -41,8 +39,8 @@ struct callstack {
     char ** stringArray;
     /** The size of the backtrace.                                 */
     size_t  backtraceSize;
-    /** The NULL terminated backtrace.                             */
-    void *  backtrace[];
+    /** The backtrace.                                             */
+    void *  backtrace[CALLSTACK_BACKTRACE_SIZE];
 };
 
 /**
