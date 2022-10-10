@@ -84,7 +84,37 @@ char ** callstack_toArray(struct callstack * self) {
     return self->stringArray;
 }
 
+size_t callstack_getTotalStringLength(struct callstack * self) {
+    size_t ret = 0;
+    if (callstack_isTranslated(self)) {
+        for (size_t i = 0; i < self->stringArraySize; ++i) {
+            ret += strlen(self->stringArray[i]);
+        }
+    }
+    return ret;
+}
 
+const char * callstack_toString(struct callstack * self, char separator) {
+    if (self->translationStatus == NONE) {
+        (void) callstack_translate(self);
+    }
+    if (self->translationStatus == FAILED) {
+        return NULL;
+    } else if (self->stringArray == NULL || self->stringArraySize == 0) {
+        char string[2] = { separator, '\0' };
+        return strdup(string);
+    }
+    char * string = malloc(callstack_getTotalStringLength(self) + self->stringArraySize * sizeof(char) + 1);
+    size_t i, j;
+    for (i = 0, j = 0; i < self->stringArraySize; ++i, ++j) {
+        const size_t len = strlen(self->stringArray[i]);
+        memcpy(string + j, self->stringArray[i], len);
+        j += len;
+        string[j] = separator;
+    }
+    string[j] = '\0';
+    return string;
+}
 
 enum callstack_type callstack_getType(struct callstack * self) {
     return self->translationStatus;
