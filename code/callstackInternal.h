@@ -34,10 +34,9 @@ struct callstack * callstack_new(void);
 /**
  * @brief Allocates an uninitialied callstack object.
  *
- * @param size The size that should be allocated.
  * @return A newly allocated callstack object.
  */
-struct callstack * callstack_allocate(size_t size);
+struct callstack * callstack_allocate(void);
 
 /**
  * @brief Initializes the given callstack object.

@@ -28,15 +28,15 @@ struct callstack * callstack_new() {
     void * trace[CALLSTACK_BACKTRACE_SIZE];
     size_t size = backtrace(trace, CALLSTACK_BACKTRACE_SIZE);
     
-    struct callstack * ret = callstack_allocate(sizeof(struct callstack));
+    struct callstack * ret = callstack_allocate();
     if (ret != NULL) {
         callstack_createWithBacktrace(ret, trace, size);
     }
     return ret;
 }
 
-struct callstack * callstack_allocate(size_t size) {
-    return malloc(size);
+struct callstack * callstack_allocate() {
+    return malloc(sizeof(struct callstack));
 }
 
 void callstack_create(struct callstack * self) {
