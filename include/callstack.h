@@ -25,7 +25,7 @@ extern "C" {
 #endif
 
 #include "callstack_type.h"
-#include "defs.h"
+#include "callstack_defs.h"
 
 /**
  * A structure representing a callstack.
