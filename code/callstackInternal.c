@@ -20,20 +20,8 @@
 #include "callstackInternal.h"
 #include "defs.h"
 
-#include <execinfo.h>
 #include <stdlib.h>
 #include <string.h>
-
-struct callstack * callstack_new() {
-    void * trace[CALLSTACK_BACKTRACE_SIZE];
-    size_t size = backtrace(trace, CALLSTACK_BACKTRACE_SIZE);
-    
-    struct callstack * ret = callstack_allocate();
-    if (ret != NULL) {
-        callstack_createWithBacktrace(ret, trace, size);
-    }
-    return ret;
-}
 
 struct callstack * callstack_allocate() {
     return malloc(sizeof(struct callstack));

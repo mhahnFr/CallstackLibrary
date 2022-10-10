@@ -19,16 +19,25 @@
 
 #include "callstackInternal.h"
 
+#include <execinfo.h>
 #include <stdlib.h>
 #include <string.h>
 
-struct callstack * callstack_generate() {
-    // TODO: Implement properly
-    return callstack_new();
+struct callstack * callstack_new() {
+    void * trace[CALLSTACK_BACKTRACE_SIZE];
+    size_t size = backtrace(trace, CALLSTACK_BACKTRACE_SIZE);
+    
+    struct callstack * ret = callstack_allocate();
+    if (ret != NULL) {
+        callstack_createWithBacktrace(ret, trace, size);
+    }
+    return ret;
 }
 
 void callstack_emplace(struct callstack * self) {
-    callstack_create(self);
+    void * trace[CALLSTACK_BACKTRACE_SIZE];
+    size_t size = backtrace(trace, CALLSTACK_BACKTRACE_SIZE);
+    callstack_emplaceWithBacktrace(self, trace, size);
 }
 
 void callstack_emplaceWithBacktrace(struct callstack * self,

@@ -23,16 +23,7 @@
 #include "../include/callstack.h"
 
 /**
- * @brief Allocates and intializes a new callstack object.
- *
- * The backtrace of the caller of this function is stored.
- *
- * @return A newly allocated callstack object or NULL in case of error.
- */
-struct callstack * callstack_new(void);
-
-/**
- * @brief Allocates an uninitialied callstack object.
+ * @brief Allocates an uninitialized callstack object.
  *
  * @return A newly allocated callstack object.
  */

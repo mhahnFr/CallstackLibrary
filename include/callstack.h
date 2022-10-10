@@ -52,7 +52,7 @@ struct callstack {
  *
  * @return A newly allocated callstack object.
  */
-struct callstack * callstack_generate(void);
+struct callstack * callstack_new(void);
 
 /**
  * @brief Constructs the given callstack object.
