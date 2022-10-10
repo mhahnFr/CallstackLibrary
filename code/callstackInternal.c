@@ -26,7 +26,7 @@ void callstack_createWithBacktrace(struct callstack * self,
                                    void * trace[], size_t traceLength) {
     callstack_create(self);
     traceLength = traceLength <= CALLSTACK_BACKTRACE_SIZE ? traceLength : CALLSTACK_BACKTRACE_SIZE;
-    memcpy(self->backtrace, trace, traceLength);
+    memcpy(self->backtrace, trace, traceLength * sizeof(void *));
     self->backtraceSize = traceLength;
 }
 

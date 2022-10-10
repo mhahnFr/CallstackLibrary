@@ -42,7 +42,7 @@ enum callstack_type callstack_parser_parseDynamicLinker(struct callstack_parser 
     if (callstack->stringArray == NULL) {
         return FAILED;
     }
-    callstack->stringArraySize = callstack->backtraceSize + 1;
+    callstack->stringArraySize = callstack->backtraceSize;
     char ** strings = backtrace_symbols(callstack->backtrace, (int) callstack->backtraceSize);
     if (strings == NULL) {
         return FAILED;
