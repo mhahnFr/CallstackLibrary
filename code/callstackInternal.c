@@ -46,6 +46,15 @@ void callstack_create(struct callstack * self) {
     self->translationStatus = NONE;
 }
 
+void callstack_emplace(struct callstack * self) {
+    callstack_create(self);
+}
+
+void callstack_emplaceWithBacktrace(struct callstack * self,
+                                    void * trace[], size_t traceLength) {
+    callstack_createWithBacktrace(self, trace, traceLength);
+}
+
 void callstack_createWithBacktrace(struct callstack * self,
                                    void * trace[], size_t traceLength) {
     callstack_create(self);

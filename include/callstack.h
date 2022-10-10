@@ -55,6 +55,28 @@ struct callstack {
 struct callstack * callstack_generate(void);
 
 /**
+ * @brief Constructs the given callstack object.
+ *
+ * Stores the backtrace of the calling function.
+ *
+ * @param self A pointer to the callstack object to be constructed.
+ */
+void callstack_emplace(struct callstack * self);
+
+/**
+ * @brief Constructs the given callstack object.
+ *
+ * Copies the given callstack into the given object. If the trace is longer than
+ * CALLSTACK_BACKTRACE_SIZE, only the first addresses are copied.
+ *
+ * @param self A pointer to the callstack object to be constructed.
+ * @param trace The backtrace to be copied.
+ * @param traceLength The length of the given trace.
+ */
+void callstack_emplaceWithBacktrace(struct callstack * self,
+                                    void * trace[], size_t traceLength);
+
+/**
  * @brief Creates an array of strings out of the backtrace and returns it.
  *
  * The backtrace is only deleted if it has not already been created.
