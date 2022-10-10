@@ -104,6 +104,16 @@ char ** callstack_toArray(struct callstack * self);
 const char *  callstack_toString(struct callstack * self, char separator);
 
 /**
+ * @brief Returns the number of frames stored in the given callstack.
+ *
+ * @param self The callstack object.
+ * @return The number of frames in the given callstack.
+ */
+static inline size_t callstack_getFrameCount(struct callstack * self) {
+    return self->backtraceSize;
+}
+
+/**
  * @brief Returns the type of the callstack.
  *
  * @param self The callstack object.
