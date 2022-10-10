@@ -19,6 +19,11 @@
 
 #include "callstack_parserInternal.h"
 
+#include <dlfcn.h>
+#include <execinfo.h>
+#include <stdlib.h>
+#include <string.h>
+
 enum callstack_type callstack_parser_parseDebugSymbols(struct callstack_parser * self,
                                                        struct callstack * callstack) {
     (void) self;
@@ -28,7 +33,43 @@ enum callstack_type callstack_parser_parseDebugSymbols(struct callstack_parser *
 
 enum callstack_type callstack_parser_parseDynamicLinker(struct callstack_parser * self,
                                                         struct callstack * callstack) {
-    (void) self;
-    (void) callstack;
-    return FAILED;
+    enum callstack_type ret = self->mode;
+    /*
+     * TODO: Maybe optimize the allocation to only once.
+     *                                              - mhahnFr, October 2022
+     */
+    callstack->stringArray = malloc((callstack->backtraceSize + 1) * sizeof(char *));
+    if (callstack->stringArray == NULL) {
+        return FAILED;
+    }
+    callstack->stringArraySize = callstack->backtraceSize + 1;
+    char ** strings = backtrace_symbols(callstack->backtrace, (int) callstack->backtraceSize);
+    if (strings == NULL) {
+        return FAILED;
+    }
+    size_t i;
+    for (i = 0; i < callstack->backtraceSize; ++i) {
+        Dl_info info;
+        if (dladdr(callstack->backtrace[i], &info)) {
+            if (info.dli_sname == NULL) {
+                if ((callstack->stringArray[i] = strdup(strings[i])) == NULL) {
+                    ret = FAILED;
+                    break;
+                }
+            } else {
+                if ((callstack->stringArray[i] = strdup(info.dli_sname)) == NULL) {
+                    ret = FAILED;
+                    break;
+                }
+            }
+        } else {
+            if ((callstack->stringArray[i] = strdup("<Unknown>")) == NULL) {
+                ret = FAILED;
+                break;
+            }
+        }
+    }
+    callstack->stringArray[i] = NULL;
+    free(strings);
+    return ret;
 }
