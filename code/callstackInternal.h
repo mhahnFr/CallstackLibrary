@@ -22,19 +22,28 @@
 
 #include "../include/callstack.h"
 
+#include <stdlib.h>
+
 /**
  * @brief Allocates an uninitialized callstack object.
  *
  * @return A newly allocated callstack object.
  */
-struct callstack * callstack_allocate(void);
+static inline struct callstack * callstack_allocate(void) {
+    return malloc(sizeof(struct callstack));
+}
 
 /**
  * @brief Initializes the given callstack object.
  *
  * @param self The callstack object.
  */
-void callstack_create(struct callstack * self);
+static inline void callstack_create(struct callstack * self) {
+    self->backtraceSize     = 0;
+    self->stringArraySize   = 0;
+    self->stringArray       = NULL;
+    self->translationStatus = NONE;
+}
 
 /**
  * @brief Initializes the given callstack object using the given backtrace.
