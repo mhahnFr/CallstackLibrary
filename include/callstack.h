@@ -109,7 +109,9 @@ const char *  callstack_toString(struct callstack * self, char separator);
  * @param self The callstack object.
  * @return The type of the callstack.
  */
-enum callstack_type callstack_getType(struct callstack * self);
+static inline enum callstack_type callstack_getType(struct callstack * self) {
+    return self->translationStatus;
+}
 
 /**
  * @brief Returns whether the callstack is already translated.
@@ -117,7 +119,9 @@ enum callstack_type callstack_getType(struct callstack * self);
  * @param self The callstack object.
  * @return Whether the callstack is already translated.
  */
-bool callstack_isTranslated(struct callstack * self);
+static inline bool callstack_isTranslated(struct callstack * self) {
+    return self->translationStatus != NONE && self->translationStatus != FAILED;
+}
 
 /**
  * @brief Deletes the given callstack.

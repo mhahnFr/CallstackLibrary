@@ -12,6 +12,7 @@
 		BF5A746428F1DD7F0017591A /* callstack.h in Headers */ = {isa = PBXBuildFile; fileRef = BF5A746328F1DD7F0017591A /* callstack.h */; };
 		BF5A746628F1E5120017591A /* callstack_type.h in Headers */ = {isa = PBXBuildFile; fileRef = BF5A746528F1E5120017591A /* callstack_type.h */; };
 		BF5A746828F1EFC40017591A /* defs.h in Headers */ = {isa = PBXBuildFile; fileRef = BF5A746728F1EFC40017591A /* defs.h */; };
+		BF86E31F28F4564600F6D20E /* callstack.c in Sources */ = {isa = PBXBuildFile; fileRef = BF86E31E28F4564600F6D20E /* callstack.c */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXFileReference section */
@@ -25,6 +26,7 @@
 		BF61E8FD28F1CFF70006346B /* .gitignore */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text; path = .gitignore; sourceTree = "<group>"; };
 		BF61E8FE28F1D1200006346B /* Makefile */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.make; path = Makefile; sourceTree = "<group>"; };
 		BF61E90028F1D1300006346B /* README.md */ = {isa = PBXFileReference; lastKnownFileType = net.daringfireball.markdown; path = README.md; sourceTree = "<group>"; };
+		BF86E31E28F4564600F6D20E /* callstack.c */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.c; path = callstack.c; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -63,6 +65,7 @@
 			isa = PBXGroup;
 			children = (
 				BF5A745F28F1DCA00017591A /* callstackInternal.h */,
+				BF86E31E28F4564600F6D20E /* callstack.c */,
 				BF5A746028F1DCA00017591A /* callstackInternal.c */,
 				BF5A746728F1EFC40017591A /* defs.h */,
 			);
@@ -149,6 +152,7 @@
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				BF86E31F28F4564600F6D20E /* callstack.c in Sources */,
 				BF5A746228F1DCA00017591A /* callstackInternal.c in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;

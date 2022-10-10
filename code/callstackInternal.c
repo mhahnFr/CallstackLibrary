@@ -46,15 +46,6 @@ void callstack_create(struct callstack * self) {
     self->translationStatus = NONE;
 }
 
-void callstack_emplace(struct callstack * self) {
-    callstack_create(self);
-}
-
-void callstack_emplaceWithBacktrace(struct callstack * self,
-                                    void * trace[], size_t traceLength) {
-    callstack_createWithBacktrace(self, trace, traceLength);
-}
-
 void callstack_createWithBacktrace(struct callstack * self,
                                    void * trace[], size_t traceLength) {
     callstack_create(self);
@@ -82,18 +73,6 @@ enum callstack_type callstack_translate(struct callstack * self) {
     return FAILED;
 }
 
-struct callstack * callstack_generate() {
-    // TODO: Implement properly
-    return callstack_new();
-}
-
-char ** callstack_toArray(struct callstack * self) {
-    if (self->translationStatus == NONE) {
-        (void) callstack_translate(self);
-    }
-    return self->stringArray;
-}
-
 size_t callstack_getTotalStringLength(struct callstack * self) {
     size_t ret = 0;
     if (callstack_isTranslated(self)) {
@@ -102,39 +81,4 @@ size_t callstack_getTotalStringLength(struct callstack * self) {
         }
     }
     return ret;
-}
-
-const char * callstack_toString(struct callstack * self, char separator) {
-    if (self->translationStatus == NONE) {
-        (void) callstack_translate(self);
-    }
-    if (self->translationStatus == FAILED) {
-        return NULL;
-    } else if (self->stringArray == NULL || self->stringArraySize == 0) {
-        char string[2] = { separator, '\0' };
-        return strdup(string);
-    }
-    char * string = malloc(callstack_getTotalStringLength(self) + self->stringArraySize * sizeof(char) + 1);
-    size_t i, j;
-    for (i = 0, j = 0; i < self->stringArraySize; ++i, ++j) {
-        const size_t len = strlen(self->stringArray[i]);
-        memcpy(string + j, self->stringArray[i], len);
-        j += len;
-        string[j] = separator;
-    }
-    string[j] = '\0';
-    return string;
-}
-
-enum callstack_type callstack_getType(struct callstack * self) {
-    return self->translationStatus;
-}
-
-bool callstack_isTranslated(struct callstack * self) {
-    return self->translationStatus != NONE && self->translationStatus != FAILED;
-}
-
-void callstack_delete(struct callstack * self) {
-    callstack_destroy(self);
-    free(self);
 }
