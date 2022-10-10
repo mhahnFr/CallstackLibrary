@@ -18,6 +18,7 @@
  */
 
 #include "callstackInternal.h"
+#include "callstack_parser.h"
 #include "../include/callstack_defs.h"
 
 #include <string.h>
@@ -38,15 +39,18 @@ void callstack_destroy(struct callstack * self) {
         for (size_t i = 0; i < self->stringArraySize; ++i) {
             free(self->stringArray[i]);
         }
+        free(self->stringArray);
     }
     
     self->stringArraySize = 0;
 }
 
 enum callstack_type callstack_translate(struct callstack * self) {
-    // TODO: Implement
-    self->translationStatus = FAILED;
-    return FAILED;
+    struct callstack_parser parser;
+    callstack_parser_create(&parser);
+    self->translationStatus = callstack_parser_parse(&parser, self);
+    callstack_parser_destroy(&parser);
+    return self->translationStatus;
 }
 
 size_t callstack_getTotalStringLength(struct callstack * self) {
