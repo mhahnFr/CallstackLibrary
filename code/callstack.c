@@ -74,6 +74,20 @@ const char * callstack_toString(struct callstack * self, char separator) {
     return string;
 }
 
+void callstack_destroy(struct callstack * self) {
+    self->translationStatus = NONE;
+    self->backtraceSize     = 0;
+    
+    if (self->stringArray != NULL) {
+        for (size_t i = 0; i < self->stringArraySize; ++i) {
+            free(self->stringArray[i]);
+        }
+        free(self->stringArray);
+    }
+    
+    self->stringArraySize = 0;
+}
+
 void callstack_delete(struct callstack * self) {
     callstack_destroy(self);
     free(self);

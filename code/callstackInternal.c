@@ -31,20 +31,6 @@ void callstack_createWithBacktrace(struct callstack * self,
     self->backtraceSize = traceLength;
 }
 
-void callstack_destroy(struct callstack * self) {
-    self->translationStatus = NONE;
-    self->backtraceSize     = 0;
-    
-    if (self->stringArray != NULL) {
-        for (size_t i = 0; i < self->stringArraySize; ++i) {
-            free(self->stringArray[i]);
-        }
-        free(self->stringArray);
-    }
-    
-    self->stringArraySize = 0;
-}
-
 enum callstack_type callstack_translate(struct callstack * self) {
     struct callstack_parser parser;
     callstack_parser_create(&parser);

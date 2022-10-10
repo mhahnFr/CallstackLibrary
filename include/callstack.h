@@ -46,8 +46,7 @@ struct callstack {
 /**
  * @brief Creates a callstack of the calling function.
  *
- * The backtrace of the calling function is created and it tries to translate it into a human
- * readable format.
+ * The backtrace of the calling function is created.
  * The struct is allocated and needs to be freed using the function callstack_delete(struct callstack *).
  *
  * @return A newly allocated callstack object.
@@ -58,6 +57,8 @@ struct callstack * callstack_new(void);
  * @brief Constructs the given callstack object.
  *
  * Stores the backtrace of the calling function.
+ * The callstack object needs to be destructed using the function callstack_destroy(struct callstack *)
+ * after use.
  *
  * @param self A pointer to the callstack object to be constructed.
  */
@@ -68,6 +69,8 @@ void callstack_emplace(struct callstack * self);
  *
  * Copies the given callstack into the given object. If the trace is longer than
  * CALLSTACK_BACKTRACE_SIZE, only the first addresses are copied.
+ * The callstack object needs to be destructed using the function callstack_destroy(struct callstack *)
+ * after use.
  *
  * @param self A pointer to the callstack object to be constructed.
  * @param trace The backtrace to be copied.
@@ -79,7 +82,7 @@ void callstack_emplaceWithBacktrace(struct callstack * self,
 /**
  * @brief Creates an array of strings out of the backtrace and returns it.
  *
- * The backtrace is only deleted if it has not already been created.
+ * The backtrace is only constructed if it has not already been created.
  * The returned string array must not be freed.
  *
  * Returns NULL if an error happens.
@@ -114,7 +117,7 @@ static inline size_t callstack_getFrameCount(struct callstack * self) {
 }
 
 /**
- * @brief Returns the type of the callstack.
+ * @brief Returns the type of the given callstack.
  *
  * @param self The callstack object.
  * @return The type of the callstack.
@@ -124,7 +127,7 @@ static inline enum callstack_type callstack_getType(struct callstack * self) {
 }
 
 /**
- * @brief Returns whether the callstack is already translated.
+ * @brief Returns whether the given callstack is already translated.
  *
  * @param self The callstack object.
  * @return Whether the callstack is already translated.
@@ -132,6 +135,15 @@ static inline enum callstack_type callstack_getType(struct callstack * self) {
 static inline bool callstack_isTranslated(struct callstack * self) {
     return self->translationStatus != NONE && self->translationStatus != FAILED;
 }
+
+/**
+ * @brief Destroys the given callstack object.
+ *
+ * The contents of the given object are invalidated.
+ *
+ * @param self The callstack object.
+ */
+void callstack_destroy(struct callstack * self);
 
 /**
  * @brief Deletes the given callstack.

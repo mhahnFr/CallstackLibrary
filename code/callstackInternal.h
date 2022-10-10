@@ -67,15 +67,6 @@ void callstack_createWithBacktrace(struct callstack * self,
 size_t callstack_getTotalStringLength(struct callstack * self);
 
 /**
- * @brief Destroys the given callstack object.
- *
- * The contents of the given object are invalidated.
- *
- * @param self The callstack object.
- */
-void callstack_destroy(struct callstack * self);
-
-/**
  * @brief Translates the given callstack object into a human readable format.
  *
  * Returns the status of the translation, which is also set into the given callstack object.
