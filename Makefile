@@ -43,7 +43,7 @@ $(SHARED_N): $(OBJS)
 	$(CC) -shared -fPIC $(LDFLAGS) -o $(SHARED_N) $(OBJS)
 	
 $(STARIC_N): $(OBJS)
-	$(AR) -crsv $(STARIC_N) $(OBJS)
+	$(AR) -crs $(STARIC_N) $(OBJS)
 	
 %.o: %.c
 	$(CC) $(CFLAGS) -MMD -MP -c -o $@ $<
