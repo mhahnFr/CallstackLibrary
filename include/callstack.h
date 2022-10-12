@@ -80,6 +80,16 @@ void callstack_emplaceWithBacktrace(struct callstack * self,
                                     void * trace[], size_t traceLength);
 
 /**
+ * @brief Copies the given callstack.
+ *
+ * The given callstack is destroyed before the contents of the other one are copied.
+ *
+ * @param self A pointer to the the callstack to be replaced.
+ * @param other The callstack object to be copied.
+ */
+void callstack_copy(struct callstack * self, const struct callstack * other);
+
+/**
  * @brief Creates an array of strings out of the backtrace and returns it.
  *
  * The backtrace is only constructed if it has not already been created.

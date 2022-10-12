@@ -45,6 +45,25 @@ void callstack_emplaceWithBacktrace(struct callstack * self,
     callstack_createWithBacktrace(self, trace, traceLength);
 }
 
+void callstack_copy(struct callstack * self, const struct callstack * other) {
+    if (other != self) {
+        callstack_destroy(self);
+        
+        self->translationStatus = other->translationStatus;
+        self->backtraceSize     = other->backtraceSize;
+        for (size_t i = 0; i < self->backtraceSize; ++i) {
+            self->backtrace[i] = other->backtrace[i];
+        }
+        self->stringArraySize   = other->stringArraySize;
+        if (self->stringArraySize != 0) {
+            self->stringArray = malloc(self->stringArraySize * sizeof(char *));
+        }
+        for (size_t i = 0; i < self->stringArraySize; ++i) {
+            self->stringArray[i] = strdup(other->stringArray[i]);
+        }
+    }
+}
+
 char ** callstack_toArray(struct callstack * self) {
     if (self->translationStatus == NONE) {
         (void) callstack_translate(self);
