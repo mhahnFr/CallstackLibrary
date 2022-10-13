@@ -49,15 +49,19 @@ void callstack_copy(struct callstack * self, const struct callstack * other) {
     if (other != self) {
         callstack_destroy(self);
         
-        self->translationStatus = other->translationStatus;
-        self->backtraceSize     = other->backtraceSize;
+        self->translationStatus  = other->translationStatus;
+        self->backtraceSize      = other->backtraceSize;
+        
         for (size_t i = 0; i < self->backtraceSize; ++i) {
-            self->backtrace[i] = other->backtrace[i];
+            self->backtrace[i]   = other->backtrace[i];
         }
-        self->stringArraySize   = other->stringArraySize;
+        
+        self->stringArraySize    = other->stringArraySize;
+        
         if (self->stringArraySize != 0) {
-            self->stringArray = malloc(self->stringArraySize * sizeof(char *));
+            self->stringArray    = malloc(self->stringArraySize * sizeof(char *));
         }
+        
         for (size_t i = 0; i < self->stringArraySize; ++i) {
             self->stringArray[i] = strdup(other->stringArray[i]);
         }
@@ -65,6 +69,8 @@ void callstack_copy(struct callstack * self, const struct callstack * other) {
 }
 
 char ** callstack_toArray(struct callstack * self) {
+    if (self == NULL) return NULL;
+
     if (self->translationStatus == NONE) {
         (void) callstack_translate(self);
     }
@@ -72,6 +78,8 @@ char ** callstack_toArray(struct callstack * self) {
 }
 
 const char * callstack_toString(struct callstack * self, char separator) {
+    if (self == NULL) return NULL;
+
     if (self->translationStatus == NONE) {
         (void) callstack_translate(self);
     }
@@ -81,7 +89,7 @@ const char * callstack_toString(struct callstack * self, char separator) {
         char string[2] = { separator, '\0' };
         return strdup(string);
     }
-    char * string = malloc(callstack_getTotalStringLength(self) + self->stringArraySize * sizeof(char) + 1);
+    char * string = malloc(callstack_getTotalStringLength(self) + (self->stringArraySize + 1) * sizeof(char));
     size_t i, j;
     for (i = 0, j = 0; i < self->stringArraySize; ++i, ++j) {
         const size_t len = strlen(self->stringArray[i]);
