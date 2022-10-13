@@ -17,6 +17,8 @@
 		BF86E32328F45DE100F6D20E /* callstack_parser.c in Sources */ = {isa = PBXBuildFile; fileRef = BF86E32128F45DE100F6D20E /* callstack_parser.c */; };
 		BF86E32628F4609100F6D20E /* callstack_parserInternal.h in Headers */ = {isa = PBXBuildFile; fileRef = BF86E32428F4609100F6D20E /* callstack_parserInternal.h */; };
 		BF86E32728F4609100F6D20E /* callstack_parserInternal.c in Sources */ = {isa = PBXBuildFile; fileRef = BF86E32528F4609100F6D20E /* callstack_parserInternal.c */; };
+		BFCC50C928F8454E00E2388D /* demangler.cpp in Sources */ = {isa = PBXBuildFile; fileRef = BFCC50C728F8454E00E2388D /* demangler.cpp */; };
+		BFCC50CA28F8454E00E2388D /* demangler.h in Headers */ = {isa = PBXBuildFile; fileRef = BFCC50C828F8454E00E2388D /* demangler.h */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXFileReference section */
@@ -35,6 +37,8 @@
 		BF86E32128F45DE100F6D20E /* callstack_parser.c */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.c; path = callstack_parser.c; sourceTree = "<group>"; };
 		BF86E32428F4609100F6D20E /* callstack_parserInternal.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = callstack_parserInternal.h; sourceTree = "<group>"; };
 		BF86E32528F4609100F6D20E /* callstack_parserInternal.c */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.c; path = callstack_parserInternal.c; sourceTree = "<group>"; };
+		BFCC50C728F8454E00E2388D /* demangler.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; path = demangler.cpp; sourceTree = "<group>"; };
+		BFCC50C828F8454E00E2388D /* demangler.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = demangler.h; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -79,6 +83,8 @@
 				BF86E32128F45DE100F6D20E /* callstack_parser.c */,
 				BF86E32428F4609100F6D20E /* callstack_parserInternal.h */,
 				BF86E32528F4609100F6D20E /* callstack_parserInternal.c */,
+				BFCC50C728F8454E00E2388D /* demangler.cpp */,
+				BFCC50C828F8454E00E2388D /* demangler.h */,
 			);
 			path = code;
 			sourceTree = "<group>";
@@ -104,6 +110,7 @@
 				BF5A746628F1E5120017591A /* callstack_type.h in Headers */,
 				BF5A746128F1DCA00017591A /* callstackInternal.h in Headers */,
 				BF86E32628F4609100F6D20E /* callstack_parserInternal.h in Headers */,
+				BFCC50CA28F8454E00E2388D /* demangler.h in Headers */,
 				BF5A746828F1EFC40017591A /* callstack_defs.h in Headers */,
 				BF5A746428F1DD7F0017591A /* callstack.h in Headers */,
 			);
@@ -170,6 +177,7 @@
 				BF5A746228F1DCA00017591A /* callstackInternal.c in Sources */,
 				BF86E32728F4609100F6D20E /* callstack_parserInternal.c in Sources */,
 				BF86E32328F45DE100F6D20E /* callstack_parser.c in Sources */,
+				BFCC50C928F8454E00E2388D /* demangler.cpp in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
