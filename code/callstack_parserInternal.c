@@ -18,6 +18,7 @@
  */
 
 #include "callstack_parserInternal.h"
+#include "demangler.h"
 
 #include <dlfcn.h>
 #include <execinfo.h>
@@ -53,7 +54,7 @@ enum callstack_type callstack_parser_parseDynamicLinker(struct callstack_parser 
                     break;
                 }
             } else {
-                if ((callstack->stringArray[i] = strdup(info.dli_sname)) == NULL) {
+                if ((callstack->stringArray[i] = callstack_parser_demangle(info.dli_sname)) == NULL) {
                     ret = FAILED;
                     break;
                 }
@@ -68,4 +69,14 @@ enum callstack_type callstack_parser_parseDynamicLinker(struct callstack_parser 
     callstack->stringArray[i] = NULL;
     free(strings);
     return ret;
+}
+
+char * callstack_parser_demangle(const char * name) {
+#ifdef CXX_DEMANGLE
+    char * ret = callstack_demangle((char *) name);
+    if (ret != name) {
+        return ret;
+    }
+#endif
+    return strdup(name);
 }

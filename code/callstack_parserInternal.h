@@ -47,4 +47,15 @@ enum callstack_type callstack_parser_parseDebugSymbols(struct callstack_parser *
 enum callstack_type callstack_parser_parseDynamicLinker(struct callstack_parser * self,
                                                         struct callstack * callstack);
 
+/**
+ * @brief If the demangling is enabled, tries to demangle the given name.
+ *
+ * If the name could not be demangled, a copy of it is returned. Otherwise, an allocated,
+ * demangled string is returned.
+ *
+ * @param name The name to be tried to demangle.
+ * @return A copy of the given name or the demangled name.
+ */
+char * callstack_parser_demangle(const char * name);
+
 #endif /* callstack_parserInternal_h */
