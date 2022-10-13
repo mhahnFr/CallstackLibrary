@@ -17,46 +17,61 @@
 # this library, see the file LICENSE.  If not, see <https://www.gnu.org/licenses/>.
 #
 
+CXX_DEMANGLER = false
+
 CORE_NAME = libcallstack
 DYLIB_N   = $(CORE_NAME).dylib
 SHARED_N  = $(CORE_NAME).so
 STARIC_N  = $(CORE_NAME).a
 
-SRCS = $(shell find . -type f -name \*.c)
-OBJS = $(patsubst %.c, %.o, $(SRCS))
-DEPS = $(patsubst %.c, %.d, $(SRCS))
+SRCS      = $(shell find . -type f -name \*.c)
+OBJS      = $(patsubst %.c, %.o, $(SRCS))
+CXX_SRCS  = $(shell find . -type f -name \*.cpp)
+CXX_OBJS  = $(patsubst %.cpp, %.opp, $(CXX_SRCS))
+DEPS      = $(patsubst %.c, %.d, $(SRCS))
 
-CFLAGS  = -Wall -pedantic -fPIC -Ofast -std=gnu11
-LDFLAGS =
+COM_FLAGS = -Wall -pedantic -fPIC -Ofast
+CFLAGS    = $(COM_FLAGS) -std=gnu11
+CXXFLAGS  = $(COM_FLAGS) -std=gnu++11
+LDFLAGS   = -ldl
+
+LD = $(CC)
 
 NAME = $(STARIC_N)
 
+ifeq ($(CXX_DEMANGLER),true)
+	LD = $(CXX)
+	OBJS += $(CXX_OBJS)
+endif
 
 default: $(NAME)
 
 all: $(SHARED_N) $(STARIC_N) $(DYLIB_N)
 
 $(DYLIB_N): $(OBJS)
-	$(CC) -dynamiclib -fPIC $(LDFLAGS) -o $(DYLIB_N) $(OBJS)
-	
+	$(LD) -dynamiclib -fPIC $(LDFLAGS) -o $(DYLIB_N) $(OBJS)
+
 $(SHARED_N): $(OBJS)
-	$(CC) -shared -fPIC $(LDFLAGS) -o $(SHARED_N) $(OBJS)
-	
+	$(LD) -shared -fPIC $(LDFLAGS) -o $(SHARED_N) $(OBJS)
+
 $(STARIC_N): $(OBJS)
 	$(AR) -crs $(STARIC_N) $(OBJS)
-	
+
 %.o: %.c
 	$(CC) $(CFLAGS) -MMD -MP -c -o $@ $<
-	
+
+%.opp: %.cpp
+	$(CXX) $(CXXFLAGS) -MMD -MP -c -o $@ $<
+
 clean:
 	- $(RM) $(OBJS) $(DEPS)
-	
+
 fclean: clean
 	- $(RM) $(DYLIB_N) $(SHARED_N) $(STARIC_N)
-	
+
 re: fclean
 	$(MAKE) default
-	
+
 .PHONY: re fclean clean all default
 
 -include $(DEPS)
