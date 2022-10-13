@@ -34,10 +34,6 @@ enum callstack_type callstack_parser_parseDebugSymbols(struct callstack_parser *
 enum callstack_type callstack_parser_parseDynamicLinker(struct callstack_parser * self,
                                                         struct callstack * callstack) {
     enum callstack_type ret = self->mode;
-    /*
-     * TODO: Maybe optimize the allocation to only once.
-     *                                              - mhahnFr, October 2022
-     */
     callstack->stringArray = malloc((callstack->backtraceSize + 1) * sizeof(char *));
     if (callstack->stringArray == NULL) {
         return FAILED;
