@@ -66,6 +66,7 @@ $(STARIC_N): $(OBJS)
 
 clean:
 	- $(RM) $(OBJS) $(DEPS)
+	- $(RM) $(CXX_OBJS)
 
 fclean: clean
 	- $(RM) $(DYLIB_N) $(SHARED_N) $(STARIC_N)
