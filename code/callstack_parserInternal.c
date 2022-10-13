@@ -22,6 +22,7 @@
 
 #include <dlfcn.h>
 #include <execinfo.h>
+#include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
 
@@ -54,7 +55,8 @@ enum callstack_type callstack_parser_parseDynamicLinker(struct callstack_parser 
                     break;
                 }
             } else {
-                if ((callstack->stringArray[i] = callstack_parser_demangle(info.dli_sname)) == NULL) {
+                if ((callstack->stringArray[i] = callstack_parser_demangle(info.dli_sname,
+                                                                           callstack->backtrace[i] - info.dli_saddr)) == NULL) {
                     ret = FAILED;
                     break;
                 }
@@ -71,12 +73,23 @@ enum callstack_type callstack_parser_parseDynamicLinker(struct callstack_parser 
     return ret;
 }
 
-char * callstack_parser_demangle(const char * name) {
+char * callstack_parser_demangle(const char * name, ptrdiff_t diff) {
+    char * result = (char *) name;
+    bool del      = false;
+
 #ifdef CXX_DEMANGLE
-    char * ret = callstack_demangle((char *) name);
-    if (ret != name) {
-        return ret;
+    result = callstack_demangle(result);
+    if (result != name) {
+        del = true;
     }
 #endif
-    return strdup(name);
+
+    char * ret;
+    if (asprintf(&ret, "%s + %td", result, diff) < 0) {
+        ret = strdup(result);
+    }
+    if (del) {
+        free(result);
+    }
+    return ret;
 }

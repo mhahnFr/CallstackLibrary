@@ -54,8 +54,9 @@ enum callstack_type callstack_parser_parseDynamicLinker(struct callstack_parser 
  * demangled string is returned.
  *
  * @param name The name to be tried to demangle.
+ * @param diff The difference between the current address and the return address.
  * @return A copy of the given name or the demangled name.
  */
-char * callstack_parser_demangle(const char * name);
+char * callstack_parser_demangle(const char * name, ptrdiff_t diff);
 
 #endif /* callstack_parserInternal_h */
