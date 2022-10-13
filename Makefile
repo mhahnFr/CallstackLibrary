@@ -30,7 +30,7 @@ CXX_SRCS  = $(shell find . -type f -name \*.cpp)
 CXX_OBJS  = $(patsubst %.cpp, %.opp, $(CXX_SRCS))
 DEPS      = $(patsubst %.c, %.d, $(SRCS))
 
-COM_FLAGS = -Wall -pedantic -fPIC -Ofast
+COM_FLAGS = -Wall -Wextra -fPIC -Ofast
 CFLAGS    = $(COM_FLAGS) -std=gnu11
 CXXFLAGS  = $(COM_FLAGS) -std=gnu++11
 LDFLAGS   = -ldl
