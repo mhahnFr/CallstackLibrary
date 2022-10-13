@@ -40,8 +40,9 @@ LD = $(CC)
 NAME = $(STARIC_N)
 
 ifeq ($(CXX_DEMANGLER),true)
-	LD = $(CXX)
-	OBJS += $(CXX_OBJS)
+	LD      = $(CXX)
+	OBJS   += $(CXX_OBJS)
+	CFLAGS += -DCXX_DEMANGLE
 endif
 
 default: $(NAME)
