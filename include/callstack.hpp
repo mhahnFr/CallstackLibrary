@@ -25,17 +25,41 @@
  #ifndef callstack_hpp
  #define callstack_hpp
 
+/**
+ * This namespace contains a wrapper class for the struct callstack.
+ * It is needed to avoid name conflicts between the struct and the wrapper class.
+ */
 namespace cs {
+    /**
+     * @brief A wrapper class around the struct callstack.
+     *
+     * It provides the usual constructors and operator overloads. Additionally, it contains the
+     * possibility to implicitly cast an object of this class to a pointer to the C struct.
+     */
     class callstack {
+        /** The original C struct. */
         ::callstack self;
         
     public:
+        /**
+         * @brief A trivial default constructor.
+         *
+         * Initializes the underlying C struct if desired.
+         *
+         * @param emplace Whether to call callstack_emplace().
+         */
         callstack(bool emplace = true) {
             if (emplace) {
                 callstack_emplace(*this);
             }
         }
         
+        /**
+         * @brief Constructs the underlying C struct with the given backtrace.
+         *
+         * @param trace The backtrace.
+         * @param length The length of the given backtrace.
+         */
         callstack(void ** trace, size_t length) {
             callstack_emplaceWithBacktrace(*this, trace, length);
         }
@@ -71,4 +95,4 @@ namespace cs {
 }
 
  #endif /* callstack_hpp */
-#endif
+#endif /* callstack_h */
