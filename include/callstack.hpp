@@ -46,7 +46,8 @@ namespace cs {
         /**
          * @brief A trivial default constructor.
          *
-         * Initializes the underlying C struct if desired.
+         * Zero-initializes the underlying C struct. If the given bool value is true,
+         * it is initialized using the function callstack_emplace().
          *
          * @param emplace Whether to call callstack_emplace().
          */
@@ -98,8 +99,8 @@ namespace cs {
         }
  #endif
         
-        operator ::callstack *()             { return &self; }
-        operator const ::callstack *() const { return &self; }
+        operator       ::callstack * ()       { return &self; }
+        operator const ::callstack * () const { return &self; }
     };
 }
 
