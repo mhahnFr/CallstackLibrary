@@ -166,6 +166,9 @@ void callstack_delete(struct callstack * self);
 
 #ifdef __cplusplus
 } // extern "C"
+
+#include "callstack.hpp"
+
 #endif
 
 #endif /* callstack_h */
