@@ -84,11 +84,15 @@ namespace cs {
         }
         
  #if __cplusplus >= 201103
-        callstack(callstack &&) = default;
+        callstack(callstack && other)
+            : self(std::move(other.self)) {
+            callstack_create(other);
+        }
         
         callstack & operator=(callstack && other) {
             callstack_destroy(*this);
             self = std::move(other.self);
+            callstack_create(other);
             return *this;
         }
  #endif
