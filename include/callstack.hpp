@@ -81,7 +81,7 @@ namespace cs {
          */
         explicit callstack(const ::callstack * cCallstack) {
             callstack_create(*this);
-            callstack_copy(*this, other);
+            callstack_copy(*this, cCallstack);
         }
         
        ~callstack() {
