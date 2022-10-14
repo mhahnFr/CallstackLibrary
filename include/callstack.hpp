@@ -51,7 +51,7 @@ namespace cs {
          *
          * @param emplace Whether to call callstack_emplace().
          */
-        callstack(bool emplace = true) {
+        explicit callstack(bool emplace = true) {
             if (emplace) {
                 callstack_emplace(*this);
             } else {
@@ -70,6 +70,16 @@ namespace cs {
         }
         
         callstack(const callstack & other) {
+            callstack_create(*this);
+            callstack_copy(*this, other);
+        }
+        
+        /**
+         * @brief Constructs a callstack object from the given C struct.
+         *
+         * @param cCallstack The C struct to be copied.
+         */
+        explicit callstack(const ::callstack * cCallstack) {
             callstack_create(*this);
             callstack_copy(*this, other);
         }
