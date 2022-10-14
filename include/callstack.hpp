@@ -69,6 +69,7 @@ namespace cs {
         }
         
         callstack(const callstack & other) {
+            callstack_create(*this);
             callstack_copy(*this, other);
         }
         
