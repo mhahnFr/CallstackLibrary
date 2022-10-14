@@ -21,6 +21,7 @@
 #define callstackinternal_h
 
 #include "../include/callstack.h"
+#include "../include/callstack_create.h"
 
 #include <stdlib.h>
 
@@ -31,18 +32,6 @@
  */
 static inline struct callstack * callstack_allocate(void) {
     return malloc(sizeof(struct callstack));
-}
-
-/**
- * @brief Initializes the given callstack object.
- *
- * @param self The callstack object.
- */
-static inline void callstack_create(struct callstack * self) {
-    self->backtraceSize     = 0;
-    self->stringArraySize   = 0;
-    self->stringArray       = NULL;
-    self->translationStatus = NONE;
 }
 
 /**

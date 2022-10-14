@@ -25,6 +25,8 @@
  #ifndef callstack_hpp
  #define callstack_hpp
 
+ #include "callstack_create.h"
+
 /**
  * This namespace contains a wrapper class for the struct callstack.
  * It is needed to avoid name conflicts between the struct and the wrapper class.
@@ -51,6 +53,8 @@ namespace cs {
         callstack(bool emplace = true) {
             if (emplace) {
                 callstack_emplace(*this);
+            } else {
+                callstack_create(*this);
             }
         }
         
