@@ -39,8 +39,10 @@ namespace lcs {
      * possibility to implicitly cast an object of this class to a pointer to the C struct.
      */
     class callstack {
-        /** The original C struct. */
-        ::callstack self;
+        /** A typedef for convenience. */
+        typedef ::callstack struct_callstack;
+        /** The original C struct.     */
+        struct_callstack self;
         
     public:
         /**
@@ -79,7 +81,7 @@ namespace lcs {
          *
          * @param cCallstack The C struct to be copied.
          */
-        explicit callstack(const ::callstack * cCallstack) {
+        explicit callstack(const struct_callstack * cCallstack) {
             callstack_create(*this);
             callstack_copy(*this, cCallstack);
         }
@@ -109,8 +111,8 @@ namespace lcs {
         }
  #endif
         
-        operator       ::callstack * ()       { return &self; }
-        operator const ::callstack * () const { return &self; }
+        operator       struct_callstack * ()       { return &self; }
+        operator const struct_callstack * () const { return &self; }
     };
 }
 
