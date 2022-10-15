@@ -31,7 +31,7 @@
  * This namespace contains a wrapper class for the struct callstack.
  * It is needed to avoid name conflicts between the struct and the wrapper class.
  */
-namespace cs {
+namespace lcs {
     /**
      * @brief A wrapper class around the struct callstack.
      *
