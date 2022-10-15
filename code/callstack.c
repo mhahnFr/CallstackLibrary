@@ -24,8 +24,12 @@
 #include <string.h>
 
 struct callstack * callstack_new() {
+    return callstack_newWithAddress(__builtin_return_address(0));
+}
+
+struct callstack * callstack_newWithAddress(void * address) {
     void * trace[CALLSTACK_BACKTRACE_SIZE];
-    int size = backtrace(trace, CALLSTACK_BACKTRACE_SIZE);
+    int size = callstack_backtrace(trace, CALLSTACK_BACKTRACE_SIZE, address);
     if (size < 0) return NULL;
     
     struct callstack * ret = callstack_allocate();
@@ -36,8 +40,12 @@ struct callstack * callstack_new() {
 }
 
 bool callstack_emplace(struct callstack * self) {
+    return callstack_emplaceWithAddress(self, __builtin_return_address(0));
+}
+
+bool callstack_emplaceWithAddress(struct callstack * self, void * address) {
     void * trace[CALLSTACK_BACKTRACE_SIZE];
-    int size = backtrace(trace, CALLSTACK_BACKTRACE_SIZE);
+    int size = callstack_backtrace(trace, CALLSTACK_BACKTRACE_SIZE, address);
     return callstack_emplaceWithBacktrace(self, trace, size);
 }
 

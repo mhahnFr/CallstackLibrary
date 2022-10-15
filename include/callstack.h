@@ -55,17 +55,41 @@ struct callstack {
 struct callstack * callstack_new(void);
 
 /**
+ * @brief Creates a new callstack object, ignoring all frames after the given address.
+ *
+ * The struct is allocated and needs to be freed using the function callstack_delete(struct callstack *).
+ * Returns NULL if an error occurs.
+ *
+ * @param address The stack address after which frames are ignored.
+ * @return A newly allocated callstack object.
+ */
+struct callstack * callstack_newWithAddress(void * address);
+
+/**
  * @brief Constructs the given callstack object.
  *
  * Stores the backtrace of the calling function.
  * The callstack object needs to be destructed using the function callstack_destroy(struct callstack *)
- * after use.
+ * upon successfull construction and use.
  * If an error occurs during the initialization of the given callstack object, false is returned.
  *
  * @param self A pointer to the callstack object to be constructed.
  * @return Whether the given callstack object was constructed successfully.
  */
 bool callstack_emplace(struct callstack * self);
+
+/**
+ * @brief Constructs the given callstack object.
+ *
+ * Stores the backtrace of the calling function, ignoring all frames after the given address.
+ * The callstack object needs to be destructed using the function callstack_destroy(struct callstack *)
+ * upon successfull construction and use.
+ *
+ * @param self A pointer to the callstack object to be constructed.
+ * @param address The stack address after which frames are ignored.
+ * @return Whether the given callstack object was constructed successfully.
+ */
+bool callstack_emplaceWithAddress(struct callstack * self, void * address);
 
 /**
  * @brief Constructs the given callstack object.

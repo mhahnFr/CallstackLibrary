@@ -21,6 +21,7 @@
 #include "callstack_parser.h"
 #include "../include/callstack_defs.h"
 
+#include <execinfo.h>
 #include <string.h>
 
 void callstack_createWithBacktrace(struct callstack * self,
@@ -29,6 +30,17 @@ void callstack_createWithBacktrace(struct callstack * self,
     traceLength = traceLength <= CALLSTACK_BACKTRACE_SIZE ? traceLength : CALLSTACK_BACKTRACE_SIZE;
     memcpy(self->backtrace, trace, traceLength * sizeof(void *));
     self->backtraceSize = traceLength;
+}
+
+int callstack_backtrace(void * buffer[], int bufferSize, void * address) {
+    int i,
+        frames = backtrace(buffer, bufferSize);
+    
+    if (frames < 0) return frames;
+    
+    for (i = 0; buffer[i] != address && i < bufferSize; ++i);
+    (void) memmove(buffer, buffer + i, (size_t) bufferSize - i);
+    return frames - i;
 }
 
 enum callstack_type callstack_translate(struct callstack * self) {

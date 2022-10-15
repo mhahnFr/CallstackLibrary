@@ -55,6 +55,8 @@ void callstack_createWithBacktrace(struct callstack * self,
  */
 size_t callstack_getTotalStringLength(struct callstack * self);
 
+int callstack_backtrace(void * buffer[], int bufferSize, void * address);
+
 /**
  * @brief Translates the given callstack object into a human readable format.
  *
