@@ -30,7 +30,7 @@ struct callstack * callstack_new() {
     
     struct callstack * ret = callstack_allocate();
     if (ret != NULL) {
-        (void) callstack_createWithBacktrace(ret, trace, size);
+        (void) callstack_createWithBacktrace(ret, trace, (size_t) size);
     }
     return ret;
 }
@@ -45,7 +45,7 @@ bool callstack_emplaceWithBacktrace(struct callstack * self,
                                     void * trace[], int traceLength) {
     if (traceLength < 0) return false;
     
-    callstack_createWithBacktrace(self, trace, traceLength);
+    callstack_createWithBacktrace(self, trace, (size_t) traceLength);
     return true;
 }
 
