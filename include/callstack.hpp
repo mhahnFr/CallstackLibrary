@@ -44,18 +44,35 @@ namespace lcs {
         /** The original C struct.     */
         struct_callstack self;
         
+        /**
+         * @brief Helper function to throw the appopriate exception.
+         *
+         * @throws A system_error if compiled using C++11 or newer, a runtime error otherwise.
+         */
+        void error() {
+#if __cplusplus >= 201103
+            throw std::system_error(errno, std::generic_category());
+#else
+            throw std::runtime_error("Backtrace invalid");
+#endif
+        }
+        
     public:
         /**
          * @brief A trivial default constructor.
          *
          * Zero-initializes the underlying C struct. If the given bool value is true,
          * it is initialized using the function callstack_emplace().
+         * Throws an runtime_error or a system_error if compiled using C++11 or newer if
+         * emplace is set to true and the backtrace could not be created.
          *
          * @param emplace Whether to call callstack_emplace().
          */
         explicit callstack(bool emplace = true) {
             if (emplace) {
-                callstack_emplace(*this);
+                if (!callstack_emplace(*this)) {
+                    error();
+                }
             } else {
                 callstack_create(*this);
             }
@@ -64,11 +81,16 @@ namespace lcs {
         /**
          * @brief Constructs the underlying C struct with the given backtrace.
          *
+         * if the given trace length is smaller than zero, a runtime_error or a system_error
+         * if compiled using C++11 or newer is thrown.
+         *
          * @param trace The backtrace.
          * @param length The length of the given backtrace.
          */
-        callstack(void ** trace, size_t length) {
-            callstack_emplaceWithBacktrace(*this, trace, length);
+        callstack(void ** trace, int length) {
+            if (!callstack_emplaceWithBacktrace(*this, trace, length)) {
+                error();
+            }
         }
         
         callstack(const callstack & other) {
