@@ -25,24 +25,28 @@
 
 struct callstack * callstack_new() {
     void * trace[CALLSTACK_BACKTRACE_SIZE];
-    size_t size = backtrace(trace, CALLSTACK_BACKTRACE_SIZE);
+    int size = backtrace(trace, CALLSTACK_BACKTRACE_SIZE);
+    if (size < 0) return NULL;
     
     struct callstack * ret = callstack_allocate();
     if (ret != NULL) {
-        callstack_createWithBacktrace(ret, trace, size);
+        (void) callstack_createWithBacktrace(ret, trace, size);
     }
     return ret;
 }
 
-void callstack_emplace(struct callstack * self) {
+bool callstack_emplace(struct callstack * self) {
     void * trace[CALLSTACK_BACKTRACE_SIZE];
-    size_t size = backtrace(trace, CALLSTACK_BACKTRACE_SIZE);
-    callstack_emplaceWithBacktrace(self, trace, size);
+    int size = backtrace(trace, CALLSTACK_BACKTRACE_SIZE);
+    return callstack_emplaceWithBacktrace(self, trace, size);
 }
 
-void callstack_emplaceWithBacktrace(struct callstack * self,
-                                    void * trace[], size_t traceLength) {
+bool callstack_emplaceWithBacktrace(struct callstack * self,
+                                    void * trace[], int traceLength) {
+    if (traceLength < 0) return false;
+    
     callstack_createWithBacktrace(self, trace, traceLength);
+    return true;
 }
 
 void callstack_copy(struct callstack * self, const struct callstack * other) {
