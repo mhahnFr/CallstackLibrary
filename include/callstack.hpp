@@ -27,6 +27,12 @@
 
  #include "callstack_create.h"
 
+ #if __cplusplus >= 201103
+  #include <system_error>
+ #else
+  #include <stdexcept>
+ #endif
+
 /**
  * This namespace contains a wrapper class for the struct callstack.
  * It is needed to avoid name conflicts between the struct and the wrapper class.
