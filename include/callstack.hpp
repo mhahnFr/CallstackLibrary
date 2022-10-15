@@ -18,7 +18,7 @@
  */
 
 #ifndef callstack_h
- #warning Wrong inclusion of "callstack.hpp" redirected to "#include "callstack.h"!
+ #warning Wrong inclusion of "callstack.hpp" redirected to '#include "callstack.h"'!
  #include "callstack.h"
 
 #else
