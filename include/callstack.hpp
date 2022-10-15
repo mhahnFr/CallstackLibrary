@@ -69,18 +69,33 @@ namespace lcs {
          *
          * Zero-initializes the underlying C struct. If the given bool value is true,
          * it is initialized using the function callstack_emplace().
-         * Throws an runtime_error or a system_error if compiled using C++11 or newer if
+         * Throws a runtime_error or a system_error if compiled using C++11 or newer if
          * emplace is set to true and the backtrace could not be created.
          *
          * @param emplace Whether to call callstack_emplace().
          */
         explicit callstack(bool emplace = true) {
             if (emplace) {
-                if (!callstack_emplace(*this)) {
+                if (!callstack_emplaceWithAddress(*this, __builtin_return_address(0))) {
                     error();
                 }
             } else {
                 callstack_create(*this);
+            }
+        }
+        
+        /**
+         * @brief Constructs this object using the given stack address.
+         *
+         * Initializes the underlying C struct using the function callstack_emplaceWithAddress().
+         * Throws a runtime_error or a system_error if compiled using C++11 or newer if
+         * the backtrace could not be created.
+         *
+         * @param address The stack address after which frames are ignored.
+         */
+        explicit callstack(void * address) {
+            if (!callstack_emplaceWithAddress(*this, address)) {
+                error();
             }
         }
         
