@@ -20,6 +20,7 @@
 #include "callstack_parserInternal.h"
 #include "demangler.h"
 
+#define _GNU_SOURCE
 #include <dlfcn.h>
 #include <execinfo.h>
 #include <stdio.h>
