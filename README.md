@@ -5,7 +5,7 @@ there is also a C++ wrapper for it.
 ## Usage
 In order to get started, you can either download a compiled version of the library [here](https://www.github.com/mhahnFr/CallstackLibrary/releases).  
 Alternatively, you can also build it from source:
-- Clone the repository: ``git clone https://www.github.com/mhahnFr/CallstackLibrary``
+- Clone the repository: ``git clone https://www.github.com/mhahnFr/CallstackLibrary.git``
 - and build the library: ``cd CallstackLibrary && make``.
 
 On some systems, you might need to install the ``libexecinfo-dev`` to compile the library successfully.
