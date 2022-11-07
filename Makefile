@@ -45,9 +45,21 @@ ifeq ($(CXX_DEMANGLER),true)
 	CFLAGS += -DCXX_DEMANGLE
 endif
 
+INSTALL_PATH ?= /usr/local
+
 default: $(NAME)
 
 all: $(SHARED_N) $(STARIC_N) $(DYLIB_N)
+
+install: $(SHARED_N)
+	mkdir -p $(INSTALL_PATH)/lib
+	mkdir -p "$(INSTALL_PATH)/include"
+	cp $(SHARED_N) $(INSTALL_PATH)/lib
+	find "include" \( -name \*.h -o -name \*.hpp \) -exec cp {} "$(INSTALL_PATH)/include" \;
+
+uninstall:
+	- $(RM) $(INSTALL_PATH)/lib/$(SHARED_N)
+	- $(RM) $(addprefix $(INSTALL_PATH)/, $(shell find "include" -name \*.h -o -name \*.hpp))
 
 $(DYLIB_N): $(OBJS)
 	$(LD) -dynamiclib -fPIC $(LDFLAGS) -o $(DYLIB_N) $(OBJS)
@@ -74,6 +86,6 @@ fclean: clean
 re: fclean
 	$(MAKE) default
 
-.PHONY: re fclean clean all default
+.PHONY: re fclean clean all default install uninstall
 
 -include $(DEPS)
