@@ -7,6 +7,18 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
+		BF3031E4294C6DA300E8ADC5 /* binary_file.h in Headers */ = {isa = PBXBuildFile; fileRef = BF3031E2294C6DA300E8ADC5 /* binary_file.h */; };
+		BF3031E5294C6DA300E8ADC5 /* binary_file.h in Headers */ = {isa = PBXBuildFile; fileRef = BF3031E2294C6DA300E8ADC5 /* binary_file.h */; };
+		BF3031E6294C6DA300E8ADC5 /* binary_file.c in Sources */ = {isa = PBXBuildFile; fileRef = BF3031E3294C6DA300E8ADC5 /* binary_file.c */; };
+		BF3031E7294C6DA300E8ADC5 /* binary_file.c in Sources */ = {isa = PBXBuildFile; fileRef = BF3031E3294C6DA300E8ADC5 /* binary_file.c */; };
+		BF3031EA294C727800E8ADC5 /* llvm_file.h in Headers */ = {isa = PBXBuildFile; fileRef = BF3031E8294C727800E8ADC5 /* llvm_file.h */; };
+		BF3031EB294C727800E8ADC5 /* llvm_file.h in Headers */ = {isa = PBXBuildFile; fileRef = BF3031E8294C727800E8ADC5 /* llvm_file.h */; };
+		BF3031EC294C727800E8ADC5 /* llvm_file.c in Sources */ = {isa = PBXBuildFile; fileRef = BF3031E9294C727800E8ADC5 /* llvm_file.c */; };
+		BF3031ED294C727800E8ADC5 /* llvm_file.c in Sources */ = {isa = PBXBuildFile; fileRef = BF3031E9294C727800E8ADC5 /* llvm_file.c */; };
+		BF3031F0294C728500E8ADC5 /* dwarf_file.h in Headers */ = {isa = PBXBuildFile; fileRef = BF3031EE294C728500E8ADC5 /* dwarf_file.h */; };
+		BF3031F1294C728500E8ADC5 /* dwarf_file.h in Headers */ = {isa = PBXBuildFile; fileRef = BF3031EE294C728500E8ADC5 /* dwarf_file.h */; };
+		BF3031F2294C728500E8ADC5 /* dwarf_file.c in Sources */ = {isa = PBXBuildFile; fileRef = BF3031EF294C728500E8ADC5 /* dwarf_file.c */; };
+		BF3031F3294C728500E8ADC5 /* dwarf_file.c in Sources */ = {isa = PBXBuildFile; fileRef = BF3031EF294C728500E8ADC5 /* dwarf_file.c */; };
 		BF3036CD28F998AD00856435 /* callstack_create.h in Headers */ = {isa = PBXBuildFile; fileRef = BF3036CC28F998AD00856435 /* callstack_create.h */; settings = {ATTRIBUTES = (Public, ); }; };
 		BF378FBE2919537000A4DAA9 /* callstack.hpp in Headers */ = {isa = PBXBuildFile; fileRef = BF3036C728F987C700856435 /* callstack.hpp */; settings = {ATTRIBUTES = (Public, ); }; };
 		BF378FCB2919542100A4DAA9 /* callstack.c in Sources */ = {isa = PBXBuildFile; fileRef = BF86E31E28F4564600F6D20E /* callstack.c */; };
@@ -38,6 +50,12 @@
 /* End PBXBuildFile section */
 
 /* Begin PBXFileReference section */
+		BF3031E2294C6DA300E8ADC5 /* binary_file.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = binary_file.h; sourceTree = "<group>"; };
+		BF3031E3294C6DA300E8ADC5 /* binary_file.c */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.c; path = binary_file.c; sourceTree = "<group>"; };
+		BF3031E8294C727800E8ADC5 /* llvm_file.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = llvm_file.h; sourceTree = "<group>"; };
+		BF3031E9294C727800E8ADC5 /* llvm_file.c */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.c; path = llvm_file.c; sourceTree = "<group>"; };
+		BF3031EE294C728500E8ADC5 /* dwarf_file.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = dwarf_file.h; sourceTree = "<group>"; };
+		BF3031EF294C728500E8ADC5 /* dwarf_file.c */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.c; path = dwarf_file.c; sourceTree = "<group>"; };
 		BF3036C728F987C700856435 /* callstack.hpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.h; path = callstack.hpp; sourceTree = "<group>"; };
 		BF3036CC28F998AD00856435 /* callstack_create.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = callstack_create.h; sourceTree = "<group>"; };
 		BF378FC52919539B00A4DAA9 /* libcallstack.dylib */ = {isa = PBXFileReference; explicitFileType = "compiled.mach-o.dylib"; includeInIndex = 0; path = libcallstack.dylib; sourceTree = BUILT_PRODUCTS_DIR; };
@@ -81,6 +99,8 @@
 		BF3031DF294C6C2300E8ADC5 /* llvm */ = {
 			isa = PBXGroup;
 			children = (
+				BF3031E8294C727800E8ADC5 /* llvm_file.h */,
+				BF3031E9294C727800E8ADC5 /* llvm_file.c */,
 			);
 			path = llvm;
 			sourceTree = "<group>";
@@ -88,6 +108,8 @@
 		BF3031E0294C6C3000E8ADC5 /* dwarf */ = {
 			isa = PBXGroup;
 			children = (
+				BF3031EE294C728500E8ADC5 /* dwarf_file.h */,
+				BF3031EF294C728500E8ADC5 /* dwarf_file.c */,
 			);
 			path = dwarf;
 			sourceTree = "<group>";
@@ -103,6 +125,8 @@
 				BFCC50C828F8454E00E2388D /* demangler.h */,
 				BF3031DF294C6C2300E8ADC5 /* llvm */,
 				BF3031E0294C6C3000E8ADC5 /* dwarf */,
+				BF3031E2294C6DA300E8ADC5 /* binary_file.h */,
+				BF3031E3294C6DA300E8ADC5 /* binary_file.c */,
 			);
 			path = parser;
 			sourceTree = "<group>";
@@ -168,6 +192,9 @@
 				BF378FDA2919544E00A4DAA9 /* callstack_parserInternal.h in Headers */,
 				BF378FDD2919545100A4DAA9 /* callstack_parser.h in Headers */,
 				BF378FE02919545500A4DAA9 /* callstackInternal.h in Headers */,
+				BF3031F1294C728500E8ADC5 /* dwarf_file.h in Headers */,
+				BF3031E5294C6DA300E8ADC5 /* binary_file.h in Headers */,
+				BF3031EB294C727800E8ADC5 /* llvm_file.h in Headers */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -184,6 +211,9 @@
 				BF5A746128F1DCA00017591A /* callstackInternal.h in Headers */,
 				BF86E32628F4609100F6D20E /* callstack_parserInternal.h in Headers */,
 				BFCC50CA28F8454E00E2388D /* demangler.h in Headers */,
+				BF3031F0294C728500E8ADC5 /* dwarf_file.h in Headers */,
+				BF3031E4294C6DA300E8ADC5 /* binary_file.h in Headers */,
+				BF3031EA294C727800E8ADC5 /* llvm_file.h in Headers */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -230,7 +260,7 @@
 		BF61E8EC28F1CDD30006346B /* Project object */ = {
 			isa = PBXProject;
 			attributes = {
-				LastUpgradeCheck = 1160;
+				LastUpgradeCheck = 1400;
 				ORGANIZATIONNAME = mhahnFr;
 				TargetAttributes = {
 					BF378FC42919539B00A4DAA9 = {
@@ -265,11 +295,14 @@
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				BF3031F3294C728500E8ADC5 /* dwarf_file.c in Sources */,
 				BF378FCB2919542100A4DAA9 /* callstack.c in Sources */,
 				BF378FCE2919542400A4DAA9 /* callstackInternal.c in Sources */,
+				BF3031E7294C6DA300E8ADC5 /* binary_file.c in Sources */,
 				BF378FD12919542600A4DAA9 /* callstack_parser.c in Sources */,
 				BF378FD42919542800A4DAA9 /* callstack_parserInternal.c in Sources */,
 				BF378FF22919546B00A4DAA9 /* demangler.cpp in Sources */,
+				BF3031ED294C727800E8ADC5 /* llvm_file.c in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -277,11 +310,14 @@
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				BF3031F2294C728500E8ADC5 /* dwarf_file.c in Sources */,
 				BF86E31F28F4564600F6D20E /* callstack.c in Sources */,
 				BF5A746228F1DCA00017591A /* callstackInternal.c in Sources */,
+				BF3031E6294C6DA300E8ADC5 /* binary_file.c in Sources */,
 				BF86E32728F4609100F6D20E /* callstack_parserInternal.c in Sources */,
 				BF86E32328F45DE100F6D20E /* callstack_parser.c in Sources */,
 				BFCC50C928F8454E00E2388D /* demangler.cpp in Sources */,
+				BF3031EC294C727800E8ADC5 /* llvm_file.c in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -294,6 +330,7 @@
 				CLANG_CXX_LANGUAGE_STANDARD = "gnu++0x";
 				CLANG_WARN_QUOTED_INCLUDE_IN_FRAMEWORK_HEADER = YES;
 				CODE_SIGN_STYLE = Automatic;
+				DEAD_CODE_STRIPPING = YES;
 				DYLIB_COMPATIBILITY_VERSION = 1;
 				DYLIB_CURRENT_VERSION = 1;
 				EXECUTABLE_PREFIX = lib;
@@ -308,6 +345,7 @@
 				CLANG_CXX_LANGUAGE_STANDARD = "gnu++0x";
 				CLANG_WARN_QUOTED_INCLUDE_IN_FRAMEWORK_HEADER = YES;
 				CODE_SIGN_STYLE = Automatic;
+				DEAD_CODE_STRIPPING = YES;
 				DYLIB_COMPATIBILITY_VERSION = 1;
 				DYLIB_CURRENT_VERSION = 1;
 				EXECUTABLE_PREFIX = lib;
@@ -343,6 +381,7 @@
 				CLANG_WARN_OBJC_IMPLICIT_RETAIN_SELF = YES;
 				CLANG_WARN_OBJC_LITERAL_CONVERSION = YES;
 				CLANG_WARN_OBJC_ROOT_CLASS = YES_ERROR;
+				CLANG_WARN_QUOTED_INCLUDE_IN_FRAMEWORK_HEADER = YES;
 				CLANG_WARN_RANGE_LOOP_ANALYSIS = YES;
 				CLANG_WARN_STRICT_PROTOTYPES = YES;
 				CLANG_WARN_SUSPICIOUS_MOVE = YES;
@@ -350,6 +389,7 @@
 				CLANG_WARN_UNREACHABLE_CODE = YES;
 				CLANG_WARN__DUPLICATE_METHOD_MATCH = YES;
 				COPY_PHASE_STRIP = NO;
+				DEAD_CODE_STRIPPING = YES;
 				DEBUG_INFORMATION_FORMAT = dwarf;
 				ENABLE_STRICT_OBJC_MSGSEND = YES;
 				ENABLE_TESTABILITY = YES;
@@ -401,6 +441,7 @@
 				CLANG_WARN_OBJC_IMPLICIT_RETAIN_SELF = YES;
 				CLANG_WARN_OBJC_LITERAL_CONVERSION = YES;
 				CLANG_WARN_OBJC_ROOT_CLASS = YES_ERROR;
+				CLANG_WARN_QUOTED_INCLUDE_IN_FRAMEWORK_HEADER = YES;
 				CLANG_WARN_RANGE_LOOP_ANALYSIS = YES;
 				CLANG_WARN_STRICT_PROTOTYPES = YES;
 				CLANG_WARN_SUSPICIOUS_MOVE = YES;
@@ -408,6 +449,7 @@
 				CLANG_WARN_UNREACHABLE_CODE = YES;
 				CLANG_WARN__DUPLICATE_METHOD_MATCH = YES;
 				COPY_PHASE_STRIP = NO;
+				DEAD_CODE_STRIPPING = YES;
 				DEBUG_INFORMATION_FORMAT = "dwarf-with-dsym";
 				ENABLE_NS_ASSERTIONS = NO;
 				ENABLE_STRICT_OBJC_MSGSEND = YES;
@@ -431,6 +473,7 @@
 			buildSettings = {
 				CLANG_CXX_LANGUAGE_STANDARD = "gnu++0x";
 				CODE_SIGN_STYLE = Automatic;
+				DEAD_CODE_STRIPPING = YES;
 				EXECUTABLE_PREFIX = lib;
 				PRODUCT_MODULE_NAME = "$(PRODUCT_NAME:c99extidentifier)";
 				PRODUCT_NAME = callstack;
@@ -443,6 +486,7 @@
 			buildSettings = {
 				CLANG_CXX_LANGUAGE_STANDARD = "gnu++0x";
 				CODE_SIGN_STYLE = Automatic;
+				DEAD_CODE_STRIPPING = YES;
 				EXECUTABLE_PREFIX = lib;
 				GCC_OPTIMIZATION_LEVEL = fast;
 				PRODUCT_MODULE_NAME = "$(PRODUCT_NAME:c99extidentifier)";
