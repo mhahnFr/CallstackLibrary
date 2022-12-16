@@ -22,21 +22,50 @@
 
 #include <stdlib.h>
 
+/**
+ * Represents a binary file generated using the LLVM.
+ */
 struct llvm_file {
+    /** The file name. */
     char * fileName;
     // ...
 };
 
+/**
+ * @brief Allocates a new llvm_file.
+ *
+ * It is constructed if the allocation succeeded.
+ *
+ * @param fileName The name of the file.
+ */
 struct llvm_file * llvm_file_new(char * fileName);
 
+/**
+ * @brief Constructs the given llvm_file.
+ *
+ * @param self The llvm_file to be constructed.
+ * @param fileName The name of the file.
+ */
 static inline void llvm_file_create(struct llvm_file * self, char * fileName) {
     self->fileName = fileName;
 }
 
+/**
+ * @brief Destroys the given llvm_file.
+ *
+ * @param self The llvm_file to be destroyed.
+ */
 static inline void llvm_file_destroy(struct llvm_file * self) {
     (void) self;
 }
 
+/**
+ * @brief Deallocates the given llvm_file.
+ *
+ * It is destroyed before being deleted.
+ *
+ * @param self The llvm_file to be deallocated.
+ */
 static inline void llvm_file_delete(struct llvm_file * self) {
     llvm_file_destroy(self);
     free(self);
