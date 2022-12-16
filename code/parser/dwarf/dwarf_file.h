@@ -22,21 +22,50 @@
 
 #include <stdlib.h>
 
+/**
+ * Represents a binary file using DWARF debug symbols.
+ */
 struct dwarf_file {
+    /** The file name. */
     char * fileName;
     // ...
 };
 
+/**
+ * @brief Allocates a new dwarf_file.
+ *
+ * It is constructed using the given file name.
+ *
+ * @return An allocated dwarf_file.
+ */
 struct dwarf_file * dwarf_file_new(char * fileName);
 
+/**
+ * @brief Constructs the given dwarf_file.
+ *
+ * @param self The dwarf_file to be constructed.
+ * @param fileName The name of the file.
+ */
 static inline void dwarf_file_create(struct dwarf_file * self, char * fileName) {
     self->fileName = fileName;
 }
 
+/**
+ * @brief Destroys the given dwarf_file.
+ *
+ * @param self The dwarf_file to be destroyed.
+ */
 static inline void dwarf_file_destroy(struct dwarf_file * self) {
     (void) self;
 }
 
+/**
+ * @brief Deletes the given dwarf_file.
+ *
+ * It is destroyed before it is deallocated.
+ *
+ * @param self The dwarf_file to be deleted.
+ */
 static inline void dwarf_file_delete(struct dwarf_file * self) {
     dwarf_file_destroy(self);
     free(self);
