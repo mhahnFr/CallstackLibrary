@@ -25,24 +25,50 @@
 
 #include <stddef.h>
 
+/**
+ * The different types supported by the binary file abstraction.
+ */
 enum binary_file_type {
+    /** A DWARF file.            */
     DWARF,
+    /** A LLVM file.             */
     LLVM,
+    /** The type is not defined. */
     UNDEFINED
 };
 
+/**
+ * The binary_file serves as an abstraction of the DWARF and the LLVM binary files.
+ */
 struct binary_file {
+    /** The file type.              */
     enum binary_file_type fileType;
+    /** The name of the file.       */
     char * fileName;
+    /** The underlying binary file. */
     void * parsedBinary;
 };
 
+/**
+ * @brief Constructs the given binary_file.
+ *
+ * All values are set as empty.
+ *
+ * @param self The binary_file to be constructed.
+ */
 static inline void binary_file_create(struct binary_file * self) {
     self->fileType     = UNDEFINED;
     self->fileName     = NULL;
     self->parsedBinary = NULL;
 }
 
+/**
+ * @brief Constructs the given binary_file using the given dwarf_file.
+ *
+ * @param self The binary_file to be constructed.
+ * @param fileName The file name.
+ * @param dwarf The dwarf_file.
+ */
 static inline void binary_file_create_from_dwarf(struct binary_file * self,
                                                  char *               fileName,
                                                  struct dwarf_file *  dwarf) {
@@ -51,6 +77,13 @@ static inline void binary_file_create_from_dwarf(struct binary_file * self,
     self->parsedBinary = dwarf;
 }
 
+/**
+ * @brief Constructs the given binary_file using the given llvm_file.
+ *
+ * @param self The binary_file to be constructed.
+ * @param fileName The name of the file.
+ * @param llvm The llvm_file.
+ */
 static inline void binary_file_create_from_llvm(struct binary_file * self,
                                                 char *               fileName,
                                                 struct llvm_file *   llvm) {
@@ -59,6 +92,12 @@ static inline void binary_file_create_from_llvm(struct binary_file * self,
     self->parsedBinary = llvm;
 }
 
+/**
+ * @brief Constructs the given binary_file by allocating a new dwarf_file.
+ *
+ * @param self The binary_file to be constructed.
+ * @param fileName The name of the file.
+ */
 static inline void binary_file_create_dwarf(struct binary_file * self,
                                             char *               fileName) {
     self->fileType     = DWARF;
@@ -66,6 +105,12 @@ static inline void binary_file_create_dwarf(struct binary_file * self,
     self->parsedBinary = dwarf_file_new(fileName);
 }
 
+/**
+ * @brief Constructs the given binary_file by allocating a new llvm_file.
+ *
+ * @param self The binary_file to be constructed.
+ * @param fileName The name of the file.
+ */
 static inline void binary_file_create_llvm(struct binary_file * self,
                                            char *               fileName) {
     self->fileType     = LLVM;
@@ -73,6 +118,13 @@ static inline void binary_file_create_llvm(struct binary_file * self,
     self->parsedBinary = llvm_file_new(fileName);
 }
 
+/**
+ * @brief Destroys the given binary_file.
+ *
+ * The underlying DWARF or LLVM file is deleted.
+ *
+ * @param self The binary_file to be destroyed.
+ */
 static inline void binary_file_destroy(struct binary_file * self) {
     switch (self->fileType) {
         case DWARF: dwarf_file_delete(self->parsedBinary); break;
