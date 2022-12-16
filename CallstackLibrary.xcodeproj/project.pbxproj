@@ -78,6 +78,35 @@
 /* End PBXFrameworksBuildPhase section */
 
 /* Begin PBXGroup section */
+		BF3031DF294C6C2300E8ADC5 /* llvm */ = {
+			isa = PBXGroup;
+			children = (
+			);
+			path = llvm;
+			sourceTree = "<group>";
+		};
+		BF3031E0294C6C3000E8ADC5 /* dwarf */ = {
+			isa = PBXGroup;
+			children = (
+			);
+			path = dwarf;
+			sourceTree = "<group>";
+		};
+		BF3031E1294C6C4700E8ADC5 /* parser */ = {
+			isa = PBXGroup;
+			children = (
+				BF86E32028F45DE100F6D20E /* callstack_parser.h */,
+				BF86E32128F45DE100F6D20E /* callstack_parser.c */,
+				BF86E32428F4609100F6D20E /* callstack_parserInternal.h */,
+				BF86E32528F4609100F6D20E /* callstack_parserInternal.c */,
+				BFCC50C728F8454E00E2388D /* demangler.cpp */,
+				BFCC50C828F8454E00E2388D /* demangler.h */,
+				BF3031DF294C6C2300E8ADC5 /* llvm */,
+				BF3031E0294C6C3000E8ADC5 /* dwarf */,
+			);
+			path = parser;
+			sourceTree = "<group>";
+		};
 		BF61E8EB28F1CDD30006346B = {
 			isa = PBXGroup;
 			children = (
@@ -103,15 +132,10 @@
 		BF61E8FB28F1CFB40006346B /* code */ = {
 			isa = PBXGroup;
 			children = (
+				BF3031E1294C6C4700E8ADC5 /* parser */,
 				BF5A745F28F1DCA00017591A /* callstackInternal.h */,
 				BF86E31E28F4564600F6D20E /* callstack.c */,
 				BF5A746028F1DCA00017591A /* callstackInternal.c */,
-				BF86E32028F45DE100F6D20E /* callstack_parser.h */,
-				BF86E32128F45DE100F6D20E /* callstack_parser.c */,
-				BF86E32428F4609100F6D20E /* callstack_parserInternal.h */,
-				BF86E32528F4609100F6D20E /* callstack_parserInternal.c */,
-				BFCC50C728F8454E00E2388D /* demangler.cpp */,
-				BFCC50C828F8454E00E2388D /* demangler.h */,
 			);
 			path = code;
 			sourceTree = "<group>";

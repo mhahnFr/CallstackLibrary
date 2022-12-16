@@ -18,7 +18,7 @@
  */
 
 #include "callstackInternal.h"
-#include "callstack_parser.h"
+#include "parser/callstack_parser.h"
 #include "../include/callstack_defs.h"
 
 #include <execinfo.h>

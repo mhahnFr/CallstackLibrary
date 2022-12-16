@@ -20,7 +20,7 @@
 #ifndef callstack_parser_h
 #define callstack_parser_h
 
-#include "../include/callstack.h"
+#include "../../include/callstack.h"
 
 /**
  * The structure of a callstack parser.
