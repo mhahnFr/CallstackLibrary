@@ -29,10 +29,24 @@
 
 enum callstack_type callstack_parser_parseDebugSymbols(struct callstack_parser * self,
                                                        struct callstack * callstack) {
-    // TODO: Implement
-    (void) self;
-    (void) callstack;
-    return FAILED;
+    enum callstack_type ret = self->mode;
+    callstack->stringArray = malloc((callstack->backtraceSize + 1) * sizeof(char *));
+    if (callstack->stringArray == NULL) {
+        return FAILED;
+    }
+    callstack->stringArraySize = callstack->backtraceSize;
+    for (size_t i = 0; i < callstack->backtraceSize; ++i) {
+        Dl_info info;
+        if (dladdr(callstack->backtrace[i], &info)) {
+            // TODO: Implement
+        } else {
+            if ((callstack->stringArray[i] = strdup("<Unknown>")) == NULL) {
+                ret = FAILED;
+                break;
+            }
+        }
+    }
+    return FAILED;//ret;
 }
 
 enum callstack_type callstack_parser_parseDynamicLinker(struct callstack_parser * self,
