@@ -62,7 +62,7 @@ uninstall:
 	- $(RM) $(addprefix $(INSTALL_PATH)/, $(shell find "include" -name \*.h -o -name \*.hpp))
 
 $(DYLIB_N): $(OBJS)
-	$(LD) -dynamiclib -fPIC $(LDFLAGS) -o $(DYLIB_N) $(OBJS)
+	$(LD) -dynamiclib -install_name $(abspath $(DYLIB_N)) -current_version 1.0.0 -compatibility_version 1 $(LDFLAGS) -o $(DYLIB_N) $(OBJS)
 
 $(SHARED_N): $(OBJS)
 	$(LD) -shared -fPIC $(LDFLAGS) -o $(SHARED_N) $(OBJS)
