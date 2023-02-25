@@ -65,7 +65,7 @@ $(DYLIB_N): $(OBJS)
 	$(LD) -dynamiclib -install_name $(abspath $(DYLIB_N)) -current_version 1.0.0 -compatibility_version 1 $(LDFLAGS) -o $(DYLIB_N) $(OBJS)
 
 $(SHARED_N): $(OBJS)
-	$(LD) -shared -fPIC $(LDFLAGS) -o $(SHARED_N) $(OBJS)
+	$(LD) -shared -fPIC -install_name $(abspath $(SHARED_N)) -current_version 1.0.0 -compatibility_version 1 $(LDFLAGS) -o $(SHARED_N) $(OBJS)
 
 $(STARIC_N): $(OBJS)
 	$(AR) -crs $(STARIC_N) $(OBJS)
