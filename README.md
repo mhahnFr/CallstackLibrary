@@ -27,4 +27,4 @@ In the future, parsing of the debug symbols will be added.
 ### Final notes
 This library is licensed under the terms of the GPL 3.0.
 
-© Copyright 2022 [mhahnFr](https://www.github.com/mhahnFr)
+© Copyright 2022 - 2023 [mhahnFr](https://www.github.com/mhahnFr)
