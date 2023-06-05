@@ -27,7 +27,7 @@ STARIC_N  = $(CORE_NAME).a
 SRCS      = $(shell find . -type f -name \*.c)
 OBJS      = $(patsubst %.c, %.o, $(SRCS))
 CXX_SRCS  = $(shell find . -type f -name \*.cpp)
-CXX_OBJS  = $(patsubst %.cpp, %.opp, $(CXX_SRCS))
+CXX_OBJS  = $(patsubst %.cpp, %.o, $(CXX_SRCS))
 DEPS      = $(patsubst %.c, %.d, $(SRCS))
 
 COM_FLAGS = -Wall -Wextra -fPIC -Ofast
@@ -77,7 +77,7 @@ $(STARIC_N): $(OBJS)
 %.o: %.c
 	$(CC) $(CFLAGS) -MMD -MP -c -o $@ $<
 
-%.opp: %.cpp
+%.o: %.cpp
 	$(CXX) $(CXXFLAGS) -MMD -MP -c -o $@ $<
 
 clean:
