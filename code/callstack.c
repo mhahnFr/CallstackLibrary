@@ -1,7 +1,7 @@
 /*
  * Callstack Library - A library creating human readable call stacks.
  *
- * Copyright (C) 2022  mhahnFr
+ * Copyright (C) 2022 - 2023  mhahnFr
  *
  * This file is part of the CallstackLibrary. This library is free software:
  * you can redistribute it and/or modify it under the terms of the
@@ -23,7 +23,7 @@
 #include <stdlib.h>
 #include <string.h>
 
-struct callstack * callstack_new() {
+struct callstack * callstack_new(void) {
     return callstack_newWithAddress(__builtin_return_address(0));
 }
 
@@ -83,8 +83,8 @@ void callstack_copy(struct callstack * self, const struct callstack * other) {
 char ** callstack_toArray(struct callstack * self) {
     if (self == NULL) return NULL;
 
-    if (self->translationStatus == NONE) {
-        (void) callstack_translate(self);
+    if (self->translationStatus == NONE && callstack_translate(self) == FAILED) {
+        return NULL;
     }
     return self->stringArray;
 }
@@ -92,10 +92,7 @@ char ** callstack_toArray(struct callstack * self) {
 const char * callstack_toString(struct callstack * self, char separator) {
     if (self == NULL) return NULL;
 
-    if (self->translationStatus == NONE) {
-        (void) callstack_translate(self);
-    }
-    if (self->translationStatus == FAILED) {
+    if (self->translationStatus == NONE && callstack_translate(self) == FAILED) {
         return NULL;
     } else if (self->stringArray == NULL || self->stringArraySize == 0) {
         char string[2] = { separator, '\0' };
