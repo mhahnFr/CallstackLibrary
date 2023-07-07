@@ -45,6 +45,8 @@
 		BF971B872A588634006BFFBB /* gnuFile.h in Headers */ = {isa = PBXBuildFile; fileRef = BF971B842A588634006BFFBB /* gnuFile.h */; };
 		BF971B882A588634006BFFBB /* gnuFile.c in Sources */ = {isa = PBXBuildFile; fileRef = BF971B852A588634006BFFBB /* gnuFile.c */; };
 		BF971B892A588634006BFFBB /* gnuFile.c in Sources */ = {isa = PBXBuildFile; fileRef = BF971B852A588634006BFFBB /* gnuFile.c */; };
+		BF971B8D2A58B135006BFFBB /* cache.h in Headers */ = {isa = PBXBuildFile; fileRef = BF971B8B2A58B135006BFFBB /* cache.h */; };
+		BF971B8E2A58B135006BFFBB /* cache.c in Sources */ = {isa = PBXBuildFile; fileRef = BF971B8C2A58B135006BFFBB /* cache.c */; };
 		BFCC50C928F8454E00E2388D /* demangler.cpp in Sources */ = {isa = PBXBuildFile; fileRef = BFCC50C728F8454E00E2388D /* demangler.cpp */; };
 		BFCC50CA28F8454E00E2388D /* demangler.h in Headers */ = {isa = PBXBuildFile; fileRef = BFCC50C828F8454E00E2388D /* demangler.h */; };
 /* End PBXBuildFile section */
@@ -74,6 +76,8 @@
 		BF971B7E2A58827B006BFFBB /* binaryFile.c */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.c; path = binaryFile.c; sourceTree = "<group>"; };
 		BF971B842A588634006BFFBB /* gnuFile.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = gnuFile.h; sourceTree = "<group>"; };
 		BF971B852A588634006BFFBB /* gnuFile.c */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.c; path = gnuFile.c; sourceTree = "<group>"; };
+		BF971B8B2A58B135006BFFBB /* cache.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = cache.h; sourceTree = "<group>"; };
+		BF971B8C2A58B135006BFFBB /* cache.c */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.c; path = cache.c; sourceTree = "<group>"; };
 		BFCC50C728F8454E00E2388D /* demangler.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; path = demangler.cpp; sourceTree = "<group>"; };
 		BFCC50C828F8454E00E2388D /* demangler.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = demangler.h; sourceTree = "<group>"; };
 /* End PBXFileReference section */
@@ -167,6 +171,7 @@
 		BF971B7C2A58823E006BFFBB /* file */ = {
 			isa = PBXGroup;
 			children = (
+				BF971B8A2A58B125006BFFBB /* cache */,
 				BF971B832A588624006BFFBB /* gnu */,
 				BF3031DF294C6C2300E8ADC5 /* llvm */,
 				BF971B7D2A58827B006BFFBB /* binaryFile.h */,
@@ -182,6 +187,15 @@
 				BF971B852A588634006BFFBB /* gnuFile.c */,
 			);
 			path = gnu;
+			sourceTree = "<group>";
+		};
+		BF971B8A2A58B125006BFFBB /* cache */ = {
+			isa = PBXGroup;
+			children = (
+				BF971B8B2A58B135006BFFBB /* cache.h */,
+				BF971B8C2A58B135006BFFBB /* cache.c */,
+			);
+			path = cache;
 			sourceTree = "<group>";
 		};
 /* End PBXGroup section */
@@ -212,6 +226,7 @@
 			files = (
 				BF5A746428F1DD7F0017591A /* callstack.h in Headers */,
 				BF971B782A588077006BFFBB /* llvmFile.h in Headers */,
+				BF971B8D2A58B135006BFFBB /* cache.h in Headers */,
 				BF5A746628F1E5120017591A /* callstack_type.h in Headers */,
 				BF5A746828F1EFC40017591A /* callstack_defs.h in Headers */,
 				BF378FBE2919537000A4DAA9 /* callstack.hpp in Headers */,
@@ -322,6 +337,7 @@
 				BF971B882A588634006BFFBB /* gnuFile.c in Sources */,
 				BF86E31F28F4564600F6D20E /* callstack.c in Sources */,
 				BF971B812A58827B006BFFBB /* binaryFile.c in Sources */,
+				BF971B8E2A58B135006BFFBB /* cache.c in Sources */,
 				BF5A746228F1DCA00017591A /* callstackInternal.c in Sources */,
 				BF86E32728F4609100F6D20E /* callstack_parserInternal.c in Sources */,
 				BF86E32328F45DE100F6D20E /* callstack_parser.c in Sources */,
