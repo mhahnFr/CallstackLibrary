@@ -21,7 +21,7 @@
 
 #include "llvm/llvmFile.h"
 
-struct binaryFile * binaryFile_new(char * fileName) {
+struct binaryFile * binaryFile_new(const char * fileName) {
     struct binaryFile * toReturn;
     
     // TODO: ifdef macOS -> llvmFile, elifdef Linux -> gnuFile

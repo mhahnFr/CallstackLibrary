@@ -32,8 +32,9 @@ struct binaryFile {
     enum binaryFileType type;
     void * concrete;
     
-    char * fileName;
-    bool   parsed;
+    bool parsed;
+    
+    const char * fileName;
     
     struct binaryFile * next;
     
@@ -42,7 +43,7 @@ struct binaryFile {
     void   (*delete)     (struct binaryFile *);
 };
 
-struct binaryFile * binaryFile_new(char * fileName);
+struct binaryFile * binaryFile_new(const char * fileName);
 void binaryFile_create(struct binaryFile * self);
 
 #endif /* binaryFile_h */

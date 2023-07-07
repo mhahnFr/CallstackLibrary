@@ -22,6 +22,6 @@
 
 #include "../binaryFile.h"
 
-struct binaryFile * cache_findOrAddFile(char * fileName);
+struct binaryFile * cache_findOrAddFile(const char * fileName);
 
 #endif /* cache_h */

@@ -23,7 +23,7 @@
 
 struct binaryFile * parsedFiles = NULL;
 
-struct binaryFile * cache_findOrAddFile(char * fileName) {
+struct binaryFile * cache_findOrAddFile(const char * fileName) {
     struct binaryFile * it;
     for (it = parsedFiles; it != NULL && it->fileName != fileName; it = it->next); // FIXME: Check string indepth!
     
