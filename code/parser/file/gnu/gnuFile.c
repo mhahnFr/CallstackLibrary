@@ -36,8 +36,16 @@ void gnuFile_create(struct gnuFile * self) {
     self->_.type     = GNU_FILE;
     self->_.concrete = self;
     
-    self->_.destroy  = &gnuFile_destroy;
-    self->_.delete   = &gnuFile_delete;
+    self->_.addr2String = &gnuFile_addr2String;
+    self->_.destroy     = &gnuFile_destroy;
+    self->_.delete      = &gnuFile_delete;
+}
+
+char * gnuFile_addr2String(struct binaryFile * self, Dl_info * info) {
+    (void) self;
+    (void) info;
+    
+    return NULL;
 }
 
 void gnuFile_destroy(struct binaryFile * self) {

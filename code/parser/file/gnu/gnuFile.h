@@ -34,6 +34,8 @@ static inline struct gnuFile * gnuFileOrNull(struct binaryFile * self) {
     return self->type == GNU_FILE ? self->concrete : NULL;
 }
 
+char * gnuFile_addr2String(struct binaryFile * self, Dl_info * info);
+
 void gnuFile_destroy(struct binaryFile * self);
 void gnuFile_delete(struct binaryFile * self);
 

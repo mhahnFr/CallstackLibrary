@@ -37,4 +37,5 @@ struct binaryFile * binaryFile_new(char * fileName) {
 void binaryFile_create(struct binaryFile * self) {
     self->fileName = NULL;
     self->next     = NULL;
+    self->parsed   = false;
 }

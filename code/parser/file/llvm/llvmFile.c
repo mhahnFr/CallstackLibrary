@@ -17,6 +17,8 @@
  * this library, see the file LICENSE.  If not, see <https://www.gnu.org/licenses/>.
  */
 
+#include <stdlib.h>
+
 #include "llvmFile.h"
 
 struct llvmFile * llvmFile_new(void)  {
@@ -34,8 +36,20 @@ void llvmFile_create(struct llvmFile * self) {
     self->_.type     = LLVM_FILE;
     self->_.concrete = self;
     
-    self->_.destroy  = &llvmFile_destroy;
-    self->_.delete   = &llvmFile_delete;
+    self->_.addr2String = &llvmFile_addr2String;
+    self->_.destroy     = &llvmFile_destroy;
+    self->_.delete      = &llvmFile_delete;
+}
+
+char * llvmFile_addr2String(struct binaryFile * me, Dl_info * info) {
+    struct llvmFile * self = llvmFileOrNull(me);
+    if (self == NULL) {
+        return NULL;
+    }
+    
+    // TODO: Implement
+    (void) info;
+    return NULL;
 }
 
 void llvmFile_destroy(struct binaryFile * self) {

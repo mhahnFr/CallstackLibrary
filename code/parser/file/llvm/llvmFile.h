@@ -20,7 +20,7 @@
 #ifndef llvmFile_h
 #define llvmFile_h
 
-#include <stdlib.h>
+#include <stddef.h>
 
 #include "../binaryFile.h"
 
@@ -35,6 +35,8 @@ void llvmFile_create(struct llvmFile * self);
 static inline struct llvmFile * llvmFileOrNull(struct binaryFile * self) {
     return self->type == LLVM_FILE ? self->concrete : NULL;
 }
+
+char * llvmFile_addr2String(struct binaryFile * self, Dl_info * info);
 
 void llvmFile_destroy(struct binaryFile * self);
 void llvmFile_delete(struct binaryFile * self);

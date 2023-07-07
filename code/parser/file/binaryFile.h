@@ -20,6 +20,9 @@
 #ifndef binaryFile_h
 #define binaryFile_h
 
+#include <dlfcn.h>
+#include <stdbool.h>
+
 enum binaryFileType {
     LLVM_FILE,
     GNU_FILE
@@ -30,11 +33,13 @@ struct binaryFile {
     void * concrete;
     
     char * fileName;
+    bool   parsed;
     
     struct binaryFile * next;
     
-    void (*destroy)(struct binaryFile *);
-    void (*delete) (struct binaryFile *);
+    char * (*addr2String)(struct binaryFile *, Dl_info *);
+    void   (*destroy)    (struct binaryFile *);
+    void   (*delete)     (struct binaryFile *);
 };
 
 struct binaryFile * binaryFile_new(char * fileName);
