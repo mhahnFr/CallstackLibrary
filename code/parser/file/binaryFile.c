@@ -33,3 +33,8 @@ struct binaryFile * binaryFile_new(char * fileName) {
     }
     return toReturn;
 }
+
+void binaryFile_create(struct binaryFile * self) {
+    self->fileName = NULL;
+    self->next     = NULL;
+}

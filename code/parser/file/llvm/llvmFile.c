@@ -29,9 +29,10 @@ struct llvmFile * llvmFile_new(void)  {
 }
 
 void llvmFile_create(struct llvmFile * self) {
+    binaryFile_create(&self->_);
+    
     self->_.type     = LLVM_FILE;
     self->_.concrete = self;
-    self->_.fileName = NULL;
     
     self->_.destroy  = &llvmFile_destroy;
     self->_.delete   = &llvmFile_delete;

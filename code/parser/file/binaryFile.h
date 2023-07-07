@@ -31,10 +31,13 @@ struct binaryFile {
     
     char * fileName;
     
+    struct binaryFile * next;
+    
     void (*destroy)(struct binaryFile *);
     void (*delete) (struct binaryFile *);
 };
 
 struct binaryFile * binaryFile_new(char * fileName);
+void binaryFile_create(struct binaryFile * self);
 
 #endif /* binaryFile_h */

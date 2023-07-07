@@ -31,9 +31,10 @@ struct gnuFile * gnuFile_new(void) {
 }
 
 void gnuFile_create(struct gnuFile * self) {
+    binaryFile_create(&self->_);
+    
     self->_.type     = GNU_FILE;
     self->_.concrete = self;
-    self->_.fileName = NULL;
     
     self->_.destroy  = &gnuFile_destroy;
     self->_.delete   = &gnuFile_delete;
