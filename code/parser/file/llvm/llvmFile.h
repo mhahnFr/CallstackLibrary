@@ -31,6 +31,11 @@ struct llvmFile {
 
 struct llvmFile * llvmFile_new(void);
 void llvmFile_create(struct llvmFile * self);
+
+static inline struct llvmFile * llvmFileOrNull(struct binaryFile * self) {
+    return self->type == LLVM_FILE ? self->concrete : NULL;
+}
+
 void llvmFile_destroy(struct binaryFile * self);
 void llvmFile_delete(struct binaryFile * self);
 

@@ -29,6 +29,11 @@ struct gnuFile {
 
 struct gnuFile * gnuFile_new(void);
 void gnuFile_create(struct gnuFile * self);
+
+static inline struct gnuFile * gnuFileOrNull(struct binaryFile * self) {
+    return self->type == GNU_FILE ? self->concrete : NULL;
+}
+
 void gnuFile_destroy(struct binaryFile * self);
 void gnuFile_delete(struct binaryFile * self);
 
