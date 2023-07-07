@@ -1,7 +1,7 @@
 /*
  * Callstack Library - A library creating human readable call stacks.
  *
- * Copyright (C) 2022  mhahnFr
+ * Copyright (C) 2022 - 2023  mhahnFr
  *
  * This file is part of the CallstackLibrary. This library is free software:
  * you can redistribute it and/or modify it under the terms of the
@@ -59,4 +59,12 @@ size_t callstack_getTotalStringLength(struct callstack * self) {
         }
     }
     return ret;
+}
+
+void callstack_reset(struct callstack * self) {
+    for (size_t i = 0; self->stringArray[i] != NULL; ++i) {
+        free(self->stringArray[i]);
+    }
+    free(self->stringArray);
+    self->stringArraySize = 0;
 }
