@@ -1,7 +1,7 @@
 /*
  * Callstack Library - A library creating human readable call stacks.
  *
- * Copyright (C) 2022 - 2023  mhahnFr
+ * Copyright (C) 2023  mhahnFr
  *
  * This file is part of the CallstackLibrary. This library is free software:
  * you can redistribute it and/or modify it under the terms of the
@@ -17,23 +17,13 @@
  * this library, see the file LICENSE.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-#include "callstack_parserInternal.h"
+#ifndef callstack_internals_h
+#define callstack_internals_h
 
-#include "../callstackInternal.h"
-#include "../../include/callstack_internals.h"
+#include <stdbool.h>
 
-enum callstack_type callstack_parser_parse(struct callstack_parser * self,
-                                           struct callstack * callstack) {
-    self->mode = DEBUG_SYMBOLS;
-    enum callstack_type result = callstack_parser_parseDebugSymbols(self, callstack);
-    if (result == FAILED) {
-        callstack_reset(callstack);
-        self->mode = DYNAMIC_LINKER;
-        result = callstack_parser_parseDynamicLinker(self, callstack);
-    }
-    
-    if (callstack_autoClearCaches) {
-        callstack_clearCaches();
-    }
-    return result;
-}
+extern bool callstack_autoClearCaches;
+
+void callstack_clearCaches(void);
+
+#endif /* callstack_internals_h */
