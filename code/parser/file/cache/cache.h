@@ -23,5 +23,6 @@
 #include "../binaryFile.h"
 
 struct binaryFile * cache_findOrAddFile(const char * fileName);
+void cache_clear(void);
 
 #endif /* cache_h */

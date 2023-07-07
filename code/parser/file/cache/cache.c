@@ -37,3 +37,13 @@ struct binaryFile * cache_findOrAddFile(const char * fileName) {
     }
     return it;
 }
+
+void cache_clear(void) {
+    struct binaryFile * tmp;
+    
+    for (struct binaryFile * it = parsedFiles; it != NULL; it = tmp) {
+        tmp = it->next;
+        it->delete(it);
+    }
+    parsedFiles = NULL;
+}
