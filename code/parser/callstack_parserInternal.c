@@ -1,7 +1,7 @@
 /*
  * Callstack Library - A library creating human readable call stacks.
  *
- * Copyright (C) 2022  mhahnFr
+ * Copyright (C) 2022 - 2023  mhahnFr
  *
  * This file is part of the CallstackLibrary. This library is free software:
  * you can redistribute it and/or modify it under the terms of the
@@ -19,6 +19,7 @@
 
 #include "callstack_parserInternal.h"
 #include "demangler.h"
+#include "file/cache/cache.h"
 
 #define _GNU_SOURCE
 #include <dlfcn.h>
@@ -38,7 +39,11 @@ enum callstack_type callstack_parser_parseDebugSymbols(struct callstack_parser *
     for (size_t i = 0; i < callstack->backtraceSize; ++i) {
         Dl_info info;
         if (dladdr(callstack->backtrace[i], &info)) {
-            // TODO: Implement
+            struct binaryFile * file = cache_findOrAddFile(info.dli_fname);
+            if (file == NULL || (callstack->stringArray[i] = file->addr2String(file, &info)) == NULL) {
+                ret = FAILED;
+                break;
+            }
         } else {
             if ((callstack->stringArray[i] = strdup("<Unknown>")) == NULL) {
                 ret = FAILED;
@@ -46,7 +51,7 @@ enum callstack_type callstack_parser_parseDebugSymbols(struct callstack_parser *
             }
         }
     }
-    return FAILED;//ret;
+    return ret;
 }
 
 enum callstack_type callstack_parser_parseDynamicLinker(struct callstack_parser * self,
