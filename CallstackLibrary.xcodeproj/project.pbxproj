@@ -47,6 +47,10 @@
 		BF971B892A588634006BFFBB /* gnuFile.c in Sources */ = {isa = PBXBuildFile; fileRef = BF971B852A588634006BFFBB /* gnuFile.c */; };
 		BF971B8D2A58B135006BFFBB /* cache.h in Headers */ = {isa = PBXBuildFile; fileRef = BF971B8B2A58B135006BFFBB /* cache.h */; };
 		BF971B8E2A58B135006BFFBB /* cache.c in Sources */ = {isa = PBXBuildFile; fileRef = BF971B8C2A58B135006BFFBB /* cache.c */; };
+		BF971B912A58B9EA006BFFBB /* llvmFileInternal.h in Headers */ = {isa = PBXBuildFile; fileRef = BF971B8F2A58B9EA006BFFBB /* llvmFileInternal.h */; };
+		BF971B922A58B9EA006BFFBB /* llvmFileInternal.h in Headers */ = {isa = PBXBuildFile; fileRef = BF971B8F2A58B9EA006BFFBB /* llvmFileInternal.h */; };
+		BF971B932A58B9EA006BFFBB /* llvmFileInternal.c in Sources */ = {isa = PBXBuildFile; fileRef = BF971B902A58B9EA006BFFBB /* llvmFileInternal.c */; };
+		BF971B942A58B9EA006BFFBB /* llvmFileInternal.c in Sources */ = {isa = PBXBuildFile; fileRef = BF971B902A58B9EA006BFFBB /* llvmFileInternal.c */; };
 		BFCC50C928F8454E00E2388D /* demangler.cpp in Sources */ = {isa = PBXBuildFile; fileRef = BFCC50C728F8454E00E2388D /* demangler.cpp */; };
 		BFCC50CA28F8454E00E2388D /* demangler.h in Headers */ = {isa = PBXBuildFile; fileRef = BFCC50C828F8454E00E2388D /* demangler.h */; };
 /* End PBXBuildFile section */
@@ -78,6 +82,8 @@
 		BF971B852A588634006BFFBB /* gnuFile.c */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.c; path = gnuFile.c; sourceTree = "<group>"; };
 		BF971B8B2A58B135006BFFBB /* cache.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = cache.h; sourceTree = "<group>"; };
 		BF971B8C2A58B135006BFFBB /* cache.c */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.c; path = cache.c; sourceTree = "<group>"; };
+		BF971B8F2A58B9EA006BFFBB /* llvmFileInternal.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = llvmFileInternal.h; sourceTree = "<group>"; };
+		BF971B902A58B9EA006BFFBB /* llvmFileInternal.c */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.c; path = llvmFileInternal.c; sourceTree = "<group>"; };
 		BFCC50C728F8454E00E2388D /* demangler.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; path = demangler.cpp; sourceTree = "<group>"; };
 		BFCC50C828F8454E00E2388D /* demangler.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = demangler.h; sourceTree = "<group>"; };
 /* End PBXFileReference section */
@@ -105,6 +111,8 @@
 			children = (
 				BF971B762A588077006BFFBB /* llvmFile.h */,
 				BF971B772A588077006BFFBB /* llvmFile.c */,
+				BF971B8F2A58B9EA006BFFBB /* llvmFileInternal.h */,
+				BF971B902A58B9EA006BFFBB /* llvmFileInternal.c */,
 			);
 			path = llvm;
 			sourceTree = "<group>";
@@ -211,6 +219,7 @@
 				BF378FE92919545B00A4DAA9 /* callstack_defs.h in Headers */,
 				BF378FEC2919545E00A4DAA9 /* callstack_type.h in Headers */,
 				BF378FEF2919546000A4DAA9 /* callstack.h in Headers */,
+				BF971B922A58B9EA006BFFBB /* llvmFileInternal.h in Headers */,
 				BF378FD72919544A00A4DAA9 /* demangler.h in Headers */,
 				BF378FDA2919544E00A4DAA9 /* callstack_parserInternal.h in Headers */,
 				BF378FDD2919545100A4DAA9 /* callstack_parser.h in Headers */,
@@ -234,6 +243,7 @@
 				BF86E32228F45DE100F6D20E /* callstack_parser.h in Headers */,
 				BF5A746128F1DCA00017591A /* callstackInternal.h in Headers */,
 				BF86E32628F4609100F6D20E /* callstack_parserInternal.h in Headers */,
+				BF971B912A58B9EA006BFFBB /* llvmFileInternal.h in Headers */,
 				BF971B7F2A58827B006BFFBB /* binaryFile.h in Headers */,
 				BFCC50CA28F8454E00E2388D /* demangler.h in Headers */,
 				BF971B862A588634006BFFBB /* gnuFile.h in Headers */,
@@ -321,6 +331,7 @@
 			files = (
 				BF971B892A588634006BFFBB /* gnuFile.c in Sources */,
 				BF378FCB2919542100A4DAA9 /* callstack.c in Sources */,
+				BF971B942A58B9EA006BFFBB /* llvmFileInternal.c in Sources */,
 				BF971B822A58827B006BFFBB /* binaryFile.c in Sources */,
 				BF378FCE2919542400A4DAA9 /* callstackInternal.c in Sources */,
 				BF378FD12919542600A4DAA9 /* callstack_parser.c in Sources */,
@@ -341,6 +352,7 @@
 				BF5A746228F1DCA00017591A /* callstackInternal.c in Sources */,
 				BF86E32728F4609100F6D20E /* callstack_parserInternal.c in Sources */,
 				BF86E32328F45DE100F6D20E /* callstack_parser.c in Sources */,
+				BF971B932A58B9EA006BFFBB /* llvmFileInternal.c in Sources */,
 				BFCC50C928F8454E00E2388D /* demangler.cpp in Sources */,
 				BF971B7A2A588077006BFFBB /* llvmFile.c in Sources */,
 			);

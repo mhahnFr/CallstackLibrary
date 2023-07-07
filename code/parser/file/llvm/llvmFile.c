@@ -20,6 +20,7 @@
 #include <stdlib.h>
 
 #include "llvmFile.h"
+#include "llvmFileInternal.h"
 
 struct llvmFile * llvmFile_new(void)  {
     struct llvmFile * toReturn = malloc(sizeof(struct llvmFile));
@@ -44,6 +45,9 @@ void llvmFile_create(struct llvmFile * self) {
 char * llvmFile_addr2String(struct binaryFile * me, Dl_info * info) {
     struct llvmFile * self = llvmFileOrNull(me);
     if (self == NULL) {
+        return NULL;
+    }
+    if (!self->_.parsed && !llvmFile_parseFile(self)) {
         return NULL;
     }
     
