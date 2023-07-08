@@ -23,27 +23,31 @@
 
 struct binaryFile * parsedFiles = NULL;
 
-struct binaryFile * cache_findOrAddFile(const char * fileName) {
+struct binaryFile * cache_findOrAddFile(struct binaryFile ** cache, const char * fileName) {
+    if (cache == NULL) cache = &parsedFiles;
+    
     struct binaryFile * it;
-    for (it = parsedFiles; it != NULL && it->fileName != fileName; it = it->next); // FIXME: Check string indepth!
+    for (it = *cache; it != NULL && it->fileName != fileName; it = it->next); // FIXME: Check string indepth!
     
     if (it == NULL) {
         it = binaryFile_new(fileName);
         if (it == NULL) {
             return NULL;
         }
-        it->next    = parsedFiles;
-        parsedFiles = it;
+        it->next = *cache;
+        *cache   = it;
     }
     return it;
 }
 
-void cache_clear(void) {
+void cache_clear(struct binaryFile ** cache) {
+    if (cache == NULL) cache = &parsedFiles;
+    
     struct binaryFile * tmp;
     
-    for (struct binaryFile * it = parsedFiles; it != NULL; it = tmp) {
+    for (struct binaryFile * it = *cache; it != NULL; it = tmp) {
         tmp = it->next;
         it->delete(it);
     }
-    parsedFiles = NULL;
+    *cache = NULL;
 }

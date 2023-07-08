@@ -39,7 +39,7 @@ enum callstack_type callstack_parser_parseDebugSymbols(struct callstack_parser *
     for (size_t i = 0; i < callstack->backtraceSize; ++i) {
         Dl_info info;
         if (dladdr(callstack->backtrace[i], &info)) {
-            struct binaryFile * file = cache_findOrAddFile(info.dli_fname);
+            struct binaryFile * file = cache_findOrAddFile(NULL, info.dli_fname);
             if (file == NULL || (callstack->stringArray[i] = file->addr2String(file, &info)) == NULL) {
                 ret = FAILED;
                 break;

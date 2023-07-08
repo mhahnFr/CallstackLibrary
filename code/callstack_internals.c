@@ -17,6 +17,8 @@
  * this library, see the file LICENSE.  If not, see <https://www.gnu.org/licenses/>.
  */
 
+#include <stddef.h>
+
 #include "../include/callstack_internals.h"
 
 #include "parser/file/cache/cache.h"
@@ -24,5 +26,5 @@
 bool callstack_autoClearCaches = true;
 
 void callstack_clearCaches(void) {
-    cache_clear();
+    cache_clear(NULL);
 }
