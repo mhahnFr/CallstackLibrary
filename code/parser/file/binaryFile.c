@@ -19,14 +19,14 @@
 
 #include "binaryFile.h"
 
-#include "llvm/llvmFile.h"
+#include "macho/machoFile.h"
 
 struct binaryFile * binaryFile_new(const char * fileName) {
     struct binaryFile * toReturn;
     
-    // TODO: ifdef macOS -> llvmFile, elifdef Linux -> gnuFile
-    toReturn = &llvmFile_new()->_;
-    // toReturn = &gnuFile_new()->_;
+    // TODO: ifdef macOS -> machoFile, elifdef Linux -> elfFile
+    toReturn = &machoFile_new()->_;
+    // toReturn = &elfFile_new()->_;
     
     if (toReturn != NULL) {
         toReturn->fileName = fileName;

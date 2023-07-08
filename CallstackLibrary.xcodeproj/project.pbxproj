@@ -33,10 +33,10 @@
 		BF86E32328F45DE100F6D20E /* callstack_parser.c in Sources */ = {isa = PBXBuildFile; fileRef = BF86E32128F45DE100F6D20E /* callstack_parser.c */; };
 		BF86E32628F4609100F6D20E /* callstack_parserInternal.h in Headers */ = {isa = PBXBuildFile; fileRef = BF86E32428F4609100F6D20E /* callstack_parserInternal.h */; };
 		BF86E32728F4609100F6D20E /* callstack_parserInternal.c in Sources */ = {isa = PBXBuildFile; fileRef = BF86E32528F4609100F6D20E /* callstack_parserInternal.c */; };
-		BF971B782A588077006BFFBB /* llvmFile.h in Headers */ = {isa = PBXBuildFile; fileRef = BF971B762A588077006BFFBB /* llvmFile.h */; };
-		BF971B792A588077006BFFBB /* llvmFile.h in Headers */ = {isa = PBXBuildFile; fileRef = BF971B762A588077006BFFBB /* llvmFile.h */; };
-		BF971B7A2A588077006BFFBB /* llvmFile.c in Sources */ = {isa = PBXBuildFile; fileRef = BF971B772A588077006BFFBB /* llvmFile.c */; };
-		BF971B7B2A588077006BFFBB /* llvmFile.c in Sources */ = {isa = PBXBuildFile; fileRef = BF971B772A588077006BFFBB /* llvmFile.c */; };
+		BF971B782A588077006BFFBB /* machoFile.h in Headers */ = {isa = PBXBuildFile; fileRef = BF971B762A588077006BFFBB /* machoFile.h */; };
+		BF971B792A588077006BFFBB /* machoFile.h in Headers */ = {isa = PBXBuildFile; fileRef = BF971B762A588077006BFFBB /* machoFile.h */; };
+		BF971B7A2A588077006BFFBB /* machoFile.c in Sources */ = {isa = PBXBuildFile; fileRef = BF971B772A588077006BFFBB /* machoFile.c */; };
+		BF971B7B2A588077006BFFBB /* machoFile.c in Sources */ = {isa = PBXBuildFile; fileRef = BF971B772A588077006BFFBB /* machoFile.c */; };
 		BF971B7F2A58827B006BFFBB /* binaryFile.h in Headers */ = {isa = PBXBuildFile; fileRef = BF971B7D2A58827B006BFFBB /* binaryFile.h */; };
 		BF971B802A58827B006BFFBB /* binaryFile.h in Headers */ = {isa = PBXBuildFile; fileRef = BF971B7D2A58827B006BFFBB /* binaryFile.h */; };
 		BF971B812A58827B006BFFBB /* binaryFile.c in Sources */ = {isa = PBXBuildFile; fileRef = BF971B7E2A58827B006BFFBB /* binaryFile.c */; };
@@ -47,10 +47,10 @@
 		BF971B892A588634006BFFBB /* elfFile.c in Sources */ = {isa = PBXBuildFile; fileRef = BF971B852A588634006BFFBB /* elfFile.c */; };
 		BF971B8D2A58B135006BFFBB /* cache.h in Headers */ = {isa = PBXBuildFile; fileRef = BF971B8B2A58B135006BFFBB /* cache.h */; };
 		BF971B8E2A58B135006BFFBB /* cache.c in Sources */ = {isa = PBXBuildFile; fileRef = BF971B8C2A58B135006BFFBB /* cache.c */; };
-		BF971B912A58B9EA006BFFBB /* llvmFileInternal.h in Headers */ = {isa = PBXBuildFile; fileRef = BF971B8F2A58B9EA006BFFBB /* llvmFileInternal.h */; };
-		BF971B922A58B9EA006BFFBB /* llvmFileInternal.h in Headers */ = {isa = PBXBuildFile; fileRef = BF971B8F2A58B9EA006BFFBB /* llvmFileInternal.h */; };
-		BF971B932A58B9EA006BFFBB /* llvmFileInternal.c in Sources */ = {isa = PBXBuildFile; fileRef = BF971B902A58B9EA006BFFBB /* llvmFileInternal.c */; };
-		BF971B942A58B9EA006BFFBB /* llvmFileInternal.c in Sources */ = {isa = PBXBuildFile; fileRef = BF971B902A58B9EA006BFFBB /* llvmFileInternal.c */; };
+		BF971B912A58B9EA006BFFBB /* machoFileInternal.h in Headers */ = {isa = PBXBuildFile; fileRef = BF971B8F2A58B9EA006BFFBB /* machoFileInternal.h */; };
+		BF971B922A58B9EA006BFFBB /* machoFileInternal.h in Headers */ = {isa = PBXBuildFile; fileRef = BF971B8F2A58B9EA006BFFBB /* machoFileInternal.h */; };
+		BF971B932A58B9EA006BFFBB /* machoFileInternal.c in Sources */ = {isa = PBXBuildFile; fileRef = BF971B902A58B9EA006BFFBB /* machoFileInternal.c */; };
+		BF971B942A58B9EA006BFFBB /* machoFileInternal.c in Sources */ = {isa = PBXBuildFile; fileRef = BF971B902A58B9EA006BFFBB /* machoFileInternal.c */; };
 		BF971B972A58C155006BFFBB /* callstack_internals.c in Sources */ = {isa = PBXBuildFile; fileRef = BF971B962A58C155006BFFBB /* callstack_internals.c */; };
 		BF971B982A58C155006BFFBB /* callstack_internals.c in Sources */ = {isa = PBXBuildFile; fileRef = BF971B962A58C155006BFFBB /* callstack_internals.c */; };
 		BFCC50C928F8454E00E2388D /* demangler.cpp in Sources */ = {isa = PBXBuildFile; fileRef = BFCC50C728F8454E00E2388D /* demangler.cpp */; };
@@ -76,16 +76,16 @@
 		BF86E32128F45DE100F6D20E /* callstack_parser.c */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.c; path = callstack_parser.c; sourceTree = "<group>"; };
 		BF86E32428F4609100F6D20E /* callstack_parserInternal.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = callstack_parserInternal.h; sourceTree = "<group>"; };
 		BF86E32528F4609100F6D20E /* callstack_parserInternal.c */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.c; path = callstack_parserInternal.c; sourceTree = "<group>"; };
-		BF971B762A588077006BFFBB /* llvmFile.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = llvmFile.h; sourceTree = "<group>"; };
-		BF971B772A588077006BFFBB /* llvmFile.c */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.c; path = llvmFile.c; sourceTree = "<group>"; };
+		BF971B762A588077006BFFBB /* machoFile.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = machoFile.h; sourceTree = "<group>"; };
+		BF971B772A588077006BFFBB /* machoFile.c */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.c; path = machoFile.c; sourceTree = "<group>"; };
 		BF971B7D2A58827B006BFFBB /* binaryFile.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = binaryFile.h; sourceTree = "<group>"; };
 		BF971B7E2A58827B006BFFBB /* binaryFile.c */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.c; path = binaryFile.c; sourceTree = "<group>"; };
 		BF971B842A588634006BFFBB /* elfFile.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = elfFile.h; sourceTree = "<group>"; };
 		BF971B852A588634006BFFBB /* elfFile.c */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.c; path = elfFile.c; sourceTree = "<group>"; };
 		BF971B8B2A58B135006BFFBB /* cache.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = cache.h; sourceTree = "<group>"; };
 		BF971B8C2A58B135006BFFBB /* cache.c */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.c; path = cache.c; sourceTree = "<group>"; };
-		BF971B8F2A58B9EA006BFFBB /* llvmFileInternal.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = llvmFileInternal.h; sourceTree = "<group>"; };
-		BF971B902A58B9EA006BFFBB /* llvmFileInternal.c */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.c; path = llvmFileInternal.c; sourceTree = "<group>"; };
+		BF971B8F2A58B9EA006BFFBB /* machoFileInternal.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = machoFileInternal.h; sourceTree = "<group>"; };
+		BF971B902A58B9EA006BFFBB /* machoFileInternal.c */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.c; path = machoFileInternal.c; sourceTree = "<group>"; };
 		BF971B952A58C0F2006BFFBB /* callstack_internals.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = callstack_internals.h; sourceTree = "<group>"; };
 		BF971B962A58C155006BFFBB /* callstack_internals.c */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.c; path = callstack_internals.c; sourceTree = "<group>"; };
 		BFCC50C728F8454E00E2388D /* demangler.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; path = demangler.cpp; sourceTree = "<group>"; };
@@ -110,15 +110,15 @@
 /* End PBXFrameworksBuildPhase section */
 
 /* Begin PBXGroup section */
-		BF3031DF294C6C2300E8ADC5 /* llvm */ = {
+		BF3031DF294C6C2300E8ADC5 /* macho */ = {
 			isa = PBXGroup;
 			children = (
-				BF971B762A588077006BFFBB /* llvmFile.h */,
-				BF971B772A588077006BFFBB /* llvmFile.c */,
-				BF971B8F2A58B9EA006BFFBB /* llvmFileInternal.h */,
-				BF971B902A58B9EA006BFFBB /* llvmFileInternal.c */,
+				BF971B762A588077006BFFBB /* machoFile.h */,
+				BF971B772A588077006BFFBB /* machoFile.c */,
+				BF971B8F2A58B9EA006BFFBB /* machoFileInternal.h */,
+				BF971B902A58B9EA006BFFBB /* machoFileInternal.c */,
 			);
-			path = llvm;
+			path = macho;
 			sourceTree = "<group>";
 		};
 		BF3031E1294C6C4700E8ADC5 /* parser */ = {
@@ -187,7 +187,7 @@
 			children = (
 				BF971B8A2A58B125006BFFBB /* cache */,
 				BF971B832A588624006BFFBB /* elf */,
-				BF3031DF294C6C2300E8ADC5 /* llvm */,
+				BF3031DF294C6C2300E8ADC5 /* macho */,
 				BF971B7D2A58827B006BFFBB /* binaryFile.h */,
 				BF971B7E2A58827B006BFFBB /* binaryFile.c */,
 			);
@@ -220,12 +220,12 @@
 			buildActionMask = 2147483647;
 			files = (
 				BF378FE32919545700A4DAA9 /* callstack_create.h in Headers */,
-				BF971B792A588077006BFFBB /* llvmFile.h in Headers */,
+				BF971B792A588077006BFFBB /* machoFile.h in Headers */,
 				BF378FE62919545800A4DAA9 /* callstack.hpp in Headers */,
 				BF378FE92919545B00A4DAA9 /* callstack_defs.h in Headers */,
 				BF378FEC2919545E00A4DAA9 /* callstack_type.h in Headers */,
 				BF378FEF2919546000A4DAA9 /* callstack.h in Headers */,
-				BF971B922A58B9EA006BFFBB /* llvmFileInternal.h in Headers */,
+				BF971B922A58B9EA006BFFBB /* machoFileInternal.h in Headers */,
 				BF378FD72919544A00A4DAA9 /* demangler.h in Headers */,
 				BF378FDA2919544E00A4DAA9 /* callstack_parserInternal.h in Headers */,
 				BF378FDD2919545100A4DAA9 /* callstack_parser.h in Headers */,
@@ -240,7 +240,7 @@
 			buildActionMask = 2147483647;
 			files = (
 				BF5A746428F1DD7F0017591A /* callstack.h in Headers */,
-				BF971B782A588077006BFFBB /* llvmFile.h in Headers */,
+				BF971B782A588077006BFFBB /* machoFile.h in Headers */,
 				BF971B8D2A58B135006BFFBB /* cache.h in Headers */,
 				BF5A746628F1E5120017591A /* callstack_type.h in Headers */,
 				BF5A746828F1EFC40017591A /* callstack_defs.h in Headers */,
@@ -249,7 +249,7 @@
 				BF86E32228F45DE100F6D20E /* callstack_parser.h in Headers */,
 				BF5A746128F1DCA00017591A /* callstackInternal.h in Headers */,
 				BF86E32628F4609100F6D20E /* callstack_parserInternal.h in Headers */,
-				BF971B912A58B9EA006BFFBB /* llvmFileInternal.h in Headers */,
+				BF971B912A58B9EA006BFFBB /* machoFileInternal.h in Headers */,
 				BF971B7F2A58827B006BFFBB /* binaryFile.h in Headers */,
 				BFCC50CA28F8454E00E2388D /* demangler.h in Headers */,
 				BF971B862A588634006BFFBB /* elfFile.h in Headers */,
@@ -338,13 +338,13 @@
 				BF971B892A588634006BFFBB /* elfFile.c in Sources */,
 				BF971B982A58C155006BFFBB /* callstack_internals.c in Sources */,
 				BF378FCB2919542100A4DAA9 /* callstack.c in Sources */,
-				BF971B942A58B9EA006BFFBB /* llvmFileInternal.c in Sources */,
+				BF971B942A58B9EA006BFFBB /* machoFileInternal.c in Sources */,
 				BF971B822A58827B006BFFBB /* binaryFile.c in Sources */,
 				BF378FCE2919542400A4DAA9 /* callstackInternal.c in Sources */,
 				BF378FD12919542600A4DAA9 /* callstack_parser.c in Sources */,
 				BF378FD42919542800A4DAA9 /* callstack_parserInternal.c in Sources */,
 				BF378FF22919546B00A4DAA9 /* demangler.cpp in Sources */,
-				BF971B7B2A588077006BFFBB /* llvmFile.c in Sources */,
+				BF971B7B2A588077006BFFBB /* machoFile.c in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -360,9 +360,9 @@
 				BF5A746228F1DCA00017591A /* callstackInternal.c in Sources */,
 				BF86E32728F4609100F6D20E /* callstack_parserInternal.c in Sources */,
 				BF86E32328F45DE100F6D20E /* callstack_parser.c in Sources */,
-				BF971B932A58B9EA006BFFBB /* llvmFileInternal.c in Sources */,
+				BF971B932A58B9EA006BFFBB /* machoFileInternal.c in Sources */,
 				BFCC50C928F8454E00E2388D /* demangler.cpp in Sources */,
-				BF971B7A2A588077006BFFBB /* llvmFile.c in Sources */,
+				BF971B7A2A588077006BFFBB /* machoFile.c in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};

@@ -17,9 +17,9 @@
  * this library, see the file LICENSE.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-#include "llvmFileInternal.h"
+#include "machoFileInternal.h"
 
-bool llvmFile_parseFile(struct llvmFile * self) {
+bool machoFile_parseFile(struct machoFile * self) {
     // TODO: Implement
     (void) self;
     return false;

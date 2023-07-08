@@ -24,7 +24,7 @@
 #include <stdbool.h>
 
 enum binaryFileType {
-    LLVM_FILE,
+    MACHO_FILE,
     ELF_FILE
 };
 

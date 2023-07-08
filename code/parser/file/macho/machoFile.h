@@ -17,11 +17,28 @@
  * this library, see the file LICENSE.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-#ifndef llvmFileInternal_h
-#define llvmFileInternal_h
+#ifndef machoFile_h
+#define machoFile_h
 
-#include "llvmFile.h"
+#include <stddef.h>
 
-bool llvmFile_parseFile(struct llvmFile * self);
+#include "../binaryFile.h"
 
-#endif /* llvmFileInternal_h */
+struct machoFile {
+    struct binaryFile _;
+    // ...
+};
+
+struct machoFile * machoFile_new(void);
+void machoFile_create(struct machoFile * self);
+
+static inline struct machoFile * machoFileOrNull(struct binaryFile * self) {
+    return self->type == MACHO_FILE ? self->concrete : NULL;
+}
+
+char * machoFile_addr2String(struct binaryFile * self, Dl_info * info);
+
+void machoFile_destroy(struct binaryFile * self);
+void machoFile_delete(struct binaryFile * self);
+
+#endif /* machoFile_h */

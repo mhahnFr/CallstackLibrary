@@ -19,35 +19,35 @@
 
 #include <stdlib.h>
 
-#include "llvmFile.h"
-#include "llvmFileInternal.h"
+#include "machoFile.h"
+#include "machoFileInternal.h"
 
-struct llvmFile * llvmFile_new(void)  {
-    struct llvmFile * toReturn = malloc(sizeof(struct llvmFile));
+struct machoFile * machoFile_new(void)  {
+    struct machoFile * toReturn = malloc(sizeof(struct machoFile));
     
     if (toReturn != NULL) {
-        llvmFile_create(toReturn);
+        machoFile_create(toReturn);
     }
     return toReturn;
 }
 
-void llvmFile_create(struct llvmFile * self) {
+void machoFile_create(struct machoFile * self) {
     binaryFile_create(&self->_);
     
-    self->_.type     = LLVM_FILE;
+    self->_.type     = MACHO_FILE;
     self->_.concrete = self;
     
-    self->_.addr2String = &llvmFile_addr2String;
-    self->_.destroy     = &llvmFile_destroy;
-    self->_.delete      = &llvmFile_delete;
+    self->_.addr2String = &machoFile_addr2String;
+    self->_.destroy     = &machoFile_destroy;
+    self->_.delete      = &machoFile_delete;
 }
 
-char * llvmFile_addr2String(struct binaryFile * me, Dl_info * info) {
-    struct llvmFile * self = llvmFileOrNull(me);
+char * machoFile_addr2String(struct binaryFile * me, Dl_info * info) {
+    struct machoFile * self = machoFileOrNull(me);
     if (self == NULL) {
         return NULL;
     }
-    if (!self->_.parsed && !llvmFile_parseFile(self)) {
+    if (!self->_.parsed && !machoFile_parseFile(self)) {
         return NULL;
     }
     
@@ -56,11 +56,11 @@ char * llvmFile_addr2String(struct binaryFile * me, Dl_info * info) {
     return NULL;
 }
 
-void llvmFile_destroy(struct binaryFile * self) {
+void machoFile_destroy(struct binaryFile * self) {
     (void) self;
 }
 
-void llvmFile_delete(struct binaryFile * self) {
+void machoFile_delete(struct binaryFile * self) {
     self->destroy(self);
     free(self->concrete);
 }
