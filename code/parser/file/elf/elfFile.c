@@ -19,40 +19,40 @@
 
 #include <stdlib.h>
 
-#include "gnuFile.h"
+#include "elfFile.h"
 
-struct gnuFile * gnuFile_new(void) {
-    struct gnuFile * toReturn = malloc(sizeof(struct gnuFile));
+struct elfFile * elfFile_new(void) {
+    struct elfFile * toReturn = malloc(sizeof(struct elfFile));
     
     if (toReturn != NULL) {
-        gnuFile_create(toReturn);
+        elfFile_create(toReturn);
     }
     return toReturn;
 }
 
-void gnuFile_create(struct gnuFile * self) {
+void elfFile_create(struct elfFile * self) {
     binaryFile_create(&self->_);
     
-    self->_.type     = GNU_FILE;
+    self->_.type     = ELF_FILE;
     self->_.concrete = self;
     
-    self->_.addr2String = &gnuFile_addr2String;
-    self->_.destroy     = &gnuFile_destroy;
-    self->_.delete      = &gnuFile_delete;
+    self->_.addr2String = &elfFile_addr2String;
+    self->_.destroy     = &elfFile_destroy;
+    self->_.delete      = &elfFile_delete;
 }
 
-char * gnuFile_addr2String(struct binaryFile * self, Dl_info * info) {
+char * elfFile_addr2String(struct binaryFile * self, Dl_info * info) {
     (void) self;
     (void) info;
     
     return NULL;
 }
 
-void gnuFile_destroy(struct binaryFile * self) {
+void elfFile_destroy(struct binaryFile * self) {
     (void) self;
 }
 
-void gnuFile_delete(struct binaryFile * self) {
+void elfFile_delete(struct binaryFile * self) {
     self->destroy(self);
     free(self->concrete);
 }

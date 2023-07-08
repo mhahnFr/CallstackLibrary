@@ -25,7 +25,7 @@
 
 enum binaryFileType {
     LLVM_FILE,
-    GNU_FILE
+    ELF_FILE
 };
 
 struct binaryFile {

@@ -17,26 +17,26 @@
  * this library, see the file LICENSE.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-#ifndef gnuFile_h
-#define gnuFile_h
+#ifndef elfFile_h
+#define elfFile_h
 
 #include "../binaryFile.h"
 
-struct gnuFile {
+struct elfFile {
     struct binaryFile _;
     // ...
 };
 
-struct gnuFile * gnuFile_new(void);
-void gnuFile_create(struct gnuFile * self);
+struct elfFile * elfFile_new(void);
+void elfFile_create(struct elfFile * self);
 
-static inline struct gnuFile * gnuFileOrNull(struct binaryFile * self) {
-    return self->type == GNU_FILE ? self->concrete : NULL;
+static inline struct elfFile * elfFileOrNull(struct binaryFile * self) {
+    return self->type == ELF_FILE ? self->concrete : NULL;
 }
 
-char * gnuFile_addr2String(struct binaryFile * self, Dl_info * info);
+char * elfFile_addr2String(struct binaryFile * self, Dl_info * info);
 
-void gnuFile_destroy(struct binaryFile * self);
-void gnuFile_delete(struct binaryFile * self);
+void elfFile_destroy(struct binaryFile * self);
+void elfFile_delete(struct binaryFile * self);
 
-#endif /* gnuFile_h */
+#endif /* elfFile_h */

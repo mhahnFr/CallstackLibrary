@@ -41,10 +41,10 @@
 		BF971B802A58827B006BFFBB /* binaryFile.h in Headers */ = {isa = PBXBuildFile; fileRef = BF971B7D2A58827B006BFFBB /* binaryFile.h */; };
 		BF971B812A58827B006BFFBB /* binaryFile.c in Sources */ = {isa = PBXBuildFile; fileRef = BF971B7E2A58827B006BFFBB /* binaryFile.c */; };
 		BF971B822A58827B006BFFBB /* binaryFile.c in Sources */ = {isa = PBXBuildFile; fileRef = BF971B7E2A58827B006BFFBB /* binaryFile.c */; };
-		BF971B862A588634006BFFBB /* gnuFile.h in Headers */ = {isa = PBXBuildFile; fileRef = BF971B842A588634006BFFBB /* gnuFile.h */; };
-		BF971B872A588634006BFFBB /* gnuFile.h in Headers */ = {isa = PBXBuildFile; fileRef = BF971B842A588634006BFFBB /* gnuFile.h */; };
-		BF971B882A588634006BFFBB /* gnuFile.c in Sources */ = {isa = PBXBuildFile; fileRef = BF971B852A588634006BFFBB /* gnuFile.c */; };
-		BF971B892A588634006BFFBB /* gnuFile.c in Sources */ = {isa = PBXBuildFile; fileRef = BF971B852A588634006BFFBB /* gnuFile.c */; };
+		BF971B862A588634006BFFBB /* elfFile.h in Headers */ = {isa = PBXBuildFile; fileRef = BF971B842A588634006BFFBB /* elfFile.h */; };
+		BF971B872A588634006BFFBB /* elfFile.h in Headers */ = {isa = PBXBuildFile; fileRef = BF971B842A588634006BFFBB /* elfFile.h */; };
+		BF971B882A588634006BFFBB /* elfFile.c in Sources */ = {isa = PBXBuildFile; fileRef = BF971B852A588634006BFFBB /* elfFile.c */; };
+		BF971B892A588634006BFFBB /* elfFile.c in Sources */ = {isa = PBXBuildFile; fileRef = BF971B852A588634006BFFBB /* elfFile.c */; };
 		BF971B8D2A58B135006BFFBB /* cache.h in Headers */ = {isa = PBXBuildFile; fileRef = BF971B8B2A58B135006BFFBB /* cache.h */; };
 		BF971B8E2A58B135006BFFBB /* cache.c in Sources */ = {isa = PBXBuildFile; fileRef = BF971B8C2A58B135006BFFBB /* cache.c */; };
 		BF971B912A58B9EA006BFFBB /* llvmFileInternal.h in Headers */ = {isa = PBXBuildFile; fileRef = BF971B8F2A58B9EA006BFFBB /* llvmFileInternal.h */; };
@@ -80,8 +80,8 @@
 		BF971B772A588077006BFFBB /* llvmFile.c */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.c; path = llvmFile.c; sourceTree = "<group>"; };
 		BF971B7D2A58827B006BFFBB /* binaryFile.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = binaryFile.h; sourceTree = "<group>"; };
 		BF971B7E2A58827B006BFFBB /* binaryFile.c */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.c; path = binaryFile.c; sourceTree = "<group>"; };
-		BF971B842A588634006BFFBB /* gnuFile.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = gnuFile.h; sourceTree = "<group>"; };
-		BF971B852A588634006BFFBB /* gnuFile.c */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.c; path = gnuFile.c; sourceTree = "<group>"; };
+		BF971B842A588634006BFFBB /* elfFile.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = elfFile.h; sourceTree = "<group>"; };
+		BF971B852A588634006BFFBB /* elfFile.c */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.c; path = elfFile.c; sourceTree = "<group>"; };
 		BF971B8B2A58B135006BFFBB /* cache.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = cache.h; sourceTree = "<group>"; };
 		BF971B8C2A58B135006BFFBB /* cache.c */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.c; path = cache.c; sourceTree = "<group>"; };
 		BF971B8F2A58B9EA006BFFBB /* llvmFileInternal.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = llvmFileInternal.h; sourceTree = "<group>"; };
@@ -186,7 +186,7 @@
 			isa = PBXGroup;
 			children = (
 				BF971B8A2A58B125006BFFBB /* cache */,
-				BF971B832A588624006BFFBB /* gnu */,
+				BF971B832A588624006BFFBB /* elf */,
 				BF3031DF294C6C2300E8ADC5 /* llvm */,
 				BF971B7D2A58827B006BFFBB /* binaryFile.h */,
 				BF971B7E2A58827B006BFFBB /* binaryFile.c */,
@@ -194,13 +194,13 @@
 			path = file;
 			sourceTree = "<group>";
 		};
-		BF971B832A588624006BFFBB /* gnu */ = {
+		BF971B832A588624006BFFBB /* elf */ = {
 			isa = PBXGroup;
 			children = (
-				BF971B842A588634006BFFBB /* gnuFile.h */,
-				BF971B852A588634006BFFBB /* gnuFile.c */,
+				BF971B842A588634006BFFBB /* elfFile.h */,
+				BF971B852A588634006BFFBB /* elfFile.c */,
 			);
-			path = gnu;
+			path = elf;
 			sourceTree = "<group>";
 		};
 		BF971B8A2A58B125006BFFBB /* cache */ = {
@@ -231,7 +231,7 @@
 				BF378FDD2919545100A4DAA9 /* callstack_parser.h in Headers */,
 				BF971B802A58827B006BFFBB /* binaryFile.h in Headers */,
 				BF378FE02919545500A4DAA9 /* callstackInternal.h in Headers */,
-				BF971B872A588634006BFFBB /* gnuFile.h in Headers */,
+				BF971B872A588634006BFFBB /* elfFile.h in Headers */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -252,7 +252,7 @@
 				BF971B912A58B9EA006BFFBB /* llvmFileInternal.h in Headers */,
 				BF971B7F2A58827B006BFFBB /* binaryFile.h in Headers */,
 				BFCC50CA28F8454E00E2388D /* demangler.h in Headers */,
-				BF971B862A588634006BFFBB /* gnuFile.h in Headers */,
+				BF971B862A588634006BFFBB /* elfFile.h in Headers */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -335,7 +335,7 @@
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
-				BF971B892A588634006BFFBB /* gnuFile.c in Sources */,
+				BF971B892A588634006BFFBB /* elfFile.c in Sources */,
 				BF971B982A58C155006BFFBB /* callstack_internals.c in Sources */,
 				BF378FCB2919542100A4DAA9 /* callstack.c in Sources */,
 				BF971B942A58B9EA006BFFBB /* llvmFileInternal.c in Sources */,
@@ -352,7 +352,7 @@
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
-				BF971B882A588634006BFFBB /* gnuFile.c in Sources */,
+				BF971B882A588634006BFFBB /* elfFile.c in Sources */,
 				BF971B972A58C155006BFFBB /* callstack_internals.c in Sources */,
 				BF86E31F28F4564600F6D20E /* callstack.c in Sources */,
 				BF971B812A58827B006BFFBB /* binaryFile.c in Sources */,
