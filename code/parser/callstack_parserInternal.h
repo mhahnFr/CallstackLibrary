@@ -1,7 +1,7 @@
 /*
  * Callstack Library - A library creating human readable call stacks.
  *
- * Copyright (C) 2022  mhahnFr
+ * Copyright (C) 2022 - 2023  mhahnFr
  *
  * This file is part of the CallstackLibrary. This library is free software:
  * you can redistribute it and/or modify it under the terms of the
@@ -58,5 +58,10 @@ enum callstack_type callstack_parser_parseDynamicLinker(struct callstack_parser 
  * @return A copy of the given name or the demangled name.
  */
 char * callstack_parser_demangle(const char * name, ptrdiff_t diff);
+
+bool callstack_parser_createDynamicLine(struct callstack * callstack,
+                                               Dl_info *   info,
+                                               size_t      index,
+                                               char *      fallback);
 
 #endif /* callstack_parserInternal_h */

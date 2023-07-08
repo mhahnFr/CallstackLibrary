@@ -41,8 +41,10 @@ enum callstack_type callstack_parser_parseDebugSymbols(struct callstack_parser *
         if (dladdr(callstack->backtrace[i], &info)) {
             struct binaryFile * file = cache_findOrAddFile(callstack_parser_getCache(self), info.dli_fname);
             if (file == NULL || (callstack->stringArray[i] = file->addr2String(file, &info)) == NULL) {
-                ret = FAILED;
-                break;
+                if (!callstack_parser_createDynamicLine(callstack, &info, i, "<< Unknown >>")) {
+                    ret = FAILED;
+                    break;
+                }
             }
         } else {
             if ((callstack->stringArray[i] = strdup("<Unknown>")) == NULL) {
@@ -52,6 +54,22 @@ enum callstack_type callstack_parser_parseDebugSymbols(struct callstack_parser *
         }
     }
     return ret;
+}
+
+bool callstack_parser_createDynamicLine(struct callstack * callstack,
+                                               Dl_info *   info,
+                                               size_t      index,
+                                               char *      fallback) {
+    if (info->dli_sname == NULL) {
+        if ((callstack->stringArray[index] = strdup(fallback)) == NULL) {
+            return false;
+        }
+    } else {
+        if ((callstack->stringArray[index] = callstack_parser_demangle(info->dli_sname, callstack->backtrace[index] - info->dli_saddr)) == NULL) {
+            return false;
+        }
+    }
+    return true;
 }
 
 enum callstack_type callstack_parser_parseDynamicLinker(struct callstack_parser * self,
@@ -70,17 +88,9 @@ enum callstack_type callstack_parser_parseDynamicLinker(struct callstack_parser 
     for (i = 0; i < callstack->backtraceSize; ++i) {
         Dl_info info;
         if (dladdr(callstack->backtrace[i], &info)) {
-            if (info.dli_sname == NULL) {
-                if ((callstack->stringArray[i] = strdup(strings[i])) == NULL) {
-                    ret = FAILED;
-                    break;
-                }
-            } else {
-                if ((callstack->stringArray[i] = callstack_parser_demangle(info.dli_sname,
-                                                                           callstack->backtrace[i] - info.dli_saddr)) == NULL) {
-                    ret = FAILED;
-                    break;
-                }
+            if (!callstack_parser_createDynamicLine(callstack, &info, i, strings[i])) {
+                ret = FAILED;
+                break;
             }
         } else {
             if ((callstack->stringArray[i] = strdup("<Unknown>")) == NULL) {
