@@ -20,7 +20,7 @@
 #include "callstack_parserInternal.h"
 
 #include "../callstackInternal.h"
-#include "../../include/callstack_internals.h"
+#include "file/cache/cache.h"
 
 enum callstack_type callstack_parser_parse(struct callstack_parser * self,
                                            struct callstack * callstack) {
@@ -32,8 +32,9 @@ enum callstack_type callstack_parser_parse(struct callstack_parser * self,
         result = callstack_parser_parseDynamicLinker(self, callstack);
     }
     
-    if (callstack_autoClearCaches) {
-        callstack_clearCaches();
-    }
     return result;
+}
+
+void callstack_parser_destroy(struct callstack_parser * self) {
+    cache_clear(&self->parsedFiles);
 }

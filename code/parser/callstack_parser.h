@@ -1,7 +1,7 @@
 /*
  * Callstack Library - A library creating human readable call stacks.
  *
- * Copyright (C) 2022  mhahnFr
+ * Copyright (C) 2022 - 2023  mhahnFr
  *
  * This file is part of the CallstackLibrary. This library is free software:
  * you can redistribute it and/or modify it under the terms of the
@@ -21,6 +21,8 @@
 #define callstack_parser_h
 
 #include "../../include/callstack.h"
+#include "../../include/callstack_internals.h"
+#include "file/binaryFile.h"
 
 /**
  * The structure of a callstack parser.
@@ -28,6 +30,8 @@
 struct callstack_parser {
     /** The mode the parser is currently using. */
     enum callstack_type mode;
+    
+    struct binaryFile * parsedFiles;
 };
 
 /**
@@ -36,7 +40,8 @@ struct callstack_parser {
  * @param self The callstack parser object to construct.
  */
 static inline void callstack_parser_create(struct callstack_parser * self) {
-    self->mode = NONE;
+    self->mode        = NONE;
+    self->parsedFiles = NULL;
 }
 
 /**
@@ -44,9 +49,7 @@ static inline void callstack_parser_create(struct callstack_parser * self) {
  *
  * @param self The callstack parser object to destroy.
  */
-static inline void callstack_parser_destroy(struct callstack_parser * self) {
-    (void) self;
-}
+void callstack_parser_destroy(struct callstack_parser * self);
 
 /**
  * @brief Parses the debug symbols to create a human readable callstack.
@@ -61,5 +64,9 @@ static inline void callstack_parser_destroy(struct callstack_parser * self) {
  */
 enum callstack_type callstack_parser_parse(struct callstack_parser * self,
                                            struct callstack * callstack);
+
+static inline struct binaryFile ** callstack_parser_getCache(struct callstack_parser * self) {
+    return callstack_autoClearCaches ? &self->parsedFiles : NULL;
+}
 
 #endif /* callstack_parser_h */
