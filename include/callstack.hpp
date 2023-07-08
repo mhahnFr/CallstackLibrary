@@ -1,7 +1,7 @@
 /*
  * Callstack Library - A library creating human readable call stacks.
  *
- * Copyright (C) 2022  mhahnFr
+ * Copyright (C) 2022 - 2023  mhahnFr
  *
  * This file is part of the CallstackLibrary. This library is free software:
  * you can redistribute it and/or modify it under the terms of the
@@ -34,26 +34,26 @@
  #endif
 
 /**
- * This namespace contains a wrapper class for the struct callstack.
- * It is needed to avoid name conflicts between the struct and the wrapper class.
+ * This namespace contains a wrapper class for the `struct callstack`.
+ * It is needed to avoid name conflicts between the structure and the wrapper class.
  */
 namespace lcs {
     /**
-     * @brief A wrapper class around the struct callstack.
+     * @brief A wrapper class around the `struct callstack`.
      *
      * It provides the usual constructors and operator overloads. Additionally, it contains the
-     * possibility to implicitly cast an object of this class to a pointer to the C struct.
+     * possibility to implicitly cast an object of this class to a pointer to the C structure.
      */
     class callstack {
-        /** A typedef for convenience. */
+        /** A `typedef` for convenience. */
         typedef ::callstack struct_callstack;
-        /** The original C struct.     */
+        /** The original C structure.    */
         struct_callstack self;
         
         /**
          * @brief Helper function to throw the appopriate exception.
          *
-         * @throws A system_error if compiled using C++11 or newer, a runtime error otherwise.
+         * @throws A `system_error` if compiled using C++11 or newer, a runtime error otherwise.
          */
         void error() {
 #if __cplusplus >= 201103
@@ -67,12 +67,12 @@ namespace lcs {
         /**
          * @brief A trivial default constructor.
          *
-         * Zero-initializes the underlying C struct. If the given bool value is true,
-         * it is initialized using the function callstack_emplace().
-         * Throws a runtime_error or a system_error if compiled using C++11 or newer if
-         * emplace is set to true and the backtrace could not be created.
+         * Zero-initializes the underlying C structure. If the given boolean value is `true`,
+         * it is initialized using the function `callstack_emplace()`.
+         * Throws a `runtime_error` or a `system_error` if compiled using C++11 or newer if
+         * `emplace` is set to `true` and the backtrace could not be created.
          *
-         * @param emplace Whether to call callstack_emplace().
+         * @param emplace Whether to call `callstack_emplace()`.
          */
         explicit callstack(bool emplace = true) {
             if (emplace) {
@@ -87,8 +87,8 @@ namespace lcs {
         /**
          * @brief Constructs this object using the given stack address.
          *
-         * Initializes the underlying C struct using the function callstack_emplaceWithAddress().
-         * Throws a runtime_error or a system_error if compiled using C++11 or newer if
+         * Initializes the underlying C structure using the function `callstack_emplaceWithAddress()`.
+         * Throws a `runtime_error` or a `system_error` if compiled using C++11 or newer if
          * the backtrace could not be created.
          *
          * @param address The stack address after which frames are ignored.
@@ -100,9 +100,9 @@ namespace lcs {
         }
         
         /**
-         * @brief Constructs the underlying C struct with the given backtrace.
+         * @brief Constructs the underlying C structure with the given backtrace.
          *
-         * if the given trace length is smaller than zero, a runtime_error or a system_error
+         * if the given trace length is smaller than zero, a `runtime_error` or a `system_error`
          * if compiled using C++11 or newer is thrown.
          *
          * @param trace The backtrace.
@@ -120,9 +120,9 @@ namespace lcs {
         }
         
         /**
-         * @brief Constructs a callstack object from the given C struct.
+         * @brief Constructs a callstack object from the given C structure.
          *
-         * @param cCallstack The C struct to be copied.
+         * @param cCallstack The C structure to be copied.
          */
         explicit callstack(const struct_callstack * cCallstack) {
             callstack_create(*this);
