@@ -1,7 +1,7 @@
 /*
  * Callstack Library - A library creating human readable call stacks.
  *
- * Copyright (C) 2022  mhahnFr
+ * Copyright (C) 2022 - 2023  mhahnFr
  *
  * This file is part of the CallstackLibrary. This library is free software:
  * you can redistribute it and/or modify it under the terms of the
@@ -47,8 +47,8 @@ struct callstack {
  * @brief Creates a callstack of the calling function.
  *
  * The backtrace of the calling function is created.
- * The struct is allocated and needs to be freed using the function callstack_delete(struct callstack *).
- * Returns NULL if an error occurs.
+ * The struct is allocated and needs to be freed using the function `callstack_delete(struct callstack *)`.
+ * Returns `NULL` if an error occurs.
  *
  * @return A newly allocated callstack object.
  */
@@ -57,8 +57,8 @@ struct callstack * callstack_new(void);
 /**
  * @brief Creates a new callstack object, ignoring all frames after the given address.
  *
- * The struct is allocated and needs to be freed using the function callstack_delete(struct callstack *).
- * Returns NULL if an error occurs.
+ * The struct is allocated and needs to be freed using the function `callstack_delete(struct callstack *)`.
+ * Returns `NULL` if an error occurs.
  *
  * @param address The stack address after which frames are ignored.
  * @return A newly allocated callstack object.
@@ -69,9 +69,9 @@ struct callstack * callstack_newWithAddress(void * address);
  * @brief Constructs the given callstack object.
  *
  * Stores the backtrace of the calling function.
- * The callstack object needs to be destructed using the function callstack_destroy(struct callstack *)
+ * The callstack object needs to be destructed using the function `callstack_destroy(struct callstack *)`
  * upon successfull construction and use.
- * If an error occurs during the initialization of the given callstack object, false is returned.
+ * If an error occurs during the initialization of the given callstack object, `false` is returned.
  *
  * @param self A pointer to the callstack object to be constructed.
  * @return Whether the given callstack object was constructed successfully.
@@ -82,7 +82,7 @@ bool callstack_emplace(struct callstack * self);
  * @brief Constructs the given callstack object.
  *
  * Stores the backtrace of the calling function, ignoring all frames after the given address.
- * The callstack object needs to be destructed using the function callstack_destroy(struct callstack *)
+ * The callstack object needs to be destructed using the function `callstack_destroy(struct callstack *)`
  * upon successfull construction and use.
  *
  * @param self A pointer to the callstack object to be constructed.
@@ -95,10 +95,10 @@ bool callstack_emplaceWithAddress(struct callstack * self, void * address);
  * @brief Constructs the given callstack object.
  *
  * Copies the given callstack into the given object. If the trace is longer than
- * CALLSTACK_BACKTRACE_SIZE, only the first addresses are copied.
- * The callstack object needs to be destructed using the function callstack_destroy(struct callstack *)
+ * `CALLSTACK_BACKTRACE_SIZE`, only the first addresses are copied.
+ * The callstack object needs to be destructed using the function `callstack_destroy(struct callstack *)`
  * after use.
- * If the fiven trace length is smaller than zero, false is returned and the given callstack
+ * If the given trace length is smaller than zero, `false` is returned and the given callstack
  * is not modified.
  *
  * @param self A pointer to the callstack object to be constructed.
@@ -125,7 +125,7 @@ void callstack_copy(struct callstack * self, const struct callstack * other);
  * The backtrace is only constructed if it has not already been created.
  * The returned string array must not be freed.
  *
- * Returns NULL if an error happens.
+ * Returns `NULL` if an error happens.
  *
  * @param self The callstack object.
  * @return A string array consisting of human readable strings.
@@ -138,7 +138,7 @@ char ** callstack_toArray(struct callstack * self);
  * The given seperator character is used to seperate the lines. The string
  * is allocated and needs to be freed.
  *
- * Returns NULL if an error happens.
+ * Returns `NULL` if an error happens.
  *
  * @param self The callstack object.
  * @param separator The separator to be used.
