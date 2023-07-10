@@ -40,7 +40,7 @@ enum callstack_type callstack_parser_parseDebugSymbols(struct callstack_parser *
         Dl_info info;
         if (dladdr(callstack->backtrace[i], &info)) {
             struct binaryFile * file = cache_findOrAddFile(callstack_parser_getCache(self), info.dli_fname);
-            if (file == NULL || (callstack->stringArray[i] = file->addr2String(file, &info)) == NULL) {
+            if (file == NULL || (callstack->stringArray[i] = file->addr2String(file, &info, callstack->backtrace[i])) == NULL) {
                 if (!callstack_parser_createDynamicLine(callstack, &info, i, "<< Unknown >>")) {
                     ret = FAILED;
                     break;

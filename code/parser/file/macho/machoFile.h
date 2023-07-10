@@ -36,7 +36,7 @@ static inline struct machoFile * machoFileOrNull(struct binaryFile * self) {
     return self->type == MACHO_FILE ? self->concrete : NULL;
 }
 
-char * machoFile_addr2String(struct binaryFile * self, Dl_info * info);
+char * machoFile_addr2String(struct binaryFile * self, Dl_info * info, void * address);
 
 void machoFile_destroy(struct binaryFile * self);
 void machoFile_delete(struct binaryFile * self);

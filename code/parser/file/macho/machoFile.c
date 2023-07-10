@@ -42,7 +42,7 @@ void machoFile_create(struct machoFile * self) {
     self->_.delete      = &machoFile_delete;
 }
 
-char * machoFile_addr2String(struct binaryFile * me, Dl_info * info) {
+char * machoFile_addr2String(struct binaryFile * me, Dl_info * info, void * address) {
     struct machoFile * self = machoFileOrNull(me);
     if (self == NULL) {
         return NULL;
@@ -52,7 +52,6 @@ char * machoFile_addr2String(struct binaryFile * me, Dl_info * info) {
     }
     
     // TODO: Implement
-    (void) info;
     return NULL;
 }
 

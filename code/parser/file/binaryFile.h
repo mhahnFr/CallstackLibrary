@@ -38,7 +38,7 @@ struct binaryFile {
     
     struct binaryFile * next;
     
-    char * (*addr2String)(struct binaryFile *, Dl_info *);
+    char * (*addr2String)(struct binaryFile *, Dl_info *, void *);
     void   (*destroy)    (struct binaryFile *);
     void   (*delete)     (struct binaryFile *);
 };

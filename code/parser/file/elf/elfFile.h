@@ -34,7 +34,7 @@ static inline struct elfFile * elfFileOrNull(struct binaryFile * self) {
     return self->type == ELF_FILE ? self->concrete : NULL;
 }
 
-char * elfFile_addr2String(struct binaryFile * self, Dl_info * info);
+char * elfFile_addr2String(struct binaryFile * self, Dl_info * info, void * address);
 
 void elfFile_destroy(struct binaryFile * self);
 void elfFile_delete(struct binaryFile * self);

@@ -41,9 +41,10 @@ void elfFile_create(struct elfFile * self) {
     self->_.delete      = &elfFile_delete;
 }
 
-char * elfFile_addr2String(struct binaryFile * self, Dl_info * info) {
+char * elfFile_addr2String(struct binaryFile * self, Dl_info * info, void * address) {
     (void) self;
     (void) info;
+    (void) address;
     
     return NULL;
 }
