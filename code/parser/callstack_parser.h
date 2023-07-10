@@ -31,6 +31,7 @@ struct callstack_parser {
     /** The mode the parser is currently using. */
     enum callstack_type mode;
     
+    /** A list of the already parsed files.     */
     struct binaryFile * parsedFiles;
 };
 
@@ -65,6 +66,12 @@ void callstack_parser_destroy(struct callstack_parser * self);
 enum callstack_type callstack_parser_parse(struct callstack_parser * self,
                                            struct callstack * callstack);
 
+/**
+ * Returns the appropriate cache for the given parser structure.
+ *
+ * @param self the parser structure
+ * @return the appropriate cache
+ */
 static inline struct binaryFile ** callstack_parser_getCache(struct callstack_parser * self) {
     return callstack_autoClearCaches ? &self->parsedFiles : NULL;
 }

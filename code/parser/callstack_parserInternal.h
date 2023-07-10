@@ -59,6 +59,18 @@ enum callstack_type callstack_parser_parseDynamicLinker(struct callstack_parser 
  */
 char * callstack_parser_demangle(const char * name, ptrdiff_t diff);
 
+/**
+ * @brief Creates a callstack line using the given callstack, info, index and fallback.
+ *
+ * The callstack line of the given index is translated using the given dynamic linker information.
+ * If translating is not possible, the fallback is used to create the callstack line.
+ *
+ * @param callstack the callstack whose line to be translated
+ * @param info the dynamic linker info
+ * @param index the index of the desired callstack line
+ * @param fallback the fallback string
+ * @return whether the line was set
+ */
 bool callstack_parser_createDynamicLine(struct callstack * callstack,
                                                Dl_info *   info,
                                                size_t      index,
