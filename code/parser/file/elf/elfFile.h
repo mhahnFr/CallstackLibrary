@@ -22,21 +22,56 @@
 
 #include "../binaryFile.h"
 
+/**
+ * This structure represents an ELF binary file.
+ */
 struct elfFile {
+    /** The super part of this structure. */
     struct binaryFile _;
     // ...
 };
 
+/**
+ * Allocates a new ELF file structure.
+ *
+ * @return the allocated structure or `NULL` on error
+ */
 struct elfFile * elfFile_new(void);
+
+/**
+ * Initializes the given ELF file structure.
+ *
+ * @param self the structure to be initialized
+ */
 void elfFile_create(struct elfFile * self);
 
+/**
+ * Returns an ELF file structure from the given binary file structure
+ * or `NULL`, if the binary file structure does not represent an ELF
+ * file structure.
+ *
+ * @param self the binary file structure to be casted
+ * @return the ELF file structure on success or `NULL`
+ */
 static inline struct elfFile * elfFileOrNull(struct binaryFile * self) {
     return self->type == ELF_FILE ? self->concrete : NULL;
 }
 
+/* Heavily WIP. */
 char * elfFile_addr2String(struct binaryFile * self, Dl_info * info, void * address);
 
+/**
+ * Deinitializes the given binary file structure, if it is an ELF file structure.
+ *
+ * @param self the binary file structure to be deinitialized
+ */
 void elfFile_destroy(struct binaryFile * self);
+
+/**
+ * Deinitializes and `free`s the given binary file, if it is an ELF file structure.
+ *
+ * @param self the binary file structure to be deleted
+ */
 void elfFile_delete(struct binaryFile * self);
 
 #endif /* elfFile_h */
