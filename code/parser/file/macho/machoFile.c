@@ -47,7 +47,7 @@ char * machoFile_addr2String(struct binaryFile * me, Dl_info * info) {
     if (self == NULL) {
         return NULL;
     }
-    if (!self->_.parsed && !machoFile_parseFile(self)) {
+    if (!self->_.parsed && !machoFile_parseFile(self, info)) {
         return NULL;
     }
     
