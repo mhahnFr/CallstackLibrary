@@ -22,6 +22,12 @@
 
 #include "machoFile.h"
 
+/**
+ * Parses the given Mach-O file using the given arguments.
+ *
+ * TODO: param description
+ * @return whether the parsing was successful
+ */
 bool machoFile_parseFile(struct machoFile * self, Dl_info * info);
 
 #endif /* machoFileInternal_h */

@@ -24,21 +24,56 @@
 
 #include "../binaryFile.h"
 
+/**
+ * This structure represents a Mach-O binary file.
+ */
 struct machoFile {
+    /** The super part of this structure. */
     struct binaryFile _;
     // ...
 };
 
+/**
+ * Allocates and initializes a Mach-O file structure.
+ *
+ * @return the allocated Mach-I file structure or `NULL` on error
+ */
 struct machoFile * machoFile_new(void);
+
+/**
+ * Initializes the given Mach-O file structure.
+ *
+ * @param self the Mach-O file structure to be initialized
+ */
 void machoFile_create(struct machoFile * self);
 
+/**
+ * Returns the represented Mach-O file structure from the given binary
+ * file structure or `NULL` if it does not represent a Mach-O file structure.
+ *
+ * @param self the binary file structure to be casted
+ * @return the represented Mach-O file structure or `NULL`
+ */
 static inline struct machoFile * machoFileOrNull(struct binaryFile * self) {
     return self->type == MACHO_FILE ? self->concrete : NULL;
 }
 
+/* Heavily WIP. */
 char * machoFile_addr2String(struct binaryFile * self, Dl_info * info, void * address);
 
+/**
+ * Deinitializes the given binary file structure if it is a Mach-O file structure.
+ *
+ * @param self the binary file structure to be deinitialized
+ */
 void machoFile_destroy(struct binaryFile * self);
+
+/**
+ * Deinitializes and `free`s the given binary file structure if it is a
+ * Mach-O file structure.
+ *
+ * @param self the binary file structure to be deleted
+ */
 void machoFile_delete(struct binaryFile * self);
 
 #endif /* machoFile_h */
