@@ -23,27 +23,54 @@
 #include <dlfcn.h>
 #include <stdbool.h>
 
+/**
+ * This enumeration contains the supported types of executable files.
+ */
 enum binaryFileType {
+    /** Represents a Mach-O binary file. */
     MACHO_FILE,
+    /** Represents an ELF binary file.   */
     ELF_FILE
 };
 
+/**
+ * This structure represents a generic binary executable file.
+ */
 struct binaryFile {
+    /** The type of this binary file.                        */
     enum binaryFileType type;
+    /** A pointer to the concrete structure.                 */
     void * concrete;
     
+    /** Indicates whether this file has already been parsed. */
     bool parsed;
     
+    /** The name of the represented binary file.             */
     const char * fileName;
     
+    /** A pointer to the next binary file structure.         */
     struct binaryFile * next;
     
+    /** Translating method, heavily WIP.                     */
     char * (*addr2String)(struct binaryFile *, Dl_info *, void *);
+    /** The appropriate deinitializing method.               */
     void   (*destroy)    (struct binaryFile *);
+    /** The appropriate deleting method.                     */
     void   (*delete)     (struct binaryFile *);
 };
 
+/**
+ * Allocates a new concrete binary file structure.
+ *
+ * @param fileName the name of the represented binary file
+ */
 struct binaryFile * binaryFile_new(const char * fileName);
+
+/**
+ * Initializes the given binary file structure.
+ *
+ * @param self the binary file structure to be initialized
+ */
 void binaryFile_create(struct binaryFile * self);
 
 #endif /* binaryFile_h */
