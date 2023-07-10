@@ -21,6 +21,7 @@
 
 #include "cache.h"
 
+/** The global cache. */
 struct binaryFile * parsedFiles = NULL;
 
 struct binaryFile * cache_findOrAddFile(struct binaryFile ** cache, const char * fileName) {

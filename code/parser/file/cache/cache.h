@@ -22,7 +22,31 @@
 
 #include "../binaryFile.h"
 
+/**
+ * @brief Returns a binary file structure used to parse the binary
+ * file pointed to by the given file name.
+ *
+ * If the given cache is `NULL`, the global cache is used.
+ *
+ * The given cache is searched for the file representation, if it is not
+ * found, it is created and added to the given cache.
+ *
+ * If no file representation exists in the given cache and creation fails,
+ * `NULL` is returned.
+ *
+ * @param cache the cache to be used
+ * @param fileName the name of the file
+ * @return the binary file structure representation
+ */
 struct binaryFile * cache_findOrAddFile(struct binaryFile ** cache, const char * fileName);
+
+/**
+ * @brief Clears the given cache.
+ *
+ * Passing `NULL`, the global cache is cleared.
+ *
+ * @param cache the cache to be cleared
+ */
 void cache_clear(struct binaryFile ** cache);
 
 #endif /* cache_h */
