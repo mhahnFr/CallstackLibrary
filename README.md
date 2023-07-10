@@ -21,7 +21,7 @@ In order to use this library, simply include the header [``callstack.h``](https:
 The complete set of features is described in the [wiki](https://www.github.com/mhahnFr/CallstackLibrary/wiki).
 
 ## Upcoming features
-The callstacks are currently created using the informations of  the dynamic linker.
+The callstacks are currently created using the information of the dynamic linker.
 In the future, parsing of the debug symbols will be added.
 
 ### Final notes
