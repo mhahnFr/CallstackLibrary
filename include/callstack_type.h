@@ -28,14 +28,11 @@ extern "C" {
  * The type of the callstack.
  */
 enum callstack_type {
+    /** The callstack has been translated.    */
     TRANSLATED,
-    /**
-     * Indcates that an error happened during the translation of the backtrace.
-     */
+    /** An error happened during translation. */
     FAILED,
-    /**
-     * Indicates that the callstack is not translated in a human readable form.
-     */
+    /** Not translated.                       */
     NONE
 };
 

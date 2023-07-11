@@ -22,6 +22,13 @@
 
 #include "callstack_parser.h"
 
+/**
+ * @brief Translates the given callstack using the given parser.
+ *
+ * @param self the callstack parser to be used
+ * @param callstack the callstack to be translated
+ * @return whether the translation was successful.
+ */
 bool callstack_parser_parseImpl(struct callstack_parser * self,
                                 struct callstack *        callstack);
 
