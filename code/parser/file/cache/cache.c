@@ -18,6 +18,7 @@
  */
 
 #include <stddef.h>
+#include <string.h>
 
 #include "cache.h"
 
@@ -28,7 +29,7 @@ struct binaryFile * cache_findOrAddFile(struct binaryFile ** cache, const char *
     if (cache == NULL) cache = &parsedFiles;
     
     struct binaryFile * it;
-    for (it = *cache; it != NULL && it->fileName != fileName; it = it->next); // FIXME: Check string indepth!
+    for (it = *cache; it != NULL && strcmp(it->fileName, fileName) != 0; it = it->next);
     
     if (it == NULL) {
         it = binaryFile_new(fileName);
