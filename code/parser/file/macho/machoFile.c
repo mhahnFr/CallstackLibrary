@@ -18,6 +18,7 @@
  */
 
 #include <stdlib.h>
+#include <string.h>
 
 #include "machoFile.h"
 #include "machoFileInternal.h"
@@ -47,11 +48,12 @@ char * machoFile_addr2String(struct binaryFile * me, Dl_info * info, void * addr
     if (self == NULL) {
         return NULL;
     }
-    if (!self->_.parsed && !machoFile_parseFile(self, info)) {
+    if (!self->_.parsed && strcmp(info->dli_fname, "/usr/lib/dyld") && !machoFile_parseFile(self, info->dli_fbase)) {
         return NULL;
     }
     
     // TODO: Implement
+    (void) address;
     return NULL;
 }
 

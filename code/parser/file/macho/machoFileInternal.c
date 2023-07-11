@@ -19,9 +19,9 @@
 
 #include "machoFileInternal.h"
 
-bool machoFile_parseFile(struct machoFile * self, Dl_info * info) {
+bool machoFile_parseFile(struct machoFile * self, void * baseAddress) {
     // TODO: Implement
     (void) self;
-    (void) info;
+    (void) baseAddress;
     return false;
 }

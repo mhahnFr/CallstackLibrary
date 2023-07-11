@@ -23,11 +23,13 @@
 #include "machoFile.h"
 
 /**
- * Parses the given Mach-O file using the given arguments.
+ * Parses the Mach-O file represented by the given structure using the
+ * given base address.
  *
- * TODO: param description
+ * @param self the Mach-O file structure representing the file to be parsed
+ * @param baseAddress the base address of the Mach-O file to parse
  * @return whether the parsing was successful
  */
-bool machoFile_parseFile(struct machoFile * self, Dl_info * info);
+bool machoFile_parseFile(struct machoFile * self, void * baseAddress);
 
 #endif /* machoFileInternal_h */
