@@ -23,16 +23,13 @@
 #include "file/cache/cache.h"
 
 enum callstack_type callstack_parser_parse(struct callstack_parser * self,
-                                           struct callstack * callstack) {
-    self->mode = DEBUG_SYMBOLS;
-    enum callstack_type result = callstack_parser_parseDebugSymbols(self, callstack);
-    if (result == FAILED) {
+                                           struct callstack *        callstack) {
+    if (!callstack_parser_parseImpl(self, callstack)) {
         callstack_reset(callstack);
-        self->mode = DYNAMIC_LINKER;
-        result = callstack_parser_parseDynamicLinker(self, callstack);
+        return FAILED;
     }
     
-    return result;
+    return TRANSLATED;
 }
 
 void callstack_parser_destroy(struct callstack_parser * self) {

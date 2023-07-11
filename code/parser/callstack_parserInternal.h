@@ -22,30 +22,8 @@
 
 #include "callstack_parser.h"
 
-/**
- * @brief Attempts to parse the debug symbols in order to translate the given callstack.
- *
- * Returns FAILED if the debug symbols are unavailable. This function might use information
- * of the dynamic linker for some of the frames.
- *
- * @param self The callstack parser object.
- * @param callstack The callstack to be translated.
- * @return The status of the translation.
- */
-enum callstack_type callstack_parser_parseDebugSymbols(struct callstack_parser * self,
-                                                       struct callstack * callstack);
-
-/**
- * @brief Parses the information of the dynamic linker in order to translate the given callstack.
- *
- * Returns FAILED if an error occurred.
- *
- * @param self The callstack parser object.
- * @param callstack The callstack object to be translated.
- * @return The status of the translation.
- */
-enum callstack_type callstack_parser_parseDynamicLinker(struct callstack_parser * self,
-                                                        struct callstack * callstack);
+bool callstack_parser_parseImpl(struct callstack_parser * self,
+                                struct callstack *        callstack);
 
 /**
  * @brief If the demangling is enabled, tries to demangle the given name.

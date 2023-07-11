@@ -28,32 +28,30 @@
 #include <stdlib.h>
 #include <string.h>
 
-enum callstack_type callstack_parser_parseDebugSymbols(struct callstack_parser * self,
-                                                       struct callstack * callstack) {
-    enum callstack_type ret = self->mode;
+bool callstack_parser_parseImpl(struct callstack_parser * self,
+                                struct callstack *        callstack) {
     callstack->stringArray = malloc((callstack->backtraceSize + 1) * sizeof(char *));
     if (callstack->stringArray == NULL) {
-        return FAILED;
+        return false;
     }
     callstack->stringArraySize = callstack->backtraceSize;
     for (size_t i = 0; i < callstack->backtraceSize; ++i) {
         Dl_info info;
         if (dladdr(callstack->backtrace[i], &info)) {
             struct binaryFile * file = cache_findOrAddFile(callstack_parser_getCache(self), info.dli_fname);
-            if (file == NULL || (callstack->stringArray[i] = file->addr2String(file, &info, callstack->backtrace[i])) == NULL) {
+            if (file == NULL ||
+                (callstack->stringArray[i] = file->addr2String(file, &info, callstack->backtrace[i])) == NULL) {
                 if (!callstack_parser_createDynamicLine(callstack, &info, i, "<< Unknown >>")) {
-                    ret = FAILED;
-                    break;
+                    return false;
                 }
             }
         } else {
-            if ((callstack->stringArray[i] = strdup("<Unknown>")) == NULL) {
-                ret = FAILED;
-                break;
+            if ((callstack->stringArray[i] = strdup("<< Unknown >>")) == NULL) {
+                return false;
             }
         }
     }
-    return ret;
+    return true;
 }
 
 bool callstack_parser_createDynamicLine(struct callstack * callstack,
@@ -65,43 +63,12 @@ bool callstack_parser_createDynamicLine(struct callstack * callstack,
             return false;
         }
     } else {
-        if ((callstack->stringArray[index] = callstack_parser_demangle(info->dli_sname, callstack->backtrace[index] - info->dli_saddr)) == NULL) {
+        if ((callstack->stringArray[index] = callstack_parser_demangle(info->dli_sname,
+                                                                       callstack->backtrace[index] - info->dli_saddr)) == NULL) {
             return false;
         }
     }
     return true;
-}
-
-enum callstack_type callstack_parser_parseDynamicLinker(struct callstack_parser * self,
-                                                        struct callstack * callstack) {
-    enum callstack_type ret = self->mode;
-    callstack->stringArray = malloc((callstack->backtraceSize + 1) * sizeof(char *));
-    if (callstack->stringArray == NULL) {
-        return FAILED;
-    }
-    callstack->stringArraySize = callstack->backtraceSize;
-    char ** strings = backtrace_symbols(callstack->backtrace, (int) callstack->backtraceSize);
-    if (strings == NULL) {
-        return FAILED;
-    }
-    size_t i;
-    for (i = 0; i < callstack->backtraceSize; ++i) {
-        Dl_info info;
-        if (dladdr(callstack->backtrace[i], &info)) {
-            if (!callstack_parser_createDynamicLine(callstack, &info, i, strings[i])) {
-                ret = FAILED;
-                break;
-            }
-        } else {
-            if ((callstack->stringArray[i] = strdup("<Unknown>")) == NULL) {
-                ret = FAILED;
-                break;
-            }
-        }
-    }
-    callstack->stringArray[i] = NULL;
-    free(strings);
-    return ret;
 }
 
 char * callstack_parser_demangle(const char * name, ptrdiff_t diff) {

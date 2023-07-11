@@ -1,7 +1,7 @@
 /*
  * Callstack Library - A library creating human readable call stacks.
  *
- * Copyright (C) 2022  mhahnFr
+ * Copyright (C) 2022 - 2023  mhahnFr
  *
  * This file is part of the CallstackLibrary. This library is free software:
  * you can redistribute it and/or modify it under the terms of the
@@ -28,14 +28,7 @@ extern "C" {
  * The type of the callstack.
  */
 enum callstack_type {
-    /**
-     * Indicates that the callstack has been generated using the dynamic linker informations.
-     */
-    DYNAMIC_LINKER,
-    /**
-     * Indicates that the callstack has been generated using the debug symbols.
-     */
-    DEBUG_SYMBOLS,
+    TRANSLATED,
     /**
      * Indcates that an error happened during the translation of the backtrace.
      */
