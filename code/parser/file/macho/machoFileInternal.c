@@ -17,9 +17,16 @@
  * this library, see the file LICENSE.  If not, see <https://www.gnu.org/licenses/>.
  */
 
+#include <string.h>
+
 #include "machoFileInternal.h"
 
 bool machoFile_parseFile(struct machoFile * self, void * baseAddress) {
+    if (strcmp(self->_.fileName, "/usr/lib/dyld") == 0) {
+        // We cannot parse Darwins dynamic linker at the moment.
+        return NULL;
+    }
+    
     // TODO: Implement
     (void) self;
     (void) baseAddress;
