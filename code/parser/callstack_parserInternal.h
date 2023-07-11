@@ -42,7 +42,9 @@ bool callstack_parser_parseImpl(struct callstack_parser * self,
  * @param diff The difference between the current address and the return address.
  * @return A copy of the given name or the demangled name.
  */
-char * callstack_parser_demangle(const char * name, ptrdiff_t diff);
+char * callstack_parser_createLine(const char * name, ptrdiff_t diff);
+
+char * callstack_parser_demangle(char * name);
 
 /**
  * @brief Creates a callstack line using the given callstack, info, index and fallback.

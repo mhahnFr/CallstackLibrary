@@ -63,15 +63,29 @@ bool callstack_parser_createDynamicLine(struct callstack * callstack,
             return false;
         }
     } else {
-        if ((callstack->stringArray[index] = callstack_parser_demangle(info->dli_sname,
-                                                                       callstack->backtrace[index] - info->dli_saddr)) == NULL) {
+        if ((callstack->stringArray[index] = callstack_parser_createLine(info->dli_sname,
+                                                                         callstack->backtrace[index] - info->dli_saddr)) == NULL) {
             return false;
         }
     }
     return true;
 }
 
-char * callstack_parser_demangle(const char * name, ptrdiff_t diff) {
+char * callstack_parser_demangle(char * name) {
+    char * result  = name;
+    bool needsCopy = true;
+    
+#ifdef CXX_DEMANGLE
+    result = callstack_demangle(result);
+    if (result != name) {
+        needsCopy = false;
+    }
+#endif
+    
+    return needsCopy ? strdup(result) : result;
+}
+
+char * callstack_parser_createLine(const char * name, ptrdiff_t diff) {
     char * result = (char *) name;
     bool del      = false;
 
