@@ -27,23 +27,31 @@
  *
  * @param self the callstack parser to be used
  * @param callstack the callstack to be translated
- * @return whether the translation was successful.
+ * @return whether the translation was successful
  */
 bool callstack_parser_parseImpl(struct callstack_parser * self,
                                 struct callstack *        callstack);
 
 /**
- * @brief If the demangling is enabled, tries to demangle the given name.
+ * @brief Creates a callstack line, demangling the given name if possible and enabled.
  *
- * If the name could not be demangled, a copy of it is returned. Otherwise, an allocated,
- * demangled string is returned.
+ * An allocated callstack line is returned.
  *
- * @param name The name to be tried to demangle.
- * @param diff The difference between the current address and the return address.
- * @return A copy of the given name or the demangled name.
+ * @param name the name to be tried to demangled
+ * @param diff the function depth
+ * @return the callstack line or `NULL` on error
  */
 char * callstack_parser_createLine(const char * name, ptrdiff_t diff);
 
+/**
+ * @brief Demangles the given name if possible and enabled.
+ *
+ * Either the allocated, demangled name is returned or a copy of the
+ * given name.
+ *
+ * @param name the name to be demangled
+ * @return the allocated name
+ */
 char * callstack_parser_demangle(char * name);
 
 /**
