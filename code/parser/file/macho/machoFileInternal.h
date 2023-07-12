@@ -32,4 +32,7 @@
  */
 bool machoFile_parseFile(struct machoFile * self, void * baseAddress);
 
+void machoFile_addObjectFile(struct machoFile *  self,
+                             struct objectFile * file);
+
 #endif /* machoFileInternal_h */

@@ -40,6 +40,9 @@ void machoFile_create(struct machoFile * self) {
     self->_.addr2String = &machoFile_addr2String;
     self->_.destroy     = &machoFile_destroy;
     self->_.delete      = &machoFile_delete;
+    
+    self->addressOffset = 0x0;
+    self->objectFiles   = NULL;
 }
 
 char * machoFile_addr2String(struct binaryFile * me, Dl_info * info, void * address) {
@@ -58,7 +61,16 @@ char * machoFile_addr2String(struct binaryFile * me, Dl_info * info, void * addr
 }
 
 void machoFile_destroy(struct binaryFile * self) {
-    (void) self;
+    struct machoFile * me = machoFileOrNull(self);
+    if (me == NULL) {
+        return;
+    }
+    
+    for (struct objectFile * tmp = me->objectFiles; tmp != NULL;) {
+        struct objectFile * n = tmp->next;
+        objectFile_delete(tmp);
+        tmp = n;
+    }
 }
 
 void machoFile_delete(struct binaryFile * self) {

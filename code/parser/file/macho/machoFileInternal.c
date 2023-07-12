@@ -32,3 +32,9 @@ bool machoFile_parseFile(struct machoFile * self, void * baseAddress) {
     (void) baseAddress;
     return false;
 }
+
+void machoFile_addObjectFile(struct machoFile *  self,
+                             struct objectFile * file) {
+    file->next        = self->objectFiles;
+    self->objectFiles = file;
+}

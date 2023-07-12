@@ -23,6 +23,7 @@
 #include <stddef.h>
 
 #include "../binaryFile.h"
+#include "objectFile.h"
 
 /**
  * This structure represents a Mach-O binary file.
@@ -30,7 +31,9 @@
 struct machoFile {
     /** The super part of this structure. */
     struct binaryFile _;
-    // ...
+    
+    uint64_t addressOffset;
+    struct objectFile * objectFiles;
 };
 
 /**
