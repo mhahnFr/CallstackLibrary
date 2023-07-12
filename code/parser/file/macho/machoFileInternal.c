@@ -19,7 +19,29 @@
 
 #include <string.h>
 
+#include <mach-o/loader.h>
+
 #include "machoFileInternal.h"
+
+static inline bool machoFile_parseFileImpl(struct machoFile * self,
+                                           void *             baseAddress,
+                                           bool               bitsReversed) {
+    // TODO: Implement 32 bit version
+    (void) self;
+    (void) baseAddress;
+    (void) bitsReversed;
+    return false;
+}
+
+static inline bool machoFile_parseFileImpl64(struct machoFile * self,
+                                             void *             baseAddress,
+                                             bool               bitsReversed) {
+    // TODO: Implement 64 bit version
+    (void) self;
+    (void) baseAddress;
+    (void) bitsReversed;
+    return false;
+}
 
 bool machoFile_parseFile(struct machoFile * self, void * baseAddress) {
     if (strcmp(self->_.fileName, "/usr/lib/dyld") == 0) {
@@ -27,9 +49,14 @@ bool machoFile_parseFile(struct machoFile * self, void * baseAddress) {
         return false;
     }
     
-    // TODO: Implement
-    (void) self;
-    (void) baseAddress;
+    struct mach_header * header = baseAddress;
+    switch (header->magic) {
+        case MH_MAGIC: return machoFile_parseFileImpl(self, baseAddress, false);
+        case MH_CIGAM: return machoFile_parseFileImpl(self, baseAddress, true);
+            
+        case MH_MAGIC_64: return machoFile_parseFileImpl64(self, baseAddress, false);
+        case MH_CIGAM_64: return machoFile_parseFileImpl64(self, baseAddress, true);
+    }
     return false;
 }
 
