@@ -34,6 +34,9 @@ struct objectFile {
 struct objectFile * objectFile_new(void);
 void objectFile_create(struct objectFile * self);
 
+void objectFile_addFunction(struct objectFile * self,
+                            struct function *   function);
+
 void objectFile_destroy(struct objectFile * self);
 void objectFile_delete(struct objectFile * self);
 

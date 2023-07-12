@@ -37,9 +37,18 @@ void objectFile_create(struct objectFile * self) {
     self->next       = NULL;
 }
 
+void objectFile_addFunction(struct objectFile * self,
+                            struct function *   function) {
+    function->next  = self->functions;
+    self->functions = function;
+}
+
 void objectFile_destroy(struct objectFile * self) {
-    // TODO: Implement
-    (void) self;
+    for (struct function * tmp = self->functions; tmp != NULL;) {
+        struct function * n = tmp->next;
+        function_delete(tmp);
+        tmp = n;
+    }
 }
 
 void objectFile_delete(struct objectFile * self) {
