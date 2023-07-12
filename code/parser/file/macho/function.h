@@ -22,18 +22,46 @@
 
 #include <stdint.h>
 
+/**
+ * This structure represents a function in a Mach-O symbol table.
+ */
 struct function {
+    /** The beginning address of the function inside its Mach-O file. */
     uint64_t startAddress;
     
+    /** The name of the function at linking time.                     */
     char * linkedName;
     
+    /** A pointer to the next function structure.                     */
     struct function * next;
 };
 
+/**
+ * Allocates a new function structure.
+ *
+ * @return the allocated function structure or `NULL` on error
+ */
 struct function * function_new(void);
+
+/**
+ * Initializes the given function structure.
+ *
+ * @param self the function structure to be initialized
+ */
 void function_create(struct function * self);
 
+/**
+ * Deinitializes the given function structure.
+ *
+ * @param self the function structure to be deinitialized
+ */
 void function_destroy(struct function * self);
+
+/**
+ * Deinitializes and `free`s the given function structure.
+ *
+ * @param self the function structure to be deleted
+ */
 void function_delete(struct function * self);
 
 #endif /* function_h */
