@@ -23,24 +23,74 @@
 
 #include "machoFileInternal.h"
 
+static inline bool machoFile_handleSegment(struct machoFile *       self,
+                                           struct segment_command * segment,
+                                           bool                     bitsReversed) {
+    // TODO: Implement
+    return false;
+}
+
+static inline bool machoFile_handleSegment64(struct machoFile *          self,
+                                             struct segment_command_64 * segment,
+                                             bool                        bitsReversed) {
+    // TODO: Implement
+    return false;
+}
+
+static inline bool machoFile_handleSymtab(struct machoFile *      self,
+                                          struct symtab_command * command,
+                                          bool                    bitsReversed) {
+    // TODO: Implement
+    return false;
+}
+
+static inline bool machoFile_handleSymtab64(struct machoFile *      self,
+                                            struct symtab_command * command,
+                                            bool                    bitsReversed) {
+    // TODO: Implement
+    return false;
+}
+
 static inline bool machoFile_parseFileImpl(struct machoFile * self,
                                            void *             baseAddress,
                                            bool               bitsReversed) {
-    // TODO: Implement 32 bit version
-    (void) self;
-    (void) baseAddress;
-    (void) bitsReversed;
-    return false;
+    // TODO: Handle bit reversion
+    struct mach_header * header = baseAddress;
+    
+    struct load_command * lc = (void *) header + sizeof(struct mach_header);
+    for (size_t i = 0; i < header->ncmds; ++i) {
+        bool result = true;
+        switch (lc->cmd) {
+            case LC_SEGMENT: result = machoFile_handleSegment(self, (void *) lc, bitsReversed); break;
+            case LC_SYMTAB:  result = machoFile_handleSymtab(self, (void *) lc, bitsReversed);  break;
+        }
+        if (!result) {
+            return false;
+        }
+        lc = (void *) lc + lc->cmdsize;
+    }
+    return true;
 }
 
 static inline bool machoFile_parseFileImpl64(struct machoFile * self,
                                              void *             baseAddress,
                                              bool               bitsReversed) {
-    // TODO: Implement 64 bit version
-    (void) self;
-    (void) baseAddress;
-    (void) bitsReversed;
-    return false;
+    // TODO: Handle bit reversion
+    struct mach_header_64 * header = baseAddress;
+    
+    struct load_command * lc = (void *) header + sizeof(struct mach_header_64);
+    for (size_t i = 0; i < header->ncmds; ++i) {
+        bool result = true;
+        switch (lc->cmd) {
+            case LC_SEGMENT_64: result = machoFile_handleSegment64(self, (void *) lc, bitsReversed); break;
+            case LC_SYMTAB:     result = machoFile_handleSymtab64(self, (void *) lc, bitsReversed);  break;
+        }
+        if (!result) {
+            return false;
+        }
+        lc = (void *) lc + lc->cmdsize;
+    }
+    return true;
 }
 
 bool machoFile_parseFile(struct machoFile * self, void * baseAddress) {
