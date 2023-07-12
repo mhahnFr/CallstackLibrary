@@ -32,6 +32,12 @@
  */
 bool machoFile_parseFile(struct machoFile * self, void * baseAddress);
 
+/**
+ * Adds the givne object file structure to the given Mach-O file structure.
+ *
+ * @param self the Mach-O file structure
+ * @param file the object file structure
+ */
 void machoFile_addObjectFile(struct machoFile *  self,
                              struct objectFile * file);
 

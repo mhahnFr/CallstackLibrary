@@ -29,10 +29,12 @@
  * This structure represents a Mach-O binary file.
  */
 struct machoFile {
-    /** The super part of this structure. */
+    /** The super part of this structure.                             */
     struct binaryFile _;
     
+    /** The address offset between Mach-O file and loaded executable. */
     uint64_t addressOffset;
+    /** The contained object files.                                   */
     struct objectFile * objectFiles;
 };
 
