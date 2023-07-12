@@ -26,15 +26,21 @@
 static inline bool machoFile_handleSegment(struct machoFile *       self,
                                            struct segment_command * segment,
                                            bool                     bitsReversed) {
-    // TODO: Implement
-    return false;
+    // TODO: Handle bit reversion
+    if (strcmp(segment->segname, SEG_LINKEDIT) == 0) {
+        self->addressOffset = segment->vmaddr - segment->fileoff;
+    }
+    return true;
 }
 
 static inline bool machoFile_handleSegment64(struct machoFile *          self,
                                              struct segment_command_64 * segment,
                                              bool                        bitsReversed) {
-    // TODO: Implement
-    return false;
+    // TODO: Handle bit reversion
+    if (strcmp(segment->segname, SEG_LINKEDIT) == 0) {
+        self->addressOffset = segment->vmaddr - segment->fileoff;
+    }
+    return true;
 }
 
 static inline bool machoFile_handleSymtab(struct machoFile *      self,
