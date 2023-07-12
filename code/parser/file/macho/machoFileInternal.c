@@ -29,6 +29,8 @@ static inline bool machoFile_handleSegment(struct machoFile *       self,
                                            struct segment_command * segment,
                                            bool                     bitsReversed) {
     // TODO: Handle bit reversion
+    (void) bitsReversed;
+    
     if (strcmp(segment->segname, SEG_LINKEDIT) == 0) {
         self->addressOffset = segment->vmaddr - segment->fileoff;
     }
@@ -39,6 +41,8 @@ static inline bool machoFile_handleSegment64(struct machoFile *          self,
                                              struct segment_command_64 * segment,
                                              bool                        bitsReversed) {
     // TODO: Handle bit reversion
+    (void) bitsReversed;
+    
     if (strcmp(segment->segname, SEG_LINKEDIT) == 0) {
         self->addressOffset = segment->vmaddr - segment->fileoff;
     }
@@ -50,6 +54,10 @@ static inline bool machoFile_handleSymtab(struct machoFile *      self,
                                           void *                  baseAddress,
                                           bool                    bitsReversed) {
     // TODO: Implement
+    (void) self;
+    (void) command;
+    (void) baseAddress;
+    (void) bitsReversed;
     return false;
 }
 
@@ -58,6 +66,8 @@ static inline bool machoFile_handleSymtab64(struct machoFile *      self,
                                             void *                  baseAddress,
                                             bool                    bitsReversed) {
     // TODO: Handle bit reversion
+    (void) bitsReversed;
+    
     char * stringBegin = baseAddress + command->stroff;
     
     struct objectFile * current = objectFile_new();
