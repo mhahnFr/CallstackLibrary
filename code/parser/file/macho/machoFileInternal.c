@@ -24,7 +24,7 @@
 bool machoFile_parseFile(struct machoFile * self, void * baseAddress) {
     if (strcmp(self->_.fileName, "/usr/lib/dyld") == 0) {
         // We cannot parse Darwins dynamic linker at the moment.
-        return NULL;
+        return false;
     }
     
     // TODO: Implement
