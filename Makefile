@@ -22,7 +22,7 @@ CXX_DEMANGLER = false
 CORE_NAME = libcallstack
 DYLIB_N   = $(CORE_NAME).dylib
 SHARED_N  = $(CORE_NAME).so
-STARIC_N  = $(CORE_NAME).a
+STATIC_N  = $(CORE_NAME).a
 
 SRCS      = $(shell find . -type f -name \*.c)
 OBJS      = $(patsubst %.c, %.o, $(SRCS))
@@ -37,7 +37,7 @@ LDFLAGS   = -ldl
 
 LD = $(CC)
 
-NAME = $(STARIC_N)
+NAME = $(STATIC_N)
 
 ifeq ($(CXX_DEMANGLER),true)
 	LD      = $(CXX)
@@ -53,7 +53,7 @@ INSTALL_PATH ?= /usr/local
 
 default: $(NAME)
 
-all: $(SHARED_N) $(STARIC_N) $(DYLIB_N)
+all: $(SHARED_N) $(STATIC_N) $(DYLIB_N)
 
 install: $(SHARED_N)
 	mkdir -p $(INSTALL_PATH)/lib
@@ -71,8 +71,8 @@ $(DYLIB_N): $(OBJS)
 $(SHARED_N): $(OBJS)
 	$(LD) -shared -fPIC $(LDFLAGS) -o $(SHARED_N) $(OBJS)
 
-$(STARIC_N): $(OBJS)
-	$(AR) -crs $(STARIC_N) $(OBJS)
+$(STATIC_N): $(OBJS)
+	$(AR) -crs $(STATIC_N) $(OBJS)
 
 %.o: %.c
 	$(CC) $(CFLAGS) -MMD -MP -c -o $@ $<
@@ -85,7 +85,7 @@ clean:
 	- $(RM) $(CXX_OBJS)
 
 fclean: clean
-	- $(RM) $(DYLIB_N) $(SHARED_N) $(STARIC_N)
+	- $(RM) $(DYLIB_N) $(SHARED_N) $(STATIC_N)
 
 re: fclean
 	$(MAKE) default
