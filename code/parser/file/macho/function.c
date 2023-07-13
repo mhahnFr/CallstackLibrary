@@ -36,7 +36,6 @@ void function_create(struct function * self) {
 }
 
 void function_destroy(struct function * self) {
-    // TODO: Implement
     (void) self;
 }
 
