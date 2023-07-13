@@ -43,6 +43,7 @@ ifeq ($(CXX_DEMANGLER),true)
 	LD      = $(CXX)
 	OBJS   += $(CXX_OBJS)
 	CFLAGS += -DCXX_DEMANGLE
+	DEPS   += $(patsubst %.cpp, %.d, $(CXX_SRCS))
 endif
 
 ifeq ($(shell uname -s),Darwin)
