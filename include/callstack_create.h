@@ -1,7 +1,7 @@
 /*
- * Callstack Library - A library creating human readable call stacks.
+ * Callstack Library - Library creating human-readable call stacks.
  *
- * Copyright (C) 2022  mhahnFr
+ * Copyright (C) 2022 - 2023  mhahnFr
  *
  * This file is part of the CallstackLibrary. This library is free software:
  * you can redistribute it and/or modify it under the terms of the
@@ -22,6 +22,10 @@
 
 #include "callstack.h"
 
+#ifdef __cplusplus
+extern "C" {
+#endif
+
 /**
  * @brief Initializes the given callstack object.
  *
@@ -33,5 +37,9 @@ static inline void callstack_create(struct callstack * self) {
     self->stringArray       = NULL;
     self->translationStatus = NONE;
 }
+
+#ifdef __cplusplus
+} // extern "C"
+#endif
 
 #endif /* callstack_create_h */

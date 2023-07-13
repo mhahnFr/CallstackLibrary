@@ -1,5 +1,5 @@
 /*
- * Callstack Library - A library creating human readable call stacks.
+ * Callstack Library - Library creating human-readable call stacks.
  *
  * Copyright (C) 2022 - 2023  mhahnFr
  *
@@ -20,22 +20,22 @@
 #ifndef callstack_h
 #define callstack_h
 
+#include "callstack_type.h"
+#include "callstack_defs.h"
+
 #ifdef __cplusplus
 extern "C" {
 #endif
-
-#include "callstack_type.h"
-#include "callstack_defs.h"
 
 /**
  * A structure representing a callstack.
  */
 struct callstack {
-    /** The type (status) of the translation to be human readable. */
+    /** The type (status) of the translation to be human-readable. */
     enum callstack_type translationStatus;
     /** The size of the string array.                              */
     size_t  stringArraySize;
-    /** The NULL terminated callstack string array.                */
+    /** The `NULL` terminated callstack string array.              */
     char ** stringArray;
     /** The size of the backtrace.                                 */
     size_t  backtraceSize;

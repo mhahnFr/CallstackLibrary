@@ -1,5 +1,5 @@
 /*
- * Callstack Library - A library creating human readable call stacks.
+ * Callstack Library - Library creating human-readable call stacks.
  *
  * Copyright (C) 2023  mhahnFr
  *
@@ -22,6 +22,10 @@
 
 #include <stdbool.h>
 
+#ifdef __cplusplus
+extern "C" {
+#endif
+
 /** Indicates whether the caches should be cleared automatically. */
 extern bool callstack_autoClearCaches;
 
@@ -31,5 +35,9 @@ extern bool callstack_autoClearCaches;
  * Only needs to be called when `callstack_autoClearCaches` is `false`.
  */
 void callstack_clearCaches(void);
+
+#ifdef __cplusplus
+} // extern "C"
+#endif
 
 #endif /* callstack_internals_h */
