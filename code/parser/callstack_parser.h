@@ -28,10 +28,7 @@
  * The structure of a callstack parser.
  */
 struct callstack_parser {
-    /** The mode the parser is currently using. */
-    enum callstack_type mode;
-    
-    /** A list of the already parsed files.     */
+    /** A list of the already parsed files. */
     struct binaryFile * parsedFiles;
 };
 
@@ -41,7 +38,6 @@ struct callstack_parser {
  * @param self The callstack parser object to construct.
  */
 static inline void callstack_parser_create(struct callstack_parser * self) {
-    self->mode        = NONE;
     self->parsedFiles = NULL;
 }
 
