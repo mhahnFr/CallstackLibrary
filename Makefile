@@ -27,9 +27,7 @@ STATIC_N  = $(CORE_NAME).a
 # -------------
 
 # Main sources
-SRCS = code/callstack.c code/callstackInternal.c code/callstack_internals.c  \
-       code/parser/callstack_parser.c code/parser/callstack_parserInternal.c \
-       code/parser/file/binaryFile.c code/parser/file/cache/cache.c
+SRCS = $(shell find . -name \*.c \! -path ./code/parser/file/elf/\* \! -path ./code/parser/file/macho/\*)
 OBJS = $(patsubst %.c, %.o, $(SRCS))
 DEPS = $(patsubst %.c, %.d, $(SRCS))
 # ------------
