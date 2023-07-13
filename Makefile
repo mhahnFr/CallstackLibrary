@@ -1,5 +1,5 @@
 #
-# Callstack Library - A library creating human readable call stacks.
+# Callstack Library - Library creating human-readable call stacks.
 #
 # Copyright (C) 2022 - 2023  mhahnFr
 #
@@ -19,21 +19,45 @@
 
 CXX_DEMANGLER = false
 
+# Library names
 CORE_NAME = libcallstack
 DYLIB_N   = $(CORE_NAME).dylib
 SHARED_N  = $(CORE_NAME).so
 STATIC_N  = $(CORE_NAME).a
+# -------------
 
-SRCS      = $(shell find . -type f -name \*.c)
-OBJS      = $(patsubst %.c, %.o, $(SRCS))
-CXX_SRCS  = $(shell find . -type f -name \*.cpp)
-CXX_OBJS  = $(patsubst %.cpp, %.o, $(CXX_SRCS))
-DEPS      = $(patsubst %.c, %.d, $(SRCS))
+# Main sources
+SRCS = code/callstack.c code/callstackInternal.c code/callstack_internals.c  \
+       code/parser/callstack_parser.c code/parser/callstack_parserInternal.c \
+       code/parser/file/binaryFile.c code/parser/file/cache/cache.c
+OBJS = $(patsubst %.c, %.o, $(SRCS))
+DEPS = $(patsubst %.c, %.d, $(SRCS))
+# ------------
 
+# C++ sources
+CXX_SRCS = $(shell find . -type f -name \*.cpp)
+CXX_OBJS = $(patsubst %.cpp, %.o, $(CXX_SRCS))
+CXX_DEPS = $(patsubst %.cpp, %.d, $(CXX_SRCS))
+# -----------
+
+# Linux specific sources
+LINUX_SRCS = $(shell find ./code/parser/file/elf -type f -name \*.c)
+LINUX_OBJS = $(patsubst %.c, %.o, $(LINUX_SRCS))
+LINUX_DEPS = $(patsubst %.c, %.d, $(LINUX_SRCS))
+# ----------------------
+
+# Darwin specific sources
+DARWIN_SRCS = $(shell find ./code/parser/file/macho -type f -name \*.c)
+DARWIN_OBJS = $(patsubst %.c, %.o, $(DARWIN_SRCS))
+DARWIN_DEPS = $(patsubst %.c, %.d, $(DARWIN_SRCS))
+# -----------------------
+
+# Compile and link flags
 COM_FLAGS = -Wall -Wextra -fPIC -Ofast
 CFLAGS    = $(COM_FLAGS) -std=gnu11
 CXXFLAGS  = $(COM_FLAGS) -std=gnu++11
 LDFLAGS   = -ldl
+# ----------------------
 
 LD = $(CC)
 
@@ -43,11 +67,18 @@ ifeq ($(CXX_DEMANGLER),true)
 	LD      = $(CXX)
 	OBJS   += $(CXX_OBJS)
 	CFLAGS += -DCXX_DEMANGLE
-	DEPS   += $(patsubst %.cpp, %.d, $(CXX_SRCS))
+	DEPS   += $(CXX_DEPS)
 endif
 
 ifeq ($(shell uname -s),Darwin)
 	LDFLAGS += -current_version 1.0.0 -compatibility_version 1 -install_name $(abspath $@)
+	OBJS    += $(DARWIN_OBJS)
+	DEPS    += $(DARWIN_DEPS)
+else ifeq ($(shell uname -s),Linux)
+	OBJS += $(LINUX_OBJS)
+	DEPS += $(LINUX_DEPS)
+else
+$(error Unsupported platform)
 endif
 
 INSTALL_PATH ?= /usr/local
