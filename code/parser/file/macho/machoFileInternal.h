@@ -41,4 +41,7 @@ bool machoFile_parseFile(struct machoFile * self, void * baseAddress);
 void machoFile_addObjectFile(struct machoFile *  self,
                              struct objectFile * file);
 
+struct function * machoFile_findClosestFunction(struct machoFile * self, void * startAddress, void * address,
+                                                struct objectFile ** filePtr);
+
 #endif /* machoFileInternal_h */
