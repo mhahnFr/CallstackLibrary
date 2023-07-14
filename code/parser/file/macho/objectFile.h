@@ -37,6 +37,9 @@ void objectFile_create(struct objectFile * self);
 void objectFile_addFunction(struct objectFile * self,
                             struct function *   function);
 
+int64_t objectFile_findClosestFunction(struct objectFile * self, uint64_t address,
+                                       struct function **  funcPtr);
+
 void objectFile_destroy(struct objectFile * self);
 void objectFile_delete(struct objectFile * self);
 

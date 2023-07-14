@@ -43,6 +43,21 @@ void objectFile_addFunction(struct objectFile * self,
     self->functions = function;
 }
 
+int64_t objectFile_findClosestFunction(struct objectFile * self, uint64_t address,
+                                       struct function **  funcPtr) {
+    struct function * func = NULL;
+    int64_t distance = INT64_MAX;
+    for (struct function * it = self->functions; it != NULL; it = it->next) {
+        int64_t diff = address - it->startAddress;
+        if (diff < distance && diff >= 0) {
+            distance = diff;
+            func = it;
+        }
+    }
+    *funcPtr = func;
+    return distance;
+}
+
 void objectFile_destroy(struct objectFile * self) {
     for (struct function * tmp = self->functions; tmp != NULL;) {
         struct function * n = tmp->next;
