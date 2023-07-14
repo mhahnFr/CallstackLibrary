@@ -1,5 +1,5 @@
 /*
- * Callstack Library - A library creating human readable call stacks.
+ * Callstack Library - Library creating human-readable call stacks.
  *
  * Copyright (C) 2023  mhahnFr
  *
@@ -53,12 +53,77 @@ static inline bool machoFile_handleSymtab(struct machoFile *      self,
                                           struct symtab_command * command,
                                           void *                  baseAddress,
                                           bool                    bitsReversed) {
-    // TODO: Implement
-    (void) self;
-    (void) command;
-    (void) baseAddress;
+    // TODO: Handle bit reversion
     (void) bitsReversed;
-    return false;
+    
+    char * stringBegin = baseAddress + command->stroff;
+    
+    struct objectFile * current = objectFile_new();
+    struct function *   currFun = NULL;
+    for (size_t i = 0; i < command->nsyms; ++i) {
+        struct nlist * entry = baseAddress + command->symoff + i * sizeof(struct nlist);
+        switch (entry->n_type) {
+            case N_BNSYM:
+                if (currFun != NULL) {
+                    // Function begin without begin -> invalid.
+                    return false;
+                }
+                currFun = function_new();
+                break;
+                
+            case N_ENSYM:
+                if (currFun == NULL) {
+                    // Function end without begin -> invalid.
+                    return false;
+                }
+                objectFile_addFunction(current, currFun);
+                currFun = NULL;
+                break;
+                
+            case N_SO: {
+                char * value = stringBegin + entry->n_un.n_strx;
+                if (*value == '\0') {
+                    // Begin of new object file
+                    machoFile_addObjectFile(self, current);
+                    current = objectFile_new();
+                } else {
+                    if (current->directory == NULL) {
+                        current->directory = value;
+                    } else if (current->sourceFile == NULL) {
+                        current->sourceFile = value;
+                    } else {
+                        // Unknown format...
+                        return false;
+                    }
+                }
+                break;
+            }
+                
+            case N_OSO:
+                current->name = stringBegin + entry->n_un.n_strx;
+                break;
+                
+            case N_FUN: {
+                if (currFun == NULL) {
+                    // Function name without begin -> invalid.
+                    return false;
+                }
+                char * value = stringBegin + entry->n_un.n_strx;
+                if (*value != '\0') {
+                    currFun->linkedName   = value;
+                    currFun->startAddress = entry->n_value;
+                }
+                break;
+            }
+        }
+    }
+    machoFile_addObjectFile(self, current);
+    if (currFun != NULL) {
+        // Function entries did not end -> invalid.
+        return false;
+    }
+    
+    return true;
 }
 
 static inline bool machoFile_handleSymtab64(struct machoFile *      self,
