@@ -17,10 +17,13 @@
  * this library, see the file LICENSE.  If not, see <https://www.gnu.org/licenses/>.
  */
 
+#include <stdio.h>
 #include <stdlib.h>
 
 #include "machoFile.h"
 #include "machoFileInternal.h"
+
+#include "../../callstack_parserInternal.h"
 
 struct machoFile * machoFile_new(void)  {
     struct machoFile * toReturn = malloc(sizeof(struct machoFile));
@@ -55,8 +58,25 @@ char * machoFile_addr2String(struct binaryFile * me, Dl_info * info, void * addr
         return NULL;
     }
     
-    // TODO: Implement
-    (void) address;
+    struct objectFile * file;
+    struct function * closest = machoFile_findClosestFunction(self, info->dli_fbase, address, &file);
+    if (closest != NULL) {
+        // TODO: Parse DWARF data if available!
+        char * name = closest->linkedName;
+        if (name != NULL) {
+            if (*name == '_' || *name == '\1') {
+                ++name;
+            }
+            name = callstack_parser_demangle(name);
+            char * toReturn = NULL;
+            asprintf(&toReturn, "%s: %s + %td",
+                     file == NULL ? "<< unknown >>" : file->name,
+                     name,
+                     (ptrdiff_t) (address - info->dli_fbase + self->addressOffset - closest->startAddress));
+            free(name);
+            return toReturn;
+        }
+    }
     return NULL;
 }
 
