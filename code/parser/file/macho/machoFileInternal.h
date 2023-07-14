@@ -41,7 +41,18 @@ bool machoFile_parseFile(struct machoFile * self, void * baseAddress);
 void machoFile_addObjectFile(struct machoFile *  self,
                              struct objectFile * file);
 
-struct function * machoFile_findClosestFunction(struct machoFile * self, void * startAddress, void * address,
+/**
+ * @brief Tries to find the closest function object relative to the given address.
+ *
+ * @param self the Mach-O file structure
+ * @param startAddress the start address of the Mach-O file
+ * @param address the address whose closest function is searched
+ * @param filePtr set to the object file structure containing the returned function structure
+ * @return the found function structure, or `NULL` if no appropriate function is found closeby
+ */
+struct function * machoFile_findClosestFunction(struct machoFile *   self,
+                                                void *               startAddress,
+                                                void *               address,
                                                 struct objectFile ** filePtr);
 
 #endif /* machoFileInternal_h */
