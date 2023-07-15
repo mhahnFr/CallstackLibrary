@@ -66,6 +66,7 @@ objectFile * objectFile_new() {
 
 void objectFile_addFunction(objectFile * self, function * func) {
     reinterpret_cast<ObjectFile *>(self)->addFunction(function(*func));
+    function_delete(func);
 }
 
 auto objectFile_findClosestFunction(objectFile * self, uint64_t address, function ** funcPtr) -> int64_t {
