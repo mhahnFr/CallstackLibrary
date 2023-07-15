@@ -72,7 +72,7 @@ void objectFile_addFunction(objectFile * self, function * func) {
 auto objectFile_findClosestFunction(objectFile * self, uint64_t address, function ** funcPtr) -> int64_t {
     const auto result = reinterpret_cast<ObjectFile *>(self->priv)->findClosestFunction(address);
     *funcPtr = std::get<2>(result);
-    return std::get<1>(result);
+    return address - std::get<1>(result);
 }
 
 void objectFile_destroy(objectFile *) {}
