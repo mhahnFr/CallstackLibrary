@@ -1,5 +1,5 @@
 /*
- * Callstack Library - A library creating human readable call stacks.
+ * Callstack Library - Library creating human-readable call stacks.
  *
  * Copyright (C) 2023  mhahnFr
  *
@@ -27,12 +27,19 @@ struct objectFile {
     char * directory;
     char * name;
     
-    struct function * functions;
+    void * priv;
     struct objectFile * next;
 };
 
 struct objectFile * objectFile_new(void);
-void objectFile_create(struct objectFile * self);
+
+static inline void objectFile_create(struct objectFile * self) {
+    self->sourceFile = NULL;
+    self->directory  = NULL;
+    self->name       = NULL;
+    self->priv       = NULL;
+    self->next       = NULL;
+}
 
 void objectFile_addFunction(struct objectFile * self,
                             struct function *   function);

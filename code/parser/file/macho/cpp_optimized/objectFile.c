@@ -1,5 +1,5 @@
 /*
- * Callstack Library - A library creating human readable call stacks.
+ * Callstack Library - Library creating human-readable call stacks.
  *
  * Copyright (C) 2023  mhahnFr
  *
@@ -19,32 +19,36 @@
 
 #include <stdlib.h>
 
-#include "objectFile.h"
+#include "../objectFile.h"
+
+struct objectFile_private {
+    struct objectFile _;
+    
+    struct function * functions;
+};
 
 struct objectFile * objectFile_new(void) {
-    struct objectFile * toReturn = malloc(sizeof(struct objectFile));
-    if (toReturn != NULL) {
-        objectFile_create(toReturn);
+    struct objectFile_private * self = malloc(sizeof(struct objectFile_private));
+    if (self == NULL) {
+        return NULL;
     }
-    return toReturn;
+    objectFile_create(&self->_);
+    self->_.priv = self;
+    return &self->_;
 }
 
-void objectFile_create(struct objectFile * self) {
-    self->sourceFile = NULL;
-    self->directory  = NULL;
-    self->name       = NULL;
-    self->functions  = NULL;
-    self->next       = NULL;
-}
-
-void objectFile_addFunction(struct objectFile * self,
+void objectFile_addFunction(struct objectFile * me,
                             struct function *   function) {
+    struct objectFile_private * self = (struct objectFile_private *) me->priv;
+    
     function->next  = self->functions;
     self->functions = function;
 }
 
-int64_t objectFile_findClosestFunction(struct objectFile * self, uint64_t address,
+int64_t objectFile_findClosestFunction(struct objectFile * me, uint64_t address,
                                        struct function **  funcPtr) {
+    struct objectFile_private * self = (struct objectFile_private *) me->priv;
+    
     struct function * func = NULL;
     int64_t distance = INT64_MAX;
     for (struct function * it = self->functions; it != NULL; it = it->next) {
@@ -58,7 +62,9 @@ int64_t objectFile_findClosestFunction(struct objectFile * self, uint64_t addres
     return distance;
 }
 
-void objectFile_destroy(struct objectFile * self) {
+void objectFile_destroy(struct objectFile * me) {
+    struct objectFile_private * self = (struct objectFile_private *) me->priv;
+    
     for (struct function * tmp = self->functions; tmp != NULL;) {
         struct function * n = tmp->next;
         function_delete(tmp);
@@ -68,5 +74,5 @@ void objectFile_destroy(struct objectFile * self) {
 
 void objectFile_delete(struct objectFile * self) {
     objectFile_destroy(self);
-    free(self);
+    free(self->priv);
 }
