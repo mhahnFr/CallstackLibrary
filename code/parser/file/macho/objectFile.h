@@ -22,17 +22,35 @@
 
 #include "function.h"
 
+/**
+ * This strucutre represents an object file.
+ */
 struct objectFile {
+    /** The name of the corresponding source file.      */
     char * sourceFile;
+    /** The directory of the corresponding source file. */
     char * directory;
+    /** The full path of the represented object file.   */
     char * name;
     
+    /** A pointer to the underlying object.             */
     void * priv;
+    /** Pointer to the next element in a list.          */
     struct objectFile * next;
 };
 
+/**
+ * Allocates and initializes a new object file structure.
+ *
+ * @return the allocated object or `NULL` on error
+ */
 struct objectFile * objectFile_new(void);
 
+/**
+ * Initializes the given object file structure.
+ *
+ * @param self the object file structure to be initialized
+ */
 static inline void objectFile_create(struct objectFile * self) {
     self->sourceFile = NULL;
     self->directory  = NULL;
@@ -41,13 +59,44 @@ static inline void objectFile_create(struct objectFile * self) {
     self->next       = NULL;
 }
 
+/**
+ * Adds the given function structure to the given object file structure.
+ *
+ * @param self the object file structure to add to
+ * @param function the function structure to be added
+ */
 void objectFile_addFunction(struct objectFile * self,
                             struct function *   function);
 
+/**
+ * @brief Finds the function that is the nearest to the given address.
+ *
+ * The distance to the begin of the nearest function is returned. The given
+ * function structure pointer is set to the function structure representation
+ * of the found function.
+ *
+ * If no corresponding function is found, `UINT64_MAX` is returned and
+ * the given function structure pointer is set to point to `NULL`.
+ *
+ * @param self the object file in which to search
+ * @param address the address whose closest function to be found
+ * @param funcPtr the pointer to the function structure to be set
+ */
 int64_t objectFile_findClosestFunction(struct objectFile * self, uint64_t address,
                                        struct function **  funcPtr);
 
+/**
+ * Deinitializes the given object file structure.
+ *
+ * @param self the object file structure to be deinitialized
+ */
 void objectFile_destroy(struct objectFile * self);
+
+/**
+ * Deinitializes and `free`s the given object file structure.
+ *
+ * @param self the object file structure to be deleted
+ */
 void objectFile_delete(struct objectFile * self);
 
 #endif /* objectFile_h */
