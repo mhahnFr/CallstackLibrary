@@ -18,6 +18,7 @@
 #
 
 CXX_DEMANGLER = false
+CXX_OPTIMIZED = false
 
 # Library names
 CORE_NAME = libcallstack
@@ -26,28 +27,60 @@ SHARED_N  = $(CORE_NAME).so
 STATIC_N  = $(CORE_NAME).a
 # -------------
 
+LD = $(CC)
+
+# Paths
+OPTIMIZED_PATH = cpp_optimized/
+LINUX_PATH     = ./code/parser/file/elf
+DARWIN_PATH    = ./code/parser/file/macho
+# -----
+
 # Main sources
-SRCS = $(shell find . -name \*.c \! -path ./code/parser/file/elf/\* \! -path ./code/parser/file/macho/\*)
+SRCS = $(shell find . -type f -name \*.c \! -path $(LINUX_PATH)\* \! -path $(DARWIN_PATH)\* \! -path \*/$(OPTIMIZED_PATH)\*)
 OBJS = $(patsubst %.c, %.o, $(SRCS))
 DEPS = $(patsubst %.c, %.d, $(SRCS))
 # ------------
 
 # C++ sources
-CXX_SRCS = $(shell find . -type f -name \*.cpp)
+CXX_SRCS = $(shell find . -type f -name \*.cpp \! -path \*/$(OPTIMIZED_PATH)\*)
 CXX_OBJS = $(patsubst %.cpp, %.o, $(CXX_SRCS))
 CXX_DEPS = $(patsubst %.cpp, %.d, $(CXX_SRCS))
 # -----------
 
 # Linux specific sources
-LINUX_SRCS = $(shell find ./code/parser/file/elf -type f -name \*.c)
+LINUX_SRCS = $(shell find $(LINUX_PATH) -type f -name \*.c \! -path \*/$(OPTIMIZED_PATH)\*)
 LINUX_OBJS = $(patsubst %.c, %.o, $(LINUX_SRCS))
 LINUX_DEPS = $(patsubst %.c, %.d, $(LINUX_SRCS))
+ifeq ($(CXX_OPTIMIZED),true)
+	LD = $(CXX)
+	LINUX_OPT = $(shell find $(LINUX_PATH) -type f -name \*.cpp -path \*/$(OPTIMIZED_PATH)\*)
+	
+	LINUX_OBJS += $(patsubst %.cpp, %.o, $(LINUX_OPT))
+	LINUX_DEPS += $(patsubst %.cpp, %.d, $(LINUX_OPT))
+else
+	LINUX_OPT = $(shell find $(LINUX_PATH) -type f -name \*.c -path \*/$(OPTIMIZED_PATH)\*)
+	
+	LINUX_OBJS += $(patsubst %.c, %.o, $(LINUX_OPT))
+	LINUX_DEPS += $(patsubst %.c, %.d, $(LINUX_OPT))
+endif
 # ----------------------
 
 # Darwin specific sources
-DARWIN_SRCS = $(shell find ./code/parser/file/macho -type f -name \*.c)
+DARWIN_SRCS = $(shell find $(DARWIN_PATH) -type f -name \*.c \! -path \*/$(OPTIMIZED_PATH)\*)
 DARWIN_OBJS = $(patsubst %.c, %.o, $(DARWIN_SRCS))
 DARWIN_DEPS = $(patsubst %.c, %.d, $(DARWIN_SRCS))
+ifeq ($(CXX_OPTIMIZED),true)
+	LD = $(CXX)
+	DARWIN_OPT = $(shell find $(DARWIN_PATH) -type f -name \*.cpp -path \*/$(OPTIMIZED_PATH)\*)
+
+	DARWIN_OBJS += $(patsubst %.cpp, %.o, $(DARWIN_OPT))
+	DARWIN_DEPS += $(patsubst %.cpp, %.d, $(DARWIN_OPT))
+else
+	DARWIN_OPT = $(shell find $(DARWIN_PATH) -type f -name \*.c -path \*/$(OPTIMIZED_PATH)\*)
+
+	DARWIN_OBJS += $(patsubst %.c, %.o, $(DARWIN_OPT))
+	DARWIN_DEPS += $(patsubst %.c, %.d, $(DARWIN_OPT))
+endif
 # -----------------------
 
 # Compile and link flags
@@ -56,8 +89,6 @@ CFLAGS    = $(COM_FLAGS) -std=gnu11
 CXXFLAGS  = $(COM_FLAGS) -std=gnu++11
 LDFLAGS   = -ldl
 # ----------------------
-
-LD = $(CC)
 
 NAME = $(STATIC_N)
 
