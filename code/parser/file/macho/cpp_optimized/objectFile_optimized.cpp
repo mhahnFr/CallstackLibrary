@@ -25,15 +25,37 @@ extern "C" {
 #include "../objectFile.h"
 }
 
+/**
+ * This class acts as a C++ wrapper around the object file structure.
+ */
 class ObjectFile {
+    /** The object file structure.                                     */
     objectFile self;
+    /** A mapping of the contained functions to their start addresses. */
     std::map<uint64_t, function, std::greater<uint64_t>> functions;
     
 public:
+    /**
+     * Adds the given function structure to this object file representation.
+     *
+     * @param function the function structure to be added
+     */
     inline void addFunction(function && function) {
         functions.emplace(std::make_pair(function.startAddress, function));
     }
     
+    /**
+     * @brief Finds and returns the function that is the nearest to the given address.
+     *
+     * A pointer to the function structure representing the found function is returned,
+     * together with its start address and a boolean indicating whether a function was found.
+     *
+     * @note A `std::tuple` is returned since `std::optional` was added in C++17
+     * and this implementation should be compatible to C++11.
+     *
+     * @param address the address whose nearest function to be found
+     * @return a tuple with the result
+     */
     inline auto findClosestFunction(uint64_t address) -> std::tuple<bool, uint64_t, function *> {
         const auto & it = functions.lower_bound(address);
         if (it == functions.end()) {
