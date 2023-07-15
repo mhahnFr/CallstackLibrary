@@ -21,9 +21,14 @@
 
 #include "../objectFile.h"
 
+/**
+ * This structure acts as a wrapper around the object file structure.
+ */
 struct objectFile_private {
+    /** The object file structure.                            */
     struct objectFile _;
     
+    /** A linked list with the contained function structures. */
     struct function * functions;
 };
 
