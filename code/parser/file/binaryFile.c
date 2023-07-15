@@ -1,5 +1,5 @@
 /*
- * Callstack Library - A library creating human readable call stacks.
+ * Callstack Library - Library creating human-readable call stacks.
  *
  * Copyright (C) 2023  mhahnFr
  *
@@ -19,14 +19,24 @@
 
 #include "binaryFile.h"
 
-#include "macho/machoFile.h"
+#ifdef __APPLE__
+ #include "macho/machoFile.h"
+#elifdef __linux__
+ #include "elf/elfFile.h"
+#endif
 
 struct binaryFile * binaryFile_new(const char * fileName) {
     struct binaryFile * toReturn;
     
-    // TODO: ifdef macOS -> machoFile, elifdef Linux -> elfFile
-    toReturn = &machoFile_new()->_;
-    // toReturn = &elfFile_new()->_;
+#ifdef __APPLE__
+    struct machoFile * tmp = machoFile_new();
+    toReturn = tmp == NULL ? NULL : &tmp->_;
+#elifdef __linux__
+    struct elfFile * tmp = elfFile_new();
+    toReturn = tmp == NULL ? NULL : &tmp->_;
+#else
+    toReturn = NULL;
+#endif
     
     if (toReturn != NULL) {
         toReturn->fileName = fileName;
