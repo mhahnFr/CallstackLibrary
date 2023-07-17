@@ -101,6 +101,13 @@
 		BFAB6B382A62DC4600726B52 /* objectFile_optimized.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; path = objectFile_optimized.cpp; sourceTree = "<group>"; };
 		BFCC50C728F8454E00E2388D /* demangler.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; path = demangler.cpp; sourceTree = "<group>"; };
 		BFCC50C828F8454E00E2388D /* demangler.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = demangler.h; sourceTree = "<group>"; };
+		BFD2A03A2A659F4C007F4B81 /* LICENSE */ = {isa = PBXFileReference; lastKnownFileType = text; path = LICENSE; sourceTree = "<group>"; };
+		BFD2A03B2A659F4C007F4B81 /* vector.hpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.h; path = vector.hpp; sourceTree = "<group>"; };
+		BFD2A03C2A659F4C007F4B81 /* optional.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = optional.h; sourceTree = "<group>"; };
+		BFD2A03D2A659F4C007F4B81 /* README.md */ = {isa = PBXFileReference; lastKnownFileType = net.daringfireball.markdown; path = README.md; sourceTree = "<group>"; };
+		BFD2A03E2A659F4C007F4B81 /* .gitignore */ = {isa = PBXFileReference; lastKnownFileType = text; path = .gitignore; sourceTree = "<group>"; };
+		BFD2A03F2A659F4C007F4B81 /* pair.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = pair.h; sourceTree = "<group>"; };
+		BFD2A0402A659F4C007F4B81 /* vector.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = vector.h; sourceTree = "<group>"; };
 		BFEC81842A5EE937002FA3B7 /* function.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = function.h; sourceTree = "<group>"; };
 		BFEC81852A5EE937002FA3B7 /* function.c */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.c; path = function.c; sourceTree = "<group>"; };
 		BFEC818A2A5EEA36002FA3B7 /* objectFile.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = objectFile.h; sourceTree = "<group>"; };
@@ -157,6 +164,7 @@
 		BF61E8EB28F1CDD30006346B = {
 			isa = PBXGroup;
 			children = (
+				BFD2A0392A659F4C007F4B81 /* DC4C */,
 				BF5A745E28F1DB890017591A /* LICENSE */,
 				BF61E8FD28F1CFF70006346B /* .gitignore */,
 				BF61E8FE28F1D1200006346B /* Makefile */,
@@ -238,6 +246,20 @@
 				BFAB6B382A62DC4600726B52 /* objectFile_optimized.cpp */,
 			);
 			path = cpp_optimized;
+			sourceTree = "<group>";
+		};
+		BFD2A0392A659F4C007F4B81 /* DC4C */ = {
+			isa = PBXGroup;
+			children = (
+				BFD2A03A2A659F4C007F4B81 /* LICENSE */,
+				BFD2A03B2A659F4C007F4B81 /* vector.hpp */,
+				BFD2A03C2A659F4C007F4B81 /* optional.h */,
+				BFD2A03D2A659F4C007F4B81 /* README.md */,
+				BFD2A03E2A659F4C007F4B81 /* .gitignore */,
+				BFD2A03F2A659F4C007F4B81 /* pair.h */,
+				BFD2A0402A659F4C007F4B81 /* vector.h */,
+			);
+			path = DC4C;
 			sourceTree = "<group>";
 		};
 /* End PBXGroup section */
