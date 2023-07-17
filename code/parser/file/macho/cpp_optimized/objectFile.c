@@ -50,6 +50,14 @@ void objectFile_addFunction(struct objectFile * me,
     self->functions = function;
 }
 
+struct function * objectFile_findFunction(struct objectFile * me, uint64_t address) {
+    struct objectFile_private * self = (struct objectFile_private *) me->priv;
+    
+    struct function * it;
+    for (it = self->functions; it != NULL && (address < it->startAddress || address > it->endAddress); it = it->next);
+    return it;
+}
+
 int64_t objectFile_findClosestFunction(struct objectFile * me, uint64_t address,
                                        struct function **  funcPtr) {
     struct objectFile_private * self = (struct objectFile_private *) me->priv;
