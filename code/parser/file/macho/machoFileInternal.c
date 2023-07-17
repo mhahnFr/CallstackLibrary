@@ -201,6 +201,35 @@ static inline bool machoFile_handleSymtab64(struct machoFile *      self,
     return true;
 }
 
+static inline bool machoFile_handleFunctionStarts(struct machoFile *             self,
+                                                  struct linkedit_data_command * command,
+                                                  void *                         baseAddress,
+                                                  bool                           bitsReversed) {
+    // TODO: Fix already parsed functions
+    uint32_t offset = machoFile_maybeSwap(32, bitsReversed, command->dataoff);
+    uint32_t size   = machoFile_maybeSwap(32, bitsReversed, command->datasize);
+    
+    uint8_t * bytes    = baseAddress + offset;
+    uint64_t  funcAddr = self->addressOffset;
+    for (size_t i = 0; i < size;) {
+        uint64_t result = 0,
+                 shift  = 0;
+        bool more = true;
+        do {
+            uint8_t b = bytes[i++];
+            result |= (b & 0x7f) << shift;
+            shift += 7;
+            if (b < 0x80) {
+                funcAddr += result;
+                vector_uint64_t_push_back(&self->functionStarts, funcAddr);
+                more = false;
+            }
+        } while (more);
+    }
+    
+    return true;
+}
+
 static inline bool machoFile_parseFileImpl(struct machoFile * self,
                                            void *             baseAddress,
                                            bool               bitsReversed) {
@@ -211,8 +240,9 @@ static inline bool machoFile_parseFileImpl(struct machoFile * self,
     for (size_t i = 0; i < ncmds; ++i) {
         bool result = true;
         switch (machoFile_maybeSwap(32, bitsReversed, lc->cmd)) {
-            case LC_SEGMENT: result = machoFile_handleSegment(self, (void *) lc, bitsReversed);        break;
-            case LC_SYMTAB:  result = machoFile_handleSymtab(self, (void *) lc, header, bitsReversed); break;
+            case LC_SEGMENT:         result = machoFile_handleSegment(self, (void *) lc, bitsReversed);                 break;
+            case LC_SYMTAB:          result = machoFile_handleSymtab(self, (void *) lc, header, bitsReversed);          break;
+            case LC_FUNCTION_STARTS: result = machoFile_handleFunctionStarts(self, (void *) lc, header,  bitsReversed); break;
         }
         if (!result) {
             return false;
@@ -232,8 +262,9 @@ static inline bool machoFile_parseFileImpl64(struct machoFile * self,
     for (size_t i = 0; i < ncmds; ++i) {
         bool result = true;
         switch (machoFile_maybeSwap(32, bitsReversed, lc->cmd)) {
-            case LC_SEGMENT_64: result = machoFile_handleSegment64(self, (void *) lc, bitsReversed);        break;
-            case LC_SYMTAB:     result = machoFile_handleSymtab64(self, (void *) lc, header, bitsReversed); break;
+            case LC_SEGMENT_64:      result = machoFile_handleSegment64(self, (void *) lc, bitsReversed);              break;
+            case LC_SYMTAB:          result = machoFile_handleSymtab64(self, (void *) lc, header, bitsReversed);       break;
+            case LC_FUNCTION_STARTS: result = machoFile_handleFunctionStarts(self, (void *) lc, header, bitsReversed); break;
         }
         if (!result) {
             return false;
