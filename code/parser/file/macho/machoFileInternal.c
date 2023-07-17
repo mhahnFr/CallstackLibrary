@@ -313,6 +313,22 @@ void machoFile_addObjectFile(struct machoFile *  self,
     self->objectFiles = file;
 }
 
+struct optional_funcFile machoFile_findFunction(struct machoFile * self, void * startAddress, void * address) {
+    struct optional_funcFile toReturn = { .has_value = false };
+    
+    for (struct objectFile * it = self->objectFiles; it != NULL; it = it->next) {
+        struct function * result = objectFile_findFunction(it, (uint64_t) (address - startAddress) + self->addressOffset);
+        if (result != NULL) {
+            toReturn.has_value = true;
+            toReturn.value.first = result;
+            toReturn.value.second = it;
+            break;
+        }
+    }
+    
+    return toReturn;
+}
+
 struct function * machoFile_findClosestFunction(struct machoFile * self, void * startAddress, void * address,
                                                 struct objectFile ** filePtr) {
     address += self->addressOffset;

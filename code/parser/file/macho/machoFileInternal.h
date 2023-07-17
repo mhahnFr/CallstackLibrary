@@ -1,5 +1,5 @@
 /*
- * Callstack Library - A library creating human readable call stacks.
+ * Callstack Library - Library creating human-readable call stacks.
  *
  * Copyright (C) 2023  mhahnFr
  *
@@ -19,6 +19,8 @@
 
 #ifndef machoFileInternal_h
 #define machoFileInternal_h
+
+#include "OptionalFuncFilePair.h"
 
 #include "machoFile.h"
 
@@ -54,5 +56,9 @@ struct function * machoFile_findClosestFunction(struct machoFile *   self,
                                                 void *               startAddress,
                                                 void *               address,
                                                 struct objectFile ** filePtr);
+
+struct optional_funcFile machoFile_findFunction(struct machoFile * self,
+                                                void *             startAddress,
+                                                void *             address);
 
 #endif /* machoFileInternal_h */

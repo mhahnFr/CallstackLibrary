@@ -60,11 +60,10 @@ char * machoFile_addr2String(struct binaryFile * me, Dl_info * info, void * addr
         return NULL;
     }
     
-    struct objectFile * file;
-    struct function * closest = machoFile_findClosestFunction(self, info->dli_fbase, address, &file);
-    if (closest != NULL) {
+    struct optional_funcFile result = machoFile_findFunction(self, info->dli_fbase, address);
+    if (result.has_value) {
         // TODO: Parse DWARF data if available!
-        char * name = closest->linkedName;
+        char * name = result.value.first->linkedName;
         if (name != NULL) {
             if (*name == '_' || *name == '\1') {
                 ++name;
@@ -72,9 +71,9 @@ char * machoFile_addr2String(struct binaryFile * me, Dl_info * info, void * addr
             name = callstack_parser_demangle(name);
             char * toReturn = NULL;
             asprintf(&toReturn, "%s: %s + %td",
-                     file == NULL ? "<< unknown >>" : file->name,
+                     result.value.second->name,
                      name,
-                     (ptrdiff_t) (address - info->dli_fbase + self->addressOffset - closest->startAddress));
+                     (ptrdiff_t) (address - info->dli_fbase + self->addressOffset - result.value.first->startAddress));
             free(name);
             return toReturn;
         }
