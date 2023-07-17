@@ -108,6 +108,7 @@
 		BFD2A03E2A659F4C007F4B81 /* .gitignore */ = {isa = PBXFileReference; lastKnownFileType = text; path = .gitignore; sourceTree = "<group>"; };
 		BFD2A03F2A659F4C007F4B81 /* pair.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = pair.h; sourceTree = "<group>"; };
 		BFD2A0402A659F4C007F4B81 /* vector.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = vector.h; sourceTree = "<group>"; };
+		BFD2A0412A659F97007F4B81 /* UInt64Vector.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = UInt64Vector.h; sourceTree = "<group>"; };
 		BFEC81842A5EE937002FA3B7 /* function.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = function.h; sourceTree = "<group>"; };
 		BFEC81852A5EE937002FA3B7 /* function.c */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.c; path = function.c; sourceTree = "<group>"; };
 		BFEC818A2A5EEA36002FA3B7 /* objectFile.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = objectFile.h; sourceTree = "<group>"; };
@@ -217,6 +218,7 @@
 				BF3031DF294C6C2300E8ADC5 /* macho */,
 				BF971B7D2A58827B006BFFBB /* binaryFile.h */,
 				BF971B7E2A58827B006BFFBB /* binaryFile.c */,
+				BFD2A0412A659F97007F4B81 /* UInt64Vector.h */,
 			);
 			path = file;
 			sourceTree = "<group>";

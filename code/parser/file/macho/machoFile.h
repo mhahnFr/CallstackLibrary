@@ -23,6 +23,7 @@
 #include <stddef.h>
 
 #include "../binaryFile.h"
+#include "../UInt64Vector.h"
 #include "objectFile.h"
 
 /**
@@ -36,6 +37,7 @@ struct machoFile {
     uint64_t addressOffset;
     /** The contained object files.                                   */
     struct objectFile * objectFiles;
+    struct vector_uint64_t functionStarts;
 };
 
 /**

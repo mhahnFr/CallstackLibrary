@@ -1,5 +1,5 @@
 /*
- * Callstack Library - A library creating human readable call stacks.
+ * Callstack Library - Library creating human-readable call stacks.
  *
  * Copyright (C) 2023  mhahnFr
  *
@@ -46,6 +46,8 @@ void machoFile_create(struct machoFile * self) {
     
     self->addressOffset = 0x0;
     self->objectFiles   = NULL;
+    
+    vector_uint64_t_create(&self->functionStarts);
 }
 
 char * machoFile_addr2String(struct binaryFile * me, Dl_info * info, void * address) {
@@ -80,17 +82,19 @@ char * machoFile_addr2String(struct binaryFile * me, Dl_info * info, void * addr
     return NULL;
 }
 
-void machoFile_destroy(struct binaryFile * self) {
-    struct machoFile * me = machoFileOrNull(self);
-    if (me == NULL) {
+void machoFile_destroy(struct binaryFile * me) {
+    struct machoFile * self = machoFileOrNull(me);
+    if (self == NULL) {
         return;
     }
     
-    for (struct objectFile * tmp = me->objectFiles; tmp != NULL;) {
+    for (struct objectFile * tmp = self->objectFiles; tmp != NULL;) {
         struct objectFile * n = tmp->next;
         objectFile_delete(tmp);
         tmp = n;
     }
+    
+    vector_uint64_t_destroy(&self->functionStarts);
 }
 
 void machoFile_delete(struct binaryFile * self) {
