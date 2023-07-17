@@ -20,6 +20,8 @@
 #ifndef objectFile_h
 #define objectFile_h
 
+#include <stdarg.h>
+
 #include "function.h"
 
 /**
@@ -84,6 +86,8 @@ void objectFile_addFunction(struct objectFile * self,
  */
 int64_t objectFile_findClosestFunction(struct objectFile * self, uint64_t address,
                                        struct function **  funcPtr);
+
+void objectFile_functionsForEach(struct objectFile * self, void (*func)(struct function *, va_list *), ...);
 
 /**
  * Deinitializes the given object file structure.
