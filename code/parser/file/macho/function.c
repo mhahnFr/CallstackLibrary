@@ -1,5 +1,5 @@
 /*
- * Callstack Library - A library creating human readable call stacks.
+ * Callstack Library - Library creating human-readable call stacks.
  *
  * Copyright (C) 2023  mhahnFr
  *
@@ -31,6 +31,7 @@ struct function * function_new(void) {
 
 void function_create(struct function * self) {
     self->startAddress = 0x0;
+    self->endAddress   = 0x0;
     self->linkedName   = NULL;
     self->next         = NULL;
 }

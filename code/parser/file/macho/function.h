@@ -28,6 +28,7 @@
 struct function {
     /** The beginning address of the function inside its Mach-O file. */
     uint64_t startAddress;
+    uint64_t endAddress;
     
     /** The name of the function at linking time.                     */
     char * linkedName;

@@ -201,11 +201,23 @@ static inline bool machoFile_handleSymtab64(struct machoFile *      self,
     return true;
 }
 
+static inline void machoFile_addFunctionEnds(struct function * func, va_list * args) {
+    struct machoFile * self = va_arg(*args, void *);
+
+    size_t i;
+    for (i = 0; i < self->functionStarts.count && self->functionStarts.content[i] != func->startAddress; ++i);
+
+    if (i < self->functionStarts.count - 1) {
+        func->endAddress = self->functionStarts.content[i + 1];
+    } else {
+        // TODO: Was dann?
+    }
+}
+
 static inline bool machoFile_handleFunctionStarts(struct machoFile *             self,
                                                   struct linkedit_data_command * command,
                                                   void *                         baseAddress,
                                                   bool                           bitsReversed) {
-    // TODO: Fix already parsed functions
     uint32_t offset = machoFile_maybeSwap(32, bitsReversed, command->dataoff);
     uint32_t size   = machoFile_maybeSwap(32, bitsReversed, command->datasize);
     
@@ -225,6 +237,10 @@ static inline bool machoFile_handleFunctionStarts(struct machoFile *            
                 more = false;
             }
         } while (more);
+    }
+    
+    for (struct objectFile * it = self->objectFiles; it != NULL; it = it->next) {
+        objectFile_functionsForEach(it, &machoFile_addFunctionEnds, self);
     }
     
     return true;
