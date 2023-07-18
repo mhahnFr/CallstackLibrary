@@ -39,6 +39,7 @@ struct objectFile * objectFile_new(void) {
     }
     objectFile_create(&self->_);
     self->_.priv = self;
+    vector_function_create(&self->functions);
     return &self->_;
 }
 
