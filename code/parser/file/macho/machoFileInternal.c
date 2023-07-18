@@ -74,7 +74,7 @@ static inline bool machoFile_handleSymtab(struct machoFile *      self,
                     // Function end without begin -> invalid.
                     return false;
                 }
-                objectFile_addFunction(current, currFun);
+                objectFile_addFunction(current, *currFun);
                 currFun = NULL;
                 break;
                 
@@ -151,7 +151,7 @@ static inline bool machoFile_handleSymtab64(struct machoFile *      self,
                     // Function end without begin -> invalid.
                     return false;
                 }
-                objectFile_addFunction(current, currFun);
+                objectFile_addFunction(current, *currFun);
                 currFun = NULL;
                 break;
             

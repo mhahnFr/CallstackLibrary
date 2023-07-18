@@ -32,9 +32,6 @@ struct function {
     
     /** The name of the function at linking time.                     */
     char * linkedName;
-    
-    /** A pointer to the next function structure.                     */
-    struct function * next;
 };
 
 /**

@@ -68,7 +68,7 @@ static inline void objectFile_create(struct objectFile * self) {
  * @param function the function structure to be added
  */
 void objectFile_addFunction(struct objectFile * self,
-                            struct function *   function);
+                            struct function     function);
 
 struct function * objectFile_findFunction(struct objectFile * self, uint64_t address);
 

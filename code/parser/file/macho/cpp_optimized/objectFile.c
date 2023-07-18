@@ -43,10 +43,10 @@ struct objectFile * objectFile_new(void) {
 }
 
 void objectFile_addFunction(struct objectFile * me,
-                            struct function *   function) {
+                            struct function     function) {
     struct objectFile_private * self = (struct objectFile_private *) me->priv;
     
-    vector_function_push_back(&self->functions, *function);
+    vector_function_push_back(&self->functions, function);
 }
 
 struct function * objectFile_findFunction(struct objectFile * me, uint64_t address) {

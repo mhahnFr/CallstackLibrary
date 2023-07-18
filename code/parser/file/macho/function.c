@@ -33,7 +33,6 @@ void function_create(struct function * self) {
     self->startAddress = 0x0;
     self->endAddress   = 0x0;
     self->linkedName   = NULL;
-    self->next         = NULL;
 }
 
 void function_destroy(struct function * self) {

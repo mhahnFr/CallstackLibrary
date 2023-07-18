@@ -84,9 +84,8 @@ objectFile * objectFile_new() {
     }
 }
 
-void objectFile_addFunction(objectFile * self, function * func) {
-    reinterpret_cast<ObjectFile *>(self)->addFunction(function(*func));
-    function_delete(func);
+void objectFile_addFunction(objectFile * self, function func) {
+    reinterpret_cast<ObjectFile *>(self)->addFunction(std::move(func));
 }
 
 function * objectFile_findFunction(objectFile * me, uint64_t address) {
