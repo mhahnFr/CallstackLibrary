@@ -26,7 +26,7 @@
 #include "function.h"
 #include "objectFile.h"
 
-typedef_pair_named(funcFile, struct function *, struct objectFile *);
+typedef_pair_named(funcFile, struct function, struct objectFile *);
 typedef_optional_named(funcFile, struct pair_funcFile);
 
 #endif /* OptionalFuncFilePair_h */

@@ -49,12 +49,19 @@ void objectFile_addFunction(struct objectFile * me,
     vector_function_push_back(&self->functions, function);
 }
 
-struct function * objectFile_findFunction(struct objectFile * me, uint64_t address) {
+struct optional_function objectFile_findFunction(struct objectFile * me, uint64_t address) {
     struct objectFile_private * self = (struct objectFile_private *) me->priv;
+    struct optional_function toReturn = { .has_value = false };
     
     size_t i;
     for (i = 0; i < self->functions.count && (address < self->functions.content[i].startAddress || address > self->functions.content[i].endAddress); ++i);
-    return i == self->functions.count ? NULL : &self->functions.content[i];
+    
+    if (i < self->functions.count) {
+        toReturn.has_value = true;
+        toReturn.value     = self->functions.content[i];
+    }
+    
+    return toReturn;
 }
 
 void objectFile_functionsForEach(struct objectFile * me, void (*func)(struct function *, va_list), ...) {

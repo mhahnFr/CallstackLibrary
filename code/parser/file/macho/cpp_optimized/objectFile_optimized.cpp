@@ -44,13 +44,16 @@ public:
         functions.emplace(std::make_pair(function.startAddress, function));
     }
     
-    inline auto findFunction(uint64_t address) -> function * {
+    inline auto findFunction(uint64_t address) -> optional_function_t {
         auto result = functions.lower_bound(address);
+        optional_function_t toReturn = { .has_value = false };
         
-        if (result == functions.end()) {
-            return nullptr;
+        if (result == functions.end() || address > result->second.endAddress) {
+            return toReturn;
         }
-        return address < result->second.endAddress ? std::addressof(result->second) : nullptr;
+        toReturn.has_value = true;
+        toReturn.value     = result->second;
+        return toReturn;
     }
     
     inline void functionsForEach(void (*func)(function *, va_list), va_list & args) {
@@ -88,7 +91,7 @@ void objectFile_addFunction(objectFile * self, function func) {
     reinterpret_cast<ObjectFile *>(self)->addFunction(std::move(func));
 }
 
-function * objectFile_findFunction(objectFile * me, uint64_t address) {
+auto objectFile_findFunction(objectFile * me, uint64_t address) -> optional_function_t {
     return reinterpret_cast<ObjectFile *>(me)->findFunction(address);
 }
 

@@ -321,10 +321,10 @@ struct optional_funcFile machoFile_findFunction(struct machoFile * self, void * 
     struct optional_funcFile toReturn = { .has_value = false };
     
     for (struct objectFile * it = self->objectFiles; it != NULL; it = it->next) {
-        struct function * result = objectFile_findFunction(it, (uint64_t) (address - startAddress) + self->addressOffset);
-        if (result != NULL) {
-            toReturn.has_value = true;
-            toReturn.value.first = result;
+        struct optional_function result = objectFile_findFunction(it, (uint64_t) (address - startAddress) + self->addressOffset);
+        if (result.has_value) {
+            toReturn.has_value    = true;
+            toReturn.value.first  = result.value;
             toReturn.value.second = it;
             break;
         }

@@ -23,6 +23,7 @@
 #include <stdarg.h>
 
 #include "function.h"
+#include "OptionalFunction.h"
 
 /**
  * This strucutre represents an object file.
@@ -70,7 +71,7 @@ static inline void objectFile_create(struct objectFile * self) {
 void objectFile_addFunction(struct objectFile * self,
                             struct function     function);
 
-struct function * objectFile_findFunction(struct objectFile * self, uint64_t address);
+optional_function_t objectFile_findFunction(struct objectFile * self, uint64_t address);
 
 void objectFile_functionsForEach(struct objectFile * self, void (*func)(struct function *, va_list), ...);
 

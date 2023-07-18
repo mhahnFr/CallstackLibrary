@@ -63,7 +63,7 @@ char * machoFile_addr2String(struct binaryFile * me, Dl_info * info, void * addr
     struct optional_funcFile result = machoFile_findFunction(self, info->dli_fbase, address);
     if (result.has_value) {
         // TODO: Parse DWARF data if available!
-        char * name = result.value.first->linkedName;
+        char * name = result.value.first.linkedName;
         if (name != NULL) {
             if (*name == '_' || *name == '\1') {
                 ++name;
@@ -73,7 +73,7 @@ char * machoFile_addr2String(struct binaryFile * me, Dl_info * info, void * addr
             asprintf(&toReturn, "%s: %s + %td",
                      result.value.second->name,
                      name,
-                     (ptrdiff_t) (address - info->dli_fbase + self->addressOffset - result.value.first->startAddress));
+                     (ptrdiff_t) (address - info->dli_fbase + self->addressOffset - result.value.first.startAddress));
             free(name);
             return toReturn;
         }
