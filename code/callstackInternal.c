@@ -39,7 +39,7 @@ int callstack_backtrace(void * buffer[], int bufferSize, void * address) {
     if (frames < 0) return frames;
     
     for (i = 0; buffer[i] != address && i < bufferSize; ++i);
-    (void) memmove(buffer, buffer + i, (size_t) bufferSize - i);
+    (void) memmove(buffer, buffer + i, ((size_t) bufferSize - i) * sizeof(void *));
     return frames - i;
 }
 
