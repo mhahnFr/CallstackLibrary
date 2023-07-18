@@ -25,6 +25,8 @@
 
 #include "machoFileInternal.h"
 
+#include "OptionalFunction.h"
+
 #define machoFile_maybeSwap(bits, swap, value) ((swap) ? OSSwapInt##bits(value) : (value))
 
 static inline bool machoFile_handleSegment(struct machoFile *       self,
@@ -53,29 +55,30 @@ static inline bool machoFile_handleSymtab(struct machoFile *      self,
                                           bool                    bitsReversed) {
     char * stringBegin = baseAddress + machoFile_maybeSwap(32, bitsReversed, command->stroff);
     
-    struct objectFile * current = objectFile_new();
-    struct function *   currFun = NULL;
-    const  uint32_t     nsyms   = machoFile_maybeSwap(32, bitsReversed, command->nsyms);
-    const  uint32_t     symoff  = machoFile_maybeSwap(32, bitsReversed, command->symoff);
+    struct objectFile *      current = objectFile_new();
+    struct optional_function currFun = { .has_value = false };
+    const  uint32_t          nsyms   = machoFile_maybeSwap(32, bitsReversed, command->nsyms);
+    const  uint32_t          symoff  = machoFile_maybeSwap(32, bitsReversed, command->symoff);
     
     for (size_t i = 0; i < nsyms; ++i) {
         struct nlist * entry = baseAddress + symoff + i * sizeof(struct nlist);
         switch (entry->n_type) {
             case N_BNSYM:
-                if (currFun != NULL) {
-                    // Function begin without begin -> invalid.
+                if (currFun.has_value) {
+                    // Function begin without end -> invalid.
                     return false;
                 }
-                currFun = function_new();
+                function_create(&currFun.value);
+                currFun.has_value = true;
                 break;
                 
             case N_ENSYM:
-                if (currFun == NULL) {
+                if (!currFun.has_value) {
                     // Function end without begin -> invalid.
                     return false;
                 }
-                objectFile_addFunction(current, *currFun);
-                currFun = NULL;
+                objectFile_addFunction(current, currFun.value);
+                currFun.has_value = false;
                 break;
                 
             case N_SO: {
@@ -102,21 +105,21 @@ static inline bool machoFile_handleSymtab(struct machoFile *      self,
                 break;
                 
             case N_FUN: {
-                if (currFun == NULL) {
+                if (!currFun.has_value) {
                     // Function name without begin -> invalid.
                     return false;
                 }
                 char * value = stringBegin + machoFile_maybeSwap(32, bitsReversed, entry->n_un.n_strx);
                 if (*value != '\0') {
-                    currFun->linkedName   = value;
-                    currFun->startAddress = machoFile_maybeSwap(32, bitsReversed, entry->n_value);
+                    currFun.value.linkedName   = value;
+                    currFun.value.startAddress = machoFile_maybeSwap(32, bitsReversed, entry->n_value);
                 }
                 break;
             }
         }
     }
     machoFile_addObjectFile(self, current);
-    if (currFun != NULL) {
+    if (currFun.has_value) {
         // Function entries did not end -> invalid.
         return false;
     }
@@ -130,29 +133,30 @@ static inline bool machoFile_handleSymtab64(struct machoFile *      self,
                                             bool                    bitsReversed) {
     char * stringBegin = baseAddress + machoFile_maybeSwap(32, bitsReversed, command->stroff);
     
-    struct objectFile * current = objectFile_new();
-    struct function *   currFun = NULL;
-    const  uint32_t     nsyms   = machoFile_maybeSwap(32, bitsReversed, command->nsyms);
-    const  uint32_t     symoff  = machoFile_maybeSwap(32, bitsReversed, command->symoff);
+    struct objectFile *      current = objectFile_new();
+    struct optional_function currFun = { .has_value = false };
+    const  uint32_t          nsyms   = machoFile_maybeSwap(32, bitsReversed, command->nsyms);
+    const  uint32_t          symoff  = machoFile_maybeSwap(32, bitsReversed, command->symoff);
     
     for (size_t i = 0; i < nsyms; ++i) {
         struct nlist_64 * entry = baseAddress + symoff + i * sizeof(struct nlist_64);
         switch (entry->n_type) {
             case N_BNSYM:
-                if (currFun != NULL) {
-                    // Function begin without begin -> invalid.
+                if (currFun.has_value) {
+                    // Function begin without end -> invalid.
                     return false;
                 }
-                currFun = function_new();
+                function_create(&currFun.value);
+                currFun.has_value = true;
                 break;
             
             case N_ENSYM:
-                if (currFun == NULL) {
+                if (!currFun.has_value) {
                     // Function end without begin -> invalid.
                     return false;
                 }
-                objectFile_addFunction(current, *currFun);
-                currFun = NULL;
+                objectFile_addFunction(current, currFun.value);
+                currFun.has_value = false;
                 break;
             
             case N_SO: {
@@ -179,21 +183,21 @@ static inline bool machoFile_handleSymtab64(struct machoFile *      self,
                 break;
                 
             case N_FUN: {
-                if (currFun == NULL) {
+                if (!currFun.has_value) {
                     // Function name without begin -> invalid.
                     return false;
                 }
                 char * value = stringBegin + machoFile_maybeSwap(32, bitsReversed, entry->n_un.n_strx);
                 if (*value != '\0') {
-                    currFun->linkedName   = value;
-                    currFun->startAddress = machoFile_maybeSwap(64, bitsReversed, entry->n_value);
+                    currFun.value.linkedName   = value;
+                    currFun.value.startAddress = machoFile_maybeSwap(64, bitsReversed, entry->n_value);
                 }
                 break;
             }
         }
     }
     machoFile_addObjectFile(self, current);
-    if (currFun != NULL) {
+    if (currFun.has_value) {
         // Function entries did not end -> invalid.
         return false;
     }
