@@ -20,6 +20,7 @@
 #include <stdlib.h>
 
 #include "../objectFile.h"
+#include "../FunctionVector.h"
 
 /**
  * This structure acts as a wrapper around the object file structure.
@@ -28,8 +29,7 @@ struct objectFile_private {
     /** The object file structure.                            */
     struct objectFile _;
     
-    /** A linked list with the contained function structures. */
-    struct function * functions;
+    struct vector_function functions;
 };
 
 struct objectFile * objectFile_new(void) {
@@ -46,16 +46,15 @@ void objectFile_addFunction(struct objectFile * me,
                             struct function *   function) {
     struct objectFile_private * self = (struct objectFile_private *) me->priv;
     
-    function->next  = self->functions;
-    self->functions = function;
+    vector_function_push_back(&self->functions, *function);
 }
 
 struct function * objectFile_findFunction(struct objectFile * me, uint64_t address) {
     struct objectFile_private * self = (struct objectFile_private *) me->priv;
     
-    struct function * it;
-    for (it = self->functions; it != NULL && (address < it->startAddress || address > it->endAddress); it = it->next);
-    return it;
+    size_t i;
+    for (i = 0; i < self->functions.count && (address < self->functions.content[i].startAddress || address > self->functions.content[i].endAddress); ++i);
+    return i == self->functions.count ? NULL : &self->functions.content[i];
 }
 
 void objectFile_functionsForEach(struct objectFile * me, void (*func)(struct function *, va_list), ...) {
@@ -63,10 +62,10 @@ void objectFile_functionsForEach(struct objectFile * me, void (*func)(struct fun
     
     va_list list;
     va_start(list, func);
-    for (struct function * it = self->functions; it != NULL; it = it->next) {
+    for (size_t i = 0; i < self->functions.count; ++i) {
         va_list copy;
         va_copy(copy, list);
-        func(it, copy);
+        func(&self->functions.content[i], copy);
         va_end(copy);
     }
     va_end(list);
@@ -75,11 +74,7 @@ void objectFile_functionsForEach(struct objectFile * me, void (*func)(struct fun
 void objectFile_destroy(struct objectFile * me) {
     struct objectFile_private * self = (struct objectFile_private *) me->priv;
     
-    for (struct function * tmp = self->functions; tmp != NULL;) {
-        struct function * n = tmp->next;
-        function_delete(tmp);
-        tmp = n;
-    }
+    vector_function_destroy(&self->functions);
 }
 
 void objectFile_delete(struct objectFile * self) {
