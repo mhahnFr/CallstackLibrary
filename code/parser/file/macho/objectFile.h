@@ -72,7 +72,7 @@ void objectFile_addFunction(struct objectFile * self,
 
 struct function * objectFile_findFunction(struct objectFile * self, uint64_t address);
 
-void objectFile_functionsForEach(struct objectFile * self, void (*func)(struct function *, va_list *), ...);
+void objectFile_functionsForEach(struct objectFile * self, void (*func)(struct function *, va_list), ...);
 
 /**
  * Deinitializes the given object file structure.

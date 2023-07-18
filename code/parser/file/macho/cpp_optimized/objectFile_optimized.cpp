@@ -53,11 +53,11 @@ public:
         return address < result->second.endAddress ? std::addressof(result->second) : nullptr;
     }
     
-    inline void functionsForEach(void (*func)(function *, va_list *), va_list * args) {
+    inline void functionsForEach(void (*func)(function *, va_list), va_list & args) {
         for (auto & elem : functions) {
             va_list copy;
-            va_copy(copy, *args);
-            func(std::addressof(elem.second), &copy);
+            va_copy(copy, args);
+            func(std::addressof(elem.second), copy);
             va_end(copy);
         }
     }
@@ -93,10 +93,10 @@ function * objectFile_findFunction(objectFile * me, uint64_t address) {
     return reinterpret_cast<ObjectFile *>(me)->findFunction(address);
 }
 
-void objectFile_functionsForEach(objectFile * me, void (*func)(function *, va_list *), ...) {
+void objectFile_functionsForEach(objectFile * me, void (*func)(function *, va_list), ...) {
     va_list list;
     va_start(list, func);
-    reinterpret_cast<ObjectFile *>(me)->functionsForEach(func, &list);
+    reinterpret_cast<ObjectFile *>(me)->functionsForEach(func, list);
     va_end(list);
 }
 

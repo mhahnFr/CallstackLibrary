@@ -201,8 +201,8 @@ static inline bool machoFile_handleSymtab64(struct machoFile *      self,
     return true;
 }
 
-static inline void machoFile_addFunctionEnds(struct function * func, va_list * args) {
-    struct machoFile * self = va_arg(*args, void *);
+static inline void machoFile_addFunctionEnds(struct function * func, va_list args) {
+    struct machoFile * self = va_arg(args, void *);
 
     size_t i;
     for (i = 0; i < self->functionStarts.count && self->functionStarts.content[i] != func->startAddress; ++i);

@@ -58,7 +58,7 @@ struct function * objectFile_findFunction(struct objectFile * me, uint64_t addre
     return it;
 }
 
-void objectFile_functionsForEach(struct objectFile * me, void (*func)(struct function *, va_list *), ...) {
+void objectFile_functionsForEach(struct objectFile * me, void (*func)(struct function *, va_list), ...) {
     struct objectFile_private * self = (struct objectFile_private *) me->priv;
     
     va_list list;
@@ -66,7 +66,7 @@ void objectFile_functionsForEach(struct objectFile * me, void (*func)(struct fun
     for (struct function * it = self->functions; it != NULL; it = it->next) {
         va_list copy;
         va_copy(copy, list);
-        func(it, &copy);
+        func(it, copy);
         va_end(copy);
     }
     va_end(list);
