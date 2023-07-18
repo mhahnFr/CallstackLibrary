@@ -328,23 +328,3 @@ struct optional_funcFile machoFile_findFunction(struct machoFile * self, void * 
     
     return toReturn;
 }
-
-struct function * machoFile_findClosestFunction(struct machoFile * self, void * startAddress, void * address,
-                                                struct objectFile ** filePtr) {
-    address += self->addressOffset;
-    
-    int64_t distance = INT64_MAX;
-    struct function * func = NULL;
-    struct objectFile * file = NULL;
-    for (struct objectFile * it = self->objectFiles; it != NULL; it = it->next) {
-        struct function * tmp = NULL;
-        int64_t dist = objectFile_findClosestFunction(it, (uint64_t) (address - startAddress), &tmp);
-        if (dist < distance && dist >= 0) {
-            distance = dist;
-            func = tmp;
-            file = it;
-        }
-    }
-    *filePtr = file;
-    return distance < INT64_MAX ? func : NULL;
-}

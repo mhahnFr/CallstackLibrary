@@ -44,26 +44,6 @@ public:
         functions.emplace(std::make_pair(function.startAddress, function));
     }
     
-    /**
-     * @brief Finds and returns the function that is the nearest to the given address.
-     *
-     * A pointer to the function structure representing the found function is returned,
-     * together with its start address and a boolean indicating whether a function was found.
-     *
-     * @note A `std::tuple` is returned since `std::optional` was added in C++17
-     * and this implementation should be compatible to C++11.
-     *
-     * @param address the address whose nearest function to be found
-     * @return a tuple with the result
-     */
-    inline auto findClosestFunction(uint64_t address) -> std::tuple<bool, uint64_t, function *> {
-        const auto & it = functions.lower_bound(address);
-        if (it == functions.end()) {
-            return std::make_tuple(false, UINT64_MAX, nullptr);
-        }
-        return std::make_tuple(true, it->first, std::addressof(it->second));
-    }
-    
     inline operator objectFile *() {
         return &self;
     }
@@ -89,12 +69,6 @@ objectFile * objectFile_new() {
 void objectFile_addFunction(objectFile * self, function * func) {
     reinterpret_cast<ObjectFile *>(self)->addFunction(function(*func));
     function_delete(func);
-}
-
-auto objectFile_findClosestFunction(objectFile * self, uint64_t address, function ** funcPtr) -> int64_t {
-    const auto result = reinterpret_cast<ObjectFile *>(self->priv)->findClosestFunction(address);
-    *funcPtr = std::get<2>(result);
-    return address - std::get<1>(result);
 }
 
 void objectFile_destroy(objectFile *) {}

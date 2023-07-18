@@ -70,23 +70,6 @@ static inline void objectFile_create(struct objectFile * self) {
 void objectFile_addFunction(struct objectFile * self,
                             struct function *   function);
 
-/**
- * @brief Finds the function that is the nearest to the given address.
- *
- * The distance to the begin of the nearest function is returned. The given
- * function structure pointer is set to the function structure representation
- * of the found function.
- *
- * If no corresponding function is found, `UINT64_MAX` is returned and
- * the given function structure pointer is set to point to `NULL`.
- *
- * @param self the object file in which to search
- * @param address the address whose closest function to be found
- * @param funcPtr the pointer to the function structure to be set
- */
-int64_t objectFile_findClosestFunction(struct objectFile * self, uint64_t address,
-                                       struct function **  funcPtr);
-
 struct function * objectFile_findFunction(struct objectFile * self, uint64_t address);
 
 void objectFile_functionsForEach(struct objectFile * self, void (*func)(struct function *, va_list *), ...);

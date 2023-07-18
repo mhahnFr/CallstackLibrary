@@ -58,23 +58,6 @@ struct function * objectFile_findFunction(struct objectFile * me, uint64_t addre
     return it;
 }
 
-int64_t objectFile_findClosestFunction(struct objectFile * me, uint64_t address,
-                                       struct function **  funcPtr) {
-    struct objectFile_private * self = (struct objectFile_private *) me->priv;
-    
-    struct function * func = NULL;
-    int64_t distance = INT64_MAX;
-    for (struct function * it = self->functions; it != NULL; it = it->next) {
-        int64_t diff = address - it->startAddress;
-        if (diff < distance && diff >= 0) {
-            distance = diff;
-            func = it;
-        }
-    }
-    *funcPtr = func;
-    return distance;
-}
-
 void objectFile_functionsForEach(struct objectFile * me, void (*func)(struct function *, va_list *), ...) {
     struct objectFile_private * self = (struct objectFile_private *) me->priv;
     
