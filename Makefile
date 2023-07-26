@@ -35,6 +35,13 @@ LINUX_PATH     = ./code/parser/file/elf
 DARWIN_PATH    = ./code/parser/file/macho
 # -----
 
+# Assert submodules are available
+ifeq ($(shell ls DC4C),)
+	_  = $(shell git submodule init)
+	_ += $(shell git submodule update)
+endif
+# -------------------------------
+
 # Main sources
 SRCS = $(shell find . -type f -name \*.c \! -path $(LINUX_PATH)\* \! -path $(DARWIN_PATH)\* \! -path \*/$(OPTIMIZED_PATH)\*)
 OBJS = $(patsubst %.c, %.o, $(SRCS))
