@@ -19,6 +19,8 @@
 
 #include "binaryFile.h"
 
+#include <stddef.h>
+
 #ifdef __APPLE__
  #include "macho/machoFile.h"
 #elifdef __linux__
