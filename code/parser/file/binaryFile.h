@@ -20,7 +20,12 @@
 #ifndef binaryFile_h
 #define binaryFile_h
 
-#include <dlfcn.h>
+#define _GNU_SOURCE
+ #define __USE_GNU
+  #include <dlfcn.h>
+ #undef __USE_GNU
+#undef _GNU_SOURCE
+
 #include <stdbool.h>
 
 /**

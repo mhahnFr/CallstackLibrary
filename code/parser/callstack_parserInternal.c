@@ -22,9 +22,13 @@
 #include "file/cache/cache.h"
 
 #define _GNU_SOURCE
-#include <dlfcn.h>
+ #define __USE_GNU
+  #include <dlfcn.h>
+  #include <stdio.h>
+ #undef __USE_GNU
+#undef _GNU_SOURCE
+
 #include <execinfo.h>
-#include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
 
