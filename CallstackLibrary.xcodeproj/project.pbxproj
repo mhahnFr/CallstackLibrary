@@ -3,7 +3,7 @@
 	archiveVersion = 1;
 	classes = {
 	};
-	objectVersion = 53;
+	objectVersion = 54;
 	objects = {
 
 /* Begin PBXBuildFile section */
@@ -177,7 +177,7 @@
 				BF61E8FE28F1D1200006346B /* Makefile */,
 				BF61E90028F1D1300006346B /* README.md */,
 				BF61E8FC28F1CFC90006346B /* include */,
-				BF61E8FB28F1CFB40006346B /* code */,
+				BF61E8FB28F1CFB40006346B /* src */,
 				BF61E8F528F1CDD30006346B /* Products */,
 			);
 			sourceTree = "<group>";
@@ -191,7 +191,7 @@
 			name = Products;
 			sourceTree = "<group>";
 		};
-		BF61E8FB28F1CFB40006346B /* code */ = {
+		BF61E8FB28F1CFB40006346B /* src */ = {
 			isa = PBXGroup;
 			children = (
 				BF3031E1294C6C4700E8ADC5 /* parser */,
@@ -200,7 +200,7 @@
 				BF5A746028F1DCA00017591A /* callstackInternal.c */,
 				BF971B962A58C155006BFFBB /* callstack_internals.c */,
 			);
-			path = code;
+			path = src;
 			sourceTree = "<group>";
 		};
 		BF61E8FC28F1CFC90006346B /* include */ = {

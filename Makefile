@@ -31,8 +31,8 @@ LD = $(CC)
 
 # Paths
 OPTIMIZED_PATH = cpp_optimized/
-LINUX_PATH     = ./code/parser/file/elf
-DARWIN_PATH    = ./code/parser/file/macho
+LINUX_PATH     = ./src/parser/file/elf
+DARWIN_PATH    = ./src/parser/file/macho
 # -----
 
 # Assert submodules are available
