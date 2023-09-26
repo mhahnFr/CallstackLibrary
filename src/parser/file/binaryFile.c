@@ -23,7 +23,7 @@
 
 #ifdef __APPLE__
  #include "macho/machoFile.h"
-#elifdef __linux__
+#elif defined(__linux__)
  #include "elf/elfFile.h"
 #endif
 
@@ -33,7 +33,7 @@ struct binaryFile * binaryFile_new(const char * fileName) {
 #ifdef __APPLE__
     struct machoFile * tmp = machoFile_new();
     toReturn = tmp == NULL ? NULL : &tmp->_;
-#elifdef __linux__
+#elif defined(__linux__)
     struct elfFile * tmp = elfFile_new();
     toReturn = tmp == NULL ? NULL : &tmp->_;
 #else
