@@ -1,5 +1,5 @@
 /*
- * Callstack Library - A library creating human readable call stacks.
+ * Callstack Library - Library creating human-readable call stacks.
  *
  * Copyright (C) 2023  mhahnFr
  *
@@ -58,7 +58,10 @@ static inline struct elfFile * elfFileOrNull(struct binaryFile * self) {
 }
 
 /* Heavily WIP. */
-char * elfFile_addr2String(struct binaryFile * self, Dl_info * info, void * address);
+bool elfFile_addr2String(struct binaryFile *      self,
+                                Dl_info *         info,
+                                void *            address,
+                         struct callstack_frame * frame);
 
 /**
  * Deinitializes the given binary file structure, if it is an ELF file structure.

@@ -1,5 +1,5 @@
 /*
- * Callstack Library - A library creating human readable call stacks.
+ * Callstack Library - Library creating human-readable call stacks.
  *
  * Copyright (C) 2023  mhahnFr
  *
@@ -41,10 +41,14 @@ void elfFile_create(struct elfFile * self) {
     self->_.delete      = &elfFile_delete;
 }
 
-char * elfFile_addr2String(struct binaryFile * self, Dl_info * info, void * address) {
+bool elfFile_addr2String(struct binaryFile *      self,
+                                Dl_info *         info,
+                                void *            address,
+                         struct callstack_frame * frame) {
     (void) self;
     (void) info;
     (void) address;
+    (void) frame;
     
     return NULL;
 }
