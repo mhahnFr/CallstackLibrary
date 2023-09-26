@@ -1,5 +1,5 @@
 /*
- * Callstack Library - A library creating human readable call stacks.
+ * Callstack Library - Library creating human-readable call stacks.
  *
  * Copyright (C) 2022 - 2023  mhahnFr
  *
@@ -34,41 +34,57 @@
 
 bool callstack_parser_parseImpl(struct callstack_parser * self,
                                 struct callstack *        callstack) {
-    callstack->stringArray = malloc((callstack->backtraceSize + 1) * sizeof(char *));
-    if (callstack->stringArray == NULL) {
+    callstack->frames = malloc((callstack->backtraceSize + 1) * sizeof(struct callstack_frame *));
+    if (callstack->frames == NULL) {
         return false;
     }
-    callstack->stringArraySize = callstack->backtraceSize;
+    callstack->frameCount = callstack->backtraceSize;
     for (size_t i = 0; i < callstack->backtraceSize; ++i) {
+        struct callstack_frame * frame = callstack_frame_new();
+        if (frame == NULL) {
+            return false;
+        }
         Dl_info info;
         if (dladdr(callstack->backtrace[i], &info)) {
+            if ((frame->binaryFile = strdup(info.dli_fname)) == NULL) {
+                callstack_frame_delete(frame);
+                return false;
+            }
             struct binaryFile * file = cache_findOrAddFile(callstack_parser_getCache(self), info.dli_fname);
-            if (file == NULL ||
-                (callstack->stringArray[i] = file->addr2String(file, &info, callstack->backtrace[i])) == NULL) {
-                if (!callstack_parser_createDynamicLine(callstack, &info, i, "<< Unknown >>")) {
+            if (file == NULL || !file->addr2String(file,
+                                                   &info,
+                                                   callstack->backtrace[i],
+                                                   frame)) {
+                if (!callstack_parser_createDynamicLine(&info,
+                                                        "<< Unknown >>",
+                                                        callstack->backtrace[i],
+                                                        frame)) {
+                    callstack_frame_delete(frame);
                     return false;
                 }
             }
         } else {
-            if ((callstack->stringArray[i] = strdup("<< Unknown >>")) == NULL) {
+            if ((frame->function = strdup("<< Unknown >>")) == NULL) {
+                callstack_frame_delete(frame);
                 return false;
             }
         }
+        callstack->frames[i] = frame;
     }
     return true;
 }
 
-bool callstack_parser_createDynamicLine(struct callstack * callstack,
-                                               Dl_info *   info,
-                                               size_t      index,
-                                               char *      fallback) {
+bool callstack_parser_createDynamicLine(       Dl_info *         info,
+                                               char *            fallback,
+                                               void *            frameAddress,
+                                        struct callstack_frame * frame) {
     if (info->dli_sname == NULL) {
-        if ((callstack->stringArray[index] = strdup(fallback)) == NULL) {
+        if ((frame->function = strdup(fallback)) == NULL) {
             return false;
         }
     } else {
-        if ((callstack->stringArray[index] = callstack_parser_createLine(info->dli_sname,
-                                                                         callstack->backtrace[index] - info->dli_saddr)) == NULL) {
+        if ((frame->function = callstack_parser_createLine(info->dli_sname,
+                                                           frameAddress - info->dli_saddr)) == NULL) {
             return false;
         }
     }

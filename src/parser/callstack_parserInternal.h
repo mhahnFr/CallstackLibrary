@@ -1,5 +1,5 @@
 /*
- * Callstack Library - A library creating human readable call stacks.
+ * Callstack Library - Library creating human-readable call stacks.
  *
  * Copyright (C) 2022 - 2023  mhahnFr
  *
@@ -60,15 +60,15 @@ char * callstack_parser_demangle(char * name);
  * The callstack line of the given index is translated using the given dynamic linker information.
  * If translating is not possible, the fallback is used to create the callstack line.
  *
- * @param callstack the callstack whose line to be translated
  * @param info the dynamic linker info
- * @param index the index of the desired callstack line
  * @param fallback the fallback string
+ * @param frameAddress the translated frame's address
+ * @param frame the frame structure to store the information in
  * @return whether the line was set
  */
-bool callstack_parser_createDynamicLine(struct callstack * callstack,
-                                               Dl_info *   info,
-                                               size_t      index,
-                                               char *      fallback);
+bool callstack_parser_createDynamicLine(       Dl_info *         info,
+                                               char *            fallback,
+                                               void *            frameAddress,
+                                        struct callstack_frame * frame);
 
 #endif /* callstack_parserInternal_h */

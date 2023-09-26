@@ -1,5 +1,5 @@
 /*
- * Callstack Library - A library creating human readable call stacks.
+ * Callstack Library - Library creating human-readable call stacks.
  *
  * Copyright (C) 2023  mhahnFr
  *
@@ -27,6 +27,8 @@
 #undef _GNU_SOURCE
 
 #include <stdbool.h>
+
+#include "../../../include/callstack_frame.h"
 
 /**
  * This enumeration contains the supported types of executable files.
@@ -57,11 +59,11 @@ struct binaryFile {
     struct binaryFile * next;
     
     /** Translating method, heavily WIP.                     */
-    char * (*addr2String)(struct binaryFile *, Dl_info *, void *);
+    bool (*addr2String)(struct binaryFile *, Dl_info *, void *, struct callstack_frame *);
     /** The appropriate deinitializing method.               */
-    void   (*destroy)    (struct binaryFile *);
+    void (*destroy)    (struct binaryFile *);
     /** The appropriate deleting method.                     */
-    void   (*delete)     (struct binaryFile *);
+    void (*delete)     (struct binaryFile *);
 };
 
 /**
