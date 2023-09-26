@@ -50,7 +50,10 @@ void machoFile_create(struct machoFile * self) {
     vector_uint64_t_create(&self->functionStarts);
 }
 
-char * machoFile_addr2String(struct binaryFile * me, Dl_info * info, void * address) {
+bool machoFile_addr2String(struct binaryFile *      me,
+                                  Dl_info *         info,
+                                  void *            address,
+                           struct callstack_frame * frame) {
     struct machoFile * self = machoFileOrNull(me);
     if (self == NULL) {
         return NULL;
@@ -75,10 +78,11 @@ char * machoFile_addr2String(struct binaryFile * me, Dl_info * info, void * addr
                      name,
                      (ptrdiff_t) (address - info->dli_fbase + self->addressOffset - result.value.first.startAddress));
             free(name);
-            return toReturn;
+            frame->function = toReturn;
+            return true;
         }
     }
-    return NULL;
+    return false;
 }
 
 void machoFile_destroy(struct binaryFile * me) {

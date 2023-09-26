@@ -66,7 +66,10 @@ static inline struct machoFile * machoFileOrNull(struct binaryFile * self) {
 }
 
 /* Heavily WIP. */
-char * machoFile_addr2String(struct binaryFile * self, Dl_info * info, void * address);
+bool machoFile_addr2String(struct binaryFile *      self,
+                                  Dl_info *         info,
+                                  void *            address,
+                           struct callstack_frame * frame);
 
 /**
  * Deinitializes the given binary file structure if it is a Mach-O file structure.
