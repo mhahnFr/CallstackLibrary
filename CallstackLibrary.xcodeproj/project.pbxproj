@@ -57,6 +57,8 @@
 		BFAB6B3C2A62EDD000726B52 /* objectFile.c in Sources */ = {isa = PBXBuildFile; fileRef = BFEC818B2A5EEA36002FA3B7 /* objectFile.c */; };
 		BFAB6B3E2A62F5EE00726B52 /* objectFile_optimized.cpp in Sources */ = {isa = PBXBuildFile; fileRef = BFAB6B382A62DC4600726B52 /* objectFile_optimized.cpp */; };
 		BFAB6B3F2A62F5EE00726B52 /* objectFile_optimized.cpp in Sources */ = {isa = PBXBuildFile; fileRef = BFAB6B382A62DC4600726B52 /* objectFile_optimized.cpp */; };
+		BFC2D17A2AC31E1300BD4C0B /* callstack_frame.c in Sources */ = {isa = PBXBuildFile; fileRef = BFC2D1792AC31E1300BD4C0B /* callstack_frame.c */; };
+		BFC2D17B2AC31E1300BD4C0B /* callstack_frame.c in Sources */ = {isa = PBXBuildFile; fileRef = BFC2D1792AC31E1300BD4C0B /* callstack_frame.c */; };
 		BFCC50C928F8454E00E2388D /* demangler.cpp in Sources */ = {isa = PBXBuildFile; fileRef = BFCC50C728F8454E00E2388D /* demangler.cpp */; };
 		BFCC50CA28F8454E00E2388D /* demangler.h in Headers */ = {isa = PBXBuildFile; fileRef = BFCC50C828F8454E00E2388D /* demangler.h */; };
 		BFEC81862A5EE937002FA3B7 /* function.h in Headers */ = {isa = PBXBuildFile; fileRef = BFEC81842A5EE937002FA3B7 /* function.h */; };
@@ -99,6 +101,8 @@
 		BF971B952A58C0F2006BFFBB /* callstack_internals.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = callstack_internals.h; sourceTree = "<group>"; };
 		BF971B962A58C155006BFFBB /* callstack_internals.c */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.c; path = callstack_internals.c; sourceTree = "<group>"; };
 		BFAB6B382A62DC4600726B52 /* objectFile_optimized.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; path = objectFile_optimized.cpp; sourceTree = "<group>"; };
+		BFC2D1782AC30BFA00BD4C0B /* callstack_frame.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = callstack_frame.h; sourceTree = "<group>"; };
+		BFC2D1792AC31E1300BD4C0B /* callstack_frame.c */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.c; path = callstack_frame.c; sourceTree = "<group>"; };
 		BFCC50C728F8454E00E2388D /* demangler.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; path = demangler.cpp; sourceTree = "<group>"; };
 		BFCC50C828F8454E00E2388D /* demangler.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = demangler.h; sourceTree = "<group>"; };
 		BFD2A03A2A659F4C007F4B81 /* LICENSE */ = {isa = PBXFileReference; lastKnownFileType = text; path = LICENSE; sourceTree = "<group>"; };
@@ -199,6 +203,7 @@
 				BF86E31E28F4564600F6D20E /* callstack.c */,
 				BF5A746028F1DCA00017591A /* callstackInternal.c */,
 				BF971B962A58C155006BFFBB /* callstack_internals.c */,
+				BFC2D1792AC31E1300BD4C0B /* callstack_frame.c */,
 			);
 			path = src;
 			sourceTree = "<group>";
@@ -212,6 +217,7 @@
 				BF3036C728F987C700856435 /* callstack.hpp */,
 				BF3036CC28F998AD00856435 /* callstack_create.h */,
 				BF971B952A58C0F2006BFFBB /* callstack_internals.h */,
+				BFC2D1782AC30BFA00BD4C0B /* callstack_frame.h */,
 			);
 			path = include;
 			sourceTree = "<group>";
@@ -399,6 +405,7 @@
 			files = (
 				BF971B892A588634006BFFBB /* elfFile.c in Sources */,
 				BFEC81892A5EE937002FA3B7 /* function.c in Sources */,
+				BFC2D17B2AC31E1300BD4C0B /* callstack_frame.c in Sources */,
 				BF971B982A58C155006BFFBB /* callstack_internals.c in Sources */,
 				BF378FCB2919542100A4DAA9 /* callstack.c in Sources */,
 				BF971B942A58B9EA006BFFBB /* machoFileInternal.c in Sources */,
@@ -431,6 +438,7 @@
 				BFEC81882A5EE937002FA3B7 /* function.c in Sources */,
 				BFCC50C928F8454E00E2388D /* demangler.cpp in Sources */,
 				BF971B7A2A588077006BFFBB /* machoFile.c in Sources */,
+				BFC2D17A2AC31E1300BD4C0B /* callstack_frame.c in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
