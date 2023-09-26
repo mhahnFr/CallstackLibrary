@@ -33,8 +33,8 @@ extern "C" {
  */
 static inline void callstack_create(struct callstack * self) {
     self->backtraceSize     = 0;
-    self->stringArraySize   = 0;
-    self->stringArray       = NULL;
+    self->frameCount        = 0;
+    self->frames            = NULL;
     self->translationStatus = NONE;
 }
 

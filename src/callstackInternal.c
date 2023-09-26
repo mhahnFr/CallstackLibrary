@@ -1,5 +1,5 @@
 /*
- * Callstack Library - A library creating human readable call stacks.
+ * Callstack Library - Library creating human-readable call stacks.
  *
  * Copyright (C) 2022 - 2023  mhahnFr
  *
@@ -51,20 +51,10 @@ enum callstack_type callstack_translate(struct callstack * self) {
     return self->translationStatus;
 }
 
-size_t callstack_getTotalStringLength(struct callstack * self) {
-    size_t ret = 0;
-    if (callstack_isTranslated(self)) {
-        for (size_t i = 0; i < self->stringArraySize; ++i) {
-            ret += strlen(self->stringArray[i]);
-        }
-    }
-    return ret;
-}
-
 void callstack_reset(struct callstack * self) {
-    for (size_t i = 0; self->stringArray[i] != NULL; ++i) {
-        free(self->stringArray[i]);
+    for (size_t i = 0; self->frames[i] != NULL; ++i) {
+        callstack_frame_delete(self->frames[i]);
     }
-    free(self->stringArray);
-    self->stringArraySize = 0;
+    free(self->frames);
+    self->frameCount = 0;
 }

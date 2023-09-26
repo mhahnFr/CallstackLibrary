@@ -1,5 +1,5 @@
 /*
- * Callstack Library - A library creating human readable call stacks.
+ * Callstack Library - Library creating human-readable call stacks.
  *
  * Copyright (C) 2022 - 2023  mhahnFr
  *
@@ -68,60 +68,39 @@ void callstack_copy(struct callstack * self, const struct callstack * other) {
             self->backtrace[i]   = other->backtrace[i];
         }
         
-        self->stringArraySize    = other->stringArraySize;
+        self->frameCount = other->frameCount;
         
-        if (self->stringArraySize != 0) {
-            self->stringArray    = malloc(self->stringArraySize * sizeof(char *));
+        if (self->frameCount != 0) {
+            self->frames = malloc(self->frameCount * sizeof(struct callstack_frame *));
         }
         
-        for (size_t i = 0; i < self->stringArraySize; ++i) {
-            self->stringArray[i] = strdup(other->stringArray[i]);
+        for (size_t i = 0; i < self->frameCount; ++i) {
+            self->frames[i] = callstack_frame_copy(other->frames[i]);
         }
     }
 }
 
-char ** callstack_toArray(struct callstack * self) {
+struct callstack_frame ** callstack_toArray(struct callstack * self) {
     if (self == NULL) return NULL;
 
     if (self->translationStatus == NONE && callstack_translate(self) == FAILED) {
         return NULL;
     }
-    return self->stringArray;
-}
-
-const char * callstack_toString(struct callstack * self, char separator) {
-    if (self == NULL) return NULL;
-
-    if (self->translationStatus == NONE && callstack_translate(self) == FAILED) {
-        return NULL;
-    } else if (self->stringArray == NULL || self->stringArraySize == 0) {
-        char string[2] = { separator, '\0' };
-        return strdup(string);
-    }
-    char * string = malloc(callstack_getTotalStringLength(self) + (self->stringArraySize + 1) * sizeof(char));
-    size_t i, j;
-    for (i = 0, j = 0; i < self->stringArraySize; ++i, ++j) {
-        const size_t len = strlen(self->stringArray[i]);
-        memcpy(string + j, self->stringArray[i], len);
-        j += len;
-        string[j] = separator;
-    }
-    string[j] = '\0';
-    return string;
+    return self->frames;
 }
 
 void callstack_destroy(struct callstack * self) {
     self->translationStatus = NONE;
     self->backtraceSize     = 0;
     
-    if (self->stringArray != NULL) {
-        for (size_t i = 0; i < self->stringArraySize; ++i) {
-            free(self->stringArray[i]);
+    if (self->frames != NULL) {
+        for (size_t i = 0; i < self->frameCount; ++i) {
+            callstack_frame_delete(self->frames[i]);
         }
-        free(self->stringArray);
+        free(self->frames);
     }
     
-    self->stringArraySize = 0;
+    self->frameCount = 0;
 }
 
 void callstack_delete(struct callstack * self) {
