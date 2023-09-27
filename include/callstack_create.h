@@ -35,6 +35,7 @@ static inline void callstack_create(struct callstack * self) {
     self->backtraceSize     = 0;
     self->frameCount        = 0;
     self->frames            = NULL;
+    self->frameInfos        = NULL;
     self->translationStatus = NONE;
 }
 

@@ -24,6 +24,8 @@
 #include "callstack_frame.h"
 #include "callstack_type.h"
 
+#include "optional_Dl_info.h"
+
 #ifdef __cplusplus
 extern "C" {
 #endif
@@ -37,6 +39,7 @@ struct callstack {
     
     size_t frameCount;
     struct callstack_frame ** frames;
+    optional_Dl_info_t * frameInfos;
     /** The size of the backtrace.                                 */
     size_t  backtraceSize;
     /** The backtrace.                                             */
@@ -131,6 +134,8 @@ void callstack_copy(struct callstack * self, const struct callstack * other);
  * @return A string array consisting of human readable strings.
  */
 struct callstack_frame ** callstack_toArray(struct callstack * self);
+
+struct callstack_frame ** callstack_getBinaries(struct callstack * self);
 
 /**
  * @brief Returns the number of frames stored in the given callstack.
