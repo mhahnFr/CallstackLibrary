@@ -1,5 +1,5 @@
 /*
- * Callstack Library - A library creating human readable call stacks.
+ * Callstack Library - Library creating human-readable call stacks.
  *
  * Copyright (C) 2022 - 2023  mhahnFr
  *
@@ -66,6 +66,8 @@ int callstack_backtrace(void * buffer[], int bufferSize, void * address);
  * @return The status of the translation.
  */
 enum callstack_type callstack_translate(struct callstack * self);
+
+enum callstack_type callstack_translateBinaries(struct callstack * self);
 
 void callstack_reset(struct callstack * self);
 

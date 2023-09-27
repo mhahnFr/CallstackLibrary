@@ -44,11 +44,36 @@ int callstack_backtrace(void * buffer[], int bufferSize, void * address) {
 }
 
 enum callstack_type callstack_translate(struct callstack * self) {
+    if (self->frameInfos == NULL && callstack_translateBinaries(self) == FAILED) {
+        return FAILED;
+    }
+    
     struct callstack_parser parser;
     callstack_parser_create(&parser);
     self->translationStatus = callstack_parser_parse(&parser, self);
     callstack_parser_destroy(&parser);
     return self->translationStatus;
+}
+
+enum callstack_type callstack_translateBinaries(struct callstack * self) {
+    self->frameInfos = malloc(sizeof(optional_Dl_info_t) * self->backtraceSize);
+    if (self->frameInfos == NULL) return FAILED;
+    
+    self->frames = malloc(sizeof(struct callstack_frame *) * self->backtraceSize);
+    if (self->frames == NULL) {
+        free(self->frameInfos);
+        return FAILED;
+    }
+    self->frameCount = self->backtraceSize;
+    
+    for (size_t i = 0; i < self->backtraceSize; ++i) {
+        const bool success = self->frameInfos[i].has_value
+                           = dladdr(self->backtrace[i], &self->frameInfos[i].value);
+        if (success && (self->frames[i] = callstack_frame_new()) != NULL) {
+            self->frames[i]->binaryFile = strdup(self->frameInfos[i].value.dli_fname);
+        }
+    }
+    return TRANSLATED;
 }
 
 void callstack_reset(struct callstack * self) {

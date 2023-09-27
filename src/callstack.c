@@ -77,6 +77,12 @@ void callstack_copy(struct callstack * self, const struct callstack * other) {
         for (size_t i = 0; i < self->frameCount; ++i) {
             self->frames[i] = callstack_frame_copy(other->frames[i]);
         }
+        
+        if (other->frameInfos != NULL) {
+            const size_t infoSize = sizeof(optional_Dl_info_t) * self->backtraceSize;
+            self->frameInfos = malloc(infoSize);
+            memcpy(self->frameInfos, other->frameInfos, infoSize);
+        }
     }
 }
 
@@ -84,6 +90,16 @@ struct callstack_frame ** callstack_toArray(struct callstack * self) {
     if (self == NULL) return NULL;
 
     if (self->translationStatus == NONE && callstack_translate(self) == FAILED) {
+        return NULL;
+    }
+    return self->frames;
+}
+
+struct callstack_frame ** callstack_getBinaries(struct callstack * self) {
+    if (self == NULL) return NULL;
+    
+    if ((self->translationStatus == NONE || self->translationStatus == FAILED)
+        && callstack_translateBinaries(self) == FAILED) {
         return NULL;
     }
     return self->frames;
@@ -99,6 +115,7 @@ void callstack_destroy(struct callstack * self) {
         }
         free(self->frames);
     }
+    free(self->frameInfos);
     
     self->frameCount = 0;
 }

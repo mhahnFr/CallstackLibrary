@@ -34,28 +34,21 @@
 
 bool callstack_parser_parseImpl(struct callstack_parser * self,
                                 struct callstack *        callstack) {
-    callstack->frames = malloc((callstack->backtraceSize + 1) * sizeof(struct callstack_frame *));
-    if (callstack->frames == NULL) {
-        return false;
-    }
-    callstack->frameCount = callstack->backtraceSize;
     for (size_t i = 0; i < callstack->backtraceSize; ++i) {
-        struct callstack_frame * frame = callstack_frame_new();
-        if (frame == NULL) {
-            return false;
-        }
-        Dl_info info;
-        if (dladdr(callstack->backtrace[i], &info)) {
-            if ((frame->binaryFile = strdup(info.dli_fname)) == NULL) {
+        optional_Dl_info_t * info = &callstack->frameInfos[i];
+        struct callstack_frame * frame = callstack->frames[i]; // FIXME: Careful with NULL!
+        
+        if (info->has_value) {
+            if ((frame->binaryFile = strdup(info->value.dli_fname)) == NULL) {
                 callstack_frame_delete(frame);
                 return false;
             }
-            struct binaryFile * file = cache_findOrAddFile(callstack_parser_getCache(self), info.dli_fname);
+            struct binaryFile * file = cache_findOrAddFile(callstack_parser_getCache(self), info->value.dli_fname);
             if (file == NULL || !file->addr2String(file,
-                                                   &info,
+                                                   &info->value,
                                                    callstack->backtrace[i],
                                                    frame)) {
-                if (!callstack_parser_createDynamicLine(&info,
+                if (!callstack_parser_createDynamicLine(&info->value,
                                                         "<< Unknown >>",
                                                         callstack->backtrace[i],
                                                         frame)) {
