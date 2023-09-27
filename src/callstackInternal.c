@@ -69,7 +69,15 @@ enum callstack_type callstack_translateBinaries(struct callstack * self) {
     for (size_t i = 0; i < self->backtraceSize; ++i) {
         const bool success = self->frameInfos[i].has_value
                            = dladdr(self->backtrace[i], &self->frameInfos[i].value);
-        if (success && (self->frames[i] = callstack_frame_new()) != NULL) {
+        if (success) {
+            if ((self->frames[i] = callstack_frame_new()) == NULL) {
+                for (size_t j = 0; j < i; ++j) {
+                    callstack_frame_delete(self->frames[i]);
+                }
+                free(self->frameInfos);
+                free(self->frames);
+                return FAILED;
+            }
             self->frames[i]->binaryFile = strdup(self->frameInfos[i].value.dli_fname);
         }
     }
