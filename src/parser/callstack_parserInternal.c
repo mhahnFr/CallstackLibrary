@@ -35,7 +35,7 @@
 bool callstack_parser_parseImpl(struct callstack_parser * self,
                                 struct callstack *        callstack) {
     for (size_t i = 0; i < callstack->backtraceSize; ++i) {
-        optional_Dl_info_t * info = &callstack->frameInfos[i];
+        optional_Dl_info_t *     info  = &callstack->frameInfos[i];
         struct callstack_frame * frame = callstack->frames[i];
         
         if (info->has_value) {
@@ -43,7 +43,8 @@ bool callstack_parser_parseImpl(struct callstack_parser * self,
                 callstack_frame_delete(frame);
                 return false;
             }
-            struct binaryFile * file = cache_findOrAddFile(callstack_parser_getCache(self), info->value.dli_fname);
+            struct binaryFile * file = cache_findOrAddFile(callstack_parser_getCache(self),
+                                                           info->value.dli_fname);
             if (file == NULL || !file->addr2String(file,
                                                    &info->value,
                                                    callstack->backtrace[i],
