@@ -156,6 +156,9 @@ namespace lcs {
         
         operator       struct_callstack * ()       { return &self; }
         operator const struct_callstack * () const { return &self; }
+        
+              struct_callstack * operator -> ()       { return &self; }
+        const struct_callstack * operator -> () const { return &self; }
     };
 }
 
