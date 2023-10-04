@@ -38,7 +38,7 @@ struct callstack {
     enum callstack_type translationStatus;
     
     size_t frameCount;
-    struct callstack_frame ** frames;
+    struct callstack_frame * frames;
     optional_Dl_info_t * frameInfos;
     /** The size of the backtrace.                                 */
     size_t  backtraceSize;
@@ -133,9 +133,9 @@ void callstack_copy(struct callstack * self, const struct callstack * other);
  * @param self The callstack object.
  * @return A string array consisting of human readable strings.
  */
-struct callstack_frame ** callstack_toArray(struct callstack * self);
+struct callstack_frame * callstack_toArray(struct callstack * self);
 
-struct callstack_frame ** callstack_getBinaries(struct callstack * self);
+struct callstack_frame * callstack_getBinaries(struct callstack * self);
 
 /**
  * @brief Returns the number of frames stored in the given callstack.

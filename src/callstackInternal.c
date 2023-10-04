@@ -59,7 +59,7 @@ enum callstack_type callstack_translateBinaries(struct callstack * self) {
     self->frameInfos = malloc(sizeof(optional_Dl_info_t) * self->backtraceSize);
     if (self->frameInfos == NULL) return FAILED;
     
-    self->frames = malloc(sizeof(struct callstack_frame *) * self->backtraceSize);
+    self->frames = malloc(sizeof(struct callstack_frame) * self->backtraceSize);
     if (self->frames == NULL) {
         free(self->frameInfos);
         return FAILED;
@@ -67,25 +67,20 @@ enum callstack_type callstack_translateBinaries(struct callstack * self) {
     self->frameCount = self->backtraceSize;
     
     for (size_t i = 0; i < self->backtraceSize; ++i) {
-        if ((self->frames[i] = callstack_frame_new()) == NULL) {
-            for (size_t j = 0; j < i; ++j) {
-                callstack_frame_delete(self->frames[i]);
-            }
-            free(self->frameInfos);
-            free(self->frames);
-            return FAILED;
-        }
+        callstack_frame_create(&self->frames[i]);
         const bool success = self->frameInfos[i].has_value
                            = dladdr(self->backtrace[i], &self->frameInfos[i].value);
-        self->frames[i]->binaryFile = success ? strdup(self->frameInfos[i].value.dli_fname) : NULL;
+        self->frames[i].binaryFile = success ? strdup(self->frameInfos[i].value.dli_fname) : NULL;
     }
     return TRANSLATED;
 }
 
 void callstack_reset(struct callstack * self) {
-    for (size_t i = 0; self->frames[i] != NULL; ++i) {
-        callstack_frame_delete(self->frames[i]);
+    if (self->frames != NULL) {
+        for (size_t i = 0; i < self->frameCount; ++i) {
+            callstack_frame_destroy(&self->frames[i]);
+        }
+        free(self->frames);
+        self->frameCount = 0;
     }
-    free(self->frames);
-    self->frameCount = 0;
 }

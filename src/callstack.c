@@ -86,7 +86,7 @@ void callstack_copy(struct callstack * self, const struct callstack * other) {
     }
 }
 
-struct callstack_frame ** callstack_toArray(struct callstack * self) {
+struct callstack_frame * callstack_toArray(struct callstack * self) {
     if (self == NULL) return NULL;
 
     if (self->translationStatus == NONE && callstack_translate(self) == FAILED) {
@@ -95,7 +95,7 @@ struct callstack_frame ** callstack_toArray(struct callstack * self) {
     return self->frames;
 }
 
-struct callstack_frame ** callstack_getBinaries(struct callstack * self) {
+struct callstack_frame * callstack_getBinaries(struct callstack * self) {
     if (self == NULL) return NULL;
     
     if ((self->translationStatus == NONE || self->translationStatus == FAILED)
@@ -111,7 +111,7 @@ void callstack_destroy(struct callstack * self) {
     
     if (self->frames != NULL) {
         for (size_t i = 0; i < self->frameCount; ++i) {
-            callstack_frame_delete(self->frames[i]);
+            callstack_frame_destroy(&self->frames[i]);
         }
         free(self->frames);
     }
