@@ -39,7 +39,7 @@ static inline void callstack_frame_create(struct callstack_frame * self) {
     self->sourceFile = NULL;
     self->sourceLine = 0;
     
-    self->info = (optional_Dl_info_t) { .has_value = false };
+    self->info.has_value = false;
 }
 
 static inline struct callstack_frame * callstack_frame_new(void) {
