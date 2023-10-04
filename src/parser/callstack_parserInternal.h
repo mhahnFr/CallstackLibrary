@@ -55,20 +55,17 @@ char * callstack_parser_createLine(const char * name, ptrdiff_t diff);
 char * callstack_parser_demangle(char * name);
 
 /**
- * @brief Creates a callstack line using the given callstack, info, index and fallback.
+ * @brief Creates a callstack line using the given info and frame address.
  *
- * The callstack line of the given index is translated using the given dynamic linker information.
- * If translating is not possible, the fallback is used to create the callstack line.
+ * The given frame address is translated using the given dynamic linker information.
  *
  * @param info the dynamic linker info
- * @param fallback the fallback string
  * @param frameAddress the translated frame's address
  * @param frame the frame structure to store the information in
- * @return whether the line was set
+ * @return whether the line could be set
  */
-bool callstack_parser_createDynamicLine(       Dl_info *         info,
-                                               char *            fallback,
-                                               void *            frameAddress,
-                                        struct callstack_frame * frame);
+bool callstack_parser_createDynamicLine(Dl_info *         info,
+                                        void *            frameAddress,
+                                struct callstack_frame * frame);
 
 #endif /* callstack_parserInternal_h */

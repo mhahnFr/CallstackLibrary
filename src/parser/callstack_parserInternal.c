@@ -38,22 +38,17 @@ bool callstack_parser_parseImpl(struct callstack_parser * self,
         optional_Dl_info_t *     info  = &callstack->frames[i].info;
         struct callstack_frame * frame = &callstack->frames[i];
         
-        if (info->has_value) {
-            struct binaryFile * file = cache_findOrAddFile(callstack_parser_getCache(self),
-                                                           info->value.dli_fname);
-            if (file == NULL || !file->addr2String(file,
-                                                   &info->value,
-                                                   callstack->backtrace[i],
-                                                   frame)) {
-                if (!callstack_parser_createDynamicLine(&info->value,
-                                                        "<< Unknown >>",
-                                                        callstack->backtrace[i],
-                                                        frame)) {
-                    return false;
-                }
-            }
-        } else {
-            if ((frame->function = strdup("<< Unknown >>")) == NULL) {
+        if (!info->has_value) continue;
+        
+        struct binaryFile * file = cache_findOrAddFile(callstack_parser_getCache(self),
+                                                       info->value.dli_fname);
+        if (file == NULL || !file->addr2String(file,
+                                               &info->value,
+                                               callstack->backtrace[i],
+                                               frame)) {
+            if (!callstack_parser_createDynamicLine(&info->value,
+                                                    callstack->backtrace[i],
+                                                    frame)) {
                 return false;
             }
         }
@@ -61,19 +56,13 @@ bool callstack_parser_parseImpl(struct callstack_parser * self,
     return true;
 }
 
-bool callstack_parser_createDynamicLine(       Dl_info *         info,
-                                               char *            fallback,
-                                               void *            frameAddress,
-                                        struct callstack_frame * frame) {
-    if (info->dli_sname == NULL) {
-        if ((frame->function = strdup(fallback)) == NULL) {
-            return false;
-        }
-    } else {
-        if ((frame->function = callstack_parser_createLine(info->dli_sname,
-                                                           frameAddress - info->dli_saddr)) == NULL) {
-            return false;
-        }
+bool callstack_parser_createDynamicLine(Dl_info *         info,
+                                        void *            frameAddress,
+                                 struct callstack_frame * frame) {
+    if (info->dli_sname != NULL && 
+        (frame->function = callstack_parser_createLine(info->dli_sname,
+                                                       frameAddress - info->dli_saddr)) == NULL) {
+        return false;
     }
     return true;
 }
