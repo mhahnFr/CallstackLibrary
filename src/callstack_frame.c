@@ -24,20 +24,20 @@
 struct callstack_frame * callstack_frame_copy(struct callstack_frame * self) {
     struct callstack_frame * toReturn = callstack_frame_new();
     
-    if (toReturn == NULL) {
-        return NULL;
+    if (toReturn != NULL) {
+        callstack_frame_copyHere(toReturn, self);
     }
-    
-    if (self->function != NULL) {
-        toReturn->function = strdup(self->function);
-    }
-    if (self->binaryFile != NULL) {
-        toReturn->binaryFile = strdup(self->binaryFile);
-    }
-    if (self->sourceFile != NULL) {
-        toReturn->sourceFile = strdup(self->sourceFile);
-    }
-    toReturn->sourceLine = self->sourceLine;
     
     return toReturn;
+}
+
+static inline char * maybeStrdup(const char * str) {
+    return str == NULL ? NULL : strdup(str);
+}
+
+void callstack_frame_copyHere(struct callstack_frame * destination, const struct callstack_frame * source) {
+    destination->binaryFile = maybeStrdup(source->binaryFile);
+    destination->function   = maybeStrdup(source->function);
+    destination->sourceFile = maybeStrdup(source->sourceFile);
+    destination->sourceLine = source->sourceLine;
 }

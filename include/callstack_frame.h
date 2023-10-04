@@ -48,6 +48,8 @@ static inline struct callstack_frame * callstack_frame_new(void) {
 
 struct callstack_frame * callstack_frame_copy(struct callstack_frame * self);
 
+void callstack_frame_copyHere(struct callstack_frame * destination, const struct callstack_frame * source);
+
 static inline void callstack_frame_destroy(struct callstack_frame * self) {
     free(self->binaryFile);
     free(self->function);

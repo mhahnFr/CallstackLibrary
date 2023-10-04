@@ -69,13 +69,11 @@ void callstack_copy(struct callstack * self, const struct callstack * other) {
         }
         
         self->frameCount = other->frameCount;
-        
         if (self->frameCount != 0) {
-            self->frames = malloc(self->frameCount * sizeof(struct callstack_frame *));
-        }
-        
-        for (size_t i = 0; i < self->frameCount; ++i) {
-            self->frames[i] = callstack_frame_copy(other->frames[i]);
+            self->frames = malloc(self->frameCount * sizeof(struct callstack_frame));
+            for (size_t i = 0; i < self->frameCount; ++i) {
+                callstack_frame_copyHere(&self->frames[i], &other->frames[i]);
+            }
         }
         
         if (other->frameInfos != NULL) {
