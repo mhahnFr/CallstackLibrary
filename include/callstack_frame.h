@@ -22,7 +22,11 @@
 
 #include <stdlib.h>
 
+#include "optional_Dl_info.h"
+
 struct callstack_frame {
+    optional_Dl_info_t info;
+    
     char * binaryFile;
     char * function;
     char * sourceFile;
@@ -34,6 +38,8 @@ static inline void callstack_frame_create(struct callstack_frame * self) {
     self->function   = NULL;
     self->sourceFile = NULL;
     self->sourceLine = 0;
+    
+    self->info = (optional_Dl_info_t) { .has_value = false };
 }
 
 static inline struct callstack_frame * callstack_frame_new(void) {

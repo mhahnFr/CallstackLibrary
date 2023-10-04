@@ -44,7 +44,7 @@ int callstack_backtrace(void * buffer[], int bufferSize, void * address) {
 }
 
 enum callstack_type callstack_translate(struct callstack * self) {
-    if (self->frameInfos == NULL && callstack_translateBinaries(self) == FAILED) {
+    if (self->frames == NULL && callstack_translateBinaries(self) == FAILED) {
         return FAILED;
     }
     
@@ -56,21 +56,17 @@ enum callstack_type callstack_translate(struct callstack * self) {
 }
 
 enum callstack_type callstack_translateBinaries(struct callstack * self) {
-    self->frameInfos = malloc(sizeof(optional_Dl_info_t) * self->backtraceSize);
-    if (self->frameInfos == NULL) return FAILED;
-    
     self->frames = malloc(sizeof(struct callstack_frame) * self->backtraceSize);
     if (self->frames == NULL) {
-        free(self->frameInfos);
         return FAILED;
     }
     self->frameCount = self->backtraceSize;
     
     for (size_t i = 0; i < self->backtraceSize; ++i) {
         callstack_frame_create(&self->frames[i]);
-        const bool success = self->frameInfos[i].has_value
-                           = dladdr(self->backtrace[i], &self->frameInfos[i].value);
-        self->frames[i].binaryFile = success ? strdup(self->frameInfos[i].value.dli_fname) : NULL;
+        const bool success = self->frames[i].info.has_value
+                           = dladdr(self->backtrace[i], &self->frames[i].info.value);
+        self->frames[i].binaryFile = success ? strdup(self->frames[i].info.value.dli_fname) : NULL;
     }
     return TRANSLATED;
 }

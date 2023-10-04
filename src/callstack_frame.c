@@ -40,4 +40,6 @@ void callstack_frame_copyHere(struct callstack_frame * destination, const struct
     destination->function   = maybeStrdup(source->function);
     destination->sourceFile = maybeStrdup(source->sourceFile);
     destination->sourceLine = source->sourceLine;
+    
+    memcpy(&destination->info, &source->info, sizeof(optional_Dl_info_t));
 }

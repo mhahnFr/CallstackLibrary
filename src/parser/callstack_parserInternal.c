@@ -35,7 +35,7 @@
 bool callstack_parser_parseImpl(struct callstack_parser * self,
                                 struct callstack *        callstack) {
     for (size_t i = 0; i < callstack->backtraceSize; ++i) {
-        optional_Dl_info_t *     info  = &callstack->frameInfos[i];
+        optional_Dl_info_t *     info  = &callstack->frames[i].info;
         struct callstack_frame * frame = &callstack->frames[i];
         
         if (info->has_value) {

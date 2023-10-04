@@ -24,8 +24,6 @@
 #include "callstack_frame.h"
 #include "callstack_type.h"
 
-#include "optional_Dl_info.h"
-
 #ifdef __cplusplus
 extern "C" {
 #endif
@@ -39,7 +37,6 @@ struct callstack {
     
     size_t frameCount;
     struct callstack_frame * frames;
-    optional_Dl_info_t * frameInfos;
     /** The size of the backtrace.                                 */
     size_t  backtraceSize;
     /** The backtrace.                                             */

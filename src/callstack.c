@@ -75,12 +75,6 @@ void callstack_copy(struct callstack * self, const struct callstack * other) {
                 callstack_frame_copyHere(&self->frames[i], &other->frames[i]);
             }
         }
-        
-        if (other->frameInfos != NULL) {
-            const size_t infoSize = sizeof(optional_Dl_info_t) * self->backtraceSize;
-            self->frameInfos = malloc(infoSize);
-            memcpy(self->frameInfos, other->frameInfos, infoSize);
-        }
     }
 }
 
@@ -113,7 +107,6 @@ void callstack_destroy(struct callstack * self) {
         }
         free(self->frames);
     }
-    free(self->frameInfos);
     
     self->frameCount = 0;
 }
