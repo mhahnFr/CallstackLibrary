@@ -23,7 +23,6 @@
 
 #define _GNU_SOURCE
  #define __USE_GNU
-  #include <dlfcn.h>
   #include <stdio.h>
  #undef __USE_GNU
 #undef _GNU_SOURCE
