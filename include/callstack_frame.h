@@ -29,14 +29,18 @@ struct callstack_frame {
     unsigned long sourceLine;
 };
 
+static inline void callstack_frame_create(struct callstack_frame * self) {
+    self->binaryFile = NULL;
+    self->function   = NULL;
+    self->sourceFile = NULL;
+    self->sourceLine = 0;
+}
+
 static inline struct callstack_frame * callstack_frame_new(void) {
     struct callstack_frame * toReturn = (struct callstack_frame *) malloc(sizeof(struct callstack_frame));
     
     if (toReturn != NULL) {
-        toReturn->binaryFile = NULL;
-        toReturn->function   = NULL;
-        toReturn->sourceFile = NULL;
-        toReturn->sourceLine = 0;
+        callstack_frame_create(toReturn);
     }
     
     return toReturn;
@@ -44,11 +48,14 @@ static inline struct callstack_frame * callstack_frame_new(void) {
 
 struct callstack_frame * callstack_frame_copy(struct callstack_frame * self);
 
-static inline void callstack_frame_delete(struct callstack_frame * self) {
+static inline void callstack_frame_destroy(struct callstack_frame * self) {
     free(self->binaryFile);
     free(self->function);
     free(self->sourceFile);
-    
+}
+
+static inline void callstack_frame_delete(struct callstack_frame * self) {
+    callstack_frame_destroy(self);
     free(self);
 }
 
