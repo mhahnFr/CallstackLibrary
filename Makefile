@@ -150,7 +150,7 @@ $(STATIC_N): $(OBJS)
 
 clean:
 	- $(RM) $(OBJS) $(DEPS)
-	- $(RM) $(CXX_OBJS)
+	- $(RM) $(CXX_OBJS) $(CXX_DEPS)
 
 fclean: clean
 	- $(RM) $(DYLIB_N) $(SHARED_N) $(STATIC_N)
