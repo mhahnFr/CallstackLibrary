@@ -1,5 +1,5 @@
 /*
- * Callstack Library - A library creating human readable call stacks.
+ * Callstack Library - Library creating human-readable call stacks.
  *
  * Copyright (C) 2023  mhahnFr
  *
@@ -28,6 +28,7 @@
 struct function {
     /** The beginning address of the function inside its Mach-O file. */
     uint64_t startAddress;
+    /** The end address of the function inside its Mach-O file.       */
     uint64_t endAddress;
     
     /** The name of the function at linking time.                     */

@@ -37,6 +37,7 @@ struct machoFile {
     uint64_t addressOffset;
     /** The contained object files.                                   */
     struct objectFile * objectFiles;
+    /** Vector with all function start addresses found in this file.  */
     struct vector_uint64_t functionStarts;
 };
 

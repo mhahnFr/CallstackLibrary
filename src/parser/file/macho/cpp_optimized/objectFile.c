@@ -26,9 +26,10 @@
  * This structure acts as a wrapper around the object file structure.
  */
 struct objectFile_private {
-    /** The object file structure.                            */
+    /** The object file structure.                       */
     struct objectFile _;
     
+    /** A vector with the functions of this object file. */
     struct vector_function functions;
 };
 
