@@ -20,25 +20,7 @@
 #ifndef optional_Dl_info_h
 #define optional_Dl_info_h
 
-#ifndef _GNU_SOURCE
- #define UNDEF_GNU_SOURCE
- #define _GNU_SOURCE
-#endif
-
-#ifndef __USE_GNU
- #define UNDEF_USE_GNU
- #define __USE_GNU
-#endif
-
-#include <dlfcn.h>
-
-#ifdef UNDEF_GNU_SOURCE
- #undef _GNU_SOURCE
-#endif
-
-#ifdef UNDEF_USE_GNU
- #undef __USE_GNU
-#endif
+#include "lcs_dlfcn.h"
 
 #include "../DC4C/optional.h"
 

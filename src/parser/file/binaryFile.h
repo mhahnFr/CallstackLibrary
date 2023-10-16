@@ -20,15 +20,10 @@
 #ifndef binaryFile_h
 #define binaryFile_h
 
-#define _GNU_SOURCE
- #define __USE_GNU
-  #include <dlfcn.h>
- #undef __USE_GNU
-#undef _GNU_SOURCE
-
 #include <stdbool.h>
 
 #include "../../../include/callstack_frame.h"
+#include "../../../include/lcs_dlfcn.h"
 
 /**
  * This enumeration contains the supported types of executable files.
