@@ -1,5 +1,5 @@
 /*
- * Callstack Library - A library creating human readable call stacks.
+ * Callstack Library - Library creating human-readable call stacks.
  *
  * Copyright (C) 2022 - 2023  mhahnFr
  *
@@ -55,7 +55,7 @@ namespace lcs {
          *
          * @throws A `system_error` if compiled using C++11 or newer, a runtime error otherwise.
          */
-        void error() {
+        inline static void error() {
 #if __cplusplus >= 201103
             throw std::system_error(errno, std::generic_category());
 #else
@@ -74,7 +74,7 @@ namespace lcs {
          *
          * @param emplace Whether to call `callstack_emplace()`.
          */
-        explicit callstack(bool emplace = true) {
+        inline explicit callstack(bool emplace = true) {
             if (emplace) {
                 if (!callstack_emplaceWithAddress(*this, __builtin_return_address(0))) {
                     error();
@@ -93,7 +93,7 @@ namespace lcs {
          *
          * @param address The stack address after which frames are ignored.
          */
-        explicit callstack(void * address) {
+        inline explicit callstack(void * address) {
             if (!callstack_emplaceWithAddress(*this, address)) {
                 error();
             }
@@ -108,13 +108,13 @@ namespace lcs {
          * @param trace The backtrace.
          * @param length The length of the given backtrace.
          */
-        callstack(void ** trace, int length) {
+        inline callstack(void ** trace, int length) {
             if (!callstack_emplaceWithBacktrace(*this, trace, length)) {
                 error();
             }
         }
         
-        callstack(const callstack & other) {
+        inline callstack(const callstack & other) {
             callstack_create(*this);
             callstack_copy(*this, other);
         }
@@ -124,16 +124,16 @@ namespace lcs {
          *
          * @param cCallstack The C structure to be copied.
          */
-        explicit callstack(const struct_callstack * cCallstack) {
+        inline explicit callstack(const struct_callstack * cCallstack) {
             callstack_create(*this);
             callstack_copy(*this, cCallstack);
         }
         
-       ~callstack() {
+        inline ~callstack() {
            callstack_destroy(*this);
         }
         
-        callstack & operator=(const callstack & other) {
+        inline callstack & operator=(const callstack & other) {
             if (&other != this) {
                 callstack_copy(*this, other);
             }
@@ -141,12 +141,12 @@ namespace lcs {
         }
         
  #if __cplusplus >= 201103
-        callstack(callstack && other)
+        inline callstack(callstack && other)
             : self(std::move(other.self)) {
             callstack_create(other);
         }
         
-        callstack & operator=(callstack && other) {
+        inline auto operator=(callstack && other) -> callstack & {
             callstack_destroy(*this);
             self = std::move(other.self);
             callstack_create(other);
@@ -154,11 +154,11 @@ namespace lcs {
         }
  #endif
         
-        operator       struct_callstack * ()       { return &self; }
-        operator const struct_callstack * () const { return &self; }
+        inline operator       struct_callstack * ()       { return &self; }
+        inline operator const struct_callstack * () const { return &self; }
         
-              struct_callstack * operator -> ()       { return &self; }
-        const struct_callstack * operator -> () const { return &self; }
+        inline       struct_callstack * operator -> ()       { return &self; }
+        inline const struct_callstack * operator -> () const { return &self; }
     };
 }
 
