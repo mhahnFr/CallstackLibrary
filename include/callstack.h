@@ -35,7 +35,9 @@ struct callstack {
     /** The type (status) of the translation to be human-readable. */
     enum callstack_type translationStatus;
     
+    /** The amount of available frames.                            */
     size_t frameCount;
+    /** An array of callstack frames.                              */
     struct callstack_frame * frames;
     /** The size of the backtrace.                                 */
     size_t  backtraceSize;
@@ -120,18 +122,26 @@ bool callstack_emplaceWithBacktrace(struct callstack * self,
 void callstack_copy(struct callstack * self, const struct callstack * other);
 
 /**
- * @brief Creates an array of strings out of the backtrace and returns it.
- *
- * The backtrace is only constructed if it has not already been created.
- * The returned string array must not be freed.
+ * @brief Translates the given callstack and returns an array of the translated frames.
  *
  * Returns `NULL` if an error happens.
  *
  * @param self The callstack object.
- * @return A string array consisting of human readable strings.
+ * @return An array of translated callstack frames.
  */
 struct callstack_frame * callstack_toArray(struct callstack * self);
 
+/**
+ * @brief Translates the given callstack and returns an array of the translated frames.
+ *
+ * If the given callstack has not been translated before, only the binary file information
+ * is deducted.
+ *
+ * Returns `NULL` if an error happens.
+ *
+ * @param self The callstack object.
+ * @return An array of translated callstack frames.
+ */
 struct callstack_frame * callstack_getBinaries(struct callstack * self);
 
 /**
@@ -187,6 +197,6 @@ void callstack_delete(struct callstack * self);
 
 #include "callstack.hpp"
 
-#endif
+#endif /* __cplusplus */
 
 #endif /* callstack_h */
