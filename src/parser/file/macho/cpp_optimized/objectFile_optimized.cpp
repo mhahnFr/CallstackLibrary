@@ -44,6 +44,12 @@ public:
         functions.emplace(std::make_pair(function.startAddress, function));
     }
     
+    /**
+     * Searches and returns the function in which the given address is in.
+     *
+     * @param address the address whose function to be searched
+     * @return the function if found
+     */
     inline auto findFunction(uint64_t address) -> optional_function_t {
         auto result = functions.lower_bound(address);
         optional_function_t toReturn = { .has_value = false };
@@ -56,6 +62,13 @@ public:
         return toReturn;
     }
     
+    /**
+     * Performs the given function with the given arguments for each function
+     * inside this object file.
+     *
+     * @param func the function to be executed
+     * @param args the additional arguments to be passed
+     */
     inline void functionsForEach(void (*func)(function *, va_list), va_list & args) {
         for (auto & elem : functions) {
             va_list copy;
