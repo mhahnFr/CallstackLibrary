@@ -80,10 +80,20 @@ void objectFile_functionsForEach(struct objectFile * me, void (*func)(struct fun
     va_end(list);
 }
 
+static inline void objectFile_functionDestroy(struct function * f, va_list args) {
+    (void) args;
+    
+    function_destroy(f);
+}
+
 void objectFile_destroy(struct objectFile * me) {
     struct objectFile_private * self = (struct objectFile_private *) me->priv;
-    
+
+    objectFile_functionsForEach(me, &objectFile_functionDestroy);
     vector_function_destroy(&self->functions);
+    free(me->sourceFile);
+    free(me->directory);
+    free(me->name);
 }
 
 void objectFile_delete(struct objectFile * self) {

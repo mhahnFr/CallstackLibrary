@@ -36,7 +36,7 @@ void function_create(struct function * self) {
 }
 
 void function_destroy(struct function * self) {
-    (void) self;
+    free(self->linkedName);
 }
 
 void function_delete(struct function * self) {
