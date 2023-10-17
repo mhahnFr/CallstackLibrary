@@ -55,6 +55,16 @@ void callstack_createWithBacktrace(struct callstack * self,
  */
 size_t callstack_getTotalStringLength(struct callstack * self);
 
+/**
+ * @brief Creates a backtrace into the given buffer.
+ *
+ * All frames upon the given address are removed from the generated backtrace.
+ *
+ * @param buffer the buffer to store the frame addresses in
+ * @param bufferSize the count of available elements in the given buffer
+ * @param address the address upon which frames are removed from the backtrace
+ * @return the count of frame addresses stored in the given buffer
+ */
 int callstack_backtrace(void * buffer[], int bufferSize, void * address);
 
 /**
@@ -67,8 +77,19 @@ int callstack_backtrace(void * buffer[], int bufferSize, void * address);
  */
 enum callstack_type callstack_translate(struct callstack * self);
 
+/**
+ * Translates the callstack frames of the given callstack to their corresponding binary files.
+ *
+ * @param self the callstack object
+ * @return whether the binaries where translated
+ */
 enum callstack_type callstack_translateBinaries(struct callstack * self);
 
+/**
+ * Removes all translated callstack frames from the given callstack object.
+ *
+ * @param self the callstack object
+ */
 void callstack_reset(struct callstack * self);
 
 #endif /* callstackinternal_h */
