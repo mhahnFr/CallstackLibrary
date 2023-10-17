@@ -295,11 +295,6 @@ static inline bool machoFile_parseFileImpl64(struct machoFile * self,
 }
 
 bool machoFile_parseFile(struct machoFile * self, void * baseAddress) {
-    if (strcmp(self->_.fileName, "/usr/lib/dyld") == 0) {
-        // We cannot parse Darwins dynamic linker at the moment.
-        return false;
-    }
-    
     struct mach_header * header = baseAddress;
     switch (header->magic) {
         case MH_MAGIC: return machoFile_parseFileImpl(self, baseAddress, false);

@@ -19,6 +19,7 @@
 
 #include <stdio.h>
 #include <stdlib.h>
+#include <sys/stat.h>
 
 #include "machoFile.h"
 #include "machoFileInternal.h"
@@ -50,6 +51,26 @@ void machoFile_create(struct machoFile * self) {
     vector_uint64_t_create(&self->functionStarts);
 }
 
+static inline bool machoFile_readAndParseFile(struct machoFile * self) {
+    if (self->_.fileName == NULL) return false;
+    
+    struct stat fileStats;
+    if (stat(self->_.fileName, &fileStats) != 0) {
+        return false;
+    }
+    FILE * file = fopen(self->_.fileName, "r");
+    void * buffer = malloc(fileStats.st_size);
+    if (buffer == NULL) {
+        fclose(file);
+        return false;
+    }
+    const size_t count = fread(buffer, 1, fileStats.st_size, file);
+    fclose(file);
+    const bool toReturn = machoFile_parseFile(self, buffer);
+    free(buffer);
+    return toReturn;
+}
+
 bool machoFile_addr2String(struct binaryFile *      me,
                                   Dl_info *         info,
                                   void *            address,
@@ -59,7 +80,7 @@ bool machoFile_addr2String(struct binaryFile *      me,
         return NULL;
     }
     if (!self->_.parsed &&
-        !(self->_.parsed = machoFile_parseFile(self, info->dli_fbase))) {
+        !(self->_.parsed = machoFile_readAndParseFile(self))) {
         return NULL;
     }
     
