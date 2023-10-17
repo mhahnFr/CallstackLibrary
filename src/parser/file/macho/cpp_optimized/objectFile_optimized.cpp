@@ -35,6 +35,13 @@ class ObjectFile {
     std::map<uint64_t, function, std::greater<uint64_t>> functions;
     
 public:
+    ~ObjectFile() {
+        objectFile_destroy(&self);
+        for (auto & elem : functions) {
+            function_destroy(&elem.second);
+        }
+    }
+    
     /**
      * Adds the given function structure to this object file representation.
      *
@@ -115,7 +122,11 @@ void objectFile_functionsForEach(objectFile * me, void (*func)(function *, va_li
     va_end(list);
 }
 
-void objectFile_destroy(objectFile *) {}
+void objectFile_destroy(objectFile * self) {
+    std::free(self->name);
+    std::free(self->directory);
+    std::free(self->sourceFile);
+}
 
 void objectFile_delete(objectFile * self) {
     delete reinterpret_cast<ObjectFile *>(self->priv);
