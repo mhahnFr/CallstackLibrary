@@ -43,6 +43,13 @@ bool machoFile_parseFile(struct machoFile * self, void * baseAddress);
 void machoFile_addObjectFile(struct machoFile *  self,
                              struct objectFile * file);
 
+/**
+ * Searches and returns the function and the object file the function is in.
+ *
+ * @param self the Mach-O file instance
+ * @param startAddress the start address of the Mach-O file
+ * @param address the raw address whose function and object file to be found
+ */
 struct optional_funcFile machoFile_findFunction(struct machoFile * self,
                                                 void *             startAddress,
                                                 void *             address);
