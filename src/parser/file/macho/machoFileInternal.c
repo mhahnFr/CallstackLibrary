@@ -89,9 +89,9 @@ static inline bool machoFile_handleSymtab(struct machoFile *      self,
                     current = objectFile_new();
                 } else {
                     if (current->directory == NULL) {
-                        current->directory = value;
+                        current->directory = strdup(value);
                     } else if (current->sourceFile == NULL) {
-                        current->sourceFile = value;
+                        current->sourceFile = strdup(value);
                     } else {
                         // Unknown format...
                         return false;
@@ -101,7 +101,7 @@ static inline bool machoFile_handleSymtab(struct machoFile *      self,
             }
                 
             case N_OSO:
-                current->name = stringBegin + machoFile_maybeSwap(32, bitsReversed, entry->n_un.n_strx);
+                current->name = strdup(stringBegin + machoFile_maybeSwap(32, bitsReversed, entry->n_un.n_strx));
                 break;
                 
             case N_FUN: {
@@ -111,7 +111,7 @@ static inline bool machoFile_handleSymtab(struct machoFile *      self,
                 }
                 char * value = stringBegin + machoFile_maybeSwap(32, bitsReversed, entry->n_un.n_strx);
                 if (*value != '\0') {
-                    currFun.value.linkedName   = value;
+                    currFun.value.linkedName   = strdup(value);
                     currFun.value.startAddress = machoFile_maybeSwap(32, bitsReversed, entry->n_value);
                 }
                 break;
@@ -167,9 +167,9 @@ static inline bool machoFile_handleSymtab64(struct machoFile *      self,
                     current = objectFile_new();
                 } else {
                     if (current->directory == NULL) {
-                        current->directory = value;
+                        current->directory = strdup(value);
                     } else if (current->sourceFile == NULL) {
-                        current->sourceFile = value;
+                        current->sourceFile = strdup(value);
                     } else {
                         // Unknown format...
                         return false;
@@ -179,7 +179,7 @@ static inline bool machoFile_handleSymtab64(struct machoFile *      self,
             }
                 
             case N_OSO:
-                current->name = stringBegin + machoFile_maybeSwap(32, bitsReversed, entry->n_un.n_strx);
+                current->name = strdup(stringBegin + machoFile_maybeSwap(32, bitsReversed, entry->n_un.n_strx));
                 break;
                 
             case N_FUN: {
@@ -189,7 +189,7 @@ static inline bool machoFile_handleSymtab64(struct machoFile *      self,
                 }
                 char * value = stringBegin + machoFile_maybeSwap(32, bitsReversed, entry->n_un.n_strx);
                 if (*value != '\0') {
-                    currFun.value.linkedName   = value;
+                    currFun.value.linkedName   = strdup(value);
                     currFun.value.startAddress = machoFile_maybeSwap(64, bitsReversed, entry->n_value);
                 }
                 break;
