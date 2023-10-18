@@ -43,7 +43,7 @@ endif
 # -------------------------------
 
 # Main sources
-SRCS = $(shell find . -type f -name \*.c \! -path $(LINUX_PATH)\* \! -path $(DARWIN_PATH)\* \! -path \*/$(OPTIMIZED_PATH)\*)
+SRCS = $(shell find ./src -type f -name \*.c \! -path $(LINUX_PATH)\* \! -path $(DARWIN_PATH)\* \! -path \*/$(OPTIMIZED_PATH)\*)
 OBJS = $(patsubst %.c, %.o, $(SRCS))
 DEPS = $(patsubst %.c, %.d, $(SRCS))
 # ------------
