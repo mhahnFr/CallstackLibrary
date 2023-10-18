@@ -58,12 +58,11 @@ static inline bool machoFile_readAndParseFile(struct machoFile * self) {
     if (stat(self->_.fileName, &fileStats) != 0) {
         return false;
     }
-    FILE * file = fopen(self->_.fileName, "r");
     void * buffer = malloc(fileStats.st_size);
     if (buffer == NULL) {
-        fclose(file);
         return false;
     }
+    FILE * file = fopen(self->_.fileName, "r");
     const size_t count = fread(buffer, 1, fileStats.st_size, file);
     fclose(file);
     const bool toReturn = machoFile_parseFile(self, buffer);
