@@ -65,7 +65,7 @@ static inline bool machoFile_readAndParseFile(struct machoFile * self) {
     FILE * file = fopen(self->_.fileName, "r");
     const size_t count = fread(buffer, 1, fileStats.st_size, file);
     fclose(file);
-    const bool toReturn = machoFile_parseFile(self, buffer);
+    const bool toReturn = (off_t) count == fileStats.st_size && machoFile_parseFile(self, buffer);
     free(buffer);
     return toReturn;
 }
