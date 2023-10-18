@@ -26,7 +26,7 @@
 
 #include <Availability.h>
 
-#if defined(__MAC_OS_X_VERSION_MIN_REQUIRED) && defined(MAC_OS_VERSION_13_0) \
+#if defined(__BLOCKS__) && defined(__MAC_OS_X_VERSION_MIN_REQUIRED) && defined(MAC_OS_VERSION_13_0) \
     && __MAC_OS_X_VERSION_MIN_REQUIRED >= MAC_OS_VERSION_13_0
  #include <mach-o/utils.h>
 #else
@@ -308,7 +308,7 @@ static inline bool machoFile_parseFileImpl64(struct machoFile * self,
 static inline bool machoFile_parseFat(struct machoFile *  self,
                                       struct fat_header * fatHeader,
                                       bool                bitsReversed) {
-#if defined(__MAC_OS_X_VERSION_MIN_REQUIRED) && defined(MAC_OS_VERSION_13_0) \
+#if defined(__BLOCKS__) && defined(__MAC_OS_X_VERSION_MIN_REQUIRED) && defined(MAC_OS_VERSION_13_0) \
     && __MAC_OS_X_VERSION_MIN_REQUIRED >= MAC_OS_VERSION_13_0
     (void) fatHeader;
     (void) bitsReversed;
