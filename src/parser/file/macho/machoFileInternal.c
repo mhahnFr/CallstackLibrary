@@ -310,12 +310,19 @@ static inline bool machoFile_parseFat(struct machoFile *  self,
                                       bool                bitsReversed) {
 #if defined(__MAC_OS_X_VERSION_MIN_REQUIRED) && defined(MAC_OS_VERSION_13_0) \
     && __MAC_OS_X_VERSION_MIN_REQUIRED >= MAC_OS_VERSION_13_0
+    (void) fh;
+    (void) bitsReversed;
+    
+    __block bool toReturn = false;
+    
     const int result = macho_best_slice(self->_.fileName,
                                         ^ (const struct mach_header * header, uint64_t offset, size_t size) {
-        // TODO: Result
-        __builtin_printf("%s\n", machoFile_parseFile(self, (void *) header) ? "true" : "false");
+        (void) offset;
+        (void) size;
+        
+        toReturn = machoFile_parseFile(self, (void *) header);
     });
-    return false;
+    return result == 0 && toReturn;
 #else
     uint32_t cputype,
              cpusubtype;
