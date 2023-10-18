@@ -25,10 +25,14 @@
 #include <mach-o/stab.h>
 
 #include <Availability.h>
-#include <mach-o/utils.h> // Since macOS 13
 
-#include <mach-o/arch.h> // Until macOS 13
-#include <sys/sysctl.h>  // Until macOS 13
+#if defined(__MAC_OS_X_VERSION_MIN_REQUIRED) && defined(MAC_OS_VERSION_13_0) \
+    && __MAC_OS_X_VERSION_MIN_REQUIRED >= MAC_OS_VERSION_13_0
+ #include <mach-o/utils.h>
+#else
+ #include <mach-o/arch.h>
+ #include <sys/sysctl.h>
+#endif
 
 #include "machoFileInternal.h"
 
@@ -304,7 +308,8 @@ static inline bool machoFile_parseFileImpl64(struct machoFile * self,
 static inline bool machoFile_parseFat(struct machoFile *  self,
                                       struct fat_header * fh,
                                       bool                bitsReversed) {
-#if 0//__MAC_OS_X_VERSION_MIN_REQUIRED >= MAC_OS_VERSION_13_0
+#if defined(__MAC_OS_X_VERSION_MIN_REQUIRED) && defined(MAC_OS_VERSION_13_0) \
+    && __MAC_OS_X_VERSION_MIN_REQUIRED >= MAC_OS_VERSION_13_0
     const int result = macho_best_slice(self->_.fileName,
                                         ^ (const struct mach_header * header, uint64_t offset, size_t size) {
         // TODO: Result
