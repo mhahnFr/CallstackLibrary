@@ -19,9 +19,10 @@
 
 #include <string.h>
 
+#include <mach-o/fat.h>
 #include <mach-o/loader.h>
-#include <mach-o/stab.h>
 #include <mach-o/nlist.h>
+#include <mach-o/stab.h>
 
 #include "machoFileInternal.h"
 
@@ -294,14 +295,38 @@ static inline bool machoFile_parseFileImpl64(struct machoFile * self,
     return true;
 }
 
+static inline bool machoFile_parseFat(struct machoFile * self,
+                                      void *             baseAddress,
+                                      bool               bitsReversed) {
+    // TODO: Implement
+    (void) self;
+    (void) baseAddress;
+    (void) bitsReversed;
+    return false;
+}
+
+static inline bool machoFile_parseFat64(struct machoFile * self,
+                                        void *             baseAddress,
+                                        bool               bitsReversed) {
+    // TODO: Implement
+    (void) self;
+    (void) baseAddress;
+    (void) bitsReversed;
+    return false;
+}
+
 bool machoFile_parseFile(struct machoFile * self, void * baseAddress) {
     struct mach_header * header = baseAddress;
     switch (header->magic) {
-        case MH_MAGIC: return machoFile_parseFileImpl(self, baseAddress, false);
-        case MH_CIGAM: return machoFile_parseFileImpl(self, baseAddress, true);
-            
+        case MH_MAGIC:    return machoFile_parseFileImpl(self, baseAddress, false);
+        case MH_CIGAM:    return machoFile_parseFileImpl(self, baseAddress, true);
         case MH_MAGIC_64: return machoFile_parseFileImpl64(self, baseAddress, false);
         case MH_CIGAM_64: return machoFile_parseFileImpl64(self, baseAddress, true);
+            
+        case FAT_MAGIC:    return machoFile_parseFat(self, baseAddress, false);
+        case FAT_CIGAM:    return machoFile_parseFat(self, baseAddress, true);
+        case FAT_MAGIC_64: return machoFile_parseFat64(self, baseAddress, false);
+        case FAT_CIGAM_64: return machoFile_parseFat64(self, baseAddress, true);
     }
     return false;
 }
