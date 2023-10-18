@@ -24,6 +24,12 @@
 #include <mach-o/nlist.h>
 #include <mach-o/stab.h>
 
+#include <Availability.h>
+#include <mach-o/utils.h> // Since macOS 13
+
+#include <mach-o/arch.h> // Until macOS 13
+#include <sys/sysctl.h>  // Until macOS 13
+
 #include "machoFileInternal.h"
 
 #include "OptionalFunction.h"
@@ -295,24 +301,56 @@ static inline bool machoFile_parseFileImpl64(struct machoFile * self,
     return true;
 }
 
-static inline bool machoFile_parseFat(struct machoFile * self,
-                                      void *             baseAddress,
-                                      bool               bitsReversed) {
-    // TODO: Implement
-    (void) self;
-    (void) baseAddress;
-    (void) bitsReversed;
+static inline bool machoFile_parseFat(struct machoFile *  self,
+                                      struct fat_header * fh,
+                                      bool                bitsReversed) {
+#if 0//__MAC_OS_X_VERSION_MIN_REQUIRED >= MAC_OS_VERSION_13_0
+    const int result = macho_best_slice(self->_.fileName,
+                                        ^ (const struct mach_header * header, uint64_t offset, size_t size) {
+        // TODO: Result
+        __builtin_printf("%s\n", machoFile_parseFile(self, (void *) header) ? "true" : "false");
+    });
     return false;
-}
-
-static inline bool machoFile_parseFat64(struct machoFile * self,
-                                        void *             baseAddress,
-                                        bool               bitsReversed) {
-    // TODO: Implement
-    (void) self;
-    (void) baseAddress;
-    (void) bitsReversed;
-    return false;
+#else
+    uint32_t cputype,
+             cpusubtype;
+    size_t len = sizeof(uint32_t);
+    if (sysctlbyname("hw.cputype", &cputype, &len, NULL, 0) != 0
+        || sysctlbyname("hw.cpusubtype", &cpusubtype, &len, NULL, 0) != 0) {
+        return false;
+    }
+    uint64_t offset;
+    switch (fh->magic) {
+        case FAT_MAGIC_64:
+        case FAT_CIGAM_64: {
+            const struct fat_arch_64 * best = NXFindBestFatArch_64(machoFile_maybeSwap(32, bitsReversed, cputype),
+                                                                   machoFile_maybeSwap(32, bitsReversed, cpusubtype),
+                                                                   (void *) fh + sizeof(struct fat_header),
+                                                                   machoFile_maybeSwap(32, bitsReversed, fh->nfat_arch));
+            if (best == NULL) {
+                return false;
+            }
+            offset = machoFile_maybeSwap(64, bitsReversed, best->offset);
+            break;
+        }
+            
+        case FAT_MAGIC:
+        case FAT_CIGAM: {
+            const struct fat_arch * best = NXFindBestFatArch(machoFile_maybeSwap(32, bitsReversed, cputype),
+                                                             machoFile_maybeSwap(32, bitsReversed, cpusubtype),
+                                                             (void *) fh + sizeof(struct fat_header),
+                                                             machoFile_maybeSwap(32, bitsReversed, fh->nfat_arch));
+            if (best == NULL) {
+                return false;
+            }
+            offset = machoFile_maybeSwap(32, bitsReversed, best->offset);
+            break;
+        }
+            
+        default: return false;
+    }
+    return machoFile_parseFile(self, (void *) fh + offset);
+#endif
 }
 
 bool machoFile_parseFile(struct machoFile * self, void * baseAddress) {
@@ -323,10 +361,11 @@ bool machoFile_parseFile(struct machoFile * self, void * baseAddress) {
         case MH_MAGIC_64: return machoFile_parseFileImpl64(self, baseAddress, false);
         case MH_CIGAM_64: return machoFile_parseFileImpl64(self, baseAddress, true);
             
-        case FAT_MAGIC:    return machoFile_parseFat(self, baseAddress, false);
-        case FAT_CIGAM:    return machoFile_parseFat(self, baseAddress, true);
-        case FAT_MAGIC_64: return machoFile_parseFat64(self, baseAddress, false);
-        case FAT_CIGAM_64: return machoFile_parseFat64(self, baseAddress, true);
+        case FAT_MAGIC:
+        case FAT_MAGIC_64: return machoFile_parseFat(self, baseAddress, false);
+            
+        case FAT_CIGAM:
+        case FAT_CIGAM_64: return machoFile_parseFat(self, baseAddress, true);
     }
     return false;
 }
