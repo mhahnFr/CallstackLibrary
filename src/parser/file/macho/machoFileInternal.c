@@ -306,11 +306,11 @@ static inline bool machoFile_parseFileImpl64(struct machoFile * self,
 }
 
 static inline bool machoFile_parseFat(struct machoFile *  self,
-                                      struct fat_header * fh,
+                                      struct fat_header * fatHeader,
                                       bool                bitsReversed) {
 #if defined(__MAC_OS_X_VERSION_MIN_REQUIRED) && defined(MAC_OS_VERSION_13_0) \
     && __MAC_OS_X_VERSION_MIN_REQUIRED >= MAC_OS_VERSION_13_0
-    (void) fh;
+    (void) fatHeader;
     (void) bitsReversed;
     
     __block bool toReturn = false;
@@ -332,13 +332,13 @@ static inline bool machoFile_parseFat(struct machoFile *  self,
         return false;
     }
     uint64_t offset;
-    switch (fh->magic) {
+    switch (fatHeader->magic) {
         case FAT_MAGIC_64:
         case FAT_CIGAM_64: {
             const struct fat_arch_64 * best = NXFindBestFatArch_64(machoFile_maybeSwap(32, bitsReversed, cputype),
                                                                    machoFile_maybeSwap(32, bitsReversed, cpusubtype),
-                                                                   (void *) fh + sizeof(struct fat_header),
-                                                                   machoFile_maybeSwap(32, bitsReversed, fh->nfat_arch));
+                                                                   (void *) fatHeader + sizeof(struct fat_header),
+                                                                   machoFile_maybeSwap(32, bitsReversed, fatHeader->nfat_arch));
             if (best == NULL) {
                 return false;
             }
@@ -350,8 +350,8 @@ static inline bool machoFile_parseFat(struct machoFile *  self,
         case FAT_CIGAM: {
             const struct fat_arch * best = NXFindBestFatArch(machoFile_maybeSwap(32, bitsReversed, cputype),
                                                              machoFile_maybeSwap(32, bitsReversed, cpusubtype),
-                                                             (void *) fh + sizeof(struct fat_header),
-                                                             machoFile_maybeSwap(32, bitsReversed, fh->nfat_arch));
+                                                             (void *) fatHeader + sizeof(struct fat_header),
+                                                             machoFile_maybeSwap(32, bitsReversed, fatHeader->nfat_arch));
             if (best == NULL) {
                 return false;
             }
@@ -361,7 +361,7 @@ static inline bool machoFile_parseFat(struct machoFile *  self,
             
         default: return false;
     }
-    return machoFile_parseFile(self, (void *) fh + offset);
+    return machoFile_parseFile(self, (void *) fatHeader + offset);
 #endif
 }
 
