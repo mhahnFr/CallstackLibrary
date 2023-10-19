@@ -51,6 +51,12 @@ void machoFile_create(struct machoFile * self) {
     vector_uint64_t_create(&self->functionStarts);
 }
 
+/**
+ * Caches the represented file from disk and parses it.
+ *
+ * @param self the Mach-O file object
+ * @return whether the file was successfully read and parsed
+ */
 static inline bool machoFile_readAndParseFile(struct machoFile * self) {
     if (self->_.fileName == NULL) return false;
     
