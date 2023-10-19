@@ -77,6 +77,8 @@ static inline bool machoFile_handleSymtab(struct machoFile *      self,
             case N_BNSYM:
                 if (currFun.has_value) {
                     // Function begin without end -> invalid.
+                    function_destroy(&currFun.value);
+                    objectFile_delete(current);
                     return false;
                 }
                 function_create(&currFun.value);
@@ -86,6 +88,7 @@ static inline bool machoFile_handleSymtab(struct machoFile *      self,
             case N_ENSYM:
                 if (!currFun.has_value) {
                     // Function end without begin -> invalid.
+                    objectFile_delete(current);
                     return false;
                 }
                 objectFile_addFunction(current, currFun.value);
@@ -105,6 +108,10 @@ static inline bool machoFile_handleSymtab(struct machoFile *      self,
                         current->sourceFile = strdup(value);
                     } else {
                         // Unknown format...
+                        objectFile_delete(current);
+                        if (currFun.has_value) {
+                            function_destroy(&currFun.value);
+                        }
                         return false;
                     }
                 }
@@ -118,6 +125,7 @@ static inline bool machoFile_handleSymtab(struct machoFile *      self,
             case N_FUN: {
                 if (!currFun.has_value) {
                     // Function name without begin -> invalid.
+                    objectFile_delete(current);
                     return false;
                 }
                 char * value = stringBegin + machoFile_maybeSwap(32, bitsReversed, entry->n_un.n_strx);
@@ -132,6 +140,7 @@ static inline bool machoFile_handleSymtab(struct machoFile *      self,
     machoFile_addObjectFile(self, current);
     if (currFun.has_value) {
         // Function entries did not end -> invalid.
+        function_destroy(&currFun.value);
         return false;
     }
     
@@ -155,6 +164,8 @@ static inline bool machoFile_handleSymtab64(struct machoFile *      self,
             case N_BNSYM:
                 if (currFun.has_value) {
                     // Function begin without end -> invalid.
+                    function_destroy(&currFun.value);
+                    objectFile_delete(current);
                     return false;
                 }
                 function_create(&currFun.value);
@@ -164,6 +175,7 @@ static inline bool machoFile_handleSymtab64(struct machoFile *      self,
             case N_ENSYM:
                 if (!currFun.has_value) {
                     // Function end without begin -> invalid.
+                    objectFile_delete(current);
                     return false;
                 }
                 objectFile_addFunction(current, currFun.value);
@@ -183,6 +195,10 @@ static inline bool machoFile_handleSymtab64(struct machoFile *      self,
                         current->sourceFile = strdup(value);
                     } else {
                         // Unknown format...
+                        objectFile_delete(current);
+                        if (currFun.has_value) {
+                            function_destroy(&currFun.value);
+                        }
                         return false;
                     }
                 }
@@ -196,6 +212,7 @@ static inline bool machoFile_handleSymtab64(struct machoFile *      self,
             case N_FUN: {
                 if (!currFun.has_value) {
                     // Function name without begin -> invalid.
+                    objectFile_delete(current);
                     return false;
                 }
                 char * value = stringBegin + machoFile_maybeSwap(32, bitsReversed, entry->n_un.n_strx);
@@ -210,6 +227,7 @@ static inline bool machoFile_handleSymtab64(struct machoFile *      self,
     machoFile_addObjectFile(self, current);
     if (currFun.has_value) {
         // Function entries did not end -> invalid.
+        function_destroy(&currFun.value);
         return false;
     }
     
