@@ -93,8 +93,7 @@ bool machoFile_addr2String(struct binaryFile *      me,
             }
             name = callstack_parser_demangle(name);
             char * toReturn = NULL;
-            asprintf(&toReturn, "%s: %s + %td",
-                     result.value.second->name,
+            asprintf(&toReturn, "%s + %td",
                      name,
                      (ptrdiff_t) (address - info->dli_fbase + self->addressOffset - result.value.first.startAddress));
             free(name);
