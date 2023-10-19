@@ -43,9 +43,9 @@
 static inline bool machoFile_handleSegment(struct machoFile *       self,
                                            struct segment_command * segment,
                                            bool                     bitsReversed) {
-    if (strcmp(segment->segname, SEG_LINKEDIT) == 0) {
+    if (strcmp(segment->segname, SEG_PAGEZERO) == 0) {
         self->addressOffset = machoFile_maybeSwap(32, bitsReversed, segment->vmaddr)
-                            - machoFile_maybeSwap(32, bitsReversed, segment->fileoff);
+                            + machoFile_maybeSwap(32, bitsReversed, segment->vmsize);
     }
     return true;
 }
@@ -53,9 +53,9 @@ static inline bool machoFile_handleSegment(struct machoFile *       self,
 static inline bool machoFile_handleSegment64(struct machoFile *          self,
                                              struct segment_command_64 * segment,
                                              bool                        bitsReversed) {
-    if (strcmp(segment->segname, SEG_LINKEDIT) == 0) {
+    if (strcmp(segment->segname, SEG_PAGEZERO) == 0) {
         self->addressOffset = machoFile_maybeSwap(64, bitsReversed, segment->vmaddr)
-                            - machoFile_maybeSwap(64, bitsReversed, segment->fileoff);
+                            + machoFile_maybeSwap(64, bitsReversed, segment->vmsize);
     }
     return true;
 }
