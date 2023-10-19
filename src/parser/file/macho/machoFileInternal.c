@@ -243,7 +243,12 @@ static inline void machoFile_addFunctionEnds(struct function * func, va_list arg
     if (i < self->functionStarts.count - 1) {
         func->endAddress = self->functionStarts.content[i + 1];
     } else {
-        // TODO: Was dann?
+        /*
+         * Should not happen. If it does, the function at that
+         * address will be ignored when searching for the function
+         * inside which a given address is in.
+         *                                              - mhahnFr
+         */
     }
 }
 
