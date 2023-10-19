@@ -80,6 +80,12 @@ void objectFile_functionsForEach(struct objectFile * me, void (*func)(struct fun
     va_end(list);
 }
 
+/**
+ * Calls the destroy function for the given function object.
+ *
+ * @param f the function to be destroyed
+ * @param args ignored
+ */
 static inline void objectFile_functionDestroy(struct function * f, va_list args) {
     (void) args;
     
