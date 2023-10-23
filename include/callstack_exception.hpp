@@ -64,6 +64,9 @@ public:
     exception(const bool printStacktrace = false) LCS_NOEXCEPT
         : std::exception(), message(), shouldPrintStacktrace(printStacktrace), cs(__builtin_return_address(0)) {}
     
+    exception(const char * message, const bool printStacktrace = false) LCS_NOEXCEPT
+        : std::exception(), message(message), shouldPrintStacktrace(printStacktrace), cs(__builtin_return_address(0)) {}
+    
     exception(const std::string & message, const bool printStacktrace = false) LCS_NOEXCEPT
         : std::exception(), message(message), shouldPrintStacktrace(printStacktrace), cs(__builtin_return_address(0)) {}
     
