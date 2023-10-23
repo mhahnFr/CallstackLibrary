@@ -97,8 +97,9 @@ public:
     
     inline void printStacktrace(std::ostream & out, const bool printMessage = true) const {
         if (printMessage) {
-            out << "lcs::exception" << (message.empty() ? "" : ": \"" + message + "\"") << std::endl;
+            out << "lcs::exception" << (message.empty() ? "" : ": \"" + message + "\"");
         }
+        out << ", stacktrace:" << std::endl;
         const callstack_frame * frames = callstack_toArray(cs);
         for (std::size_t i = 0; i < callstack_getFrameCount(cs); ++i) {
             out << (i == 0 ? "At" : "in") << ": "
