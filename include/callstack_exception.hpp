@@ -28,17 +28,18 @@
 #include "callstack.h"
 
 #if __cplusplus >= 201103
-#define LCS_NOEXCEPT  noexcept
-#define LCS_CONSTEXPR constexpr
-#define LCS_OVERRIDE  override
-#define LCS_NULL      nullptr
+ #define LCS_NOEXCEPT  noexcept
+ #define LCS_CONSTEXPR constexpr
+ #define LCS_OVERRIDE  override
+ #define LCS_NULL      nullptr
 
-#define LCS_CXX11
+ #define LCS_CXX11
+
 #else
-#define LCS_NOEXCEPT  throw()
-#define LCS_CONSTEXPR
-#define LCS_OVERRIDE
-#define LCS_NULL      NULL
+ #define LCS_NOEXCEPT  throw()
+ #define LCS_CONSTEXPR
+ #define LCS_OVERRIDE
+ #define LCS_NULL      NULL
 #endif
 
 namespace lcs {
@@ -61,13 +62,13 @@ class exception: public std::exception {
     }
     
 public:
-    exception(const bool printStacktrace = false) LCS_NOEXCEPT
+    exception(const bool printStacktrace = true) LCS_NOEXCEPT
         : std::exception(), message(), shouldPrintStacktrace(printStacktrace), cs(__builtin_return_address(0)) {}
     
-    exception(const char * message, const bool printStacktrace = false) LCS_NOEXCEPT
+    exception(const char * message, const bool printStacktrace = true) LCS_NOEXCEPT
         : std::exception(), message(message), shouldPrintStacktrace(printStacktrace), cs(__builtin_return_address(0)) {}
     
-    exception(const std::string & message, const bool printStacktrace = false) LCS_NOEXCEPT
+    exception(const std::string & message, const bool printStacktrace = true) LCS_NOEXCEPT
         : std::exception(), message(message), shouldPrintStacktrace(printStacktrace), cs(__builtin_return_address(0)) {}
     
     exception(const exception & other)
