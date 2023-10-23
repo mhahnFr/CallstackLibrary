@@ -31,12 +31,14 @@
 #define LCS_NOEXCEPT  noexcept
 #define LCS_CONSTEXPR constexpr
 #define LCS_OVERRIDE  override
+#define LCS_NULL      nullptr
 
 #define LCS_CXX11
 #else
-#define LCS_NOEXCEPT throw()
+#define LCS_NOEXCEPT  throw()
 #define LCS_CONSTEXPR
 #define LCS_OVERRIDE
+#define LCS_NULL      NULL
 #endif
 
 namespace lcs {
@@ -47,6 +49,16 @@ class exception: public std::exception {
     
     mutable callstack cs;
     mutable std::string messageBuffer;
+    
+    static inline std::string toString(unsigned long number) {
+#ifdef LCS_CXX11
+        return std::to_string(number);
+#else
+        std::stringstream stream;
+        stream << number;
+        return stream.str();
+#endif
+    }
     
 public:
     exception(const bool printStacktrace = false) LCS_NOEXCEPT
@@ -83,7 +95,15 @@ public:
     }
     
     void printStacktrace(std::ostream & out) const {
-        // TODO: Implement
+        const callstack_frame * frames = callstack_toArray(cs);
+        for (std::size_t i = 0; i < callstack_getFrameCount(cs); ++i) {
+            out << (i == 0 ? "At" : "in") << ": " 
+                << frames[i].function << "("
+                << (frames[i].sourceFile == LCS_NULL 
+                    ? frames[i].binaryFile
+                    : (std::string(frames[i].sourceFile) + ":" + toString(frames[i].sourceLine)))
+                << ")" << std::endl;
+        }
     }
     
     void setPrintStacktrace(const bool printStacktrace) LCS_NOEXCEPT {
