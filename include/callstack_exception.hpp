@@ -25,6 +25,18 @@
 
 #include "callstack.h"
 
+#if __cplusplus >= 201103
+#define LCS_NOEXCEPT  noexcept
+#define LCS_CONSTEXPR constexpr
+#define LCS_OVERRIDE  override
+
+#define LCS_CXX11
+#else
+#define LCS_NOEXCEPT throw()
+#define LCS_CONSTEXPR
+#define LCS_OVERRIDE
+#endif
+
 namespace lcs {
 class exception: public std::exception {
     const std::string message;
@@ -39,12 +51,21 @@ public:
     exception(const exception &) = default;
    ~exception() = default;
     
-    // TODO: C++11 Move constructors
+#ifdef LCS_CXX11
+    exception(exception &&) = default;
+#endif
     
-    virtual const char * what(); // TODO: Override nothrow
+    virtual const char * what() const LCS_NOEXCEPT LCS_OVERRIDE {
+        return message.c_str();
+    }
     
-    callstack & getCallstack() const; // TODO: constexpr noexcept
-    const std::string & getMessage() const; // TODO: constexpr noexcept
+    LCS_CONSTEXPR callstack & getCallstack() const LCS_NOEXCEPT {
+        return cs;
+    }
+    
+    LCS_CONSTEXPR const std::string & getMessage() const LCS_NOEXCEPT {
+        return message;
+    }
 };
 }
 
