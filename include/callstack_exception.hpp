@@ -81,12 +81,7 @@ public:
         
         if (shouldPrintStacktrace) {
             std::stringstream stream;
-            stream << "lcs::exception";
-            if (!message.empty()) {
-                stream << ": \"" << message << "\"";
-            }
-            stream << std::endl;
-            printStacktrace(stream);
+            printStacktrace(stream, true);
             messageBuffer = stream.str();
         } else {
             messageBuffer = "lcs::exception" + (message.empty() ? "" : (": \"" + message + "\""));
@@ -94,12 +89,15 @@ public:
         return messageBuffer.c_str();
     }
     
-    void printStacktrace(std::ostream & out) const {
+    void printStacktrace(std::ostream & out, const bool printMessage = true) const {
+        if (printMessage) {
+            out << "lcs::exception" << (message.empty() ? "" : ": \"" + message + "\"") << std::endl;
+        }
         const callstack_frame * frames = callstack_toArray(cs);
         for (std::size_t i = 0; i < callstack_getFrameCount(cs); ++i) {
-            out << (i == 0 ? "At" : "in") << ": " 
+            out << (i == 0 ? "At" : "in") << ": "
                 << frames[i].function << "("
-                << (frames[i].sourceFile == LCS_NULL 
+                << (frames[i].sourceFile == LCS_NULL
                     ? frames[i].binaryFile
                     : (std::string(frames[i].sourceFile) + ":" + toString(frames[i].sourceLine)))
                 << ")" << std::endl;
