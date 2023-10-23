@@ -103,11 +103,11 @@ public:
         const callstack_frame * frames = callstack_toArray(cs);
         for (std::size_t i = 0; i < callstack_getFrameCount(cs); ++i) {
             out << (i == 0 ? "At" : "in") << ": "
-                << (frames[i].function == LCS_NULL ? "<< Unknown >>" : frames[i].function) << " ("
-                << (frames[i].sourceFile == LCS_NULL
-                    ? frames[i].binaryFile
-                    : (std::string(frames[i].sourceFile) + ":" + toString(frames[i].sourceLine)))
-                << ")" << std::endl;
+                << "(" << frames[i].binaryFile << ") "
+                << (frames[i].function == LCS_NULL ? "<< Unknown >>" : frames[i].function)
+                << (frames[i].sourceFile == LCS_NULL ? ""
+                    : (" (" + std::string(frames[i].sourceFile) + ":" + toString(frames[i].sourceLine) + ")"))
+                << std::endl;
         }
     }
     
