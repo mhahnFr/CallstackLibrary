@@ -40,13 +40,17 @@
 namespace lcs {
 class exception: public std::exception {
     const std::string message;
+    
+    bool printStacktrace;
+    
     mutable callstack cs;
     
 public:
-    exception(): std::exception(), message(), cs(__builtin_return_address(0)) {}
+    exception(const bool printStacktrace = false) LCS_NOEXCEPT
+        : std::exception(), message(), printStacktrace(printStacktrace), cs(__builtin_return_address(0)) {}
     
-    exception(const std::string & message)
-        : std::exception(), message(message), cs(__builtin_return_address(0)) {}
+    exception(const std::string & message, const bool printStacktrace = false) LCS_NOEXCEPT
+        : std::exception(), message(message), printStacktrace(printStacktrace), cs(__builtin_return_address(0)) {}
     
     exception(const exception &) = default;
    ~exception() = default;
@@ -57,6 +61,14 @@ public:
     
     virtual const char * what() const LCS_NOEXCEPT LCS_OVERRIDE {
         return message.c_str();
+    }
+    
+    void setPrintStacktrace(const bool printStacktrace) LCS_NOEXCEPT {
+        exception::printStacktrace = printStacktrace;
+    }
+    
+    LCS_CONSTEXPR bool getPrintStacktrace() const LCS_NOEXCEPT {
+        return printStacktrace;
     }
     
     LCS_CONSTEXPR callstack & getCallstack() const LCS_NOEXCEPT {
