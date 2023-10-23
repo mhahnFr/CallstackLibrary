@@ -62,25 +62,25 @@ class exception: public std::exception {
     }
     
 public:
-    exception(const bool printStacktrace = true) LCS_NOEXCEPT
+    inline exception(const bool printStacktrace = true) LCS_NOEXCEPT
         : std::exception(), message(), shouldPrintStacktrace(printStacktrace), cs(__builtin_return_address(0)) {}
     
-    exception(const char * message, const bool printStacktrace = true) LCS_NOEXCEPT
+    inline exception(const char * message, const bool printStacktrace = true) LCS_NOEXCEPT
         : std::exception(), message(message), shouldPrintStacktrace(printStacktrace), cs(__builtin_return_address(0)) {}
     
-    exception(const std::string & message, const bool printStacktrace = true) LCS_NOEXCEPT
+    inline exception(const std::string & message, const bool printStacktrace = true) LCS_NOEXCEPT
         : std::exception(), message(message), shouldPrintStacktrace(printStacktrace), cs(__builtin_return_address(0)) {}
     
-    exception(const exception & other)
+    inline exception(const exception & other)
         : std::exception(other), message(other.message), shouldPrintStacktrace(other.shouldPrintStacktrace), cs(other.cs) {}
     
-   ~exception() LCS_NOEXCEPT {};
+    inline ~exception() LCS_NOEXCEPT {};
     
 #ifdef LCS_CXX11
-    exception(exception &&) = default;
+    inline exception(exception &&) = default;
 #endif
     
-    virtual const char * what() const LCS_NOEXCEPT LCS_OVERRIDE {
+    inline virtual const char * what() const LCS_NOEXCEPT LCS_OVERRIDE {
         if (!messageBuffer.empty()) {
             return messageBuffer.c_str();
         }
@@ -95,7 +95,7 @@ public:
         return messageBuffer.c_str();
     }
     
-    void printStacktrace(std::ostream & out, const bool printMessage = true) const {
+    inline void printStacktrace(std::ostream & out, const bool printMessage = true) const {
         if (printMessage) {
             out << "lcs::exception" << (message.empty() ? "" : ": \"" + message + "\"") << std::endl;
         }
@@ -110,19 +110,19 @@ public:
         }
     }
     
-    void setPrintStacktrace(const bool printStacktrace) LCS_NOEXCEPT {
+    inline void setPrintStacktrace(const bool printStacktrace) LCS_NOEXCEPT {
         shouldPrintStacktrace = printStacktrace;
     }
     
-    LCS_CONSTEXPR bool getPrintStacktrace() const LCS_NOEXCEPT {
+    inline LCS_CONSTEXPR bool getPrintStacktrace() const LCS_NOEXCEPT {
         return shouldPrintStacktrace;
     }
     
-    LCS_CONSTEXPR callstack & getCallstack() const LCS_NOEXCEPT {
+    inline LCS_CONSTEXPR callstack & getCallstack() const LCS_NOEXCEPT {
         return cs;
     }
     
-    LCS_CONSTEXPR const std::string & getMessage() const LCS_NOEXCEPT {
+    inline LCS_CONSTEXPR const std::string & getMessage() const LCS_NOEXCEPT {
         return message;
     }
 };
