@@ -83,6 +83,7 @@
 		BF61E8FD28F1CFF70006346B /* .gitignore */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text; path = .gitignore; sourceTree = "<group>"; };
 		BF61E8FE28F1D1200006346B /* Makefile */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.make; path = Makefile; sourceTree = "<group>"; };
 		BF61E90028F1D1300006346B /* README.md */ = {isa = PBXFileReference; lastKnownFileType = net.daringfireball.markdown; path = README.md; sourceTree = "<group>"; };
+		BF6660D82AE6B9EC002D2BDE /* callstack_exception.hpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.h; path = callstack_exception.hpp; sourceTree = "<group>"; };
 		BF86E31E28F4564600F6D20E /* callstack.c */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.c; path = callstack.c; sourceTree = "<group>"; };
 		BF86E32028F45DE100F6D20E /* callstack_parser.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = callstack_parser.h; sourceTree = "<group>"; };
 		BF86E32128F45DE100F6D20E /* callstack_parser.c */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.c; path = callstack_parser.c; sourceTree = "<group>"; };
@@ -222,6 +223,7 @@
 				BFC2D1782AC30BFA00BD4C0B /* callstack_frame.h */,
 				BFA17E6E2AC496A200931B1E /* optional_Dl_info.h */,
 				BFADAB062ADDA923004B4695 /* lcs_dlfcn.h */,
+				BF6660D82AE6B9EC002D2BDE /* callstack_exception.hpp */,
 			);
 			path = include;
 			sourceTree = "<group>";
