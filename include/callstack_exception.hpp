@@ -21,6 +21,8 @@
 #define callstack_exception_hpp
 
 #include <exception>
+#include <ostream>
+#include <sstream>
 #include <string>
 
 #include "callstack.h"
@@ -41,16 +43,17 @@ namespace lcs {
 class exception: public std::exception {
     const std::string message;
     
-    bool printStacktrace;
+    bool shouldPrintStacktrace;
     
     mutable callstack cs;
+    mutable std::string messageBuffer;
     
 public:
     exception(const bool printStacktrace = false) LCS_NOEXCEPT
-        : std::exception(), message(), printStacktrace(printStacktrace), cs(__builtin_return_address(0)) {}
+        : std::exception(), message(), shouldPrintStacktrace(printStacktrace), cs(__builtin_return_address(0)) {}
     
     exception(const std::string & message, const bool printStacktrace = false) LCS_NOEXCEPT
-        : std::exception(), message(message), printStacktrace(printStacktrace), cs(__builtin_return_address(0)) {}
+        : std::exception(), message(message), shouldPrintStacktrace(printStacktrace), cs(__builtin_return_address(0)) {}
     
     exception(const exception &) = default;
    ~exception() = default;
@@ -60,15 +63,35 @@ public:
 #endif
     
     virtual const char * what() const LCS_NOEXCEPT LCS_OVERRIDE {
-        return message.c_str();
+        if (!messageBuffer.empty()) {
+            return messageBuffer.c_str();
+        }
+        
+        if (shouldPrintStacktrace) {
+            std::stringstream stream;
+            stream << "lcs::exception";
+            if (!message.empty()) {
+                stream << ": \"" << message << "\"";
+            }
+            stream << std::endl;
+            printStacktrace(stream);
+            messageBuffer = stream.str();
+        } else {
+            messageBuffer = "lcs::exception" + (message.empty() ? "" : (": \"" + message + "\""));
+        }
+        return messageBuffer.c_str();
+    }
+    
+    void printStacktrace(std::ostream & out) const {
+        // TODO: Implement
     }
     
     void setPrintStacktrace(const bool printStacktrace) LCS_NOEXCEPT {
-        exception::printStacktrace = printStacktrace;
+        shouldPrintStacktrace = printStacktrace;
     }
     
     LCS_CONSTEXPR bool getPrintStacktrace() const LCS_NOEXCEPT {
-        return printStacktrace;
+        return shouldPrintStacktrace;
     }
     
     LCS_CONSTEXPR callstack & getCallstack() const LCS_NOEXCEPT {
