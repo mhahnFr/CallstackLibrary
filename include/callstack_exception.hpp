@@ -62,13 +62,13 @@ class exception: public std::exception {
     }
     
 public:
-    inline exception(const bool printStacktrace = true) LCS_NOEXCEPT
+    explicit inline exception(const bool printStacktrace = true) LCS_NOEXCEPT
         : std::exception(), message(), shouldPrintStacktrace(printStacktrace), cs(__builtin_return_address(0)) {}
     
-    inline exception(const char * message, const bool printStacktrace = true) LCS_NOEXCEPT
+    explicit inline exception(const char * message, const bool printStacktrace = true) LCS_NOEXCEPT
         : std::exception(), message(message), shouldPrintStacktrace(printStacktrace), cs(__builtin_return_address(0)) {}
     
-    inline exception(const std::string & message, const bool printStacktrace = true) LCS_NOEXCEPT
+    explicit inline exception(const std::string & message, const bool printStacktrace = true) LCS_NOEXCEPT
         : std::exception(), message(message), shouldPrintStacktrace(printStacktrace), cs(__builtin_return_address(0)) {}
     
     inline exception(const exception & other)
