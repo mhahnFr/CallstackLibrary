@@ -91,7 +91,7 @@ public:
     inline exception(const exception & other)
         : std::exception(other), message(other.message), shouldPrintStacktrace(other.shouldPrintStacktrace), cs(other.cs) {}
     
-    inline ~exception() LCS_NOEXCEPT {};
+    inline virtual ~exception() LCS_NOEXCEPT {};
     
 #ifdef LCS_CXX11
     inline exception(exception &&) = default;
