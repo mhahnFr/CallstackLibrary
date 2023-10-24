@@ -51,3 +51,13 @@ void binaryFile_create(struct binaryFile * self) {
     self->next     = NULL;
     self->parsed   = false;
 }
+
+char * binaryFile_toRelativePath(char * path) {
+    char * toReturn;
+#ifdef CXX_FILESYSTEM
+    toReturn = lcs_toRelativePath(path);
+#else
+    toReturn = path;
+#endif
+    return toReturn;
+}

@@ -75,4 +75,6 @@ struct binaryFile * binaryFile_new(const char * fileName);
  */
 void binaryFile_create(struct binaryFile * self);
 
+char * binaryFile_toRelativePath(char * path);
+
 #endif /* binaryFile_h */
