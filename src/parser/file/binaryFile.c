@@ -17,9 +17,11 @@
  * this library, see the file LICENSE.  If not, see <https://www.gnu.org/licenses/>.
  */
 
+#include <stddef.h>
+
 #include "binaryFile.h"
 
-#include <stddef.h>
+#include "fileHelper.h"
 
 #ifdef __APPLE__
  #include "macho/machoFile.h"
@@ -52,12 +54,24 @@ void binaryFile_create(struct binaryFile * self) {
     self->parsed   = false;
 }
 
-char * binaryFile_toRelativePath(char * path) {
+static inline char * binaryFile_toRelativePathIntern(char * path, bool f) {
     char * toReturn;
 #ifdef CXX_FUNCTIONS
     toReturn = lcs_toRelativePath(path);
+    if (f) {
+        free(path);
+    }
 #else
+    (void) f;
     toReturn = path;
 #endif
     return toReturn;
+}
+
+char * binaryFile_toRelativePath(char * path) {
+    return binaryFile_toRelativePathIntern(path, false);
+}
+
+char * binaryFile_toRelativePathFree(char * path) {
+    return binaryFile_toRelativePathIntern(path, true);
 }
