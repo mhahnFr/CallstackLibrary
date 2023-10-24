@@ -93,7 +93,7 @@ endif
 # Compile and link flags
 COM_FLAGS = -Wall -Wextra -fPIC -Ofast
 CFLAGS    = $(COM_FLAGS) -std=gnu11
-CXXFLAGS  = $(COM_FLAGS) -std=gnu++11
+CXXFLAGS  = $(COM_FLAGS) -std=gnu++17
 LDFLAGS   = -ldl
 # ----------------------
 
