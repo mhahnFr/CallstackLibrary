@@ -20,10 +20,12 @@
 #ifndef callstack_exception_hpp
 #define callstack_exception_hpp
 
+#include <cxxabi.h>
 #include <exception>
 #include <ostream>
 #include <sstream>
 #include <string>
+#include <typeinfo>
 
 #include "callstack.h"
 
@@ -61,6 +63,21 @@ class exception: public std::exception {
 #endif
     }
     
+    inline std::string getName() const LCS_NOEXCEPT {
+        std::string toReturn;
+        
+        const char * rawName = typeid(*this).name();
+        int status;
+        char * dName = abi::__cxa_demangle(rawName, LCS_NULL, LCS_NULL, &status);
+        if (dName != LCS_NULL) {
+            toReturn = dName;
+            std::free(dName);
+        } else {
+            toReturn = rawName;
+        }
+        return toReturn;
+    }
+    
 public:
     explicit inline exception(const bool printStacktrace = true) LCS_NOEXCEPT
         : std::exception(), message(), shouldPrintStacktrace(printStacktrace), cs(__builtin_return_address(0)) {}
@@ -90,14 +107,14 @@ public:
             printStacktrace(stream, true);
             messageBuffer = stream.str();
         } else {
-            messageBuffer = "lcs::exception" + (message.empty() ? "" : (": \"" + message + "\""));
+            messageBuffer = getName() + (message.empty() ? "" : (": \"" + message + "\""));
         }
         return messageBuffer.c_str();
     }
     
     inline void printStacktrace(std::ostream & out, const bool printMessage = true) const {
         if (printMessage) {
-            out << "lcs::exception" << (message.empty() ? "" : ": \"" + message + "\"");
+            out << getName() << (message.empty() ? "" : ": \"" + message + "\"");
         }
         out << ", stacktrace:" << std::endl;
         const callstack_frame * frames = callstack_toArray(cs);
