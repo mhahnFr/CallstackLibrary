@@ -17,9 +17,15 @@
  * this library, see the file LICENSE.  If not, see <https://www.gnu.org/licenses/>.
  */
 
+#include <cstring>
+#include <filesystem>
+
 #include "fileHelper.h"
 
 char * lcs_toRelativePath(char * path) {
-    // TODO: Implement
-    return path;
+    const auto fPath = std::filesystem::path(std::string(path));
+    if (fPath.is_relative()) {
+        return strdup(fPath.c_str());
+    }
+    return strdup(std::filesystem::relative(fPath).c_str());
 }
