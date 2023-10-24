@@ -70,7 +70,7 @@ char * callstack_parser_demangle(char * name) {
     char * result  = name;
     bool needsCopy = true;
     
-#ifdef CXX_DEMANGLE
+#ifdef CXX_FUNCTIONS
     result = callstack_demangle(result);
     if (result != name) {
         needsCopy = false;
@@ -84,7 +84,7 @@ char * callstack_parser_createLine(const char * name, ptrdiff_t diff) {
     char * result = (char *) name;
     bool del      = false;
 
-#ifdef CXX_DEMANGLE
+#ifdef CXX_FUNCTIONS
     result = callstack_demangle(result);
     if (result != name) {
         del = true;

@@ -17,7 +17,7 @@
 # this library, see the file LICENSE.  If not, see <https://www.gnu.org/licenses/>.
 #
 
-CXX_DEMANGLER = false
+CXX_FUNCTIONS = false
 CXX_OPTIMIZED = false
 
 # Library names
@@ -99,10 +99,10 @@ LDFLAGS   = -ldl
 
 NAME = $(STATIC_N)
 
-ifeq ($(CXX_DEMANGLER),true)
+ifeq ($(CXX_FUNCTIONS),true)
 	LD      = $(CXX)
 	OBJS   += $(CXX_OBJS)
-	CFLAGS += -DCXX_DEMANGLE
+	CFLAGS += -DCXX_FUNCTIONS
 	DEPS   += $(CXX_DEPS)
 endif
 
