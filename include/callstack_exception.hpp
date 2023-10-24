@@ -44,15 +44,34 @@
  #define LCS_NULL      NULL
 #endif
 
+/**
+ * @brief The namespace all C++ classes of the CallstackLibrary can be found in.
+ *
+ * The name stands for: **l**ib**c**all**s**tack.
+ */
 namespace lcs {
+/**
+ * This exception class defines an exception capable to create and print
+ * the callstack where it initially has been constructed - usually where it was thrown.
+ */
 class exception: public std::exception {
+    /** The optional message of this exception.                                  */
     const std::string message;
     
+    /** Whether to automatically translate and add the callstack to the message. */
     bool shouldPrintStacktrace;
     
+    /** The callstack where this object was constructed.                         */
     mutable callstack cs;
+    /** A message buffer.                                                        */
     mutable std::string messageBuffer;
     
+    /**
+     * Converts the given number to a string and returns it.
+     *
+     * @param number the number to be converted
+     * @return the string representation of the given number
+     */
     static inline std::string toString(unsigned long number) {
 #ifdef LCS_CXX11
         return std::to_string(number);
@@ -63,6 +82,11 @@ class exception: public std::exception {
 #endif
     }
     
+    /**
+     * Returns the demangled name of the class the calling object belongs to.
+     *
+     * @return the name of the class of the calling object
+     */
     inline std::string getName() const LCS_NOEXCEPT {
         std::string toReturn;
         
@@ -79,12 +103,31 @@ class exception: public std::exception {
     }
     
 public:
+    /**
+     * Trivial default constructor.
+     *
+     * @param printStacktrace whether to automatically append the stacktrace to the exception message
+     */
     explicit inline exception(const bool printStacktrace = true) LCS_NOEXCEPT
         : std::exception(), message(), shouldPrintStacktrace(printStacktrace), cs(__builtin_return_address(0)) {}
     
+    /**
+     * @brief Constructs an exception with the given message.
+     *
+     * The message is copied.
+     *
+     * @param message the message
+     * @param printStacktrace whether to automatically append the stacktrace
+     */
     explicit inline exception(const char * message, const bool printStacktrace = true) LCS_NOEXCEPT
         : std::exception(), message(message), shouldPrintStacktrace(printStacktrace), cs(__builtin_return_address(0)) {}
     
+    /**
+     * Constructs an exception with the given message.
+     *
+     * @param message the message
+     * @param printStacktrace whether to automatically append the stacktrace
+     */
     explicit inline exception(const std::string & message, const bool printStacktrace = true) LCS_NOEXCEPT
         : std::exception(), message(message), shouldPrintStacktrace(printStacktrace), cs(__builtin_return_address(0)) {}
     
@@ -112,6 +155,13 @@ public:
         return messageBuffer.c_str();
     }
     
+    /**
+     * Prints the stacktrace where this exception has been constructed to the given output
+     * stream.
+     *
+     * @param out the output stream to print to
+     * @param printMessage whether to print the message text as well
+     */
     inline void printStacktrace(std::ostream & out, const bool printMessage = true) const {
         if (printMessage) {
             out << getName() << (message.empty() ? "" : ": \"" + message + "\"");
@@ -128,18 +178,38 @@ public:
         }
     }
     
+    /**
+     * Sets whether to automatically append the stacktrace.
+     *
+     * @param printStacktrace whether to automatically append the stacktrace
+     */
     inline void setPrintStacktrace(const bool printStacktrace) LCS_NOEXCEPT {
         shouldPrintStacktrace = printStacktrace;
     }
     
+    /**
+     * Returns whether to automatically append the stacktrace.
+     *
+     * @return whether to automatically append the stacktrace
+     */
     inline LCS_CONSTEXPR bool getPrintStacktrace() const LCS_NOEXCEPT {
         return shouldPrintStacktrace;
     }
     
+    /**
+     * Returns the callstack where this exception has been constructed.
+     *
+     * @return the construction callstack
+     */
     inline LCS_CONSTEXPR callstack & getCallstack() const LCS_NOEXCEPT {
         return cs;
     }
     
+    /**
+     * Returns the message of this exception.
+     *
+     * @return the message text
+     */
     inline LCS_CONSTEXPR const std::string & getMessage() const LCS_NOEXCEPT {
         return message;
     }
