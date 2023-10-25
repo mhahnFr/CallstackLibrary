@@ -53,12 +53,12 @@ struct callstack_frame {
  * @param self the callstack frame to be initialized
  */
 static inline void callstack_frame_create(struct callstack_frame * self) {
-    self->binaryFile = NULL;
+    self->binaryFile         = NULL;
     self->binaryFileRelative = NULL;
-    self->function   = NULL;
-    self->sourceFile = NULL;
+    self->function           = NULL;
+    self->sourceFile         = NULL;
     self->sourceFileRelative = NULL;
-    self->sourceLine = 0;
+    self->sourceLine         = 0;
     
     self->info.has_value = false;
 }
@@ -105,8 +105,10 @@ char * callstack_frame_getShortestSourceFile(const struct callstack_frame * self
  */
 static inline void callstack_frame_destroy(struct callstack_frame * self) {
     free(self->binaryFile);
+    free(self->binaryFileRelative);
     free(self->function);
     free(self->sourceFile);
+    free(self->sourceFileRelative);
 }
 
 /**
