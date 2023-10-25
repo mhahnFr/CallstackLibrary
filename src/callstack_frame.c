@@ -43,3 +43,15 @@ void callstack_frame_copyHere(struct callstack_frame * destination, const struct
     
     memcpy(&destination->info, &source->info, sizeof(optional_Dl_info_t));
 }
+
+char * callstack_frame_getShortestName(const struct callstack_frame * self) {
+    if (self->binaryFileRelative == NULL) {
+        return self->binaryFile;
+    } else if (self->binaryFile == NULL) {
+        return NULL;
+    }
+    
+    const size_t s1 = strlen(self->binaryFile),
+                 s2 = strlen(self->binaryFileRelative);
+    return s2 < s1 ? self->binaryFileRelative : self->binaryFile;
+}
