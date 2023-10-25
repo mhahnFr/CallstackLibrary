@@ -24,8 +24,5 @@
 
 char * lcs_toRelativePath(char * path) {
     const auto fPath = std::filesystem::path(std::string(path));
-    if (fPath.is_relative()) {
-        return strdup(fPath.c_str());
-    }
     return strdup(std::filesystem::relative(fPath).c_str());
 }

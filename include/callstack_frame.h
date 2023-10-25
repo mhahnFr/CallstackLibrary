@@ -20,6 +20,10 @@
 #ifndef callstack_frame_h
 #define callstack_frame_h
 
+#ifdef __cplusplus
+extern "C" {
+#endif
+
 #include <stdlib.h>
 
 #include "optional_Dl_info.h"
@@ -33,6 +37,7 @@ struct callstack_frame {
     
     /** The name of the binary file this frame is in.        */
     char * binaryFile;
+    char * binaryFileRelative;
     /** The name of the function this frame is in.           */
     char * function;
     /** The name of the source file this frame is in.        */
@@ -86,6 +91,8 @@ struct callstack_frame * callstack_frame_copy(struct callstack_frame * self);
  */
 void callstack_frame_copyHere(struct callstack_frame * destination, const struct callstack_frame * source);
 
+char * callstack_frame_getShortestName(const struct callstack_frame * self);
+
 /**
  * Destructs the given callstack frame.
  *
@@ -106,5 +113,9 @@ static inline void callstack_frame_delete(struct callstack_frame * self) {
     callstack_frame_destroy(self);
     free(self);
 }
+
+#ifdef __cplusplus
+} // extern "C"
+#endif
 
 #endif /* callstack_frame_h */
