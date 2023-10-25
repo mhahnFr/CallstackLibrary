@@ -48,10 +48,22 @@ char * callstack_frame_getShortestName(const struct callstack_frame * self) {
     if (self->binaryFileRelative == NULL) {
         return self->binaryFile;
     } else if (self->binaryFile == NULL) {
-        return NULL;
+        return self->binaryFileRelative;
     }
     
     const size_t s1 = strlen(self->binaryFile),
                  s2 = strlen(self->binaryFileRelative);
     return s2 < s1 ? self->binaryFileRelative : self->binaryFile;
+}
+
+char * callstack_frame_getShortestSourceFile(const struct callstack_frame * self) {
+    if (self->sourceFileRelative == NULL) {
+        return self->sourceFile;
+    } else if (self->sourceFile == NULL) {
+        return self->sourceFileRelative;
+    }
+    
+    const size_t s1 = strlen(self->sourceFile),
+                 s2 = strlen(self->sourceFileRelative);
+    return s2 < s1 ? self->sourceFileRelative : self->sourceFile;
 }

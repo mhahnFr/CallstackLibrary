@@ -42,6 +42,7 @@ struct callstack_frame {
     char * function;
     /** The name of the source file this frame is in.        */
     char * sourceFile;
+    char * sourceFileRelative;
     /** The line number in the source file this frame is on. */
     unsigned long sourceLine;
 };
@@ -53,8 +54,10 @@ struct callstack_frame {
  */
 static inline void callstack_frame_create(struct callstack_frame * self) {
     self->binaryFile = NULL;
+    self->binaryFileRelative = NULL;
     self->function   = NULL;
     self->sourceFile = NULL;
+    self->sourceFileRelative = NULL;
     self->sourceLine = 0;
     
     self->info.has_value = false;
@@ -92,6 +95,8 @@ struct callstack_frame * callstack_frame_copy(struct callstack_frame * self);
 void callstack_frame_copyHere(struct callstack_frame * destination, const struct callstack_frame * source);
 
 char * callstack_frame_getShortestName(const struct callstack_frame * self);
+
+char * callstack_frame_getShortestSourceFile(const struct callstack_frame * self);
 
 /**
  * Destructs the given callstack frame.
