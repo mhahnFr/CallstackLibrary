@@ -31,6 +31,12 @@ struct callstack_frame * callstack_frame_copy(struct callstack_frame * self) {
     return toReturn;
 }
 
+/**
+ * Creates a copy of the given string if it is not `NULL`.
+ *
+ * @param str the string to be copied
+ * @return the copy or `NULL` if `NULL` was passed or unable to allocate
+ */
 static inline char * maybeStrdup(const char * str) {
     return str == NULL ? NULL : strdup(str);
 }
