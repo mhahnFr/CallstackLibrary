@@ -18,6 +18,7 @@
  */
 
 #include <stddef.h>
+#include <string.h>
 
 #include "binaryFile.h"
 
@@ -58,13 +59,12 @@ static inline char * binaryFile_toRelativePathIntern(char * path, bool f) {
     char * toReturn;
 #ifdef CXX_FUNCTIONS
     toReturn = lcs_toRelativePath(path);
+#else
+    toReturn = strdup(path);
+#endif
     if (f) {
         free(path);
     }
-#else
-    (void) f;
-    toReturn = path;
-#endif
     return toReturn;
 }
 
