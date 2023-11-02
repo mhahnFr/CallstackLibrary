@@ -40,6 +40,14 @@
 
 #define machoFile_maybeSwap(bits, swap, value) ((swap) ? OSSwapInt##bits(value) : (value))
 
+/**
+ * Handles the given segment command.
+ *
+ * @param self the Mach-O file abstraction object
+ * @param segment the segment command to handle
+ * @param bitsReversed whether to swap the numbers' endianess
+ * @return whether the handling was successfull
+ */
 static inline bool machoFile_handleSegment(struct machoFile *       self,
                                            struct segment_command * segment,
                                            bool                     bitsReversed) {
@@ -50,6 +58,14 @@ static inline bool machoFile_handleSegment(struct machoFile *       self,
     return true;
 }
 
+/**
+ * Handles the given 64 bit segment command.
+ *
+ * @param self the Mach-O file abstraction object
+ * @param segment the 64 bit segment command to handle
+ * @param bitsReversed whether to swap the numbers' endianess
+ * @return whether the handling was successfull
+ */
 static inline bool machoFile_handleSegment64(struct machoFile *          self,
                                              struct segment_command_64 * segment,
                                              bool                        bitsReversed) {
@@ -60,6 +76,15 @@ static inline bool machoFile_handleSegment64(struct machoFile *          self,
     return true;
 }
 
+/**
+ * Handles the given symtab command.
+ *
+ * @param self the Mach-O file abstraction object
+ * @param command the symtab command to handle
+ * @param baseAddress the baseAddress of the Mach-O file
+ * @param bitsReversed whether to swap the numbers' endianess
+ * @return whether the handling was successfull
+ */
 static inline bool machoFile_handleSymtab(struct machoFile *      self,
                                           struct symtab_command * command,
                                           void *                  baseAddress,
@@ -147,6 +172,15 @@ static inline bool machoFile_handleSymtab(struct machoFile *      self,
     return true;
 }
 
+/**
+ * Handles the given 64 bit symtab command.
+ *
+ * @param self the Mach-O file abstraction object
+ * @param command the 64 bit symtab command to handle
+ * @param baseAddress the base address of the Mach-O file
+ * @param bitsReversed whether to swap the numbers' endianess
+ * @return whether the handling was successfull
+ */
 static inline bool machoFile_handleSymtab64(struct machoFile *      self,
                                             struct symtab_command * command,
                                             void *                  baseAddress,
@@ -234,6 +268,12 @@ static inline bool machoFile_handleSymtab64(struct machoFile *      self,
     return true;
 }
 
+/**
+ * Adds the end address of the given function if it was found.
+ *
+ * @param func the function whose end address to set
+ * @param args the argument list - should contain a Mach-O file abstraction object as first argument
+ */
 static inline void machoFile_addFunctionEnds(struct function * func, va_list args) {
     struct machoFile * self = va_arg(args, void *);
 
@@ -252,6 +292,15 @@ static inline void machoFile_addFunctionEnds(struct function * func, va_list arg
     }
 }
 
+/**
+ * Handles the function starts command. These are inside a linkedit data command.
+ *
+ * @param self the Mach-O file abstraction object
+ * @param command the linkedit data command to handle
+ * @param baseAddress the base address of the Mach-O file
+ * @param bitsReversed whether to swap the numbers' endianess
+ * @return whether the handling was successfull
+ */
 static inline bool machoFile_handleFunctionStarts(struct machoFile *             self,
                                                   struct linkedit_data_command * command,
                                                   void *                         baseAddress,
@@ -284,6 +333,14 @@ static inline bool machoFile_handleFunctionStarts(struct machoFile *            
     return true;
 }
 
+/**
+ * Parses a Mach-O file into the given Mach-O file abstraction object.
+ *
+ * @param self the Mach-O file abstraction object
+ * @param baseAddress the base address of the Mach-O file
+ * @param bitsReversed whether to swap the numbers' endianess
+ * @return whether the parsing was successfull
+ */
 static inline bool machoFile_parseFileImpl(struct machoFile * self,
                                            void *             baseAddress,
                                            bool               bitsReversed) {
@@ -306,6 +363,14 @@ static inline bool machoFile_parseFileImpl(struct machoFile * self,
     return true;
 }
 
+/**
+ * Parses a 64 bit Mach-O file into the given Mach-O file abstraction object.
+ *
+ * @param self the Mach-O file abstraction object
+ * @param baseAddress the base address of the Mach-O file
+ * @param bitsReversed whether to swap the numbers' endianess
+ * @return whether the parsing was successfull
+ */
 static inline bool machoFile_parseFileImpl64(struct machoFile * self,
                                              void *             baseAddress,
                                              bool               bitsReversed) {
@@ -328,6 +393,14 @@ static inline bool machoFile_parseFileImpl64(struct machoFile * self,
     return true;
 }
 
+/**
+ * Parses the given fat Mach-O binary file into the given Mach-O file abstraction object.
+ *
+ * @param self the Mach-O file abstraction object
+ * @param fatHeader the fat Mach-O header to parse
+ * @param bitsReversed whether to swap the numbers' endianess
+ * @return whether the parsing was successfull
+ */
 static inline bool machoFile_parseFat(struct machoFile *  self,
                                       struct fat_header * fatHeader,
                                       bool                bitsReversed) {
