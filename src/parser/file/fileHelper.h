@@ -24,6 +24,12 @@
 extern "C" {
 #endif
 
+/**
+ * Converts the given path to a relative path.
+ *
+ * @param path the path to create a relative one from
+ * @return a newly allocated relative path
+ */
 char * lcs_toRelativePath(char * path);
 
 #ifdef __cplusplus
