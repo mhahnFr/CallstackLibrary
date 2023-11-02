@@ -37,11 +37,13 @@ struct callstack_frame {
     
     /** The name of the binary file this frame is in.        */
     char * binaryFile;
+    /** The relative path of the name of the binary file.    */
     char * binaryFileRelative;
     /** The name of the function this frame is in.           */
     char * function;
     /** The name of the source file this frame is in.        */
     char * sourceFile;
+    /** The relative path of the name of the source file.    */
     char * sourceFileRelative;
     /** The line number in the source file this frame is on. */
     unsigned long sourceLine;
@@ -94,8 +96,20 @@ struct callstack_frame * callstack_frame_copy(struct callstack_frame * self);
  */
 void callstack_frame_copyHere(struct callstack_frame * destination, const struct callstack_frame * source);
 
+/**
+ * Returns the shortest binary file name of the given callstack frame.
+ *
+ * @param self the callstack frame
+ * @return the shortest name
+ */
 char * callstack_frame_getShortestName(const struct callstack_frame * self);
 
+/**
+ * Returns the shortest source file name of the given callstack frame.
+ *
+ * @param self the callstack frame
+ * @return the shortest source file name
+ */
 char * callstack_frame_getShortestSourceFile(const struct callstack_frame * self);
 
 /**
