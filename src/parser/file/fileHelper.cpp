@@ -26,3 +26,8 @@ char * lcs_toRelativePath(char * path) {
     const auto fPath = std::filesystem::path(std::string(path));
     return strdup(std::filesystem::relative(fPath).c_str());
 }
+
+char * lcs_toCanonicalPath(char * path) {
+    const auto fPath = std::filesystem::path(std::string(path));
+    return strdup(std::filesystem::weakly_canonical(fPath).c_str());
+}

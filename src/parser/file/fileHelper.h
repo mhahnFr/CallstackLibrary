@@ -31,6 +31,7 @@ extern "C" {
  * @return a newly allocated relative path
  */
 char * lcs_toRelativePath(char * path);
+char * lcs_toCanonicalPath(char * path);
 
 #ifdef __cplusplus
 } // extern "C"
