@@ -75,3 +75,25 @@ char * binaryFile_toRelativePath(char * path) {
 char * binaryFile_toRelativePathFree(char * path) {
     return binaryFile_toRelativePathIntern(path, true);
 }
+
+static inline char * binaryFile_toAbsolutePathIntern(char * path, bool f) {
+    char * toReturn;
+#ifdef CXX_FUNCTIONS
+    toReturn = lcs_toCanonicalPath(path);
+    if (f) {
+        free(path);
+    }
+#else
+    (void) f;
+    toReturn = path;
+#endif
+    return toReturn;
+}
+
+char * binaryFile_toAbsolutePath(char * path) {
+    return binaryFile_toAbsolutePathIntern(path, false);
+}
+
+char * binaryFile_toAbsolutePathFree(char * path) {
+    return binaryFile_toAbsolutePathIntern(path, true);
+}

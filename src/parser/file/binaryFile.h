@@ -93,5 +93,7 @@ char * binaryFile_toRelativePath(char * path);
  * @return a newly allocated relative path
  */
 char * binaryFile_toRelativePathFree(char * path);
+char * binaryFile_toAbsolutePath(char * path);
+char * binaryFile_toAbsolutePathFree(char * path);
 
 #endif /* binaryFile_h */
