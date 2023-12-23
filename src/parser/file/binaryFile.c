@@ -80,13 +80,12 @@ static inline char * binaryFile_toAbsolutePathIntern(char * path, bool f) {
     char * toReturn;
 #ifdef CXX_FUNCTIONS
     toReturn = lcs_toCanonicalPath(path);
+#else
+    toReturn = strdup(path);
+#endif
     if (f) {
         free(path);
     }
-#else
-    (void) f;
-    toReturn = path;
-#endif
     return toReturn;
 }
 
