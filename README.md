@@ -27,7 +27,7 @@ In the future, parsing of the debug symbols will be added.
 ### Final notes
 This library is licensed under the terms of the GPL 3.0.
 
-© Copyright 2022 - 2023 [mhahnFr][4]
+© Copyright 2022 - 2024 [mhahnFr][4]
 
 [1]: https://github.com/mhahnFr/CallstackLibrary/releases
 [2]: https://github.com/mhahnFr/CallstackLibrary/blob/main/include/callstack.h

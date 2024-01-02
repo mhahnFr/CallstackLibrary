@@ -1,7 +1,7 @@
 /*
  * Callstack Library - Library creating human-readable call stacks.
  *
- * Copyright (C) 2023  mhahnFr
+ * Copyright (C) 2023 - 2024  mhahnFr
  *
  * This file is part of the CallstackLibrary. This library is free software:
  * you can redistribute it and/or modify it under the terms of the
@@ -55,6 +55,16 @@ void binaryFile_create(struct binaryFile * self) {
     self->parsed   = false;
 }
 
+/**
+ * @brief Returns an allocated copy of the given path.
+ *
+ * If the C++ functionality of this library is enabled, the returned path is
+ * made relative to the current working directory.
+ *
+ * @param path the path to be copied
+ * @param f whether to free the given path after copying
+ * @return the allocated copy
+ */
 static inline char * binaryFile_toRelativePathIntern(char * path, bool f) {
     char * toReturn;
 #ifdef CXX_FUNCTIONS
@@ -76,6 +86,16 @@ char * binaryFile_toRelativePathFree(char * path) {
     return binaryFile_toRelativePathIntern(path, true);
 }
 
+/**
+ * @brief Returns an allocated copy of the given path.
+ *
+ * If the C++ functionality of this library is enabled, the copy is converted
+ * to an absolute path.
+ *
+ * @param path the path to be copied
+ * @param f whether to free the given path after copying
+ * @return the allocated copy
+ */
 static inline char * binaryFile_toAbsolutePathIntern(char * path, bool f) {
     char * toReturn;
 #ifdef CXX_FUNCTIONS
