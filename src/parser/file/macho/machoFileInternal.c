@@ -1,7 +1,7 @@
 /*
  * Callstack Library - Library creating human-readable call stacks.
  *
- * Copyright (C) 2023  mhahnFr
+ * Copyright (C) 2023 - 2024  mhahnFr
  *
  * This file is part of the CallstackLibrary. This library is free software:
  * you can redistribute it and/or modify it under the terms of the
@@ -28,6 +28,7 @@
 
 #if defined(__BLOCKS__) && defined(__MAC_OS_X_VERSION_MIN_REQUIRED) && defined(MAC_OS_VERSION_13_0) \
     && __MAC_OS_X_VERSION_MIN_REQUIRED >= MAC_OS_VERSION_13_0
+ #define HAS_MACH_O_UTILS
  #include <mach-o/utils.h>
 #else
  #include <mach-o/arch.h>
@@ -404,8 +405,7 @@ static inline bool machoFile_parseFileImpl64(struct machoFile * self,
 static inline bool machoFile_parseFat(struct machoFile *  self,
                                       struct fat_header * fatHeader,
                                       bool                bitsReversed) {
-#if defined(__BLOCKS__) && defined(__MAC_OS_X_VERSION_MIN_REQUIRED) && defined(MAC_OS_VERSION_13_0) \
-    && __MAC_OS_X_VERSION_MIN_REQUIRED >= MAC_OS_VERSION_13_0
+#ifdef HAS_MACH_O_UTILS
     (void) bitsReversed;
     
     __block uint64_t fileOffset;
