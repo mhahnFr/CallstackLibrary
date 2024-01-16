@@ -20,14 +20,14 @@
 #ifndef callstack_frame_h
 #define callstack_frame_h
 
+#include "optional_Dl_info.h"
+#include "optional_ulong.h"
+
 #ifdef __cplusplus
 extern "C" {
 #endif
 
 #include <stdlib.h>
-
-#include "optional_Dl_info.h"
-#include "optional_ulong.h"
 
 /**
  * This structure represents a translated callstack frame.
