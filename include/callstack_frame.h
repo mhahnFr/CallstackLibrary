@@ -1,7 +1,7 @@
 /*
  * Callstack Library - Library creating human-readable call stacks.
  *
- * Copyright (C) 2023  mhahnFr
+ * Copyright (C) 2023 - 2024  mhahnFr
  *
  * This file is part of the CallstackLibrary. This library is free software:
  * you can redistribute it and/or modify it under the terms of the
@@ -27,6 +27,7 @@ extern "C" {
 #include <stdlib.h>
 
 #include "optional_Dl_info.h"
+#include "optional_ulong.h"
 
 /**
  * This structure represents a translated callstack frame.
@@ -47,6 +48,7 @@ struct callstack_frame {
     char * sourceFileRelative;
     /** The line number in the source file this frame is on. */
     unsigned long sourceLine;
+    struct optional_ulong sourceLineColumn;
 };
 
 /**
@@ -61,6 +63,8 @@ static inline void callstack_frame_create(struct callstack_frame * self) {
     self->sourceFile         = NULL;
     self->sourceFileRelative = NULL;
     self->sourceLine         = 0;
+    
+    self->sourceLineColumn.has_value = false;
     
     self->info.has_value = false;
 }
