@@ -105,6 +105,7 @@
 		BF971B962A58C155006BFFBB /* callstack_internals.c */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.c; path = callstack_internals.c; sourceTree = "<group>"; };
 		BFA17E6E2AC496A200931B1E /* optional_Dl_info.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = optional_Dl_info.h; sourceTree = "<group>"; };
 		BFAB6B382A62DC4600726B52 /* objectFile_optimized.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; path = objectFile_optimized.cpp; sourceTree = "<group>"; };
+		BFAD35292B5675E200FDFBD6 /* optional_ulong.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = optional_ulong.h; sourceTree = "<group>"; };
 		BFADAB062ADDA923004B4695 /* lcs_dlfcn.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = lcs_dlfcn.h; sourceTree = "<group>"; };
 		BFC2D1782AC30BFA00BD4C0B /* callstack_frame.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = callstack_frame.h; sourceTree = "<group>"; };
 		BFC2D1792AC31E1300BD4C0B /* callstack_frame.c */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.c; path = callstack_frame.c; sourceTree = "<group>"; };
@@ -228,6 +229,7 @@
 				BFA17E6E2AC496A200931B1E /* optional_Dl_info.h */,
 				BFADAB062ADDA923004B4695 /* lcs_dlfcn.h */,
 				BF6660D82AE6B9EC002D2BDE /* callstack_exception.hpp */,
+				BFAD35292B5675E200FDFBD6 /* optional_ulong.h */,
 			);
 			path = include;
 			sourceTree = "<group>";
@@ -381,7 +383,7 @@
 			isa = PBXProject;
 			attributes = {
 				BuildIndependentTargetsInParallel = YES;
-				LastUpgradeCheck = 1500;
+				LastUpgradeCheck = 1520;
 				ORGANIZATIONNAME = mhahnFr;
 				TargetAttributes = {
 					BF378FC42919539B00A4DAA9 = {
