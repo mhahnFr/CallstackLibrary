@@ -48,7 +48,7 @@ struct callstack_frame {
     char * sourceFileRelative;
     /** The line number in the source file this frame is on. */
     unsigned long sourceLine;
-    struct optional_ulong sourceLineColumn;
+    optional_ulong_t sourceLineColumn;
 };
 
 /**
