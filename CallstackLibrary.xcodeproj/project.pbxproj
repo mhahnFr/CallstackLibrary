@@ -109,6 +109,7 @@
 		BFAB6B382A62DC4600726B52 /* objectFile_optimized.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; path = objectFile_optimized.cpp; sourceTree = "<group>"; };
 		BFAD35292B5675E200FDFBD6 /* optional_ulong.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = optional_ulong.h; sourceTree = "<group>"; };
 		BFAD42AC2B5927A700ADB6AF /* objectFile_shared.c */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.c; path = objectFile_shared.c; sourceTree = "<group>"; };
+		BFAD42AF2B592D2000ADB6AF /* macho_utils.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = macho_utils.h; sourceTree = "<group>"; };
 		BFADAB062ADDA923004B4695 /* lcs_dlfcn.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = lcs_dlfcn.h; sourceTree = "<group>"; };
 		BFC2D1782AC30BFA00BD4C0B /* callstack_frame.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = callstack_frame.h; sourceTree = "<group>"; };
 		BFC2D1792AC31E1300BD4C0B /* callstack_frame.c */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.c; path = callstack_frame.c; sourceTree = "<group>"; };
@@ -166,6 +167,7 @@
 				BFE075A32A66C0C7009C4462 /* FunctionVector.h */,
 				BFE075A42A66C985009C4462 /* OptionalFunction.h */,
 				BFAD42AC2B5927A700ADB6AF /* objectFile_shared.c */,
+				BFAD42AF2B592D2000ADB6AF /* macho_utils.h */,
 			);
 			path = macho;
 			sourceTree = "<group>";
