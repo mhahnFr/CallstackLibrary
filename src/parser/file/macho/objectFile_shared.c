@@ -36,7 +36,7 @@ static inline bool dwarf_parseLineProgram(void* begin, void (*callback)(void)) {
     return true;
 }
 
-static inline bool objectFile_handleSegment64(struct segment_command_64* command, bool bitsSwapped, void (*callback)(void)) {
+static inline bool objectFile_handleSegment64(struct segment_command_64* command, void* baseAddress, bool bitsSwapped, void (*callback)(void)) {
     const uint32_t nsects = macho_maybeSwap(32, bitsSwapped, command->nsects);
     
     for (size_t i = 0; i < nsects; ++i) {
@@ -44,7 +44,7 @@ static inline bool objectFile_handleSegment64(struct segment_command_64* command
         
         if (strcmp("__DWARF", section->segname) == 0 &&
             strcmp("__debug_line", section->sectname) == 0) {
-            if (!dwarf_parseLineProgram(/*baseAddress*/ NULL + macho_maybeSwap(32, bitsSwapped, section->offset), callback)) {
+            if (!dwarf_parseLineProgram(baseAddress + macho_maybeSwap(32, bitsSwapped, section->offset), callback)) {
                 return false;
             }
         }
@@ -52,7 +52,7 @@ static inline bool objectFile_handleSegment64(struct segment_command_64* command
     return true;
 }
 
-static inline bool objectFile_handleSegment(struct segment_command* command, bool bitsSwapped, void (*callback)(void)) {
+static inline bool objectFile_handleSegment(struct segment_command* command, void* baseAddress, bool bitsSwapped, void (*callback)(void)) {
     const uint32_t nsects = macho_maybeSwap(32, bitsSwapped, command->nsects);
     
     for (size_t i = 0; i < nsects; ++i) {
@@ -60,7 +60,7 @@ static inline bool objectFile_handleSegment(struct segment_command* command, boo
         
         if (strcmp("__DWARF", section->segname) == 0 &&
             strcmp("__debug_line", section->sectname) == 0) {
-            if (!dwarf_parseLineProgram(/*baseAddress*/ NULL + macho_maybeSwap(32, bitsSwapped, section->offset), callback)) {
+            if (!dwarf_parseLineProgram(baseAddress + macho_maybeSwap(32, bitsSwapped, section->offset), callback)) {
                 return false;
             }
         }
@@ -76,7 +76,7 @@ static inline bool objectFile_parseDwarfImpl64(void* baseAddress, bool bitsSwapp
     for (size_t i = 0; i < ncmds; ++i) {
         bool result = true;
         switch (macho_maybeSwap(32, bitsSwapped, lc->cmd)) {
-            case LC_SEGMENT_64: result = objectFile_handleSegment64((void*) lc, bitsSwapped, callback); break;
+            case LC_SEGMENT_64: result = objectFile_handleSegment64((void*) lc, baseAddress, bitsSwapped, callback); break;
         }
         if (!result) {
             return false;
@@ -94,7 +94,7 @@ static inline bool objectFile_parseDwarfImpl(void* baseAddress, bool bitsSwapped
     for (size_t i = 0; i < ncmds; ++i) {
         bool result = true;
         switch (macho_maybeSwap(32, bitsSwapped, lc->cmd)) {
-            case LC_SEGMENT: result = objectFile_handleSegment((void*) lc, bitsSwapped, callback); break;
+            case LC_SEGMENT: result = objectFile_handleSegment((void*) lc, baseAddress, bitsSwapped, callback); break;
         }
         if (!result) {
             return false;
