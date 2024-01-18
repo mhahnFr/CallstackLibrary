@@ -19,6 +19,7 @@
 
 #include <stdio.h>
 #include <stdlib.h>
+#include <string.h>
 #include <sys/stat.h>
 
 #include <mach-o/loader.h>
@@ -27,8 +28,28 @@
 
 #include "macho_utils.h"
 
-static inline bool objectFile_handleSegment64(struct objectFile* self, struct segment_command_64* command, bool bitsSwapped, void (*callback)(void)) {
-    // TODO: Implement
+static inline bool dwarf_parseLineProgram(void* begin, void (*callback)(void)) {
+    // TODO: Properly implement
+    (void) begin;
+    (void) callback;
+    
+    return true;
+}
+
+static inline bool objectFile_handleSegment64(struct segment_command_64* command, bool bitsSwapped, void (*callback)(void)) {
+    const uint32_t nsects = macho_maybeSwap(32, bitsSwapped, command->nsects);
+    
+    for (size_t i = 0; i < nsects; ++i) {
+        struct section_64* section = (void*) command + sizeof(struct segment_command_64) + i * sizeof(struct section_64);
+        
+        if (strcmp("__DWARF", section->segname) == 0 &&
+            strcmp("__debug_line", section->sectname) == 0) {
+            if (!dwarf_parseLineProgram(/*baseAddress*/ NULL + macho_maybeSwap(32, bitsSwapped, section->offset), callback)) {
+                return false;
+            }
+        }
+    }
+    
     return true;
 }
 
@@ -37,7 +58,7 @@ static inline bool objectFile_handleSegment(struct objectFile* self, struct segm
     return true;
 }
 
-static inline bool objectFile_parseDwarfImpl64(struct objectFile* self, void* baseAddress, bool bitsSwapped, void (*callback)(void)) {
+static inline bool objectFile_parseDwarfImpl64(void* baseAddress, bool bitsSwapped, void (*callback)(void)) {
     struct mach_header_64* header = baseAddress;
     struct load_command*   lc     = (void*) header + sizeof(struct mach_header_64);
     const  uint32_t        ncmds  = macho_maybeSwap(32, bitsSwapped, header->ncmds);
@@ -45,7 +66,7 @@ static inline bool objectFile_parseDwarfImpl64(struct objectFile* self, void* ba
     for (size_t i = 0; i < ncmds; ++i) {
         bool result = true;
         switch (macho_maybeSwap(32, bitsSwapped, lc->cmd)) {
-            case LC_SEGMENT_64: result = objectFile_handleSegment64(self, (void*) lc, bitsSwapped, callback); break;
+            case LC_SEGMENT_64: result = objectFile_handleSegment64((void*) lc, bitsSwapped, callback); break;
         }
         if (!result) {
             return false;
@@ -79,8 +100,8 @@ static inline bool objectFile_parseDwarf(struct objectFile* self, void* buffer, 
         case MH_MAGIC: return objectFile_parseDwarfImpl(self, buffer, false, callback);
         case MH_CIGAM: return objectFile_parseDwarfImpl(self, buffer, true,  callback);
             
-        case MH_MAGIC_64: return objectFile_parseDwarfImpl64(self, buffer, false, callback);
-        case MH_CIGAM_64: return objectFile_parseDwarfImpl64(self, buffer, true,  callback);
+        case MH_MAGIC_64: return objectFile_parseDwarfImpl64(buffer, false, callback);
+        case MH_CIGAM_64: return objectFile_parseDwarfImpl64(buffer, true,  callback);
             
         // We do not parse fat Mach-O object files for now.
         // If this becomes necessary, refer to the implementation
