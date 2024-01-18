@@ -39,7 +39,7 @@
 
 #include "OptionalFunction.h"
 
-#define machoFile_maybeSwap(bits, swap, value) ((swap) ? OSSwapInt##bits(value) : (value))
+#include "macho_utils.h"
 
 /**
  * Handles the given segment command.
@@ -53,8 +53,8 @@ static inline bool machoFile_handleSegment(struct machoFile *       self,
                                            struct segment_command * segment,
                                            bool                     bitsReversed) {
     if (strcmp(segment->segname, SEG_PAGEZERO) == 0) {
-        self->addressOffset = machoFile_maybeSwap(32, bitsReversed, segment->vmaddr)
-                            + machoFile_maybeSwap(32, bitsReversed, segment->vmsize);
+        self->addressOffset = macho_maybeSwap(32, bitsReversed, segment->vmaddr)
+                            + macho_maybeSwap(32, bitsReversed, segment->vmsize);
     }
     return true;
 }
@@ -71,8 +71,8 @@ static inline bool machoFile_handleSegment64(struct machoFile *          self,
                                              struct segment_command_64 * segment,
                                              bool                        bitsReversed) {
     if (strcmp(segment->segname, SEG_PAGEZERO) == 0) {
-        self->addressOffset = machoFile_maybeSwap(64, bitsReversed, segment->vmaddr)
-                            + machoFile_maybeSwap(64, bitsReversed, segment->vmsize);
+        self->addressOffset = macho_maybeSwap(64, bitsReversed, segment->vmaddr)
+                            + macho_maybeSwap(64, bitsReversed, segment->vmsize);
     }
     return true;
 }
@@ -90,12 +90,12 @@ static inline bool machoFile_handleSymtab(struct machoFile *      self,
                                           struct symtab_command * command,
                                           void *                  baseAddress,
                                           bool                    bitsReversed) {
-    char * stringBegin = baseAddress + machoFile_maybeSwap(32, bitsReversed, command->stroff);
+    char * stringBegin = baseAddress + macho_maybeSwap(32, bitsReversed, command->stroff);
     
     struct objectFile *      current = objectFile_new();
     struct optional_function currFun = { .has_value = false };
-    const  uint32_t          nsyms   = machoFile_maybeSwap(32, bitsReversed, command->nsyms);
-    const  uint32_t          symoff  = machoFile_maybeSwap(32, bitsReversed, command->symoff);
+    const  uint32_t          nsyms   = macho_maybeSwap(32, bitsReversed, command->nsyms);
+    const  uint32_t          symoff  = macho_maybeSwap(32, bitsReversed, command->symoff);
     
     for (size_t i = 0; i < nsyms; ++i) {
         struct nlist * entry = baseAddress + symoff + i * sizeof(struct nlist);
@@ -122,7 +122,7 @@ static inline bool machoFile_handleSymtab(struct machoFile *      self,
                 break;
                 
             case N_SO: {
-                char * value = stringBegin + machoFile_maybeSwap(32, bitsReversed, entry->n_un.n_strx);
+                char * value = stringBegin + macho_maybeSwap(32, bitsReversed, entry->n_un.n_strx);
                 if (*value == '\0') {
                     // Begin of new object file
                     machoFile_addObjectFile(self, current);
@@ -145,7 +145,7 @@ static inline bool machoFile_handleSymtab(struct machoFile *      self,
             }
                 
             case N_OSO:
-                current->name = strdup(stringBegin + machoFile_maybeSwap(32, bitsReversed, entry->n_un.n_strx));
+                current->name = strdup(stringBegin + macho_maybeSwap(32, bitsReversed, entry->n_un.n_strx));
                 break;
                 
             case N_FUN: {
@@ -154,10 +154,10 @@ static inline bool machoFile_handleSymtab(struct machoFile *      self,
                     objectFile_delete(current);
                     return false;
                 }
-                char * value = stringBegin + machoFile_maybeSwap(32, bitsReversed, entry->n_un.n_strx);
+                char * value = stringBegin + macho_maybeSwap(32, bitsReversed, entry->n_un.n_strx);
                 if (*value != '\0') {
                     currFun.value.linkedName   = strdup(value);
-                    currFun.value.startAddress = machoFile_maybeSwap(32, bitsReversed, entry->n_value);
+                    currFun.value.startAddress = macho_maybeSwap(32, bitsReversed, entry->n_value);
                 }
                 break;
             }
@@ -186,12 +186,12 @@ static inline bool machoFile_handleSymtab64(struct machoFile *      self,
                                             struct symtab_command * command,
                                             void *                  baseAddress,
                                             bool                    bitsReversed) {
-    char * stringBegin = baseAddress + machoFile_maybeSwap(32, bitsReversed, command->stroff);
+    char * stringBegin = baseAddress + macho_maybeSwap(32, bitsReversed, command->stroff);
     
     struct objectFile *      current = objectFile_new();
     struct optional_function currFun = { .has_value = false };
-    const  uint32_t          nsyms   = machoFile_maybeSwap(32, bitsReversed, command->nsyms);
-    const  uint32_t          symoff  = machoFile_maybeSwap(32, bitsReversed, command->symoff);
+    const  uint32_t          nsyms   = macho_maybeSwap(32, bitsReversed, command->nsyms);
+    const  uint32_t          symoff  = macho_maybeSwap(32, bitsReversed, command->symoff);
     
     for (size_t i = 0; i < nsyms; ++i) {
         struct nlist_64 * entry = baseAddress + symoff + i * sizeof(struct nlist_64);
@@ -218,7 +218,7 @@ static inline bool machoFile_handleSymtab64(struct machoFile *      self,
                 break;
             
             case N_SO: {
-                char * value = stringBegin + machoFile_maybeSwap(32, bitsReversed, entry->n_un.n_strx);
+                char * value = stringBegin + macho_maybeSwap(32, bitsReversed, entry->n_un.n_strx);
                 if (*value == '\0') {
                     // Begin of new object file
                     machoFile_addObjectFile(self, current);
@@ -241,7 +241,7 @@ static inline bool machoFile_handleSymtab64(struct machoFile *      self,
             }
                 
             case N_OSO:
-                current->name = strdup(stringBegin + machoFile_maybeSwap(32, bitsReversed, entry->n_un.n_strx));
+                current->name = strdup(stringBegin + macho_maybeSwap(32, bitsReversed, entry->n_un.n_strx));
                 break;
                 
             case N_FUN: {
@@ -250,10 +250,10 @@ static inline bool machoFile_handleSymtab64(struct machoFile *      self,
                     objectFile_delete(current);
                     return false;
                 }
-                char * value = stringBegin + machoFile_maybeSwap(32, bitsReversed, entry->n_un.n_strx);
+                char * value = stringBegin + macho_maybeSwap(32, bitsReversed, entry->n_un.n_strx);
                 if (*value != '\0') {
                     currFun.value.linkedName   = strdup(value);
-                    currFun.value.startAddress = machoFile_maybeSwap(64, bitsReversed, entry->n_value);
+                    currFun.value.startAddress = macho_maybeSwap(64, bitsReversed, entry->n_value);
                 }
                 break;
             }
@@ -306,8 +306,8 @@ static inline bool machoFile_handleFunctionStarts(struct machoFile *            
                                                   struct linkedit_data_command * command,
                                                   void *                         baseAddress,
                                                   bool                           bitsReversed) {
-    uint32_t offset = machoFile_maybeSwap(32, bitsReversed, command->dataoff);
-    uint32_t size   = machoFile_maybeSwap(32, bitsReversed, command->datasize);
+    uint32_t offset = macho_maybeSwap(32, bitsReversed, command->dataoff);
+    uint32_t size   = macho_maybeSwap(32, bitsReversed, command->datasize);
     
     uint8_t * bytes    = baseAddress + offset;
     uint64_t  funcAddr = self->addressOffset;
@@ -347,11 +347,11 @@ static inline bool machoFile_parseFileImpl(struct machoFile * self,
                                            bool               bitsReversed) {
     struct mach_header *  header = baseAddress;
     struct load_command * lc     = (void *) header + sizeof(struct mach_header);
-    const  uint32_t       ncmds  = machoFile_maybeSwap(32, bitsReversed, header->ncmds);
+    const  uint32_t       ncmds  = macho_maybeSwap(32, bitsReversed, header->ncmds);
     
     for (size_t i = 0; i < ncmds; ++i) {
         bool result = true;
-        switch (machoFile_maybeSwap(32, bitsReversed, lc->cmd)) {
+        switch (macho_maybeSwap(32, bitsReversed, lc->cmd)) {
             case LC_SEGMENT:         result = machoFile_handleSegment(self, (void *) lc, bitsReversed);                 break;
             case LC_SYMTAB:          result = machoFile_handleSymtab(self, (void *) lc, header, bitsReversed);          break;
             case LC_FUNCTION_STARTS: result = machoFile_handleFunctionStarts(self, (void *) lc, header,  bitsReversed); break;
@@ -359,7 +359,7 @@ static inline bool machoFile_parseFileImpl(struct machoFile * self,
         if (!result) {
             return false;
         }
-        lc = (void *) lc + machoFile_maybeSwap(32, bitsReversed, lc->cmdsize);
+        lc = (void *) lc + macho_maybeSwap(32, bitsReversed, lc->cmdsize);
     }
     return true;
 }
@@ -377,11 +377,11 @@ static inline bool machoFile_parseFileImpl64(struct machoFile * self,
                                              bool               bitsReversed) {
     struct mach_header_64 * header = baseAddress;
     struct load_command *   lc     = (void *) header + sizeof(struct mach_header_64);
-    const  uint32_t         ncmds  = machoFile_maybeSwap(32, bitsReversed, header->ncmds);
+    const  uint32_t         ncmds  = macho_maybeSwap(32, bitsReversed, header->ncmds);
     
     for (size_t i = 0; i < ncmds; ++i) {
         bool result = true;
-        switch (machoFile_maybeSwap(32, bitsReversed, lc->cmd)) {
+        switch (macho_maybeSwap(32, bitsReversed, lc->cmd)) {
             case LC_SEGMENT_64:      result = machoFile_handleSegment64(self, (void *) lc, bitsReversed);              break;
             case LC_SYMTAB:          result = machoFile_handleSymtab64(self, (void *) lc, header, bitsReversed);       break;
             case LC_FUNCTION_STARTS: result = machoFile_handleFunctionStarts(self, (void *) lc, header, bitsReversed); break;
@@ -389,7 +389,7 @@ static inline bool machoFile_parseFileImpl64(struct machoFile * self,
         if (!result) {
             return false;
         }
-        lc = (void *) lc + machoFile_maybeSwap(32, bitsReversed, lc->cmdsize);
+        lc = (void *) lc + macho_maybeSwap(32, bitsReversed, lc->cmdsize);
     }
     return true;
 }
@@ -430,27 +430,27 @@ static inline bool machoFile_parseFat(struct machoFile *  self,
     switch (fatHeader->magic) {
         case FAT_MAGIC_64:
         case FAT_CIGAM_64: {
-            const struct fat_arch_64 * best = NXFindBestFatArch_64(machoFile_maybeSwap(32, bitsReversed, cputype),
-                                                                   machoFile_maybeSwap(32, bitsReversed, cpusubtype),
+            const struct fat_arch_64 * best = NXFindBestFatArch_64(macho_maybeSwap(32, bitsReversed, cputype),
+                                                                   macho_maybeSwap(32, bitsReversed, cpusubtype),
                                                                    (void *) fatHeader + sizeof(struct fat_header),
-                                                                   machoFile_maybeSwap(32, bitsReversed, fatHeader->nfat_arch));
+                                                                   macho_maybeSwap(32, bitsReversed, fatHeader->nfat_arch));
             if (best == NULL) {
                 return false;
             }
-            offset = machoFile_maybeSwap(64, bitsReversed, best->offset);
+            offset = macho_maybeSwap(64, bitsReversed, best->offset);
             break;
         }
             
         case FAT_MAGIC:
         case FAT_CIGAM: {
-            const struct fat_arch * best = NXFindBestFatArch(machoFile_maybeSwap(32, bitsReversed, cputype),
-                                                             machoFile_maybeSwap(32, bitsReversed, cpusubtype),
+            const struct fat_arch * best = NXFindBestFatArch(macho_maybeSwap(32, bitsReversed, cputype),
+                                                             macho_maybeSwap(32, bitsReversed, cpusubtype),
                                                              (void *) fatHeader + sizeof(struct fat_header),
-                                                             machoFile_maybeSwap(32, bitsReversed, fatHeader->nfat_arch));
+                                                             macho_maybeSwap(32, bitsReversed, fatHeader->nfat_arch));
             if (best == NULL) {
                 return false;
             }
-            offset = machoFile_maybeSwap(32, bitsReversed, best->offset);
+            offset = macho_maybeSwap(32, bitsReversed, best->offset);
             break;
         }
             
