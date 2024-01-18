@@ -21,9 +21,54 @@
 #include <stdlib.h>
 #include <sys/stat.h>
 
+#include <mach-o/loader.h>
+
 #include "objectFile.h"
 
+#include "macho_utils.h"
+
+static inline bool objectFile_handleSegment64(struct objectFile* self, struct segment_command_64* command, bool bitsSwapped, void (*callback)(void)) {
+    // TODO: Implement
+    return true;
+}
+
+static inline bool objectFile_parseDwarfImpl64(struct objectFile* self, void* baseAddress, bool bitsSwapped, void (*callback)(void)) {
+    struct mach_header_64* header = baseAddress;
+    struct load_command*   lc     = (void*) header + sizeof(struct mach_header_64);
+    const  uint32_t        ncmds  = macho_maybeSwap(32, bitsSwapped, header->ncmds);
+    
+    for (size_t i = 0; i < ncmds; ++i) {
+        bool result = true;
+        switch (macho_maybeSwap(32, bitsSwapped, lc->cmd)) {
+            case LC_SEGMENT_64: result = objectFile_handleSegment64(self, (void*) lc, bitsSwapped, callback); break;
+        }
+        if (!result) {
+            return false;
+        }
+        lc = (void*) lc + macho_maybeSwap(32, bitsSwapped, lc->cmdsize);
+    }
+    return true;
+}
+
+static inline bool objectFile_parseDwarfImpl(struct objectFile* self, void* baseAddress, bool bitsSwapped, void (*callback)(void)) {
+    // TODO: Implement
+    return false;
+}
+
 static inline bool objectFile_parseDwarf(struct objectFile* self, void* buffer, void (*callback)(void)) {
+    struct mach_header* header = buffer;
+    switch (header->magic) {
+        case MH_MAGIC: return objectFile_parseDwarfImpl(self, buffer, false, callback);
+        case MH_CIGAM: return objectFile_parseDwarfImpl(self, buffer, true,  callback);
+            
+        case MH_MAGIC_64: return objectFile_parseDwarfImpl64(self, buffer, false, callback);
+        case MH_CIGAM_64: return objectFile_parseDwarfImpl64(self, buffer, true,  callback);
+            
+        // We do not parse fat Mach-O object files for now.
+        // If this becomes necessary, refer to the implementation
+        // of machoFile_parseFat.
+        //                                          - mhahnFr
+    }
     return false;
 }
 
