@@ -49,12 +49,22 @@ static inline bool objectFile_handleSegment64(struct segment_command_64* command
             }
         }
     }
-    
     return true;
 }
 
-static inline bool objectFile_handleSegment(struct objectFile* self, struct segment_command* command, bool bitsSwapped, void (*callback)(void)) {
-    // TODO: Implement
+static inline bool objectFile_handleSegment(struct segment_command* command, bool bitsSwapped, void (*callback)(void)) {
+    const uint32_t nsects = macho_maybeSwap(32, bitsSwapped, command->nsects);
+    
+    for (size_t i = 0; i < nsects; ++i) {
+        struct section* section = (void*) command + sizeof(struct segment_command) + i * sizeof(struct section);
+        
+        if (strcmp("__DWARF", section->segname) == 0 &&
+            strcmp("__debug_line", section->sectname) == 0) {
+            if (!dwarf_parseLineProgram(/*baseAddress*/ NULL + macho_maybeSwap(32, bitsSwapped, section->offset), callback)) {
+                return false;
+            }
+        }
+    }
     return true;
 }
 
@@ -76,7 +86,7 @@ static inline bool objectFile_parseDwarfImpl64(void* baseAddress, bool bitsSwapp
     return true;
 }
 
-static inline bool objectFile_parseDwarfImpl(struct objectFile* self, void* baseAddress, bool bitsSwapped, void (*callback)(void)) {
+static inline bool objectFile_parseDwarfImpl(void* baseAddress, bool bitsSwapped, void (*callback)(void)) {
     struct mach_header*  header = baseAddress;
     struct load_command* lc     = (void*) header + sizeof(struct mach_header);
     const  uint32_t      ncmds  = macho_maybeSwap(32, bitsSwapped, header->ncmds);
@@ -84,7 +94,7 @@ static inline bool objectFile_parseDwarfImpl(struct objectFile* self, void* base
     for (size_t i = 0; i < ncmds; ++i) {
         bool result = true;
         switch (macho_maybeSwap(32, bitsSwapped, lc->cmd)) {
-            case LC_SEGMENT: result = objectFile_handleSegment(self, (void*) lc, bitsSwapped, callback); break;
+            case LC_SEGMENT: result = objectFile_handleSegment((void*) lc, bitsSwapped, callback); break;
         }
         if (!result) {
             return false;
@@ -94,11 +104,11 @@ static inline bool objectFile_parseDwarfImpl(struct objectFile* self, void* base
     return true;
 }
 
-static inline bool objectFile_parseDwarf(struct objectFile* self, void* buffer, void (*callback)(void)) {
+static inline bool objectFile_parseDwarf(void* buffer, void (*callback)(void)) {
     struct mach_header* header = buffer;
     switch (header->magic) {
-        case MH_MAGIC: return objectFile_parseDwarfImpl(self, buffer, false, callback);
-        case MH_CIGAM: return objectFile_parseDwarfImpl(self, buffer, true,  callback);
+        case MH_MAGIC: return objectFile_parseDwarfImpl(buffer, false, callback);
+        case MH_CIGAM: return objectFile_parseDwarfImpl(buffer, true,  callback);
             
         case MH_MAGIC_64: return objectFile_parseDwarfImpl64(buffer, false, callback);
         case MH_CIGAM_64: return objectFile_parseDwarfImpl64(buffer, true,  callback);
@@ -129,7 +139,7 @@ bool objectFile_parse(struct objectFile* self, void (*callback)(void)) {
     }
     const size_t count = fread(buffer, 1, fileStats.st_size, file);
     fclose(file);
-    const bool success = (off_t) count == fileStats.st_size && objectFile_parseDwarf(self, buffer, callback);
+    const bool success = (off_t) count == fileStats.st_size && objectFile_parseDwarf(buffer, callback);
     free(buffer);
     return success;
 }
