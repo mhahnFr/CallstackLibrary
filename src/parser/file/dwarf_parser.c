@@ -116,7 +116,38 @@ static inline bool dwarf_parseLineProgramV4(void* begin, size_t counter, uint64_
     while (counter - 4 < actualSize) {
         const uint8_t opCode = *((uint8_t*) (begin + counter++));
         if (opCode == 0) {
-            
+            const uint64_t length = getULEB128(begin, &counter);
+            const uint8_t  actualOpCode = *((uint8_t*) (begin + counter++));
+            switch (actualOpCode) {
+                case 1:
+                    endSequence = true;
+                    // TODO: Call the callback with a new matrix line
+                    address = opIndex = column = isa = discriminator = 0;
+                    basicBlock = endSequence = prologueEnd = epilogueBegin = false;
+                    file = line = 1;
+                    isStmt = defaultIsStmt;
+                    break;
+                    
+                case 2: {
+                    const size_t newAddress = *((size_t*) (begin + counter));
+                    counter += sizeof(size_t);
+                    address = newAddress;
+                    opIndex = 0;
+                    break;
+                }
+                    
+                case 3: // TODO: Add another file
+                    abort();
+                    break;
+                    
+                case 4:
+                    discriminator = getULEB128(begin, &counter);
+                    break;
+                    
+                default:
+                    counter += length - 1;
+                    break;
+            }
         } else if (opCode < opCodeBase) {
             
         } else {
