@@ -53,6 +53,26 @@ static inline uint64_t getULEB128(void* begin, size_t* counter) {
     return result;
 }
 
+static inline int64_t getLEB128(void* begin, size_t* counter) {
+    int64_t result = 0,
+            shift  = 0;
+    
+    bool more = true;
+    do {
+        uint8_t b = *((uint8_t*) (begin + *counter));
+        *counter += 1;
+        result |= (b & 0x7f) << shift;
+        shift += 7;
+        if ((0x80 & b) == 0) {
+            if (shift < 32 && (b & 0x40) != 0) {
+                result |= ~0 << shift;
+            }
+            more = false;
+        }
+    } while (more);
+    return result;
+}
+
 static inline bool dwarf_parseLineProgramV4(void* begin, size_t counter, uint64_t actualSize, bool bit64, dwarf_line_callback cb) {
     uint64_t headerLength;
     if (bit64) {
@@ -140,16 +160,58 @@ static inline bool dwarf_parseLineProgramV4(void* begin, size_t counter, uint64_
                     abort();
                     break;
                     
-                case 4:
-                    discriminator = getULEB128(begin, &counter);
-                    break;
+                case 4: discriminator = getULEB128(begin, &counter); break;
                     
-                default:
-                    counter += length - 1;
-                    break;
+                default: counter += length - 1; break;
             }
         } else if (opCode < opCodeBase) {
-            
+            switch (opCode) {
+                case 1:
+                    // TODO: Call the callback with a new matrix line
+                    discriminator = 0;
+                    basicBlock = prologueEnd = epilogueBegin = false;
+                    break;
+                    
+                case 2: {
+                    const uint64_t operationAdvance = getULEB128(begin, &counter);
+                    address += minimumInstructionLength * ((opIndex + operationAdvance) / maximumOperations);
+                    opIndex = (opIndex + operationAdvance) % maximumOperations;
+                    break;
+                }
+                    
+                case 3: line += getLEB128(begin, &counter);   break;
+                case 4: file = getULEB128(begin, &counter);   break;
+                case 5: column = getULEB128(begin, &counter); break;
+                case 6: isStmt = !isStmt;                     break;
+                case 7: basicBlock = true;                    break;
+                    
+                case 8: {
+                    const uint8_t adjustedOpCode   = 255 - opCodeBase;
+                    const uint8_t operationAdvance = adjustedOpCode / lineRange;
+                    
+                    address += minimumInstructionLength * ((opIndex + operationAdvance) / maximumOperations);
+                    opIndex  = (opIndex + operationAdvance) % maximumOperations;
+                    break;
+                }
+                    
+                case 9: {
+                    opIndex = 0;
+                    const uint16_t adder = *((uint16_t*) (begin + counter));
+                    counter += 2;
+                    address += adder;
+                    break;
+                }
+                    
+                case 10: prologueEnd = true;                break;
+                case 11: epilogueBegin = true;              break;
+                case 12: isa = getULEB128(begin, &counter); break;
+                    
+                default:
+                    for (uint64_t i = 0; i < stdOpcodeLengths.content[opCode - 1]; ++i) {
+                        getLEB128(begin, &counter);
+                    }
+                    break;
+            }
         } else {
             uint8_t adjustedOpCode   = opCode - opCodeBase;
             uint8_t operationAdvance = adjustedOpCode / lineRange;
