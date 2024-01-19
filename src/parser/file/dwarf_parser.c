@@ -63,17 +63,17 @@ static inline bool dwarf_parseLineProgramV4(void* begin, size_t counter, uint64_
         counter += 4;
     }
     const uint8_t minimumInstructionLength = *((uint8_t*) (begin + counter++));
-    const uint8_t maximumInstructionLength = *((uint8_t*) (begin + counter++));
+    const uint8_t maximumOperations        = *((uint8_t*) (begin + counter++));
     const bool    defaultIsStmt            = *((uint8_t*) (begin + counter++));
     const int8_t  lineBase                 = *((int8_t*)  (begin + counter++));
     const uint8_t lineRange                = *((uint8_t*) (begin + counter++));
-    const uint8_t opcodeBase               = *((uint8_t*) (begin + counter++));
+    const uint8_t opCodeBase               = *((uint8_t*) (begin + counter++));
     
     // TODO: For DC4C: Create copy create function
     vector_uint8_t stdOpcodeLengths;
     vector_uint8_create(&stdOpcodeLengths);
-    vector_uint8_reserve(&stdOpcodeLengths, opcodeBase - 2);
-    for (uint8_t i = 1; i < opcodeBase; ++i) {
+    vector_uint8_reserve(&stdOpcodeLengths, opCodeBase - 2);
+    for (uint8_t i = 1; i < opCodeBase; ++i) {
         vector_uint8_push_back(&stdOpcodeLengths, *((uint8_t*) (begin + counter++)));
     }
     
@@ -99,7 +99,43 @@ static inline bool dwarf_parseLineProgramV4(void* begin, size_t counter, uint64_
     }
     ++counter;
     
-    // program
+    uint64_t address       = 0,
+             opIndex       = 0,
+             file          = 1,
+             line          = 1,
+             column        = 0,
+             isa           = 0,
+             discriminator = 0;
+    
+    bool isStmt         = defaultIsStmt,
+          basicBlock    = false,
+          endSequence   = false,
+          prologueEnd   = false,
+          epilogueBegin = false;
+    
+    while (counter - 4 < actualSize) {
+        const uint8_t opCode = *((uint8_t*) (begin + counter++));
+        if (opCode == 0) {
+            
+        } else if (opCode < opCodeBase) {
+            
+        } else {
+            uint8_t adjustedOpCode   = opCode - opCodeBase;
+            uint8_t operationAdvance = adjustedOpCode / lineRange;
+            
+            address += minimumInstructionLength * ((opIndex + operationAdvance) / maximumOperations);
+            opIndex  = (opIndex + operationAdvance) % maximumOperations;
+            line    += lineBase + (adjustedOpCode % lineRange);
+            
+            // TODO: Call the callback with a new matrix line
+            
+            basicBlock    = false;
+            prologueEnd   = false;
+            epilogueBegin = false;
+            discriminator = 0;
+        }
+    }
+    
     return true;
 }
 
