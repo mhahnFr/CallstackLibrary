@@ -20,7 +20,9 @@
 #ifndef dwarf_parser_h
 #define dwarf_parser_h
 
-typedef void (*)(void) dwarf_line_callback;
+#include <stdbool.h>
+
+typedef void (*dwarf_line_callback)(void);
 
 bool dwarf_parseLineProgram(void* begin, dwarf_line_callback cb);
 

@@ -26,6 +26,8 @@
 #include "function.h"
 #include "OptionalFunction.h"
 
+#include "../dwarf_parser.h"
+
 /**
  * This structure represents an object file.
  */
@@ -81,7 +83,7 @@ void objectFile_addFunction(struct objectFile * self,
  */
 optional_function_t objectFile_findFunction(struct objectFile * self, uint64_t address);
 
-bool objectFile_parse(struct objectFile* self, void (*callback)(void));
+bool objectFile_parse(struct objectFile* self, dwarf_line_callback cb);
 
 /**
  * @brief Invokes the given function for each function object inside the given object file.
