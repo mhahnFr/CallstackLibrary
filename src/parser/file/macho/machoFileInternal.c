@@ -242,6 +242,7 @@ static inline bool machoFile_handleSymtab64(struct machoFile *      self,
                 
             case N_OSO:
                 current->name = strdup(stringBegin + macho_maybeSwap(32, bitsReversed, entry->n_un.n_strx));
+                current->lastModified = entry->n_value;
                 break;
                 
             case N_FUN: {

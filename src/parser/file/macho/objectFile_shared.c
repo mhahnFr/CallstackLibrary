@@ -120,6 +120,9 @@ bool objectFile_parse(struct objectFile* self, dwarf_line_callback cb) {
     if (stat(self->name, &fileStats) != 0) {
         return false;
     }
+    if (fileStats.st_mtime > self->lastModified) {
+        return false;
+    }
     void* buffer = malloc(fileStats.st_size);
     if (buffer == NULL) {
         return false;

@@ -22,6 +22,7 @@
 
 #include <stdarg.h>
 #include <stdbool.h>
+#include <time.h>
 
 #include "function.h"
 #include "OptionalFunction.h"
@@ -38,6 +39,8 @@ struct objectFile {
     char * directory;
     /** The full path of the represented object file.   */
     char * name;
+    
+    time_t lastModified;
     
     /** A pointer to the underlying object.             */
     void * priv;
@@ -58,11 +61,12 @@ struct objectFile * objectFile_new(void);
  * @param self the object file structure to be initialized
  */
 static inline void objectFile_create(struct objectFile * self) {
-    self->sourceFile = NULL;
-    self->directory  = NULL;
-    self->name       = NULL;
-    self->priv       = NULL;
-    self->next       = NULL;
+    self->sourceFile   = NULL;
+    self->directory    = NULL;
+    self->name         = NULL;
+    self->priv         = NULL;
+    self->next         = NULL;
+    self->lastModified = 0;
 }
 
 /**
