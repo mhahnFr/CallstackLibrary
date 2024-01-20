@@ -24,6 +24,7 @@
 #include "dwarf_parser.h"
 
 #include "vector_string.h"
+#include "vector_uint8.h"
 
 #include "../../../../DC4C/vector.h"
 
@@ -34,7 +35,6 @@ struct dwarfFileNameEntry {
     uint64_t size;
 };
 
-typedef_vector_light_named(uint8, uint8_t);
 typedef_vector_light_named(dwarfFile, struct dwarfFileNameEntry);
 
 static inline uint64_t getULEB128(void* begin, size_t* counter) {

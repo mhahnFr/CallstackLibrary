@@ -117,6 +117,7 @@
 		BFAD63162B5BCC4B00EE8E14 /* macho_parser.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = macho_parser.h; sourceTree = "<group>"; };
 		BFAD63172B5BCC4B00EE8E14 /* macho_parser.c */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.c; path = macho_parser.c; sourceTree = "<group>"; };
 		BFAD631B2B5BD67900EE8E14 /* vector_string.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = vector_string.h; sourceTree = "<group>"; };
+		BFAD631C2B5BD74100EE8E14 /* vector_uint8.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = vector_uint8.h; sourceTree = "<group>"; };
 		BFAD65412B5A717F00024242 /* dwarf_parser.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = dwarf_parser.h; sourceTree = "<group>"; };
 		BFAD65422B5A717F00024242 /* dwarf_parser.c */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.c; path = dwarf_parser.c; sourceTree = "<group>"; };
 		BFADAB062ADDA923004B4695 /* lcs_dlfcn.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = lcs_dlfcn.h; sourceTree = "<group>"; };
@@ -300,6 +301,7 @@
 				BFAD65412B5A717F00024242 /* dwarf_parser.h */,
 				BFAD65422B5A717F00024242 /* dwarf_parser.c */,
 				BFAD631B2B5BD67900EE8E14 /* vector_string.h */,
+				BFAD631C2B5BD74100EE8E14 /* vector_uint8.h */,
 			);
 			path = dwarf;
 			sourceTree = "<group>";
