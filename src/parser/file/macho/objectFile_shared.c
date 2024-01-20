@@ -60,7 +60,7 @@ static inline bool objectFile_handleSegment(struct segment_command* command, voi
     return true;
 }
 
-static inline bool objectFile_parseDwarfImpl64(void* baseAddress, bool bitsSwapped, dwarf_line_callback cb) {
+static inline bool objectFile_parseMachOImpl64(void* baseAddress, bool bitsSwapped, dwarf_line_callback cb) {
     struct mach_header_64* header = baseAddress;
     struct load_command*   lc     = (void*) header + sizeof(struct mach_header_64);
     const  uint32_t        ncmds  = macho_maybeSwap(32, bitsSwapped, header->ncmds);
@@ -78,7 +78,7 @@ static inline bool objectFile_parseDwarfImpl64(void* baseAddress, bool bitsSwapp
     return true;
 }
 
-static inline bool objectFile_parseDwarfImpl(void* baseAddress, bool bitsSwapped, dwarf_line_callback cb) {
+static inline bool objectFile_parseMachOImpl(void* baseAddress, bool bitsSwapped, dwarf_line_callback cb) {
     struct mach_header*  header = baseAddress;
     struct load_command* lc     = (void*) header + sizeof(struct mach_header);
     const  uint32_t      ncmds  = macho_maybeSwap(32, bitsSwapped, header->ncmds);
@@ -96,14 +96,14 @@ static inline bool objectFile_parseDwarfImpl(void* baseAddress, bool bitsSwapped
     return true;
 }
 
-static inline bool objectFile_parseDwarf(void* buffer, dwarf_line_callback cb) {
+static inline bool objectFile_parseMachO(void* buffer, dwarf_line_callback cb) {
     struct mach_header* header = buffer;
     switch (header->magic) {
-        case MH_MAGIC: return objectFile_parseDwarfImpl(buffer, false, cb);
-        case MH_CIGAM: return objectFile_parseDwarfImpl(buffer, true,  cb);
+        case MH_MAGIC: return objectFile_parseMachOImpl(buffer, false, cb);
+        case MH_CIGAM: return objectFile_parseMachOImpl(buffer, true,  cb);
             
-        case MH_MAGIC_64: return objectFile_parseDwarfImpl64(buffer, false, cb);
-        case MH_CIGAM_64: return objectFile_parseDwarfImpl64(buffer, true,  cb);
+        case MH_MAGIC_64: return objectFile_parseMachOImpl64(buffer, false, cb);
+        case MH_CIGAM_64: return objectFile_parseMachOImpl64(buffer, true,  cb);
             
         // We do not parse fat Mach-O object files for now.
         // If this becomes necessary, refer to the implementation
@@ -131,7 +131,7 @@ bool objectFile_parse(struct objectFile* self, dwarf_line_callback cb) {
     }
     const size_t count = fread(buffer, 1, fileStats.st_size, file);
     fclose(file);
-    const bool success = (off_t) count == fileStats.st_size && objectFile_parseDwarf(buffer, cb);
+    const bool success = (off_t) count == fileStats.st_size && objectFile_parseMachO(buffer, cb);
     free(buffer);
     return success;
 }
