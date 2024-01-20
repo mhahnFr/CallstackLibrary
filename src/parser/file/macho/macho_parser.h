@@ -20,22 +20,6 @@
 #ifndef macho_parser_h
 #define macho_parser_h
 
-/*
- Format of the MachO debug symbols:
- 
-  SO: \0
-  SO: <path>
-  SO: <source_file_name>
- OSO: <full_object_path> <last_modified_time>
- ... <Symbols> ...
-  SO: \0
- 
- BNSYM: <function address>
-   FUN: <linked name> <address>
-   FUN: \0 <function's length>
- ENSYM: <function address>
- */
-
 #include <mach-o/loader.h>
 
 #include "function.h"
@@ -44,6 +28,16 @@
 typedef void (*macho_addObjectFile)(struct objectFile*);
 typedef void (*macho_addFunction)(struct function*);
 
-bool macho_parseSymtab(struct symtab_command* command, void* baseAddress, bool bytesSwapped, macho_addObjectFile objCb, macho_addFunction funCb);
+bool macho_parseSymtab(struct symtab_command* command, 
+                       void*                  baseAddress,
+                       bool                   bytesSwapped,
+                       macho_addObjectFile    objCb,
+                       macho_addFunction      funCb);
+
+bool macho_parseSymtab64(struct symtab_command* command,
+                         void*                  baseAddress,
+                         bool                   bytesSwapped,
+                         macho_addObjectFile    objCb,
+                         macho_addFunction      funCb);
 
 #endif /* macho_parser_h */
