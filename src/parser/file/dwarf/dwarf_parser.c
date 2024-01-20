@@ -23,19 +23,9 @@
 
 #include "dwarf_parser.h"
 
+#include "fileNameEntry.h"
 #include "vector_string.h"
 #include "vector_uint8.h"
-
-#include "../../../../DC4C/vector.h"
-
-struct dwarfFileNameEntry {
-    const char* name;
-    uint64_t dirIndex;
-    uint64_t modTime;
-    uint64_t size;
-};
-
-typedef_vector_light_named(dwarfFile, struct dwarfFileNameEntry);
 
 static inline uint64_t getULEB128(void* begin, size_t* counter) {
     uint64_t result = 0,
@@ -107,8 +97,8 @@ static inline bool dwarf_parseLineProgramV4(void* begin, size_t counter, uint64_
     }
     ++counter;
     
-    vector_dwarfFile_t fileNames; // Treat 0 as 1!
-    vector_dwarfFile_create(&fileNames);
+    vector_dwarfFileEntry_t fileNames; // Treat 0 as 1!
+    vector_dwarfFileEntry_create(&fileNames);
     while (*((uint8_t*) (begin + counter)) != 0x0) {
         const char* string = begin + counter;
         counter += strlen(string) + 1;
@@ -116,7 +106,7 @@ static inline bool dwarf_parseLineProgramV4(void* begin, size_t counter, uint64_
         const uint64_t dirIndex     = getULEB128(begin, &counter),
                        modification = getULEB128(begin, &counter),
                        size         = getULEB128(begin, &counter);
-        vector_dwarfFile_push_back(&fileNames, (struct dwarfFileNameEntry) { string, dirIndex, modification, size });
+        vector_dwarfFileEntry_push_back(&fileNames, (struct dwarf_fileNameEntry) { string, dirIndex, modification, size });
     }
     ++counter;
     
