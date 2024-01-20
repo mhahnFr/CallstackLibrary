@@ -23,7 +23,7 @@
 
 #include "dwarf_parser.h"
 
-#include "../../../DC4C/vector.h"
+#include "../../../../DC4C/vector.h"
 
 struct dwarfFileNameEntry {
     const char* name;

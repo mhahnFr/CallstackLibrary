@@ -27,7 +27,7 @@
 #include "function.h"
 #include "OptionalFunction.h"
 
-#include "../dwarf_parser.h"
+#include "../dwarf/dwarf_parser.h"
 
 /**
  * This structure represents an object file.

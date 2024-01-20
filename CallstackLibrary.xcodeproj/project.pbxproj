@@ -253,6 +253,7 @@
 		BF971B7C2A58823E006BFFBB /* file */ = {
 			isa = PBXGroup;
 			children = (
+				BFAD631A2B5BD5B000EE8E14 /* dwarf */,
 				BF971B8A2A58B125006BFFBB /* cache */,
 				BF971B832A588624006BFFBB /* elf */,
 				BF3031DF294C6C2300E8ADC5 /* macho */,
@@ -261,8 +262,6 @@
 				BFD2A0412A659F97007F4B81 /* UInt64Vector.h */,
 				BFE97A932AE82E92009E1DA4 /* fileHelper.cpp */,
 				BFE97A942AE82E92009E1DA4 /* fileHelper.h */,
-				BFAD65412B5A717F00024242 /* dwarf_parser.h */,
-				BFAD65422B5A717F00024242 /* dwarf_parser.c */,
 			);
 			path = file;
 			sourceTree = "<group>";
@@ -292,6 +291,15 @@
 				BFAB6B382A62DC4600726B52 /* objectFile_optimized.cpp */,
 			);
 			path = cpp_optimized;
+			sourceTree = "<group>";
+		};
+		BFAD631A2B5BD5B000EE8E14 /* dwarf */ = {
+			isa = PBXGroup;
+			children = (
+				BFAD65412B5A717F00024242 /* dwarf_parser.h */,
+				BFAD65422B5A717F00024242 /* dwarf_parser.c */,
+			);
+			path = dwarf;
 			sourceTree = "<group>";
 		};
 		BFD2A0392A659F4C007F4B81 /* DC4C */ = {
