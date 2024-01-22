@@ -17,7 +17,14 @@
  * this library, see the file LICENSE.  If not, see <https://www.gnu.org/licenses/>.
  */
 
+#include <string.h>
+
+#include <mach-o/nlist.h>
+#include <mach-o/stab.h>
+
 #include "macho_parser.h"
+
+#include "macho_utils.h"
 
 /*
  Format of the MachO debug symbols:
@@ -40,14 +47,86 @@ bool macho_parseSymtab(struct symtab_command* command,
                        bool                   bytesSwapped,
                        macho_addObjectFile    objCb,
                        macho_addFunction      funCb) {
-    // TODO: Implement
+    if (objCb == NULL && funCb == NULL) return false;
     
-    (void) command;
-    (void) baseAddress;
-    (void) bytesSwapped;
-    (void) objCb;
-    (void) funCb;
+    const char*    stringBegin = baseAddress + macho_maybeSwap(32, bytesSwapped, command->stroff);
+    const uint32_t nsyms       = macho_maybeSwap(32, bytesSwapped, command->nsyms),
+                   symoff      = macho_maybeSwap(32, bytesSwapped, command->symoff);
     
+    struct optional_function currFun = { .has_value = false };
+    struct objectFile*       currObj = NULL;
+    
+    for (uint32_t i = 0; i < nsyms; ++i) {
+        struct nlist_64* entry = baseAddress + symoff + i * sizeof(struct nlist_64); // <--- FIXME: 64 Bit here
+        switch (entry->n_type) {
+            case N_BNSYM:
+                if (currFun.has_value) {
+                    // TODO: Invalid format
+                    return false;
+                }
+                function_create(&currFun.value);
+                currFun.has_value = true;
+                currFun.value.startAddress = macho_maybeSwap(64, bytesSwapped, entry->n_value); // <--- FIXME: 64 Bit here
+                break;
+                
+            case N_ENSYM:
+                if (!currFun.has_value) {
+                    // TODO: Invalid
+                    return false;
+                }
+                if (currObj == NULL) {
+                    if (funCb != NULL) {
+                        funCb(currFun.value);
+                    }
+                } else {
+                    objectFile_addFunction(currObj, currFun.value);
+                }
+                currFun.has_value = false;
+                break;
+                
+            case N_SO: {
+                const char* value = stringBegin + macho_maybeSwap(32, bytesSwapped, entry->n_un.n_strx);
+                if (*value == '\0') {
+                    if (currObj == NULL) {
+                        currObj = objectFile_new();
+                    } else {
+                        if (objCb == NULL) {
+                            objectFile_delete(currObj);
+                        } else {
+                            objCb(currObj);
+                        }
+                        currObj = NULL;
+                    }
+                } else if (currObj->directory == NULL) {
+                    currObj->directory = strdup(value);
+                } else {
+                    currObj->sourceFile = strdup(value);
+                }
+                break;
+            }
+                
+            case N_OSO:
+                currObj->name         = strdup(stringBegin + macho_maybeSwap(32, bytesSwapped, entry->n_un.n_strx));
+                currObj->lastModified = macho_maybeSwap(64, bytesSwapped, entry->n_value); // <--- FIXME: 64 Bit here
+                break;
+                
+            case N_FUN: {
+                if (!currFun.has_value) {
+                    // TODO: Invalid
+                    return false;
+                }
+                const char* value = stringBegin + macho_maybeSwap(32, bytesSwapped, entry->n_un.n_strx);
+                // TODO: Can this one come anywhere?
+                if (*value == '\0') {
+                    currFun.value.length = macho_maybeSwap(64, bytesSwapped, entry->n_value); // <--- FIXME: 64 Bit here
+                } else {
+                    currFun.value.linkedName   = strdup(value);
+                    currFun.value.startAddress = macho_maybeSwap(64, bytesSwapped, entry->n_value); // <--- FIXME: 64 Bit here
+                }
+                break;
+            }
+        }
+    }
     return true;
 }
 
