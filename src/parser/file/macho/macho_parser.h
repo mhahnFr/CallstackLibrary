@@ -31,13 +31,8 @@ typedef void (*macho_addFunction)(struct function);
 bool macho_parseSymtab(struct symtab_command* command, 
                        void*                  baseAddress,
                        bool                   bytesSwapped,
+                       bool                   bit64,
                        macho_addObjectFile    objCb,
                        macho_addFunction      funCb);
-
-bool macho_parseSymtab64(struct symtab_command* command,
-                         void*                  baseAddress,
-                         bool                   bytesSwapped,
-                         macho_addObjectFile    objCb,
-                         macho_addFunction      funCb);
 
 #endif /* macho_parser_h */
