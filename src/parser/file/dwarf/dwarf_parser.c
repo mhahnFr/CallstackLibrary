@@ -220,6 +220,9 @@ static inline bool dwarf_parseLineProgramV4(void* begin, size_t counter, uint64_
         }
     }
     
+    vector_uint8_destroy(&stdOpcodeLengths);
+    vector_string_destroy(&includeDirectories);
+    vector_dwarfFileEntry_destroy(&fileNames);
     return true;
 }
 
