@@ -47,12 +47,16 @@ bool macho_parseSymtab(struct symtab_command* command,
                        bool                   bytesSwapped,
                        bool                   bit64,
                        macho_addObjectFile    objCb,
-                       macho_addFunction      funCb) {
+                       macho_addFunction      funCb,
+                       ...) {
     if (objCb == NULL && funCb == NULL) return false;
     
     const char*    stringBegin = baseAddress + macho_maybeSwap(32, bytesSwapped, command->stroff);
     const uint32_t nsyms       = macho_maybeSwap(32, bytesSwapped, command->nsyms),
                    symoff      = macho_maybeSwap(32, bytesSwapped, command->symoff);
+    
+    va_list args;
+    va_start(args, funCb);
     
     struct optional_function currFun = { .has_value = false };
     struct objectFile*       currObj = NULL;
@@ -77,7 +81,10 @@ bool macho_parseSymtab(struct symtab_command* command,
                 }
                 if (currObj == NULL) {
                     if (funCb != NULL) {
-                        funCb(currFun.value);
+                        va_list copy;
+                        va_copy(copy, args);
+                        funCb(currFun.value, copy);
+                        va_end(copy);
                     }
                 } else {
                     objectFile_addFunction(currObj, currFun.value);
@@ -94,7 +101,10 @@ bool macho_parseSymtab(struct symtab_command* command,
                         if (objCb == NULL) {
                             objectFile_delete(currObj);
                         } else {
-                            objCb(currObj);
+                            va_list copy;
+                            va_copy(copy, args);
+                            objCb(currObj, copy);
+                            va_end(copy);
                         }
                         currObj = NULL;
                     }
@@ -128,5 +138,6 @@ bool macho_parseSymtab(struct symtab_command* command,
             }
         }
     }
+    va_end(args);
     return true;
 }

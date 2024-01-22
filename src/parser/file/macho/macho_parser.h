@@ -25,14 +25,15 @@
 #include "function.h"
 #include "objectFile.h"
 
-typedef void (*macho_addObjectFile)(struct objectFile*);
-typedef void (*macho_addFunction)(struct function);
+typedef void (*macho_addObjectFile)(struct objectFile*, va_list);
+typedef void (*macho_addFunction)(struct function, va_list);
 
 bool macho_parseSymtab(struct symtab_command* command, 
                        void*                  baseAddress,
                        bool                   bytesSwapped,
                        bool                   bit64,
                        macho_addObjectFile    objCb,
-                       macho_addFunction      funCb);
+                       macho_addFunction      funCb,
+                       ...);
 
 #endif /* macho_parser_h */
