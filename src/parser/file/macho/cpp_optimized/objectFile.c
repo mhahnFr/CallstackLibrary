@@ -1,7 +1,7 @@
 /*
  * Callstack Library - Library creating human-readable call stacks.
  *
- * Copyright (C) 2023  mhahnFr
+ * Copyright (C) 2023 - 2024  mhahnFr
  *
  * This file is part of the CallstackLibrary. This library is free software:
  * you can redistribute it and/or modify it under the terms of the
@@ -56,7 +56,7 @@ struct optional_function objectFile_findFunction(struct objectFile * me, uint64_
     struct optional_function toReturn = { .has_value = false };
     
     size_t i;
-    for (i = 0; i < self->functions.count && (address < self->functions.content[i].startAddress || address > self->functions.content[i].endAddress); ++i);
+    for (i = 0; i < self->functions.count && (address < self->functions.content[i].startAddress || address > self->functions.content[i].startAddress + self->functions.content[i].length); ++i);
     
     if (i < self->functions.count) {
         toReturn.has_value = true;

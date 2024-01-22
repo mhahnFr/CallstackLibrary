@@ -26,7 +26,7 @@
 #include "objectFile.h"
 
 typedef void (*macho_addObjectFile)(struct objectFile*);
-typedef void (*macho_addFunction)(struct function*);
+typedef void (*macho_addFunction)(struct function);
 
 bool macho_parseSymtab(struct symtab_command* command, 
                        void*                  baseAddress,

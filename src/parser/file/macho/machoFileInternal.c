@@ -284,7 +284,8 @@ static inline void machoFile_addFunctionEnds(struct function * func, va_list arg
     for (i = 0; i < self->functionStarts.count && self->functionStarts.content[i] != func->startAddress; ++i);
 
     if (i < self->functionStarts.count - 1) {
-        func->endAddress = self->functionStarts.content[i + 1];
+        uint64_t end = self->functionStarts.content[i + 1];
+        func->length = end - func->startAddress;
     } else {
         /*
          * Should not happen. If it does, the function at that

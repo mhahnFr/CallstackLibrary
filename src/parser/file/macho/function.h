@@ -1,7 +1,7 @@
 /*
  * Callstack Library - Library creating human-readable call stacks.
  *
- * Copyright (C) 2023  mhahnFr
+ * Copyright (C) 2023 - 2024  mhahnFr
  *
  * This file is part of the CallstackLibrary. This library is free software:
  * you can redistribute it and/or modify it under the terms of the
@@ -28,8 +28,7 @@
 struct function {
     /** The beginning address of the function inside its Mach-O file. */
     uint64_t startAddress;
-    /** The end address of the function inside its Mach-O file.       */
-    uint64_t endAddress;
+    uint64_t length;
     
     /** The name of the function at linking time.                     */
     char * linkedName;

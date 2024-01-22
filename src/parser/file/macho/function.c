@@ -1,7 +1,7 @@
 /*
  * Callstack Library - Library creating human-readable call stacks.
  *
- * Copyright (C) 2023  mhahnFr
+ * Copyright (C) 2023 - 2024  mhahnFr
  *
  * This file is part of the CallstackLibrary. This library is free software:
  * you can redistribute it and/or modify it under the terms of the
@@ -31,7 +31,7 @@ struct function * function_new(void) {
 
 void function_create(struct function * self) {
     self->startAddress = 0x0;
-    self->endAddress   = 0x0;
+    self->length       = 0x0;
     self->linkedName   = NULL;
 }
 
