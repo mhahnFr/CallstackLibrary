@@ -65,7 +65,9 @@ bool macho_parseSymtab(struct symtab_command* command,
         switch (entry.n_type) {
             case N_BNSYM:
                 if (currFun.has_value) {
-                    // TODO: Invalid format
+                    if (currObj != NULL) objectFile_delete(currObj);
+                    function_destroy(&currFun.value);
+                    va_end(args);
                     return false;
                 }
                 function_create(&currFun.value);
@@ -75,7 +77,8 @@ bool macho_parseSymtab(struct symtab_command* command,
                 
             case N_ENSYM:
                 if (!currFun.has_value) {
-                    // TODO: Invalid
+                    if (currObj != NULL) objectFile_delete(currObj);
+                    va_end(args);
                     return false;
                 }
                 if (currObj == NULL) {
@@ -123,11 +126,11 @@ bool macho_parseSymtab(struct symtab_command* command,
                 
             case N_FUN: {
                 if (!currFun.has_value) {
-                    // TODO: Invalid
+                    if (currObj != NULL) objectFile_delete(currObj);
+                    va_end(args);
                     return false;
                 }
                 const char* value = stringBegin + entry.n_strx;
-                // TODO: Can this one come anywhere?
                 if (*value == '\0') {
                     currFun.value.length = entry.n_value;
                 } else {
