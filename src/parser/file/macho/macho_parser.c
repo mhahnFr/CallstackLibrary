@@ -24,7 +24,7 @@
 
 #include "macho_parser.h"
 
-#include "macho_utils.h"
+#include "macho_parser_nlist.h"
 
 /*
  Format of the MachO debug symbols:
@@ -45,6 +45,7 @@
 bool macho_parseSymtab(struct symtab_command* command,
                        void*                  baseAddress,
                        bool                   bytesSwapped,
+                       // TODO: bool bit64,
                        macho_addObjectFile    objCb,
                        macho_addFunction      funCb) {
     if (objCb == NULL && funCb == NULL) return false;
@@ -57,8 +58,8 @@ bool macho_parseSymtab(struct symtab_command* command,
     struct objectFile*       currObj = NULL;
     
     for (uint32_t i = 0; i < nsyms; ++i) {
-        struct nlist_64* entry = baseAddress + symoff + i * sizeof(struct nlist_64); // <--- FIXME: 64 Bit here
-        switch (entry->n_type) {
+        struct macho_parser_nlist entry = macho_parser_nlist_from(baseAddress + symoff + i * macho_parser_nlist_sizeof(true), true, bytesSwapped);
+        switch (entry.n_type) {
             case N_BNSYM:
                 if (currFun.has_value) {
                     // TODO: Invalid format
@@ -66,7 +67,7 @@ bool macho_parseSymtab(struct symtab_command* command,
                 }
                 function_create(&currFun.value);
                 currFun.has_value = true;
-                currFun.value.startAddress = macho_maybeSwap(64, bytesSwapped, entry->n_value); // <--- FIXME: 64 Bit here
+                currFun.value.startAddress = entry.n_value;
                 break;
                 
             case N_ENSYM:
@@ -85,7 +86,7 @@ bool macho_parseSymtab(struct symtab_command* command,
                 break;
                 
             case N_SO: {
-                const char* value = stringBegin + macho_maybeSwap(32, bytesSwapped, entry->n_un.n_strx);
+                const char* value = stringBegin + entry.n_strx;
                 if (*value == '\0') {
                     if (currObj == NULL) {
                         currObj = objectFile_new();
@@ -106,8 +107,8 @@ bool macho_parseSymtab(struct symtab_command* command,
             }
                 
             case N_OSO:
-                currObj->name         = strdup(stringBegin + macho_maybeSwap(32, bytesSwapped, entry->n_un.n_strx));
-                currObj->lastModified = macho_maybeSwap(64, bytesSwapped, entry->n_value); // <--- FIXME: 64 Bit here
+                currObj->name         = strdup(stringBegin + entry.n_strx);
+                currObj->lastModified = entry.n_value;
                 break;
                 
             case N_FUN: {
@@ -115,13 +116,13 @@ bool macho_parseSymtab(struct symtab_command* command,
                     // TODO: Invalid
                     return false;
                 }
-                const char* value = stringBegin + macho_maybeSwap(32, bytesSwapped, entry->n_un.n_strx);
+                const char* value = stringBegin + entry.n_strx;
                 // TODO: Can this one come anywhere?
                 if (*value == '\0') {
-                    currFun.value.length = macho_maybeSwap(64, bytesSwapped, entry->n_value); // <--- FIXME: 64 Bit here
+                    currFun.value.length = entry.n_value;
                 } else {
                     currFun.value.linkedName   = strdup(value);
-                    currFun.value.startAddress = macho_maybeSwap(64, bytesSwapped, entry->n_value); // <--- FIXME: 64 Bit here
+                    currFun.value.startAddress = entry.n_value;
                 }
                 break;
             }
