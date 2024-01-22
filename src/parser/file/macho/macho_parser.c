@@ -29,7 +29,6 @@
 /*
  Format of the MachO debug symbols:
  
-  SO: \0
   SO: <path>
   SO: <source_file_name>
  OSO: <full_object_path> <last_modified_time>
@@ -96,19 +95,20 @@ bool macho_parseSymtab(struct symtab_command* command,
                 const char* value = stringBegin + entry.n_strx;
                 if (*value == '\0') {
                     if (currObj == NULL) {
-                        currObj = objectFile_new();
-                    } else {
-                        if (objCb == NULL) {
-                            objectFile_delete(currObj);
-                        } else {
-                            va_list copy;
-                            va_copy(copy, args);
-                            objCb(currObj, copy);
-                            va_end(copy);
-                        }
-                        currObj = NULL;
+                        // Beginning, ignore
+                        continue;
                     }
-                } else if (currObj->directory == NULL) {
+                    if (objCb == NULL) {
+                        objectFile_delete(currObj);
+                    } else {
+                        va_list copy;
+                        va_copy(copy, args);
+                        objCb(currObj, copy);
+                        va_end(copy);
+                    }
+                    currObj = NULL;
+                } else if (currObj == NULL) {
+                    currObj = objectFile_new();
                     currObj->directory = strdup(value);
                 } else {
                     currObj->sourceFile = strdup(value);
