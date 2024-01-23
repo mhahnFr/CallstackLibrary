@@ -42,6 +42,7 @@ struct objectFile * objectFile_new(void) {
     objectFile_create(&self->_);
     self->_.priv = self;
     vector_function_create(&self->functions);
+    vector_function_create(&self->ownFunctions);
     return &self->_;
 }
 
@@ -50,6 +51,13 @@ void objectFile_addFunction(struct objectFile * me,
     struct objectFile_private * self = (struct objectFile_private *) me->priv;
     
     vector_function_push_back(&self->functions, function);
+}
+
+void objectFile_addOwnFunction(struct objectFile* me,
+                               struct function    function) {
+    struct objectFile_private* self = me->priv;
+    
+    vector_function_push_back(&self->ownFunctions, function);
 }
 
 struct optional_function objectFile_findFunction(struct objectFile * me, uint64_t address) {

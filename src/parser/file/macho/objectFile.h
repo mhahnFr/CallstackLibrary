@@ -91,6 +91,8 @@ void objectFile_addFunction(struct objectFile * self,
  */
 optional_function_t objectFile_findFunction(struct objectFile * self, uint64_t address);
 
+void objectFile_addOwnFunction(struct objectFile* self, struct function function);
+
 bool objectFile_parse(struct objectFile* self, dwarf_line_callback cb);
 
 /**

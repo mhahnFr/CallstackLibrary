@@ -18,8 +18,7 @@
  */
 
 #include <map>
-#include <memory>
-#include <tuple>
+#include <vector>
 
 extern "C" {
 #include "../objectFile.h"
@@ -33,6 +32,7 @@ class ObjectFile {
     objectFile self;
     /** A mapping of the contained functions to their start addresses. */
     std::map<uint64_t, function, std::greater<uint64_t>> functions;
+    std::vector<function> ownFunctions;
     
 public:
     ~ObjectFile() {
@@ -49,6 +49,10 @@ public:
      */
     inline void addFunction(function && function) {
         functions.emplace(std::make_pair(function.startAddress, function));
+    }
+    
+    inline void addOwnFunction(function&& function) {
+        ownFunctions.emplace_back(function);
     }
     
     /**
@@ -119,6 +123,10 @@ objectFile * objectFile_new() {
 
 void objectFile_addFunction(objectFile * self, function func) {
     reinterpret_cast<ObjectFile *>(self)->addFunction(std::move(func));
+}
+
+void objectFile_addOwnFunction(objectFile* self, function func) {
+    reinterpret_cast<ObjectFile*>(self)->addOwnFunction(std::move(func));
 }
 
 auto objectFile_findFunction(objectFile * me, uint64_t address) -> optional_function_t {
