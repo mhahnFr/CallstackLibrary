@@ -139,6 +139,19 @@ bool macho_parseSymtab(struct symtab_command* command,
                 }
                 break;
             }
+                
+            default:
+                // TODO: Implement this in the machoFile as well
+                if (funCb != NULL && (entry.n_type & N_TYPE) == N_SECT && entry.n_type & N_EXT) {
+                    va_list copy;
+                    va_copy(copy, args);
+                    funCb((struct function) {
+                        .linkedName = strdup(stringBegin + entry.n_strx),
+                        .startAddress = entry.n_value
+                    }, copy);
+                    va_end(copy);
+                }
+                break;
         }
     }
     va_end(args);
