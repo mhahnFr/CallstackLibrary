@@ -27,6 +27,7 @@
 #include "function.h"
 #include "OptionalFunction.h"
 
+#include "../debugInfo.h"
 #include "../dwarf/dwarf_parser.h"
 
 /**
@@ -98,6 +99,8 @@ bool objectFile_parse(struct objectFile* self, dwarf_line_callback cb);
  * @param func the function to be invoked
  */
 void objectFile_functionsForEach(struct objectFile * self, void (*func)(struct function *, va_list), ...);
+
+optional_debugInfo_t objectFile_getDebugInfo(struct objectFile* self, uint64_t address);
 
 /**
  * Deinitializes the given object file structure.
