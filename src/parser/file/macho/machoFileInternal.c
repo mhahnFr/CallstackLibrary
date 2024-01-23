@@ -254,3 +254,16 @@ struct optional_funcFile machoFile_findFunction(struct machoFile * self, void * 
     
     return toReturn;
 }
+
+optional_debugInfo_t machoFile_getDebugInfo(struct machoFile* self, void* startAddress, void* address) {
+    optional_debugInfo_t toReturn = { .has_value = false };
+    
+    for (struct objectFile* it = self->objectFiles; it != NULL; it = it->next) {
+        optional_debugInfo_t result = objectFile_getDebugInfo(it, (uint64_t) (address - startAddress) + self->addressOffset);
+        if (result.has_value) {
+            return result;
+        }
+    }
+    
+    return toReturn;
+}

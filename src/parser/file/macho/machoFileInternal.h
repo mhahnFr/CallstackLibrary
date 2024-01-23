@@ -24,6 +24,8 @@
 
 #include "machoFile.h"
 
+#include "../debugInfo.h"
+
 /**
  * Parses the Mach-O file represented by the given structure using the
  * given base address.
@@ -53,5 +55,9 @@ void machoFile_addObjectFile(struct machoFile *  self,
 struct optional_funcFile machoFile_findFunction(struct machoFile * self,
                                                 void *             startAddress,
                                                 void *             address);
+
+optional_debugInfo_t machoFile_getDebugInfo(struct machoFile* self,
+                                            void*             startAddress,
+                                            void*             address);
 
 #endif /* machoFileInternal_h */
