@@ -64,6 +64,22 @@ static inline int64_t getLEB128(void* begin, size_t* counter) {
     return result;
 }
 
+static inline char* dwarf_stringFrom(struct dwarf_fileNameEntry* file, struct vector_string* directories) {
+    if (file->dirIndex == 0) {
+        return NULL;
+    }
+    const char* directory = directories->content[file->dirIndex - 1];
+    const size_t size  = strlen(directory) + strlen(file->name) + 2;
+    char* toReturn = malloc(size);
+    if (toReturn == NULL) {
+        return NULL;
+    }
+    strlcpy(toReturn, directory, size);
+    strlcat(toReturn, "/", size);
+    strlcat(toReturn, file->name, size);
+    return toReturn;
+}
+
 static inline bool dwarf_parseLineProgramV4(void* begin, size_t counter, uint64_t actualSize, bool bit64, dwarf_line_callback cb) {
     uint64_t headerLength;
     if (bit64) {
@@ -88,7 +104,7 @@ static inline bool dwarf_parseLineProgramV4(void* begin, size_t counter, uint64_
         vector_uint8_push_back(&stdOpcodeLengths, *((uint8_t*) (begin + counter++)));
     }
     
-    vector_string_t includeDirectories; // Treat 0 as 1!
+    vector_string_t includeDirectories;
     vector_string_create(&includeDirectories);
     while (*((uint8_t*) (begin + counter)) != 0x0) {
         const char* string = begin + counter;
@@ -97,7 +113,7 @@ static inline bool dwarf_parseLineProgramV4(void* begin, size_t counter, uint64_
     }
     ++counter;
     
-    vector_dwarfFileEntry_t fileNames; // Treat 0 as 1!
+    vector_dwarfFileEntry_t fileNames;
     vector_dwarfFileEntry_create(&fileNames);
     while (*((uint8_t*) (begin + counter)) != 0x0) {
         const char* string = begin + counter;
@@ -132,7 +148,12 @@ static inline bool dwarf_parseLineProgramV4(void* begin, size_t counter, uint64_
             switch (actualOpCode) {
                 case 1:
                     endSequence = true;
-                    // TODO: Call the callback with a new matrix line
+                    cb((struct dwarfLineInfo) {
+                        address, line, column, isa, discriminator,
+                        file == 0 ? NULL : dwarf_stringFrom(&fileNames.content[file - 1], &includeDirectories),
+                        isStmt, basicBlock, endSequence, prologueEnd, epilogueBegin
+                    });
+                    
                     address = opIndex = column = isa = discriminator = 0;
                     basicBlock = endSequence = prologueEnd = epilogueBegin = false;
                     file = line = 1;
@@ -158,7 +179,12 @@ static inline bool dwarf_parseLineProgramV4(void* begin, size_t counter, uint64_
         } else if (opCode < opCodeBase) {
             switch (opCode) {
                 case 1:
-                    // TODO: Call the callback with a new matrix line
+                    cb((struct dwarfLineInfo) {
+                        address, line, column, isa, discriminator,
+                        file == 0 ? NULL : dwarf_stringFrom(&fileNames.content[file - 1], &includeDirectories),
+                        isStmt, basicBlock, endSequence, prologueEnd, epilogueBegin
+                    });
+                    
                     discriminator = 0;
                     basicBlock = prologueEnd = epilogueBegin = false;
                     break;
@@ -211,7 +237,11 @@ static inline bool dwarf_parseLineProgramV4(void* begin, size_t counter, uint64_
             opIndex  = (opIndex + operationAdvance) % maximumOperations;
             line    += lineBase + (adjustedOpCode % lineRange);
             
-            // TODO: Call the callback with a new matrix line
+            cb((struct dwarfLineInfo) {
+                address, line, column, isa, discriminator,
+                file == 0 ? NULL : dwarf_stringFrom(&fileNames.content[file - 1], &includeDirectories),
+                isStmt, basicBlock, endSequence, prologueEnd, epilogueBegin
+            });
             
             basicBlock    = false;
             prologueEnd   = false;
