@@ -35,6 +35,7 @@ struct objectFile_private {
     struct vector_function functions;
     struct vector_function ownFunctions;
     struct vector_dwarfLineInfo lineInfos;
+    const char* mainSourceFileCache;
 };
 
 struct objectFile * objectFile_new(void) {
@@ -47,6 +48,7 @@ struct objectFile * objectFile_new(void) {
     vector_function_create(&self->functions);
     vector_function_create(&self->ownFunctions);
     vector_dwarfLineInfo_create(&self->lineInfos);
+    self->mainSourceFileCache = NULL;
     return &self->_;
 }
 
@@ -101,12 +103,26 @@ static inline optional_function_t objectFile_findOwnFunction(struct objectFile_p
     
     for (size_t i = 0; i < self->ownFunctions.count; ++i) {
         if (strcmp(name, self->ownFunctions.content[i].linkedName) == 0) {
-            toReturn.value = self->ownFunctions.content[i];
+            toReturn = (struct optional_function) { true, self->ownFunctions.content[i] };
             break;
         }
     }
     
     return toReturn;
+}
+
+static inline const char* objectFile_getSourceFileName(struct objectFile_private* self) {
+    if (self->mainSourceFileCache != NULL) return self->mainSourceFileCache;
+    
+    const size_t size = strlen(self->_.directory) + strlen(self->_.name) + 1;
+    char* toReturn = malloc(size);
+    if (toReturn == NULL) {
+        // TODO: Handle this better
+        return "";
+    }
+    strlcpy(toReturn, self->_.directory, size);
+    strlcat(toReturn, self->_.sourceFile, size);
+    return self->mainSourceFileCache = toReturn;
 }
 
 optional_debugInfo_t objectFile_getDebugInfo(struct objectFile* me, uint64_t address) {
@@ -138,20 +154,21 @@ optional_debugInfo_t objectFile_getDebugInfo(struct objectFile* me, uint64_t add
     struct dwarf_lineInfo* closest = NULL;
     for (size_t i = 0; i < self->lineInfos.count; ++i) {
         struct dwarf_lineInfo* elem = &self->lineInfos.content[i];
-        if (closest == NULL && lineAddress >= elem->address) {
+        
+        if (closest == NULL && elem->address < lineAddress) {
             closest = elem;
-        } else if (closest != NULL && lineAddress >= elem->address && lineAddress - elem->address < lineAddress - closest->address) {
+        } else if (closest != NULL && elem->address < lineAddress && lineAddress - elem->address < lineAddress - closest->address) {
             closest = elem;
         }
     }
-    if (closest == NULL || closest->address > ownFunction.value.startAddress + ownFunction.value.length) {
+    if (closest == NULL) {
         return toReturn;
     }
     toReturn.value.sourceFileInfo = (optional_sourceFileInfo_t) {
         true, (struct sourceFileInfo) {
             closest->line,
             closest->column,
-            closest->fileName
+            closest->fileName == NULL ? objectFile_getSourceFileName(self) : closest->fileName
         }
     };
     return toReturn;
@@ -486,6 +503,7 @@ void objectFile_destroy(struct objectFile * me) {
         dwarf_lineInfo_destroy(&self->lineInfos.content[i]);
     }
     vector_dwarfLineInfo_destroy(&self->lineInfos);
+    free((void*) self->mainSourceFileCache);
     free(me->sourceFile);
     free(me->directory);
     free(me->name);
