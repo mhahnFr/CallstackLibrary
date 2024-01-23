@@ -17,31 +17,13 @@
  * this library, see the file LICENSE.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-#ifndef dwarfLineInfo_h
-#define dwarfLineInfo_h
+#ifndef vector_dwarf_lineInfo_h
+#define vector_dwarf_lineInfo_h
 
-#include <stdbool.h>
-#include <stdint.h>
-#include <stdlib.h>
+#include "../../../../DC4C/vector.h"
 
-struct dwarf_lineInfo {
-    uint64_t address;
-    uint64_t line;
-    uint64_t column;
-    uint64_t isa;
-    uint64_t discriminator;
-    
-    const char* fileName;
-    
-    bool isStmt;
-    bool basicBlock;
-    bool endSequence;
-    bool prologueEnd;
-    bool epilogueBegin;
-};
+#include "dwarf_lineInfo.h"
 
-static inline void dwarf_lineInfo_destroy(struct dwarf_lineInfo* self) {
-    free((void*) self->fileName);
-}
+typedef_vector_light_named(dwarfLineInfo, struct dwarf_lineInfo);
 
-#endif /* dwarfLineInfo_h */
+#endif /* vector_dwarf_lineInfo_h */

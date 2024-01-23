@@ -22,6 +22,8 @@
 #include "../objectFile.h"
 #include "../FunctionVector.h"
 
+#include "../../dwarf/vector_dwarf_lineInfo.h"
+
 /**
  * This structure acts as a wrapper around the object file structure.
  */
@@ -32,6 +34,7 @@ struct objectFile_private {
     /** A vector with the functions of this object file. */
     struct vector_function functions;
     struct vector_function ownFunctions;
+    struct vector_dwarfLineInfo lineInfos;
 };
 
 struct objectFile * objectFile_new(void) {
@@ -43,6 +46,7 @@ struct objectFile * objectFile_new(void) {
     self->_.priv = self;
     vector_function_create(&self->functions);
     vector_function_create(&self->ownFunctions);
+    vector_dwarfLineInfo_create(&self->lineInfos);
     return &self->_;
 }
 
@@ -444,6 +448,10 @@ void objectFile_destroy(struct objectFile * me) {
         function_destroy(&self->ownFunctions.content[i]);
     }
     vector_function_destroy(&self->ownFunctions);
+    for (size_t i = 0; i < self->lineInfos.count; ++i) {
+        dwarf_lineInfo_destroy(&self->lineInfos.content[i]);
+    }
+    vector_dwarfLineInfo_destroy(&self->lineInfos);
     free(me->sourceFile);
     free(me->directory);
     free(me->name);

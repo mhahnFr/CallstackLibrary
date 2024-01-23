@@ -146,6 +146,7 @@
 		BFEC81852A5EE937002FA3B7 /* function.c */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.c; path = function.c; sourceTree = "<group>"; };
 		BFEC818A2A5EEA36002FA3B7 /* objectFile.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = objectFile.h; sourceTree = "<group>"; };
 		BFEC818B2A5EEA36002FA3B7 /* objectFile.c */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.c; path = objectFile.c; sourceTree = "<group>"; };
+		BFF6F7522B60176B0064D068 /* vector_dwarf_lineInfo.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = vector_dwarf_lineInfo.h; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -310,6 +311,7 @@
 				BFAD631C2B5BD74100EE8E14 /* vector_uint8.h */,
 				BFAD631D2B5BD7FE00EE8E14 /* fileNameEntry.h */,
 				BFB227A12B5FD3930069E896 /* dwarf_lineInfo.h */,
+				BFF6F7522B60176B0064D068 /* vector_dwarf_lineInfo.h */,
 			);
 			path = dwarf;
 			sourceTree = "<group>";
