@@ -1,7 +1,7 @@
 /*
  * Callstack Library - Library creating human-readable call stacks.
  *
- * Copyright (C) 2023  mhahnFr
+ * Copyright (C) 2023 - 2024  mhahnFr
  *
  * This file is part of the CallstackLibrary. This library is free software:
  * you can redistribute it and/or modify it under the terms of the
@@ -61,7 +61,7 @@ public:
         auto result = functions.lower_bound(address);
         optional_function_t toReturn = { .has_value = false };
         
-        if (result == functions.end() || address > result->second.endAddress) {
+        if (result == functions.end() || address > result->second.startAddress + result->second.length) {
             return toReturn;
         }
         toReturn.has_value = true;
