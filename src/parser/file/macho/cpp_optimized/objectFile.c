@@ -79,8 +79,14 @@ struct optional_function objectFile_findFunction(struct objectFile * me, uint64_
     return toReturn;
 }
 
+static inline void objectFile_dwarfLineCallback(struct dwarf_lineInfo info, va_list args) {
+    struct objectFile_private* self = va_arg(args, void*);
+    
+    vector_dwarfLineInfo_push_back(&self->lineInfos, info);
+}
+
 static inline bool objectFile_parseIntern(struct objectFile_private* self) {
-    const bool result = objectFile_parse(&self->_, NULL); // TODO: DWARF line callback
+    const bool result = objectFile_parse(&self->_, objectFile_dwarfLineCallback, self);
     if (!result) {
         for (size_t i = 0; i < self->ownFunctions.count; ++i) {
             function_destroy(&self->ownFunctions.content[i]);

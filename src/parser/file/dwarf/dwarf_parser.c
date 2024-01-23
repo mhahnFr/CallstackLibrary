@@ -17,6 +17,7 @@
  * this library, see the file LICENSE.  If not, see <https://www.gnu.org/licenses/>.
  */
 
+#include <stdarg.h>
 #include <stddef.h>
 #include <stdint.h>
 #include <string.h>
@@ -80,7 +81,11 @@ static inline char* dwarf_stringFrom(struct dwarf_fileNameEntry* file, struct ve
     return toReturn;
 }
 
-static inline bool dwarf_parseLineProgramV4(void* begin, size_t counter, uint64_t actualSize, bool bit64, dwarf_line_callback cb) {
+static inline bool dwarf_parseLineProgramV4(void*    begin,
+                                            size_t   counter,
+                                            uint64_t actualSize, 
+                                            bool     bit64,
+                                            dwarf_line_callback cb, va_list args) {
     uint64_t headerLength;
     if (bit64) {
         headerLength = *((uint64_t*) (begin + counter));
@@ -146,19 +151,23 @@ static inline bool dwarf_parseLineProgramV4(void* begin, size_t counter, uint64_
             const uint64_t length = getULEB128(begin, &counter);
             const uint8_t  actualOpCode = *((uint8_t*) (begin + counter++));
             switch (actualOpCode) {
-                case 1:
+                case 1: {
                     endSequence = true;
+                    va_list copy;
+                    va_copy(copy, args);
                     cb((struct dwarf_lineInfo) {
                         address, line, column, isa, discriminator,
                         file == 0 ? NULL : dwarf_stringFrom(&fileNames.content[file - 1], &includeDirectories),
                         isStmt, basicBlock, endSequence, prologueEnd, epilogueBegin
-                    });
+                    }, copy);
+                    va_end(copy);
                     
                     address = opIndex = column = isa = discriminator = 0;
                     basicBlock = endSequence = prologueEnd = epilogueBegin = false;
                     file = line = 1;
                     isStmt = defaultIsStmt;
                     break;
+                }
                     
                 case 2: {
                     const size_t newAddress = *((size_t*) (begin + counter));
@@ -178,16 +187,20 @@ static inline bool dwarf_parseLineProgramV4(void* begin, size_t counter, uint64_
             }
         } else if (opCode < opCodeBase) {
             switch (opCode) {
-                case 1:
+                case 1: {
+                    va_list copy;
+                    va_copy(copy, args);
                     cb((struct dwarf_lineInfo) {
                         address, line, column, isa, discriminator,
                         file == 0 ? NULL : dwarf_stringFrom(&fileNames.content[file - 1], &includeDirectories),
                         isStmt, basicBlock, endSequence, prologueEnd, epilogueBegin
-                    });
+                    }, copy);
+                    va_end(copy);
                     
                     discriminator = 0;
                     basicBlock = prologueEnd = epilogueBegin = false;
                     break;
+                }
                     
                 case 2: {
                     const uint64_t operationAdvance = getULEB128(begin, &counter);
@@ -237,11 +250,14 @@ static inline bool dwarf_parseLineProgramV4(void* begin, size_t counter, uint64_
             opIndex  = (opIndex + operationAdvance) % maximumOperations;
             line    += lineBase + (adjustedOpCode % lineRange);
             
+            va_list copy;
+            va_copy(copy, args);
             cb((struct dwarf_lineInfo) {
                 address, line, column, isa, discriminator,
                 file == 0 ? NULL : dwarf_stringFrom(&fileNames.content[file - 1], &includeDirectories),
                 isStmt, basicBlock, endSequence, prologueEnd, epilogueBegin
-            });
+            }, copy);
+            va_end(copy);
             
             basicBlock    = false;
             prologueEnd   = false;
@@ -256,7 +272,7 @@ static inline bool dwarf_parseLineProgramV4(void* begin, size_t counter, uint64_
     return true;
 }
 
-bool dwarf_parseLineProgram(void* begin, dwarf_line_callback cb) {
+bool dwarf_parseLineProgram(void* begin, dwarf_line_callback cb, va_list args) {
     size_t counter = 0;
     
     const uint32_t size = *((uint32_t*) begin);
@@ -276,7 +292,7 @@ bool dwarf_parseLineProgram(void* begin, dwarf_line_callback cb) {
     counter += 2;
     
     switch (version) {
-        case 4: return dwarf_parseLineProgramV4(begin, counter, actualSize, bit64, cb);
+        case 4: return dwarf_parseLineProgramV4(begin, counter, actualSize, bit64, cb, args);
             
         default: return false;
     }

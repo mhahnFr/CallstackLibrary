@@ -20,12 +20,13 @@
 #ifndef dwarf_parser_h
 #define dwarf_parser_h
 
+#include <stdarg.h>
 #include <stdbool.h>
 
 #include "dwarf_lineInfo.h"
 
-typedef void (*dwarf_line_callback)(struct dwarf_lineInfo);
+typedef void (*dwarf_line_callback)(struct dwarf_lineInfo, va_list);
 
-bool dwarf_parseLineProgram(void* begin, dwarf_line_callback cb);
+bool dwarf_parseLineProgram(void* begin, dwarf_line_callback, va_list args);
 
 #endif /* dwarf_parser_h */
