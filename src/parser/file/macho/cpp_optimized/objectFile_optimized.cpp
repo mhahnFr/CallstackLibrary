@@ -17,7 +17,9 @@
  * this library, see the file LICENSE.  If not, see <https://www.gnu.org/licenses/>.
  */
 
+#include <algorithm>
 #include <map>
+#include <string>
 #include <vector>
 
 extern "C" {
@@ -98,8 +100,13 @@ public:
                 return { .has_value = false };
             }
         }
-        
-        // TODO: Properly implement
+        const auto ownFunction = std::find_if(ownFunctions.cbegin(), ownFunctions.cend(), [&](const auto value) {
+            return std::string(value.linkedName) == std::string(func.value.linkedName);
+        });
+        if (ownFunction == ownFunctions.cend()) {
+            return { .has_value = false };
+        }
+        // TODO: See ../objectFile.c:117:5
         return { .has_value = false };
     }
     

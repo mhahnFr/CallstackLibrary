@@ -86,6 +86,19 @@ static inline bool objectFile_parseIntern(struct objectFile_private* self) {
     return result;
 }
 
+static inline optional_function_t objectFile_findOwnFunction(struct objectFile_private* self, const char* name) {
+    optional_function_t toReturn = { .has_value = false };
+    
+    for (size_t i = 0; i < self->ownFunctions.count; ++i) {
+        if (strcmp(name, self->ownFunctions.content[i].linkedName) == 0) {
+            toReturn.value = self->ownFunctions.content[i];
+            break;
+        }
+    }
+    
+    return toReturn;
+}
+
 optional_debugInfo_t objectFile_getDebugInfo(struct objectFile* me, uint64_t address) {
     optional_function_t func = objectFile_findFunction(me, address);
     if (!func.has_value) return (optional_debugInfo_t) { .has_value = false };
@@ -97,8 +110,12 @@ optional_debugInfo_t objectFile_getDebugInfo(struct objectFile* me, uint64_t add
             return (optional_debugInfo_t) { .has_value = false };
         }
     }
-    // TODO: if has debug symbols, map the functions
-    // TODO: map mapped function address + offset to closest line info
+    optional_function_t ownFunction = objectFile_findOwnFunction(self, func.value.linkedName);
+    if (!ownFunction.has_value) {
+        return (optional_debugInfo_t) { .has_value = false };
+    }
+    // TODO: Line address = ownFunction.value.startAddress + address - func.value.startAddress
+    // TODO: Find the corresponding (closest) line info
     return (optional_debugInfo_t) { .has_value = false };
 }
 
