@@ -1,7 +1,7 @@
 /*
  * Callstack Library - Library creating human-readable call stacks.
  *
- * Copyright (C) 2023  mhahnFr
+ * Copyright (C) 2023 - 2024  mhahnFr
  *
  * This file is part of the CallstackLibrary. This library is free software:
  * you can redistribute it and/or modify it under the terms of the
@@ -89,23 +89,36 @@ bool machoFile_addr2String(struct binaryFile *      me,
         return NULL;
     }
     
-    struct optional_funcFile result = machoFile_findFunction(self, info->dli_fbase, address);
+    optional_debugInfo_t result = machoFile_getDebugInfo(self, info->dli_fbase, address);
     if (result.has_value) {
-        // TODO: Parse DWARF data if available!
-        char * name = result.value.first.linkedName;
-        if (name != NULL) {
-            if (*name == '_' || *name == '\1') {
-                ++name;
-            }
-            name = callstack_parser_demangle(name);
-            char * toReturn = NULL;
-            asprintf(&toReturn, "%s + %td",
-                     name,
-                     (ptrdiff_t) (address - info->dli_fbase + self->addressOffset - result.value.first.startAddress));
-            free(name);
-            frame->function = toReturn;
-            return true;
+        if (result.value.functionName == NULL) {
+            return false;
         }
+        
+        char* name = (char*) result.value.functionName;
+        if (*name == '_' || *name == '\1') {
+            ++name;
+        }
+        name = callstack_parser_demangle(name);
+        if (result.value.sourceFileInfo.has_value) {
+            frame->sourceFile = binaryFile_toAbsolutePath((char*) result.value.sourceFileInfo.value.sourceFile);
+            frame->sourceFileRelative = binaryFile_toRelativePath((char*) result.value.sourceFileInfo.value.sourceFile);
+            frame->sourceLine = result.value.sourceFileInfo.value.line;
+            if (result.value.sourceFileInfo.value.column > 0) {
+                frame->sourceLineColumn = (optional_ulong_t) { true, result.value.sourceFileInfo.value.column };
+            }
+            frame->function = name;
+        } else {
+            // TODO: Add difference to the function name
+//            char * toReturn = NULL;
+//            asprintf(&toReturn, "%s + %td",
+//                     name,
+//                     (ptrdiff_t) (address - info->dli_fbase + self->addressOffset - result.value.first.startAddress));
+//            free(name);
+//            frame->function = toReturn;
+            frame->function = name;
+        }
+        return true;
     }
     return false;
 }
