@@ -34,11 +34,25 @@ class ObjectFile {
     std::map<uint64_t, function, std::greater<uint64_t>> functions;
     std::vector<function> ownFunctions;
     
+    inline auto parse() -> bool {
+        const auto result = objectFile_parse(&self, nullptr); // TODO: DWARF line callback
+        if (!result) {
+            for (auto& elem : ownFunctions) {
+                function_destroy(&elem);
+            }
+            ownFunctions.clear();
+        }
+        return result;
+    }
+    
 public:
     ~ObjectFile() {
         objectFile_destroy(&self);
         for (auto & elem : functions) {
             function_destroy(&elem.second);
+        }
+        for (auto& elem : ownFunctions) {
+            function_destroy(&elem);
         }
     }
     
@@ -77,6 +91,12 @@ public:
         const auto func = findFunction(address);
         if (!func.has_value) {
             return { .has_value = false };
+        }
+        
+        if (!self.parsed) {
+            if (!(self.parsed = parse())) {
+                return { .has_value = false };
+            }
         }
         
         // TODO: Properly implement

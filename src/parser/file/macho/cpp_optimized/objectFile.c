@@ -76,10 +76,14 @@ struct optional_function objectFile_findFunction(struct objectFile * me, uint64_
 }
 
 static inline bool objectFile_parseIntern(struct objectFile_private* self) {
-    // TODO: Implement
-    
-    (void) self;
-    return false;
+    const bool result = objectFile_parse(&self->_, NULL); // TODO: DWARF line callback
+    if (!result) {
+        for (size_t i = 0; i < self->ownFunctions.count; ++i) {
+            function_destroy(&self->ownFunctions.content[i]);
+        }
+        vector_function_clear(&self->ownFunctions);
+    }
+    return result;
 }
 
 optional_debugInfo_t objectFile_getDebugInfo(struct objectFile* me, uint64_t address) {
