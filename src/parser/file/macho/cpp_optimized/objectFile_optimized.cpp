@@ -69,6 +69,16 @@ public:
         return toReturn;
     }
     
+    inline auto getDebugInfo(uint64_t address) -> optional_debugInfo_t {
+        const auto func = findFunction(address);
+        if (!func.has_value) {
+            return { .has_value = false };
+        }
+        
+        // TODO: Properly implement
+        return { .has_value = false };
+    }
+    
     /**
      * Performs the given function with the given arguments for each function
      * inside this object file.
@@ -113,6 +123,10 @@ void objectFile_addFunction(objectFile * self, function func) {
 
 auto objectFile_findFunction(objectFile * me, uint64_t address) -> optional_function_t {
     return reinterpret_cast<ObjectFile *>(me)->findFunction(address);
+}
+
+auto objectFile_getDebugInfo(objectFile* me, uint64_t address) -> optional_debugInfo_t {
+    return reinterpret_cast<ObjectFile*>(me)->getDebugInfo(address);
 }
 
 void objectFile_functionsForEach(objectFile * me, void (*func)(function *, va_list), ...) {
