@@ -22,9 +22,9 @@
 
 #include <stdbool.h>
 
-#include "dwarfLineInfo.h"
+#include "dwarf_lineInfo.h"
 
-typedef void (*dwarf_line_callback)(struct dwarfLineInfo);
+typedef void (*dwarf_line_callback)(struct dwarf_lineInfo);
 
 bool dwarf_parseLineProgram(void* begin, dwarf_line_callback cb);
 

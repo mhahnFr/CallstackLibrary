@@ -148,7 +148,7 @@ static inline bool dwarf_parseLineProgramV4(void* begin, size_t counter, uint64_
             switch (actualOpCode) {
                 case 1:
                     endSequence = true;
-                    cb((struct dwarfLineInfo) {
+                    cb((struct dwarf_lineInfo) {
                         address, line, column, isa, discriminator,
                         file == 0 ? NULL : dwarf_stringFrom(&fileNames.content[file - 1], &includeDirectories),
                         isStmt, basicBlock, endSequence, prologueEnd, epilogueBegin
@@ -179,7 +179,7 @@ static inline bool dwarf_parseLineProgramV4(void* begin, size_t counter, uint64_
         } else if (opCode < opCodeBase) {
             switch (opCode) {
                 case 1:
-                    cb((struct dwarfLineInfo) {
+                    cb((struct dwarf_lineInfo) {
                         address, line, column, isa, discriminator,
                         file == 0 ? NULL : dwarf_stringFrom(&fileNames.content[file - 1], &includeDirectories),
                         isStmt, basicBlock, endSequence, prologueEnd, epilogueBegin
@@ -237,7 +237,7 @@ static inline bool dwarf_parseLineProgramV4(void* begin, size_t counter, uint64_
             opIndex  = (opIndex + operationAdvance) % maximumOperations;
             line    += lineBase + (adjustedOpCode % lineRange);
             
-            cb((struct dwarfLineInfo) {
+            cb((struct dwarf_lineInfo) {
                 address, line, column, isa, discriminator,
                 file == 0 ? NULL : dwarf_stringFrom(&fileNames.content[file - 1], &includeDirectories),
                 isStmt, basicBlock, endSequence, prologueEnd, epilogueBegin

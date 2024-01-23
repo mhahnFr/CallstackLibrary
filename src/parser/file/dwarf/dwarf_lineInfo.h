@@ -23,7 +23,7 @@
 #include <stdbool.h>
 #include <stdint.h>
 
-struct dwarfLineInfo {
+struct dwarf_lineInfo {
     uint64_t address;
     uint64_t line;
     uint64_t column;
