@@ -124,6 +124,7 @@
 		BFADAB062ADDA923004B4695 /* lcs_dlfcn.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = lcs_dlfcn.h; sourceTree = "<group>"; };
 		BFB0B1812B5E804F00CF45E1 /* macho_parser_nlist.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = macho_parser_nlist.h; sourceTree = "<group>"; };
 		BFB227A02B5FB9480069E896 /* debugInfo.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = debugInfo.h; sourceTree = "<group>"; };
+		BFB227A12B5FD3930069E896 /* dwarfLineInfo.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = dwarfLineInfo.h; sourceTree = "<group>"; };
 		BFC2D1782AC30BFA00BD4C0B /* callstack_frame.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = callstack_frame.h; sourceTree = "<group>"; };
 		BFC2D1792AC31E1300BD4C0B /* callstack_frame.c */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.c; path = callstack_frame.c; sourceTree = "<group>"; };
 		BFCC50C728F8454E00E2388D /* demangler.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; path = demangler.cpp; sourceTree = "<group>"; };
@@ -308,6 +309,7 @@
 				BFAD631B2B5BD67900EE8E14 /* vector_string.h */,
 				BFAD631C2B5BD74100EE8E14 /* vector_uint8.h */,
 				BFAD631D2B5BD7FE00EE8E14 /* fileNameEntry.h */,
+				BFB227A12B5FD3930069E896 /* dwarfLineInfo.h */,
 			);
 			path = dwarf;
 			sourceTree = "<group>";

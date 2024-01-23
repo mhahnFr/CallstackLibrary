@@ -17,15 +17,26 @@
  * this library, see the file LICENSE.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-#ifndef dwarf_parser_h
-#define dwarf_parser_h
+#ifndef dwarfLineInfo_h
+#define dwarfLineInfo_h
 
 #include <stdbool.h>
+#include <stdint.h>
 
-#include "dwarfLineInfo.h"
+struct dwarfLineInfo {
+    uint64_t address;
+    uint64_t line;
+    uint64_t column;
+    uint64_t isa;
+    uint64_t discriminator;
+    
+    const char* fileName;
+    
+    bool isStmt;
+    bool basicBlock;
+    bool endSequence;
+    bool prologueEnd;
+    bool epilogueBegin;
+};
 
-typedef void (*dwarf_line_callback)(struct dwarfLineInfo);
-
-bool dwarf_parseLineProgram(void* begin, dwarf_line_callback cb);
-
-#endif /* dwarf_parser_h */
+#endif /* dwarfLineInfo_h */
