@@ -118,9 +118,34 @@ optional_debugInfo_t objectFile_getDebugInfo(struct objectFile* me, uint64_t add
     if (!ownFunction.has_value) {
         return (optional_debugInfo_t) { .has_value = false };
     }
-    // TODO: Line address = ownFunction.value.startAddress + address - func.value.startAddress
-    // TODO: Find the corresponding (closest) line info
-    return (optional_debugInfo_t) { .has_value = false };
+    const uint64_t lineAddress = ownFunction.value.startAddress + address - func.value.startAddress;
+    
+    struct dwarf_lineInfo* closest = NULL;
+    for (size_t i = 0; i < self->lineInfos.count; ++i) {
+        struct dwarf_lineInfo* elem = &self->lineInfos.content[i];
+        if (closest == NULL && lineAddress >= elem->address) {
+            closest = elem;
+        } else if (closest != NULL && lineAddress >= elem->address && lineAddress - elem->address < lineAddress - closest->address) {
+            closest = elem;
+        }
+    }
+    if (closest == NULL || closest->address > ownFunction.value.startAddress + ownFunction.value.length) {
+        return (optional_debugInfo_t) { .has_value = false };
+    }
+    return (optional_debugInfo_t) {
+        true,
+        (struct debugInfo) {
+            func.value.linkedName,
+            (optional_sourceFileInfo_t) {
+                true,
+                (struct sourceFileInfo) {
+                    closest->line,
+                    closest->column,
+                    closest->fileName
+                }
+            }
+        }
+    };
 }
 
 void objectFile_functionsForEach(struct objectFile * me, void (*func)(struct function *, va_list), ...) {
