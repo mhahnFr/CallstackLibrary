@@ -26,6 +26,7 @@
 
 #include "objectFile.h"
 
+#include "macho_parser.h"
 #include "macho_utils.h"
 
 static inline bool objectFile_handleSegment64(struct segment_command_64* command, void* baseAddress, bool bitsSwapped, dwarf_line_callback cb) {
@@ -60,7 +61,11 @@ static inline bool objectFile_handleSegment(struct segment_command* command, voi
     return true;
 }
 
-static inline bool objectFile_parseMachOImpl64(void* baseAddress, bool bitsSwapped, dwarf_line_callback cb) {
+static inline void objectFile_addFunctionCallback(struct function function, va_list args) {
+    objectFile_addOwnFunction(va_arg(args, void*), function);
+}
+
+static inline bool objectFile_parseMachOImpl64(struct objectFile* self, void* baseAddress, bool bitsSwapped, dwarf_line_callback cb) {
     struct mach_header_64* header = baseAddress;
     struct load_command*   lc     = (void*) header + sizeof(struct mach_header_64);
     const  uint32_t        ncmds  = macho_maybeSwap(32, bitsSwapped, header->ncmds);
@@ -68,7 +73,13 @@ static inline bool objectFile_parseMachOImpl64(void* baseAddress, bool bitsSwapp
     for (size_t i = 0; i < ncmds; ++i) {
         bool result = true;
         switch (macho_maybeSwap(32, bitsSwapped, lc->cmd)) {
-            case LC_SEGMENT_64: result = objectFile_handleSegment64((void*) lc, baseAddress, bitsSwapped, cb); break;
+            case LC_SEGMENT_64:
+                result = objectFile_handleSegment64((void*) lc, baseAddress, bitsSwapped, cb);
+                break;
+                
+            case LC_SYMTAB:
+                result = macho_parseSymtab((void*) lc, baseAddress, bitsSwapped, true, NULL, objectFile_addFunctionCallback, self);
+                break;
         }
         if (!result) {
             return false;
@@ -78,7 +89,7 @@ static inline bool objectFile_parseMachOImpl64(void* baseAddress, bool bitsSwapp
     return true;
 }
 
-static inline bool objectFile_parseMachOImpl(void* baseAddress, bool bitsSwapped, dwarf_line_callback cb) {
+static inline bool objectFile_parseMachOImpl(struct objectFile* self, void* baseAddress, bool bitsSwapped, dwarf_line_callback cb) {
     struct mach_header*  header = baseAddress;
     struct load_command* lc     = (void*) header + sizeof(struct mach_header);
     const  uint32_t      ncmds  = macho_maybeSwap(32, bitsSwapped, header->ncmds);
@@ -86,7 +97,13 @@ static inline bool objectFile_parseMachOImpl(void* baseAddress, bool bitsSwapped
     for (size_t i = 0; i < ncmds; ++i) {
         bool result = true;
         switch (macho_maybeSwap(32, bitsSwapped, lc->cmd)) {
-            case LC_SEGMENT: result = objectFile_handleSegment((void*) lc, baseAddress, bitsSwapped, cb); break;
+            case LC_SEGMENT:
+                result = objectFile_handleSegment((void*) lc, baseAddress, bitsSwapped, cb);
+                break;
+                
+            case LC_SYMTAB:
+                result = macho_parseSymtab((void*) lc, baseAddress, bitsSwapped, false, NULL, objectFile_addFunctionCallback, self);
+                break;
         }
         if (!result) {
             return false;
@@ -96,14 +113,14 @@ static inline bool objectFile_parseMachOImpl(void* baseAddress, bool bitsSwapped
     return true;
 }
 
-static inline bool objectFile_parseMachO(void* buffer, dwarf_line_callback cb) {
+static inline bool objectFile_parseMachO(struct objectFile* self, void* buffer, dwarf_line_callback cb) {
     struct mach_header* header = buffer;
     switch (header->magic) {
-        case MH_MAGIC: return objectFile_parseMachOImpl(buffer, false, cb);
-        case MH_CIGAM: return objectFile_parseMachOImpl(buffer, true,  cb);
+        case MH_MAGIC: return objectFile_parseMachOImpl(self, buffer, false, cb);
+        case MH_CIGAM: return objectFile_parseMachOImpl(self, buffer, true,  cb);
             
-        case MH_MAGIC_64: return objectFile_parseMachOImpl64(buffer, false, cb);
-        case MH_CIGAM_64: return objectFile_parseMachOImpl64(buffer, true,  cb);
+        case MH_MAGIC_64: return objectFile_parseMachOImpl64(self, buffer, false, cb);
+        case MH_CIGAM_64: return objectFile_parseMachOImpl64(self, buffer, true,  cb);
             
         // We do not parse fat Mach-O object files for now.
         // If this becomes necessary, refer to the implementation
@@ -134,7 +151,7 @@ bool objectFile_parse(struct objectFile* self, dwarf_line_callback cb) {
     }
     const size_t count = fread(buffer, 1, fileStats.st_size, file);
     fclose(file);
-    const bool success = (off_t) count == fileStats.st_size && objectFile_parseMachO(buffer, cb);
+    const bool success = (off_t) count == fileStats.st_size && objectFile_parseMachO(self, buffer, cb);
     free(buffer);
     return success;
 }
