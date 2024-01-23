@@ -110,19 +110,28 @@ static inline optional_function_t objectFile_findOwnFunction(struct objectFile_p
 }
 
 optional_debugInfo_t objectFile_getDebugInfo(struct objectFile* me, uint64_t address) {
+    optional_debugInfo_t toReturn = { .has_value = false };
     optional_function_t func = objectFile_findFunction(me, address);
-    if (!func.has_value) return (optional_debugInfo_t) { .has_value = false };
+    if (!func.has_value) {
+        return toReturn;
+    }
     
+    toReturn = (optional_debugInfo_t) {
+        true, (struct debugInfo) {
+            .functionName = func.value.linkedName,
+            .sourceFileInfo.has_value = false
+        }
+    };
     struct objectFile_private* self = (struct objectFile_private*) me->priv;
     
     if (!me->parsed) {
         if (!(me->parsed = objectFile_parseIntern(self))) {
-            return (optional_debugInfo_t) { .has_value = false };
+            return toReturn;
         }
     }
     optional_function_t ownFunction = objectFile_findOwnFunction(self, func.value.linkedName);
     if (!ownFunction.has_value) {
-        return (optional_debugInfo_t) { .has_value = false };
+        return toReturn;
     }
     const uint64_t lineAddress = ownFunction.value.startAddress + address - func.value.startAddress;
     
@@ -136,22 +145,16 @@ optional_debugInfo_t objectFile_getDebugInfo(struct objectFile* me, uint64_t add
         }
     }
     if (closest == NULL || closest->address > ownFunction.value.startAddress + ownFunction.value.length) {
-        return (optional_debugInfo_t) { .has_value = false };
+        return toReturn;
     }
-    return (optional_debugInfo_t) {
-        true,
-        (struct debugInfo) {
-            func.value.linkedName,
-            (optional_sourceFileInfo_t) {
-                true,
-                (struct sourceFileInfo) {
-                    closest->line,
-                    closest->column,
-                    closest->fileName
-                }
-            }
+    toReturn.value.sourceFileInfo = (optional_sourceFileInfo_t) {
+        true, (struct sourceFileInfo) {
+            closest->line,
+            closest->column,
+            closest->fileName
         }
     };
+    return toReturn;
 }
 
 void objectFile_functionsForEach(struct objectFile * me, void (*func)(struct function *, va_list), ...) {
