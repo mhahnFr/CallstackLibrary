@@ -43,6 +43,8 @@ struct objectFile {
     
     time_t lastModified;
     
+    bool parsed;
+    
     /** A pointer to the underlying object.             */
     void * priv;
     /** Pointer to the next element in a list.          */
@@ -68,6 +70,7 @@ static inline void objectFile_create(struct objectFile * self) {
     self->priv         = NULL;
     self->next         = NULL;
     self->lastModified = 0;
+    self->parsed       = false;
 }
 
 /**

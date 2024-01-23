@@ -31,6 +31,7 @@ struct objectFile_private {
     
     /** A vector with the functions of this object file. */
     struct vector_function functions;
+    struct vector_function ownFunctions;
 };
 
 struct objectFile * objectFile_new(void) {
@@ -66,13 +67,24 @@ struct optional_function objectFile_findFunction(struct objectFile * me, uint64_
     return toReturn;
 }
 
+static inline bool objectFile_parseIntern(struct objectFile_private* self) {
+    // TODO: Implement
+    
+    (void) self;
+    return false;
+}
+
 optional_debugInfo_t objectFile_getDebugInfo(struct objectFile* me, uint64_t address) {
     optional_function_t func = objectFile_findFunction(me, address);
     if (!func.has_value) return (optional_debugInfo_t) { .has_value = false };
     
     struct objectFile_private* self = (struct objectFile_private*) me->priv;
     
-    // TODO: if not parsed, parse
+    if (!me->parsed) {
+        if (!(me->parsed = objectFile_parseIntern(self))) {
+            return (optional_debugInfo_t) { .has_value = false };
+        }
+    }
     // TODO: if has debug symbols, map the functions
     // TODO: map mapped function address + offset to closest line info
     return (optional_debugInfo_t) { .has_value = false };
@@ -399,6 +411,10 @@ void objectFile_destroy(struct objectFile * me) {
 
     objectFile_functionsForEach(me, &objectFile_functionDestroy);
     vector_function_destroy(&self->functions);
+    for (size_t i = 0; i < self->ownFunctions.count; ++i) {
+        function_destroy(&self->ownFunctions.content[i]);
+    }
+    vector_function_destroy(&self->ownFunctions);
     free(me->sourceFile);
     free(me->directory);
     free(me->name);
