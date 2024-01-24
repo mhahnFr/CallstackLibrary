@@ -24,18 +24,29 @@
 
 #include "../../../DC4C/optional.h"
 
+/**
+ * Representa the deducted information about the source file,
+ */
 struct sourceFileInfo {
+    /** The line number.               */
     uint64_t line;
+    /** The column number.             */
     uint64_t column;
     
+    /** The deducted source file name. */
     const char* sourceFile;
 };
 
 typedef_optional_named(sourceFileInfo, struct sourceFileInfo);
 
+/**
+ * Represents the deducted debug information.
+ */
 struct debugInfo {
+    /** The deducted name of the function.                    */
     const char* functionName;
     
+    /** The source file info if it was successfully deducted. */
     optional_sourceFileInfo_t sourceFileInfo;
 };
 
