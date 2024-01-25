@@ -109,14 +109,12 @@ bool machoFile_addr2String(struct binaryFile *      me,
             }
             frame->function = name;
         } else {
-            // TODO: Add difference to the function name
-//            char * toReturn = NULL;
-//            asprintf(&toReturn, "%s + %td",
-//                     name,
-//                     (ptrdiff_t) (address - info->dli_fbase + self->addressOffset - result.value.first.startAddress));
-//            free(name);
-//            frame->function = toReturn;
-            frame->function = name;
+            char* toReturn = NULL;
+            asprintf(&toReturn, "%s + %td",
+                     name,
+                     (ptrdiff_t) (address - info->dli_fbase + self->addressOffset - result.value.function.startAddress));
+            free(name);
+            frame->function = toReturn;
         }
         return true;
     }
