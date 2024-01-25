@@ -117,8 +117,7 @@ static inline const char* objectFile_getSourceFileName(struct objectFile_private
     const size_t size = strlen(self->_.directory) + strlen(self->_.sourceFile) + 1;
     char* toReturn = malloc(size);
     if (toReturn == NULL) {
-        // TODO: Handle this better
-        return "";
+        return self->_.sourceFile;
     }
     strlcpy(toReturn, self->_.directory, size);
     strlcat(toReturn, self->_.sourceFile, size);
