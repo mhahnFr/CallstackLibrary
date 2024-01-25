@@ -178,9 +178,8 @@ static inline bool dwarf_parseLineProgramV4(void*    begin,
                     break;
                 }
                     
-                case 3: // TODO: Add another file
-                    abort();
-                    break;
+//                case 3: // TODO: Add another file
+//                    break;
                     
                 case 4: discriminator = getULEB128(begin, &counter); break;
                     
