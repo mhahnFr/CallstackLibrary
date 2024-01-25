@@ -94,6 +94,8 @@ static inline bool dwarf_parseLineProgramV4(void*    begin,
         headerLength = *((uint32_t*) (begin + counter));
         counter += 4;
     }
+    (void) headerLength;
+    
     const uint8_t minimumInstructionLength = *((uint8_t*) (begin + counter++));
     const uint8_t maximumOperations        = *((uint8_t*) (begin + counter++));
     const bool    defaultIsStmt            = *((uint8_t*) (begin + counter++));
@@ -101,7 +103,6 @@ static inline bool dwarf_parseLineProgramV4(void*    begin,
     const uint8_t lineRange                = *((uint8_t*) (begin + counter++));
     const uint8_t opCodeBase               = *((uint8_t*) (begin + counter++));
     
-    // TODO: For DC4C: Create copy create function
     vector_uint8_t stdOpcodeLengths;
     vector_uint8_create(&stdOpcodeLengths);
     vector_uint8_reserve(&stdOpcodeLengths, opCodeBase - 2);
