@@ -114,7 +114,7 @@ static inline optional_function_t objectFile_findOwnFunction(struct objectFile_p
 static inline const char* objectFile_getSourceFileName(struct objectFile_private* self) {
     if (self->mainSourceFileCache != NULL) return self->mainSourceFileCache;
     
-    const size_t size = strlen(self->_.directory) + strlen(self->_.name) + 1;
+    const size_t size = strlen(self->_.directory) + strlen(self->_.sourceFile) + 1;
     char* toReturn = malloc(size);
     if (toReturn == NULL) {
         // TODO: Handle this better
