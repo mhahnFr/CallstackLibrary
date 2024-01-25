@@ -142,7 +142,7 @@ bool macho_parseSymtab(struct symtab_command* command,
                 
             default:
                 // TODO: Implement this in the machoFile as well
-                if (funCb != NULL && (entry.n_type & N_TYPE) == N_SECT && entry.n_type & N_EXT) {
+                if (funCb != NULL && (entry.n_type & N_TYPE) == N_SECT) {
                     va_list copy;
                     va_copy(copy, args);
                     funCb((struct function) {
