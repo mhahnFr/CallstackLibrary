@@ -134,7 +134,7 @@ optional_debugInfo_t objectFile_getDebugInfo(struct objectFile* me, uint64_t add
     
     toReturn = (optional_debugInfo_t) {
         true, (struct debugInfo) {
-            .functionName = func.value.linkedName,
+            .function = func.value,
             .sourceFileInfo.has_value = false
         }
     };

@@ -91,11 +91,11 @@ bool machoFile_addr2String(struct binaryFile *      me,
     
     optional_debugInfo_t result = machoFile_getDebugInfo(self, info->dli_fbase, address);
     if (result.has_value) {
-        if (result.value.functionName == NULL) {
+        if (result.value.function.linkedName == NULL) {
             return false;
         }
         
-        char* name = (char*) result.value.functionName;
+        char* name = (char*) result.value.function.linkedName;
         if (*name == '_' || *name == '\1') {
             ++name;
         }

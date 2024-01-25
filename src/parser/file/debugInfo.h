@@ -22,6 +22,8 @@
 
 #include <stdint.h>
 
+#include "macho/function.h"
+
 #include "../../../DC4C/optional.h"
 
 /**
@@ -44,7 +46,8 @@ typedef_optional_named(sourceFileInfo, struct sourceFileInfo);
  */
 struct debugInfo {
     /** The deducted name of the function.                    */
-    const char* functionName;
+//    const char* functionName;
+    struct function function;
     
     /** The source file info if it was successfully deducted. */
     optional_sourceFileInfo_t sourceFileInfo;

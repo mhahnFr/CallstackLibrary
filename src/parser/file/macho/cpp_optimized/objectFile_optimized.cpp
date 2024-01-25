@@ -116,7 +116,7 @@ public:
         }
         toReturn = {
             true, {
-                .functionName = func.value.linkedName,
+                .function = func.value,
                 .sourceFileInfo.has_value = false
             }
         };
