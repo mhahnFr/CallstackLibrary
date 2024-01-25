@@ -97,7 +97,7 @@ public:
      * @return the function if found
      */
     inline auto findFunction(uint64_t address) -> optional_function_t {
-        auto result = functions.lower_bound(address);
+        auto result = functions.upper_bound(address);
         optional_function_t toReturn = { .has_value = false };
         
         if (result == functions.end() || address > result->second.startAddress + result->second.length) {
