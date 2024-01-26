@@ -1,7 +1,7 @@
 /*
  * Callstack Library - Library creating human-readable call stacks.
  *
- * Copyright (C) 2023  mhahnFr
+ * Copyright (C) 2023 - 2024  mhahnFr
  *
  * This file is part of the CallstackLibrary. This library is free software:
  * you can redistribute it and/or modify it under the terms of the
@@ -50,6 +50,8 @@ struct binaryFile {
     /** The name of the represented binary file.             */
     const char * fileName;
     
+    void* startAddress;
+    
     /** A pointer to the next binary file structure.         */
     struct binaryFile * next;
     
@@ -65,8 +67,9 @@ struct binaryFile {
  * Allocates a new concrete binary file structure.
  *
  * @param fileName the name of the represented binary file
+ * @param startAddress the start address of the represented binary file
  */
-struct binaryFile * binaryFile_new(const char * fileName);
+struct binaryFile * binaryFile_new(const char * fileName, void* startAddress);
 
 /**
  * Initializes the given binary file structure.

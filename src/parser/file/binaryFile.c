@@ -30,7 +30,7 @@
  #include "elf/elfFile.h"
 #endif
 
-struct binaryFile * binaryFile_new(const char * fileName) {
+struct binaryFile * binaryFile_new(const char * fileName, void* startAddress) {
     struct binaryFile * toReturn;
     
 #ifdef __APPLE__
@@ -45,6 +45,7 @@ struct binaryFile * binaryFile_new(const char * fileName) {
     
     if (toReturn != NULL) {
         toReturn->fileName = fileName;
+        toReturn->startAddress = startAddress;
     }
     return toReturn;
 }
