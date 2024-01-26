@@ -135,6 +135,9 @@ void machoFile_destroy(struct binaryFile * me) {
     }
     
     vector_uint64_t_destroy(&self->functionStarts);
+    for (size_t i = 0; i < self->functions.count; ++i) {
+        function_destroy(&self->functions.content[i]);
+    }
     vector_function_destroy(&self->functions);
 }
 
