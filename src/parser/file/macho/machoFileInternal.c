@@ -261,9 +261,31 @@ struct optional_funcFile machoFile_findFunction(struct machoFile * self, void * 
     return toReturn;
 }
 
-optional_debugInfo_t machoFile_getDebugInfo(struct machoFile* self, void* startAddress, void* address) {
-    optional_debugInfo_t toReturn = { .has_value = false };
+static inline optional_debugInfo_t machoFile_createLocalDebugInfo(struct machoFile* self, void* startAddress, void* address) {
+    const uint64_t searchAddress = address - startAddress + self->addressOffset;
     
+    struct function* closest = NULL;
+    for (size_t i = 0; i < self->functions.count; ++i) {
+        struct function* elem = &self->functions.content[i];
+
+        if (closest == NULL && elem->startAddress < searchAddress) {
+            closest = elem;
+        } else if (closest != NULL && elem->startAddress < searchAddress && searchAddress - elem->startAddress < searchAddress - closest->startAddress) {
+            closest = elem;
+        }
+    }
+    if (closest == NULL) {
+        return (optional_debugInfo_t) { .has_value = false };
+    }
+    return (optional_debugInfo_t) {
+        true, (struct debugInfo) {
+            .function                 = *closest,
+            .sourceFileInfo.has_value = false
+        }
+    };
+}
+
+optional_debugInfo_t machoFile_getDebugInfo(struct machoFile* self, void* startAddress, void* address) {
     for (struct objectFile* it = self->objectFiles; it != NULL; it = it->next) {
         optional_debugInfo_t result = objectFile_getDebugInfo(it, (uint64_t) (address - startAddress) + self->addressOffset);
         if (result.has_value) {
@@ -271,5 +293,5 @@ optional_debugInfo_t machoFile_getDebugInfo(struct machoFile* self, void* startA
         }
     }
     
-    return toReturn;
+    return machoFile_createLocalDebugInfo(self, startAddress, address);
 }
