@@ -23,7 +23,6 @@
 #include <stdbool.h>
 
 #include "../../../include/callstack_frame.h"
-#include "../../../include/lcs_dlfcn.h"
 
 /**
  * This enumeration contains the supported types of executable files.
@@ -56,7 +55,7 @@ struct binaryFile {
     struct binaryFile * next;
     
     /** Translating method, heavily WIP.                     */
-    bool (*addr2String)(struct binaryFile *, Dl_info *, void *, struct callstack_frame *);
+    bool (*addr2String)(struct binaryFile*, void*, struct callstack_frame*);
     /** The appropriate deinitializing method.               */
     void (*destroy)    (struct binaryFile *);
     /** The appropriate deleting method.                     */

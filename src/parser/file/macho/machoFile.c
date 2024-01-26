@@ -77,10 +77,7 @@ static inline bool machoFile_readAndParseFile(struct machoFile * self) {
     return toReturn;
 }
 
-bool machoFile_addr2String(struct binaryFile *      me,
-                                  Dl_info *         info,
-                                  void *            address,
-                           struct callstack_frame * frame) {
+bool machoFile_addr2String(struct binaryFile* me, void* address, struct callstack_frame* frame) {
     struct machoFile * self = machoFileOrNull(me);
     if (self == NULL) {
         return NULL;

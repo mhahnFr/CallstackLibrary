@@ -1,7 +1,7 @@
 /*
  * Callstack Library - Library creating human-readable call stacks.
  *
- * Copyright (C) 2023  mhahnFr
+ * Copyright (C) 2023 - 2024  mhahnFr
  *
  * This file is part of the CallstackLibrary. This library is free software:
  * you can redistribute it and/or modify it under the terms of the
@@ -70,10 +70,7 @@ static inline struct machoFile * machoFileOrNull(struct binaryFile * self) {
 }
 
 /* Heavily WIP. */
-bool machoFile_addr2String(struct binaryFile *      self,
-                                  Dl_info *         info,
-                                  void *            address,
-                           struct callstack_frame * frame);
+bool machoFile_addr2String(struct binaryFile* self, void* address, struct callstack_frame* frame);
 
 /**
  * Deinitializes the given binary file structure if it is a Mach-O file structure.

@@ -42,10 +42,7 @@ bool callstack_parser_parseImpl(struct callstack_parser * self,
         struct binaryFile * file = cache_findOrAddFile(callstack_parser_getCache(self),
                                                        info->value.dli_fname,
                                                        info->value.dli_fbase);
-        if (file == NULL || !file->addr2String(file,
-                                               &info->value,
-                                               callstack->backtrace[i],
-                                               frame)) {
+        if (file == NULL || !file->addr2String(file, callstack->backtrace[i], frame)) {
             if (!callstack_parser_createDynamicLine(&info->value,
                                                     callstack->backtrace[i],
                                                     frame)) {
