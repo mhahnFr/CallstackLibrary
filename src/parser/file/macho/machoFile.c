@@ -90,7 +90,7 @@ bool machoFile_addr2String(struct binaryFile *      me,
         return NULL;
     }
     
-    optional_debugInfo_t result = machoFile_getDebugInfo(self, info->dli_fbase, address);
+    optional_debugInfo_t result = machoFile_getDebugInfo(self, address);
     if (result.has_value) {
         if (result.value.function.linkedName == NULL) {
             return false;
@@ -113,7 +113,7 @@ bool machoFile_addr2String(struct binaryFile *      me,
             char* toReturn = NULL;
             asprintf(&toReturn, "%s + %td",
                      name,
-                     (ptrdiff_t) (address - info->dli_fbase + self->addressOffset - result.value.function.startAddress));
+                     (ptrdiff_t) (address - self->_.startAddress + self->addressOffset - result.value.function.startAddress));
             free(name);
             frame->function = toReturn;
         }

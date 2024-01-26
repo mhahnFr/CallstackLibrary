@@ -1,7 +1,7 @@
 /*
  * Callstack Library - Library creating human-readable call stacks.
  *
- * Copyright (C) 2023  mhahnFr
+ * Copyright (C) 2023 - 2024  mhahnFr
  *
  * This file is part of the CallstackLibrary. This library is free software:
  * you can redistribute it and/or modify it under the terms of the
@@ -49,15 +49,12 @@ void machoFile_addObjectFile(struct machoFile *  self,
  * Searches and returns the function and the object file the function is in.
  *
  * @param self the Mach-O file instance
- * @param startAddress the start address of the Mach-O file
  * @param address the raw address whose function and object file to be found
  */
 struct optional_funcFile machoFile_findFunction(struct machoFile * self,
-                                                void *             startAddress,
                                                 void *             address);
 
 optional_debugInfo_t machoFile_getDebugInfo(struct machoFile* self,
-                                            void*             startAddress,
                                             void*             address);
 
 #endif /* machoFileInternal_h */
