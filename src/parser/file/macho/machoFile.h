@@ -24,7 +24,9 @@
 
 #include "../binaryFile.h"
 #include "../UInt64Vector.h"
+
 #include "objectFile.h"
+#include "FunctionVector.h"
 
 /**
  * This structure represents a Mach-O binary file.
@@ -39,6 +41,7 @@ struct machoFile {
     struct objectFile * objectFiles;
     /** Vector with all function start addresses found in this file.  */
     struct vector_uint64_t functionStarts;
+    struct vector_function functions;
 };
 
 /**

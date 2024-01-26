@@ -49,6 +49,7 @@ void machoFile_create(struct machoFile * self) {
     self->objectFiles   = NULL;
     
     vector_uint64_t_create(&self->functionStarts);
+    vector_function_create(&self->functions);
 }
 
 /**
@@ -134,6 +135,7 @@ void machoFile_destroy(struct binaryFile * me) {
     }
     
     vector_uint64_t_destroy(&self->functionStarts);
+    vector_function_destroy(&self->functions);
 }
 
 void machoFile_delete(struct binaryFile * self) {

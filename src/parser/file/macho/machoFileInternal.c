@@ -82,6 +82,12 @@ static inline void machoFile_addObjectFileImpl(struct objectFile* file, va_list 
     machoFile_addObjectFile(self, file);
 }
 
+static inline void machoFile_addFunctionImpl(struct function function, va_list args) {
+    struct machoFile* self = va_arg(args, void*);
+
+    vector_function_push_back(&self->functions, function);
+}
+
 /**
  * Parses a Mach-O file into the given Mach-O file abstraction object.
  *
@@ -105,7 +111,7 @@ static inline bool machoFile_parseFileImpl(struct machoFile * self,
                 break;
                 
             case LC_SYMTAB:
-                result = macho_parseSymtab((void*) lc, baseAddress, bitsReversed, false, machoFile_addObjectFileImpl, NULL, self);
+                result = macho_parseSymtab((void*) lc, baseAddress, bitsReversed, false, machoFile_addObjectFileImpl, machoFile_addFunctionImpl, self);
                 break;
         }
         if (!result) {
@@ -139,7 +145,7 @@ static inline bool machoFile_parseFileImpl64(struct machoFile * self,
                 break;
                 
             case LC_SYMTAB:
-                result = macho_parseSymtab((void*) lc, baseAddress, bitsReversed, true, machoFile_addObjectFileImpl, NULL, self);
+                result = macho_parseSymtab((void*) lc, baseAddress, bitsReversed, true, machoFile_addObjectFileImpl, machoFile_addFunctionImpl, self);
                 break;
         }
         if (!result) {
