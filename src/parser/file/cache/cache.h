@@ -1,7 +1,7 @@
 /*
  * Callstack Library - Library creating human-readable call stacks.
  *
- * Copyright (C) 2023  mhahnFr
+ * Copyright (C) 2023 - 2024  mhahnFr
  *
  * This file is part of the CallstackLibrary. This library is free software:
  * you can redistribute it and/or modify it under the terms of the
@@ -36,9 +36,10 @@
  *
  * @param cache the cache to be used
  * @param fileName the name of the file
+ * @param startAddress the start address of the binary file
  * @return the binary file structure representation
  */
-struct binaryFile * cache_findOrAddFile(struct binaryFile ** cache, const char * fileName);
+struct binaryFile * cache_findOrAddFile(struct binaryFile ** cache, const char * fileName, void* startAddress);
 
 /**
  * @brief Clears the given cache.

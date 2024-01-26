@@ -1,7 +1,7 @@
 /*
  * Callstack Library - Library creating human-readable call stacks.
  *
- * Copyright (C) 2022 - 2023  mhahnFr
+ * Copyright (C) 2022 - 2024  mhahnFr
  *
  * This file is part of the CallstackLibrary. This library is free software:
  * you can redistribute it and/or modify it under the terms of the
@@ -40,7 +40,8 @@ bool callstack_parser_parseImpl(struct callstack_parser * self,
         if (!info->has_value) continue;
         
         struct binaryFile * file = cache_findOrAddFile(callstack_parser_getCache(self),
-                                                       info->value.dli_fname);
+                                                       info->value.dli_fname,
+                                                       info->value.dli_fbase);
         if (file == NULL || !file->addr2String(file,
                                                &info->value,
                                                callstack->backtrace[i],

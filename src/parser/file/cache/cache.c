@@ -1,7 +1,7 @@
 /*
  * Callstack Library - Library creating human-readable call stacks.
  *
- * Copyright (C) 2023  mhahnFr
+ * Copyright (C) 2023 - 2024  mhahnFr
  *
  * This file is part of the CallstackLibrary. This library is free software:
  * you can redistribute it and/or modify it under the terms of the
@@ -25,14 +25,14 @@
 /** The global cache. */
 struct binaryFile * parsedFiles = NULL;
 
-struct binaryFile * cache_findOrAddFile(struct binaryFile ** cache, const char * fileName) {
+struct binaryFile * cache_findOrAddFile(struct binaryFile ** cache, const char * fileName, void* startAddress) {
     if (cache == NULL) cache = &parsedFiles;
     
     struct binaryFile * it;
     for (it = *cache; it != NULL && strcmp(it->fileName, fileName) != 0; it = it->next);
     
     if (it == NULL) {
-        it = binaryFile_new(fileName);
+        it = binaryFile_new(fileName, startAddress);
         if (it == NULL) {
             return NULL;
         }
