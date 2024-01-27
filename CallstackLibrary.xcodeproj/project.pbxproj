@@ -43,8 +43,6 @@
 		BF971B892A588634006BFFBB /* elfFile.c in Sources */ = {isa = PBXBuildFile; fileRef = BF971B852A588634006BFFBB /* elfFile.c */; };
 		BF971B8D2A58B135006BFFBB /* cache.h in Headers */ = {isa = PBXBuildFile; fileRef = BF971B8B2A58B135006BFFBB /* cache.h */; };
 		BF971B8E2A58B135006BFFBB /* cache.c in Sources */ = {isa = PBXBuildFile; fileRef = BF971B8C2A58B135006BFFBB /* cache.c */; };
-		BF971B932A58B9EA006BFFBB /* machoFileInternal.c in Sources */ = {isa = PBXBuildFile; fileRef = BF971B902A58B9EA006BFFBB /* machoFileInternal.c */; };
-		BF971B942A58B9EA006BFFBB /* machoFileInternal.c in Sources */ = {isa = PBXBuildFile; fileRef = BF971B902A58B9EA006BFFBB /* machoFileInternal.c */; };
 		BF971B972A58C155006BFFBB /* callstack_internals.c in Sources */ = {isa = PBXBuildFile; fileRef = BF971B962A58C155006BFFBB /* callstack_internals.c */; };
 		BF971B982A58C155006BFFBB /* callstack_internals.c in Sources */ = {isa = PBXBuildFile; fileRef = BF971B962A58C155006BFFBB /* callstack_internals.c */; };
 		BFAB6B3B2A62EDC800726B52 /* objectFile.c in Sources */ = {isa = PBXBuildFile; fileRef = BFEC818B2A5EEA36002FA3B7 /* objectFile.c */; };
@@ -97,7 +95,6 @@
 		BF971B852A588634006BFFBB /* elfFile.c */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.c; path = elfFile.c; sourceTree = "<group>"; };
 		BF971B8B2A58B135006BFFBB /* cache.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = cache.h; sourceTree = "<group>"; };
 		BF971B8C2A58B135006BFFBB /* cache.c */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.c; path = cache.c; sourceTree = "<group>"; };
-		BF971B902A58B9EA006BFFBB /* machoFileInternal.c */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.c; path = machoFileInternal.c; sourceTree = "<group>"; };
 		BF971B952A58C0F2006BFFBB /* callstack_internals.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = callstack_internals.h; sourceTree = "<group>"; };
 		BF971B962A58C155006BFFBB /* callstack_internals.c */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.c; path = callstack_internals.c; sourceTree = "<group>"; };
 		BFA17E6E2AC496A200931B1E /* optional_Dl_info.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = optional_Dl_info.h; sourceTree = "<group>"; };
@@ -165,7 +162,6 @@
 				BFAB6B3D2A62F5E100726B52 /* cpp_optimized */,
 				BF971B762A588077006BFFBB /* machoFile.h */,
 				BF971B772A588077006BFFBB /* machoFile.c */,
-				BF971B902A58B9EA006BFFBB /* machoFileInternal.c */,
 				BFEC81842A5EE937002FA3B7 /* function.h */,
 				BFEC81852A5EE937002FA3B7 /* function.c */,
 				BFEC818A2A5EEA36002FA3B7 /* objectFile.h */,
@@ -452,7 +448,6 @@
 				BF971B982A58C155006BFFBB /* callstack_internals.c in Sources */,
 				BFAD42AE2B5927A700ADB6AF /* objectFile_shared.c in Sources */,
 				BF378FCB2919542100A4DAA9 /* callstack.c in Sources */,
-				BF971B942A58B9EA006BFFBB /* machoFileInternal.c in Sources */,
 				BFAB6B3F2A62F5EE00726B52 /* objectFile_optimized.cpp in Sources */,
 				BFAB6B3B2A62EDC800726B52 /* objectFile.c in Sources */,
 				BF971B822A58827B006BFFBB /* binaryFile.c in Sources */,
@@ -477,7 +472,6 @@
 				BFAB6B3C2A62EDD000726B52 /* objectFile.c in Sources */,
 				BF86E32328F45DE100F6D20E /* callstack_parser.c in Sources */,
 				BFAD63192B5BCC4B00EE8E14 /* macho_parser.c in Sources */,
-				BF971B932A58B9EA006BFFBB /* machoFileInternal.c in Sources */,
 				BFEC81882A5EE937002FA3B7 /* function.c in Sources */,
 				BFCC50C928F8454E00E2388D /* demangler.cpp in Sources */,
 				BFAD65442B5A717F00024242 /* dwarf_parser.c in Sources */,
