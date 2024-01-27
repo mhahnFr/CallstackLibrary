@@ -1,7 +1,7 @@
 /*
  * Callstack Library - Library creating human-readable call stacks.
  *
- * Copyright (C) 2022 - 2023  mhahnFr
+ * Copyright (C) 2022 - 2024  mhahnFr
  *
  * This file is part of the CallstackLibrary. This library is free software:
  * you can redistribute it and/or modify it under the terms of the
@@ -17,7 +17,7 @@
  * this library, see the file LICENSE.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-#include "callstack_parserInternal.h"
+#include "callstack_parser.h"
 
 #include "../callstackInternal.h"
 #include "file/cache/cache.h"

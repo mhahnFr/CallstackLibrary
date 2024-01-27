@@ -14,7 +14,6 @@
 		BF378FD12919542600A4DAA9 /* callstack_parser.c in Sources */ = {isa = PBXBuildFile; fileRef = BF86E32128F45DE100F6D20E /* callstack_parser.c */; };
 		BF378FD42919542800A4DAA9 /* callstack_parserInternal.c in Sources */ = {isa = PBXBuildFile; fileRef = BF86E32528F4609100F6D20E /* callstack_parserInternal.c */; };
 		BF378FD72919544A00A4DAA9 /* demangler.h in Headers */ = {isa = PBXBuildFile; fileRef = BFCC50C828F8454E00E2388D /* demangler.h */; };
-		BF378FDA2919544E00A4DAA9 /* callstack_parserInternal.h in Headers */ = {isa = PBXBuildFile; fileRef = BF86E32428F4609100F6D20E /* callstack_parserInternal.h */; };
 		BF378FDD2919545100A4DAA9 /* callstack_parser.h in Headers */ = {isa = PBXBuildFile; fileRef = BF86E32028F45DE100F6D20E /* callstack_parser.h */; };
 		BF378FE02919545500A4DAA9 /* callstackInternal.h in Headers */ = {isa = PBXBuildFile; fileRef = BF5A745F28F1DCA00017591A /* callstackInternal.h */; };
 		BF378FE32919545700A4DAA9 /* callstack_create.h in Headers */ = {isa = PBXBuildFile; fileRef = BF3036CC28F998AD00856435 /* callstack_create.h */; settings = {ATTRIBUTES = (Public, ); }; };
@@ -31,7 +30,6 @@
 		BF86E31F28F4564600F6D20E /* callstack.c in Sources */ = {isa = PBXBuildFile; fileRef = BF86E31E28F4564600F6D20E /* callstack.c */; };
 		BF86E32228F45DE100F6D20E /* callstack_parser.h in Headers */ = {isa = PBXBuildFile; fileRef = BF86E32028F45DE100F6D20E /* callstack_parser.h */; };
 		BF86E32328F45DE100F6D20E /* callstack_parser.c in Sources */ = {isa = PBXBuildFile; fileRef = BF86E32128F45DE100F6D20E /* callstack_parser.c */; };
-		BF86E32628F4609100F6D20E /* callstack_parserInternal.h in Headers */ = {isa = PBXBuildFile; fileRef = BF86E32428F4609100F6D20E /* callstack_parserInternal.h */; };
 		BF86E32728F4609100F6D20E /* callstack_parserInternal.c in Sources */ = {isa = PBXBuildFile; fileRef = BF86E32528F4609100F6D20E /* callstack_parserInternal.c */; };
 		BF971B782A588077006BFFBB /* machoFile.h in Headers */ = {isa = PBXBuildFile; fileRef = BF971B762A588077006BFFBB /* machoFile.h */; };
 		BF971B792A588077006BFFBB /* machoFile.h in Headers */ = {isa = PBXBuildFile; fileRef = BF971B762A588077006BFFBB /* machoFile.h */; };
@@ -95,7 +93,6 @@
 		BF86E31E28F4564600F6D20E /* callstack.c */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.c; path = callstack.c; sourceTree = "<group>"; };
 		BF86E32028F45DE100F6D20E /* callstack_parser.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = callstack_parser.h; sourceTree = "<group>"; };
 		BF86E32128F45DE100F6D20E /* callstack_parser.c */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.c; path = callstack_parser.c; sourceTree = "<group>"; };
-		BF86E32428F4609100F6D20E /* callstack_parserInternal.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = callstack_parserInternal.h; sourceTree = "<group>"; };
 		BF86E32528F4609100F6D20E /* callstack_parserInternal.c */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.c; path = callstack_parserInternal.c; sourceTree = "<group>"; };
 		BF971B762A588077006BFFBB /* machoFile.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = machoFile.h; sourceTree = "<group>"; };
 		BF971B772A588077006BFFBB /* machoFile.c */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.c; path = machoFile.c; sourceTree = "<group>"; };
@@ -196,7 +193,6 @@
 				BF971B7C2A58823E006BFFBB /* file */,
 				BF86E32028F45DE100F6D20E /* callstack_parser.h */,
 				BF86E32128F45DE100F6D20E /* callstack_parser.c */,
-				BF86E32428F4609100F6D20E /* callstack_parserInternal.h */,
 				BF86E32528F4609100F6D20E /* callstack_parserInternal.c */,
 				BFCC50C728F8454E00E2388D /* demangler.cpp */,
 				BFCC50C828F8454E00E2388D /* demangler.h */,
@@ -347,7 +343,6 @@
 				BF378FEF2919546000A4DAA9 /* callstack.h in Headers */,
 				BF971B922A58B9EA006BFFBB /* machoFileInternal.h in Headers */,
 				BF378FD72919544A00A4DAA9 /* demangler.h in Headers */,
-				BF378FDA2919544E00A4DAA9 /* callstack_parserInternal.h in Headers */,
 				BF378FDD2919545100A4DAA9 /* callstack_parser.h in Headers */,
 				BF971B802A58827B006BFFBB /* binaryFile.h in Headers */,
 				BF378FE02919545500A4DAA9 /* callstackInternal.h in Headers */,
@@ -371,7 +366,6 @@
 				BF86E32228F45DE100F6D20E /* callstack_parser.h in Headers */,
 				BF5A746128F1DCA00017591A /* callstackInternal.h in Headers */,
 				BFEC818C2A5EEA36002FA3B7 /* objectFile.h in Headers */,
-				BF86E32628F4609100F6D20E /* callstack_parserInternal.h in Headers */,
 				BFE97A962AE82E92009E1DA4 /* fileHelper.h in Headers */,
 				BFEC81862A5EE937002FA3B7 /* function.h in Headers */,
 				BF971B912A58B9EA006BFFBB /* machoFileInternal.h in Headers */,

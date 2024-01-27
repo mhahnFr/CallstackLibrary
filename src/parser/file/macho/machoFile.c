@@ -24,7 +24,7 @@
 #include "machoFile.h"
 #include "machoFileInternal.h"
 
-#include "../../callstack_parserInternal.h"
+#include "../../callstack_parser.h"
 
 struct machoFile * machoFile_new(void)  {
     struct machoFile * toReturn = malloc(sizeof(struct machoFile));

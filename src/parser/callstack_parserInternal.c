@@ -17,7 +17,8 @@
  * this library, see the file LICENSE.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-#include "callstack_parserInternal.h"
+#include "callstack_parser.h"
+
 #include "demangler.h"
 #include "file/cache/cache.h"
 
