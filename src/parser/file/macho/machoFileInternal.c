@@ -33,7 +33,7 @@
  #include <sys/sysctl.h>
 #endif
 
-#include "machoFileInternal.h"
+#include "machoFile.h"
 
 #include "OptionalFunction.h"
 

@@ -23,10 +23,12 @@
 #include <stddef.h>
 
 #include "../binaryFile.h"
+#include "../debugInfo.h"
 #include "../UInt64Vector.h"
 
 #include "objectFile.h"
 #include "FunctionVector.h"
+#include "OptionalFuncFilePair.h"
 
 /**
  * This structure represents a Mach-O binary file.
@@ -71,6 +73,37 @@ static inline struct machoFile * machoFileOrNull(struct binaryFile * self) {
 
 /* Heavily WIP. */
 bool machoFile_addr2String(struct binaryFile* self, void* address, struct callstack_frame* frame);
+
+/**
+ * Parses the Mach-O file represented by the given structure using the
+ * given base address.
+ *
+ * @param self the Mach-O file structure representing the file to be parsed
+ * @param baseAddress the base address of the Mach-O file to parse
+ * @return whether the parsing was successful
+ */
+bool machoFile_parseFile(struct machoFile * self, void * baseAddress);
+
+/**
+ * Adds the givne object file structure to the given Mach-O file structure.
+ *
+ * @param self the Mach-O file structure
+ * @param file the object file structure
+ */
+void machoFile_addObjectFile(struct machoFile *  self,
+                             struct objectFile * file);
+
+/**
+ * Searches and returns the function and the object file the function is in.
+ *
+ * @param self the Mach-O file instance
+ * @param address the raw address whose function and object file to be found
+ */
+struct optional_funcFile machoFile_findFunction(struct machoFile * self,
+                                                void *             address);
+
+optional_debugInfo_t machoFile_getDebugInfo(struct machoFile* self,
+                                            void*             address);
 
 /**
  * Deinitializes the given binary file structure if it is a Mach-O file structure.

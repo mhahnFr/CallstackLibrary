@@ -22,7 +22,6 @@
 #include <sys/stat.h>
 
 #include "machoFile.h"
-#include "machoFileInternal.h"
 
 #include "../../callstack_parser.h"
 
