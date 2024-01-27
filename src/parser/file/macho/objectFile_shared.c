@@ -21,7 +21,6 @@
 #include <stdlib.h>
 #include <string.h>
 #include <sys/stat.h>
-
 #include <mach-o/loader.h>
 
 #include "objectFile.h"
@@ -29,7 +28,7 @@
 #include "macho_parser.h"
 #include "macho_utils.h"
 
-static inline bool objectFile_handleSegment64(struct segment_command_64* command, 
+static inline bool objectFile_handleSegment64(struct segment_command_64* command,
                                               void* baseAddress,
                                               bool  bitsSwapped,
                                               dwarf_line_callback cb, va_list args) {
