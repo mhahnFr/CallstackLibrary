@@ -17,22 +17,18 @@
  * this library, see the file LICENSE.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-#include "callstack_parser.h"
-
-#include "../callstackInternal.h"
-#include "file/cache/cache.h"
-
-#include "demangler.h"
-
-#define _GNU_SOURCE
- #define __USE_GNU
-  #include <stdio.h>
- #undef __USE_GNU
-#undef _GNU_SOURCE
-
 #include <execinfo.h>
 #include <stdlib.h>
 #include <string.h>
+
+#include "lcs_stdio.h"
+
+#include "callstack_parser.h"
+
+#include "demangler.h"
+#include "file/cache/cache.h"
+
+#include "../callstackInternal.h"
 
 /**
  * @brief Creates a callstack line, demangling the given name if possible and enabled.
