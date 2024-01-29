@@ -51,26 +51,6 @@ void machoFile_addObjectFile(struct machoFile* me, struct objectFile* file) {
     self->objectFiles = file;
 }
 
-struct optional_funcFile machoFile_findFunction(struct machoFile* me, void* address) {
-    struct machoFile_private* self = me->priv;
-    struct optional_funcFile toReturn = { .has_value = false };
-    
-    for (struct objectFile* it = self->objectFiles; it != NULL; it = it->next) {
-        struct optional_function result = objectFile_findFunction(it, (uint64_t) (address - self->_._.startAddress) + self->_.addressOffset);
-        if (result.has_value) {
-            toReturn = (optional_funcFile_t) {
-                true, (struct pair_funcFile) {
-                    result.value,
-                    it
-                }
-            };
-            break;
-        }
-    }
-    
-    return toReturn;
-}
-
 static inline optional_debugInfo_t machoFile_createLocalDebugInfo(struct machoFile_private* self, void* address) {
     const uint64_t searchAddress = address - self->_._.startAddress + self->_.addressOffset;
     

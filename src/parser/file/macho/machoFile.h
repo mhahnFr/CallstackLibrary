@@ -89,14 +89,6 @@ void machoFile_addObjectFile(struct machoFile *  self,
 
 void machoFile_addFunction(struct machoFile* self, struct function function);
 
-/**
- * Searches and returns the function and the object file the function is in.
- *
- * @param self the Mach-O file instance
- * @param address the raw address whose function and object file to be found
- */
-optional_funcFile_t machoFile_findFunction(struct machoFile* self, void* address);
-
 optional_debugInfo_t machoFile_getDebugInfo(struct machoFile* self,
                                             void*             address);
 
