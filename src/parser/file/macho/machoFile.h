@@ -39,11 +39,6 @@ struct machoFile {
     
     /** The address offset between Mach-O file and loaded executable. */
     uint64_t addressOffset;
-    /** The contained object files.                                   */
-    struct objectFile * objectFiles;
-    /** Vector with all function start addresses found in this file.  */
-    struct vector_uint64_t functionStarts; // TODO: Maybe readd the fuction start addresses
-    struct vector_function functions;
     
     void* priv;
 };
@@ -133,11 +128,7 @@ static inline void machoFile_create(struct machoFile* self) {
     self->_.delete      = &machoFile_delete;
     
     self->addressOffset = 0x0;
-    self->objectFiles   = NULL;
     self->priv          = NULL;
-    
-    vector_uint64_t_create(&self->functionStarts);
-    vector_function_create(&self->functions);
 }
 
 #endif /* machoFile_h */

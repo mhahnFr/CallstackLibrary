@@ -19,30 +19,44 @@
 
 #include "../machoFile.h"
 
-struct machoFile * machoFile_new(void)  {
-    struct machoFile * toReturn = malloc(sizeof(struct machoFile));
+struct machoFile_private {
+    struct machoFile _;
+    
+    struct objectFile* objectFiles;
+    struct vector_function functions;
+};
+
+struct machoFile* machoFile_new(void)  {
+    struct machoFile_private* toReturn = malloc(sizeof(struct machoFile_private));
     
     if (toReturn != NULL) {
-        machoFile_create(toReturn);
+        machoFile_create(&toReturn->_);
+        vector_function_create(&toReturn->functions);
+        toReturn->objectFiles = NULL;
+        toReturn->_.priv = toReturn;
     }
-    return toReturn;
+    return &toReturn->_;
 }
 
-void machoFile_addFunction(struct machoFile* self, struct function function) {
+void machoFile_addFunction(struct machoFile* me, struct function function) {
+    struct machoFile_private* self = me->priv;
+    
     vector_function_push_back(&self->functions, function);
 }
 
-void machoFile_addObjectFile(struct machoFile *  self,
-                             struct objectFile * file) {
+void machoFile_addObjectFile(struct machoFile* me, struct objectFile* file) {
+    struct machoFile_private* self = me->priv;
+    
     file->next        = self->objectFiles;
     self->objectFiles = file;
 }
 
-struct optional_funcFile machoFile_findFunction(struct machoFile* self, void* address) {
+struct optional_funcFile machoFile_findFunction(struct machoFile* me, void* address) {
+    struct machoFile_private* self = me->priv;
     struct optional_funcFile toReturn = { .has_value = false };
     
     for (struct objectFile* it = self->objectFiles; it != NULL; it = it->next) {
-        struct optional_function result = objectFile_findFunction(it, (uint64_t) (address - self->_.startAddress) + self->addressOffset);
+        struct optional_function result = objectFile_findFunction(it, (uint64_t) (address - self->_._.startAddress) + self->_.addressOffset);
         if (result.has_value) {
             toReturn = (optional_funcFile_t) {
                 true, (struct pair_funcFile) {
@@ -57,8 +71,8 @@ struct optional_funcFile machoFile_findFunction(struct machoFile* self, void* ad
     return toReturn;
 }
 
-static inline optional_debugInfo_t machoFile_createLocalDebugInfo(struct machoFile* self, void* address) {
-    const uint64_t searchAddress = address - self->_.startAddress + self->addressOffset;
+static inline optional_debugInfo_t machoFile_createLocalDebugInfo(struct machoFile_private* self, void* address) {
+    const uint64_t searchAddress = address - self->_._.startAddress + self->_.addressOffset;
     
     struct function* closest = NULL;
     for (size_t i = 0; i < self->functions.count; ++i) {
@@ -81,9 +95,11 @@ static inline optional_debugInfo_t machoFile_createLocalDebugInfo(struct machoFi
     };
 }
 
-optional_debugInfo_t machoFile_getDebugInfo(struct machoFile* self, void* address) {
+optional_debugInfo_t machoFile_getDebugInfo(struct machoFile* me, void* address) {
+    struct machoFile_private* self = me->priv;
+    
     for (struct objectFile* it = self->objectFiles; it != NULL; it = it->next) {
-        optional_debugInfo_t result = objectFile_getDebugInfo(it, (uint64_t) (address - self->_.startAddress) + self->addressOffset);
+        optional_debugInfo_t result = objectFile_getDebugInfo(it, (uint64_t) (address - self->_._.startAddress) + self->_.addressOffset);
         if (result.has_value) {
             return result;
         }
@@ -93,10 +109,11 @@ optional_debugInfo_t machoFile_getDebugInfo(struct machoFile* self, void* addres
 }
 
 void machoFile_destroy(struct binaryFile * me) {
-    struct machoFile * self = machoFileOrNull(me);
-    if (self == NULL) {
+    struct machoFile* tmp = machoFileOrNull(me);
+    if (tmp == NULL) {
         return;
     }
+    struct machoFile_private* self = tmp->priv;
     
     for (struct objectFile * tmp = self->objectFiles; tmp != NULL;) {
         struct objectFile * n = tmp->next;
@@ -104,7 +121,6 @@ void machoFile_destroy(struct binaryFile * me) {
         tmp = n;
     }
     
-    vector_uint64_t_destroy(&self->functionStarts);
     for (size_t i = 0; i < self->functions.count; ++i) {
         function_destroy(&self->functions.content[i]);
     }
