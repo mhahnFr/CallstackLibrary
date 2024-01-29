@@ -42,8 +42,10 @@ struct machoFile {
     /** The contained object files.                                   */
     struct objectFile * objectFiles;
     /** Vector with all function start addresses found in this file.  */
-    struct vector_uint64_t functionStarts;
+    struct vector_uint64_t functionStarts; // TODO: Maybe readd the fuction start addresses
     struct vector_function functions;
+    
+    void* priv;
 };
 
 /**
@@ -52,13 +54,6 @@ struct machoFile {
  * @return the allocated Mach-I file structure or `NULL` on error
  */
 struct machoFile * machoFile_new(void);
-
-/**
- * Initializes the given Mach-O file structure.
- *
- * @param self the Mach-O file structure to be initialized
- */
-void machoFile_create(struct machoFile * self);
 
 /**
  * Returns the represented Mach-O file structure from the given binary
@@ -119,5 +114,28 @@ void machoFile_destroy(struct binaryFile * self);
  * @param self the binary file structure to be deleted
  */
 void machoFile_delete(struct binaryFile * self);
+
+/**
+ * Initializes the given Mach-O file structure.
+ *
+ * @param self the Mach-O file structure to be initialized
+ */
+static inline void machoFile_create(struct machoFile* self) {
+    binaryFile_create(&self->_);
+    
+    self->_.type     = MACHO_FILE;
+    self->_.concrete = self;
+    
+    self->_.addr2String = &machoFile_addr2String;
+    self->_.destroy     = &machoFile_destroy;
+    self->_.delete      = &machoFile_delete;
+    
+    self->addressOffset = 0x0;
+    self->objectFiles   = NULL;
+    self->priv          = NULL;
+    
+    vector_uint64_t_create(&self->functionStarts);
+    vector_function_create(&self->functions);
+}
 
 #endif /* machoFile_h */

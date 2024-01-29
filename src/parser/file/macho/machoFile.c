@@ -54,23 +54,6 @@ struct machoFile * machoFile_new(void)  {
     return toReturn;
 }
 
-void machoFile_create(struct machoFile * self) {
-    binaryFile_create(&self->_);
-    
-    self->_.type     = MACHO_FILE;
-    self->_.concrete = self;
-    
-    self->_.addr2String = &machoFile_addr2String;
-    self->_.destroy     = &machoFile_destroy;
-    self->_.delete      = &machoFile_delete;
-    
-    self->addressOffset = 0x0;
-    self->objectFiles   = NULL;
-    
-    vector_uint64_t_create(&self->functionStarts);
-    vector_function_create(&self->functions);
-}
-
 /**
  * Handles the given segment command.
  *
