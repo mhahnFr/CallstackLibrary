@@ -26,7 +26,8 @@ class MachoFile {
     machoFile self;
     
     std::list<objectFile*> objectFiles;
-    std::map<uint64_t, std::pair<function, objectFile*>, std::greater<uint64_t>> functions;
+    std::vector<function> functionStorage;
+    std::map<uint64_t, std::pair<function*, objectFile*>, std::greater<uint64_t>> functions;
     
 public:
     inline MachoFile() {
@@ -39,13 +40,14 @@ public:
         for (auto& file : objectFiles) {
             objectFile_delete(file);
         }
-//        for (auto& [address, [function, filePtr]] : functions) { // ?
-//            function_destroy(&function);
-//        }
+        for (auto& func : functionStorage) {
+            function_destroy(&func);
+        }
     }
     
     constexpr inline void addFunction(function&& function) {
-        functions.emplace(std::make_pair(function.startAddress, std::make_pair(function, nullptr)));
+        auto it = functionStorage.insert(functionStorage.end(), function);
+        functions.emplace(std::make_pair(it->startAddress, std::make_pair(&(*it), nullptr)));
     }
     
     constexpr inline void addObjectFile(objectFile* file) {
@@ -54,7 +56,7 @@ public:
             MachoFile*  self = reinterpret_cast<MachoFile*> (va_arg(args, void*));
             objectFile* file = reinterpret_cast<objectFile*>(va_arg(args, void*));
             
-            self->functions.insert_or_assign(it->startAddress, std::make_pair(*it, file));
+            self->functions.insert_or_assign(it->startAddress, std::make_pair(it, file));
         }, this, file);
     }
     
@@ -66,12 +68,12 @@ public:
         }
         optional_debugInfo_t info = { .has_value = false };
         if (it->second.second != nullptr) {
-            info = objectFile_getDebugInfo(it->second.second, address, it->second.first);
+            info = objectFile_getDebugInfo(it->second.second, address, *it->second.first);
         }
         if (!info.has_value) {
             info = {
                 true, {
-                    it->second.first,
+                    *it->second.first,
                     .sourceFileInfo.has_value = false
                 }
             };
