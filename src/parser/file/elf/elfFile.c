@@ -38,7 +38,7 @@ void elfFile_create(struct elfFile * self) {
     
     self->_.addr2String = &elfFile_addr2String;
     self->_.destroy     = &elfFile_destroy;
-    self->_.delete      = &elfFile_delete;
+    self->_.deleter     = &elfFile_delete;
 }
 
 bool elfFile_addr2String(struct binaryFile* self, void* address, struct callstack_frame* frame) {

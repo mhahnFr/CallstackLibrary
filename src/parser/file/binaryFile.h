@@ -24,6 +24,10 @@
 
 #include "../../../include/callstack_frame.h"
 
+#ifdef __cplusplus
+extern "C" {
+#endif
+
 /**
  * This enumeration contains the supported types of executable files.
  */
@@ -59,7 +63,7 @@ struct binaryFile {
     /** The appropriate deinitializing method.               */
     void (*destroy)    (struct binaryFile *);
     /** The appropriate deleting method.                     */
-    void (*delete)     (struct binaryFile *);
+    void (*deleter)    (struct binaryFile *);
 };
 
 /**
@@ -97,5 +101,9 @@ char * binaryFile_toRelativePath(char * path);
 char * binaryFile_toRelativePathFree(char * path);
 char * binaryFile_toAbsolutePath(char * path);
 char * binaryFile_toAbsolutePathFree(char * path);
+
+#ifdef __cplusplus
+} // extern "C"
+#endif
 
 #endif /* binaryFile_h */

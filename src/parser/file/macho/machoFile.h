@@ -30,6 +30,10 @@
 #include "FunctionVector.h"
 #include "OptionalFuncFilePair.h"
 
+#ifdef __cplusplus
+extern "C" {
+#endif
+
 /**
  * This structure represents a Mach-O binary file.
  */
@@ -57,8 +61,8 @@ struct machoFile * machoFile_new(void);
  * @param self the binary file structure to be casted
  * @return the represented Mach-O file structure or `NULL`
  */
-static inline struct machoFile * machoFileOrNull(struct binaryFile * self) {
-    return self->type == MACHO_FILE ? self->concrete : NULL;
+static inline struct machoFile* machoFileOrNull(struct binaryFile * self) {
+    return (struct machoFile*) (self->type == MACHO_FILE ? self->concrete : NULL);
 }
 
 /* Heavily WIP. */
@@ -91,8 +95,7 @@ void machoFile_addFunction(struct machoFile* self, struct function function);
  * @param self the Mach-O file instance
  * @param address the raw address whose function and object file to be found
  */
-struct optional_funcFile machoFile_findFunction(struct machoFile * self,
-                                                void *             address);
+optional_funcFile_t machoFile_findFunction(struct machoFile* self, void* address);
 
 optional_debugInfo_t machoFile_getDebugInfo(struct machoFile* self,
                                             void*             address);
@@ -125,10 +128,14 @@ static inline void machoFile_create(struct machoFile* self) {
     
     self->_.addr2String = &machoFile_addr2String;
     self->_.destroy     = &machoFile_destroy;
-    self->_.delete      = &machoFile_delete;
+    self->_.deleter     = &machoFile_delete;
     
     self->addressOffset = 0x0;
     self->priv          = NULL;
 }
+
+#ifdef __cplusplus
+} // extern "C"
+#endif
 
 #endif /* machoFile_h */

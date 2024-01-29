@@ -49,7 +49,7 @@ void cache_clear(struct binaryFile ** cache) {
     
     for (struct binaryFile * it = *cache; it != NULL; it = tmp) {
         tmp = it->next;
-        it->delete(it);
+        it->deleter(it);
     }
     *cache = NULL;
 }
