@@ -88,6 +88,8 @@ bool machoFile_parseFile(struct machoFile * self, void * baseAddress);
 void machoFile_addObjectFile(struct machoFile *  self,
                              struct objectFile * file);
 
+void machoFile_addFunction(struct machoFile* self, struct function function);
+
 /**
  * Searches and returns the function and the object file the function is in.
  *

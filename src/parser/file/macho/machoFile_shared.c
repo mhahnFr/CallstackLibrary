@@ -1,7 +1,7 @@
 /*
  * Callstack Library - Library creating human-readable call stacks.
  *
- * Copyright (C) 2023 - 2024  mhahnFr
+ * Copyright (C) 2024  mhahnFr
  *
  * This file is part of the CallstackLibrary. This library is free software:
  * you can redistribute it and/or modify it under the terms of the
@@ -31,27 +31,82 @@
  #include <sys/sysctl.h>
 #endif
 
+#include <stdbool.h>
 #include <stdio.h>
 #include <stdlib.h>
-#include <string.h>
 #include <sys/stat.h>
 
 #include "machoFile.h"
-
-#include "OptionalFunction.h"
-
 #include "macho_parser.h"
 #include "macho_utils.h"
 
 #include "../../callstack_parser.h"
 
-struct machoFile * machoFile_new(void)  {
-    struct machoFile * toReturn = malloc(sizeof(struct machoFile));
+/**
+ * Caches the represented file from disk and parses it.
+ *
+ * @param self the Mach-O file object
+ * @return whether the file was successfully read and parsed
+ */
+static inline bool machoFile_readAndParseFile(struct machoFile * self) {
+    if (self->_.fileName == NULL) return false;
     
-    if (toReturn != NULL) {
-        machoFile_create(toReturn);
+    struct stat fileStats;
+    if (stat(self->_.fileName, &fileStats) != 0) {
+        return false;
     }
+    void * buffer = malloc(fileStats.st_size);
+    if (buffer == NULL) {
+        return false;
+    }
+    FILE * file = fopen(self->_.fileName, "r");
+    const size_t count = fread(buffer, 1, fileStats.st_size, file);
+    fclose(file);
+    const bool toReturn = (off_t) count == fileStats.st_size && machoFile_parseFile(self, buffer);
+    free(buffer);
     return toReturn;
+}
+
+bool machoFile_addr2String(struct binaryFile* me, void* address, struct callstack_frame* frame) {
+    struct machoFile * self = machoFileOrNull(me);
+    if (self == NULL) {
+        return NULL;
+    }
+    if (!self->_.parsed &&
+        !(self->_.parsed = machoFile_readAndParseFile(self))) {
+        return NULL;
+    }
+    
+    optional_debugInfo_t result = machoFile_getDebugInfo(self, address);
+    if (result.has_value) {
+        if (result.value.function.linkedName == NULL) {
+            return false;
+        }
+        
+        char* name = (char*) result.value.function.linkedName;
+        if (*name == '_' || *name == '\1') {
+            ++name;
+        }
+        name = callstack_parser_demangle(name);
+        if (result.value.sourceFileInfo.has_value) {
+            frame->sourceFile = binaryFile_toAbsolutePath((char*) result.value.sourceFileInfo.value.sourceFile);
+            frame->sourceFileRelative = binaryFile_toRelativePath((char*) result.value.sourceFileInfo.value.sourceFile);
+            frame->sourceLine = result.value.sourceFileInfo.value.line;
+            if (result.value.sourceFileInfo.value.column > 0) {
+                frame->sourceLineColumn = (optional_ulong_t) { true, result.value.sourceFileInfo.value.column };
+            }
+            frame->function = name;
+        } else {
+            char* toReturn = NULL;
+            asprintf(&toReturn, "%s + %td",
+                     name,
+                     (ptrdiff_t) (address - self->_.startAddress + self->addressOffset - result.value.function.startAddress));
+            free(name);
+            frame->function = toReturn;
+        }
+        return true;
+    }
+    return false;
 }
 
 /**
@@ -90,16 +145,16 @@ static inline bool machoFile_handleSegment64(struct machoFile *          self,
     return true;
 }
 
-static inline void machoFile_addObjectFileImpl(struct objectFile* file, va_list args) {
+static inline void machoFile_addObjectFileImpl(struct objectFile* objectFile, va_list args) {
     struct machoFile* self = va_arg(args, void*);
     
-    machoFile_addObjectFile(self, file);
+    machoFile_addObjectFile(self, objectFile);
 }
 
 static inline void machoFile_addFunctionImpl(struct function function, va_list args) {
     struct machoFile* self = va_arg(args, void*);
-
-    vector_function_push_back(&self->functions, function);
+    
+    machoFile_addFunction(self, function);
 }
 
 /**
@@ -251,156 +306,4 @@ bool machoFile_parseFile(struct machoFile * self, void * baseAddress) {
         case FAT_CIGAM_64: return machoFile_parseFat(self, baseAddress, true);
     }
     return false;
-}
-
-void machoFile_addObjectFile(struct machoFile *  self,
-                             struct objectFile * file) {
-    file->next        = self->objectFiles;
-    self->objectFiles = file;
-}
-
-struct optional_funcFile machoFile_findFunction(struct machoFile* self, void* address) {
-    struct optional_funcFile toReturn = { .has_value = false };
-    
-    for (struct objectFile* it = self->objectFiles; it != NULL; it = it->next) {
-        struct optional_function result = objectFile_findFunction(it, (uint64_t) (address - self->_.startAddress) + self->addressOffset);
-        if (result.has_value) {
-            toReturn = (optional_funcFile_t) {
-                true, (struct pair_funcFile) {
-                    result.value,
-                    it
-                }
-            };
-            break;
-        }
-    }
-    
-    return toReturn;
-}
-
-static inline optional_debugInfo_t machoFile_createLocalDebugInfo(struct machoFile* self, void* address) {
-    const uint64_t searchAddress = address - self->_.startAddress + self->addressOffset;
-    
-    struct function* closest = NULL;
-    for (size_t i = 0; i < self->functions.count; ++i) {
-        struct function* elem = &self->functions.content[i];
-
-        if (closest == NULL && elem->startAddress < searchAddress) {
-            closest = elem;
-        } else if (closest != NULL && elem->startAddress < searchAddress && searchAddress - elem->startAddress < searchAddress - closest->startAddress) {
-            closest = elem;
-        }
-    }
-    if (closest == NULL) {
-        return (optional_debugInfo_t) { .has_value = false };
-    }
-    return (optional_debugInfo_t) {
-        true, (struct debugInfo) {
-            .function                 = *closest,
-            .sourceFileInfo.has_value = false
-        }
-    };
-}
-
-optional_debugInfo_t machoFile_getDebugInfo(struct machoFile* self, void* address) {
-    for (struct objectFile* it = self->objectFiles; it != NULL; it = it->next) {
-        optional_debugInfo_t result = objectFile_getDebugInfo(it, (uint64_t) (address - self->_.startAddress) + self->addressOffset);
-        if (result.has_value) {
-            return result;
-        }
-    }
-    
-    return machoFile_createLocalDebugInfo(self, address);
-}
-
-
-/**
- * Caches the represented file from disk and parses it.
- *
- * @param self the Mach-O file object
- * @return whether the file was successfully read and parsed
- */
-static inline bool machoFile_readAndParseFile(struct machoFile * self) {
-    if (self->_.fileName == NULL) return false;
-    
-    struct stat fileStats;
-    if (stat(self->_.fileName, &fileStats) != 0) {
-        return false;
-    }
-    void * buffer = malloc(fileStats.st_size);
-    if (buffer == NULL) {
-        return false;
-    }
-    FILE * file = fopen(self->_.fileName, "r");
-    const size_t count = fread(buffer, 1, fileStats.st_size, file);
-    fclose(file);
-    const bool toReturn = (off_t) count == fileStats.st_size && machoFile_parseFile(self, buffer);
-    free(buffer);
-    return toReturn;
-}
-
-bool machoFile_addr2String(struct binaryFile* me, void* address, struct callstack_frame* frame) {
-    struct machoFile * self = machoFileOrNull(me);
-    if (self == NULL) {
-        return NULL;
-    }
-    if (!self->_.parsed &&
-        !(self->_.parsed = machoFile_readAndParseFile(self))) {
-        return NULL;
-    }
-    
-    optional_debugInfo_t result = machoFile_getDebugInfo(self, address);
-    if (result.has_value) {
-        if (result.value.function.linkedName == NULL) {
-            return false;
-        }
-        
-        char* name = (char*) result.value.function.linkedName;
-        if (*name == '_' || *name == '\1') {
-            ++name;
-        }
-        name = callstack_parser_demangle(name);
-        if (result.value.sourceFileInfo.has_value) {
-            frame->sourceFile = binaryFile_toAbsolutePath((char*) result.value.sourceFileInfo.value.sourceFile);
-            frame->sourceFileRelative = binaryFile_toRelativePath((char*) result.value.sourceFileInfo.value.sourceFile);
-            frame->sourceLine = result.value.sourceFileInfo.value.line;
-            if (result.value.sourceFileInfo.value.column > 0) {
-                frame->sourceLineColumn = (optional_ulong_t) { true, result.value.sourceFileInfo.value.column };
-            }
-            frame->function = name;
-        } else {
-            char* toReturn = NULL;
-            asprintf(&toReturn, "%s + %td",
-                     name,
-                     (ptrdiff_t) (address - self->_.startAddress + self->addressOffset - result.value.function.startAddress));
-            free(name);
-            frame->function = toReturn;
-        }
-        return true;
-    }
-    return false;
-}
-
-void machoFile_destroy(struct binaryFile * me) {
-    struct machoFile * self = machoFileOrNull(me);
-    if (self == NULL) {
-        return;
-    }
-    
-    for (struct objectFile * tmp = self->objectFiles; tmp != NULL;) {
-        struct objectFile * n = tmp->next;
-        objectFile_delete(tmp);
-        tmp = n;
-    }
-    
-    vector_uint64_t_destroy(&self->functionStarts);
-    for (size_t i = 0; i < self->functions.count; ++i) {
-        function_destroy(&self->functions.content[i]);
-    }
-    vector_function_destroy(&self->functions);
-}
-
-void machoFile_delete(struct binaryFile * self) {
-    self->destroy(self);
-    free(self->concrete);
 }
