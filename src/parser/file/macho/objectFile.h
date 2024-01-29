@@ -86,15 +86,6 @@ static inline void objectFile_create(struct objectFile * self) {
 void objectFile_addFunction(struct objectFile * self,
                             struct function     function);
 
-/**
- * Searches and returns the function in which the given address is in.
- *
- * @param self the object file instance
- * @param address the address whose function to be searched
- * @return the function if found
- */
-optional_function_t objectFile_findFunction(struct objectFile * self, uint64_t address);
-
 void objectFile_addOwnFunction(struct objectFile* self, struct function function);
 
 bool objectFile_parse(struct objectFile* self, dwarf_line_callback cb, ...);
@@ -109,7 +100,7 @@ bool objectFile_parse(struct objectFile* self, dwarf_line_callback cb, ...);
  */
 void objectFile_functionsForEach(struct objectFile * self, void (*func)(struct function *, va_list), ...);
 
-optional_debugInfo_t objectFile_getDebugInfo(struct objectFile* self, uint64_t address);
+optional_debugInfo_t objectFile_getDebugInfo(struct objectFile* self, uint64_t address, struct function function);
 
 /**
  * Deinitializes the given object file structure.

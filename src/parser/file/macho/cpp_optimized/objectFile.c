@@ -66,21 +66,6 @@ void objectFile_addOwnFunction(struct objectFile* me,
     vector_function_push_back(&self->ownFunctions, function);
 }
 
-struct optional_function objectFile_findFunction(struct objectFile * me, uint64_t address) {
-    struct objectFile_private * self = (struct objectFile_private *) me->priv;
-    struct optional_function toReturn = { .has_value = false };
-    
-    size_t i;
-    for (i = 0; i < self->functions.count && (address < self->functions.content[i].startAddress || address > self->functions.content[i].startAddress + self->functions.content[i].length); ++i);
-    
-    if (i < self->functions.count) {
-        toReturn.has_value = true;
-        toReturn.value     = self->functions.content[i];
-    }
-    
-    return toReturn;
-}
-
 static inline void objectFile_dwarfLineCallback(struct dwarf_lineInfo info, va_list args) {
     struct objectFile_private* self = va_arg(args, void*);
     
@@ -124,16 +109,12 @@ static inline const char* objectFile_getSourceFileName(struct objectFile_private
     return self->mainSourceFileCache = toReturn;
 }
 
-optional_debugInfo_t objectFile_getDebugInfo(struct objectFile* me, uint64_t address) {
+optional_debugInfo_t objectFile_getDebugInfo(struct objectFile* me, uint64_t address, struct function function) {
     optional_debugInfo_t toReturn = { .has_value = false };
-    optional_function_t func = objectFile_findFunction(me, address);
-    if (!func.has_value) {
-        return toReturn;
-    }
     
     toReturn = (optional_debugInfo_t) {
         true, (struct debugInfo) {
-            .function = func.value,
+            .function = function,
             .sourceFileInfo.has_value = false
         }
     };
@@ -144,11 +125,11 @@ optional_debugInfo_t objectFile_getDebugInfo(struct objectFile* me, uint64_t add
             return toReturn;
         }
     }
-    optional_function_t ownFunction = objectFile_findOwnFunction(self, func.value.linkedName);
+    optional_function_t ownFunction = objectFile_findOwnFunction(self, function.linkedName);
     if (!ownFunction.has_value) {
         return toReturn;
     }
-    const uint64_t lineAddress = ownFunction.value.startAddress + address - func.value.startAddress;
+    const uint64_t lineAddress = ownFunction.value.startAddress + address - function.startAddress;
     
     struct dwarf_lineInfo* closest = NULL;
     for (size_t i = 0; i < self->lineInfos.count; ++i) {

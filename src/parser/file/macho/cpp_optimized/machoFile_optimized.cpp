@@ -66,13 +66,13 @@ public:
         }
         optional_debugInfo_t info = { .has_value = false };
         if (it->second.second != nullptr) {
-            info = objectFile_getDebugInfo(it->second.second, address);
+            info = objectFile_getDebugInfo(it->second.second, address, it->second.first);
         }
         if (!info.has_value) {
             info = {
                 true, {
                     it->second.first,
-                    { .has_value = false }
+                    .sourceFileInfo.has_value = false
                 }
             };
         }

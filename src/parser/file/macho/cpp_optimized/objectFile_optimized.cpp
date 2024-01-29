@@ -88,33 +88,11 @@ public:
         ownFunctions.emplace_back(function);
     }
     
-    /**
-     * Searches and returns the function in which the given address is in.
-     *
-     * @param address the address whose function to be searched
-     * @return the function if found
-     */
-    inline auto findFunction(uint64_t address) -> optional_function_t {
-        auto result = functions.upper_bound(address);
-        optional_function_t toReturn = { .has_value = false };
-        
-        if (result == functions.end() || address > result->second.startAddress + result->second.length) {
-            return toReturn;
-        }
-        toReturn.has_value = true;
-        toReturn.value     = result->second;
-        return toReturn;
-    }
-    
-    inline auto getDebugInfo(uint64_t address) -> optional_debugInfo_t {
+    inline auto getDebugInfo(const function& function, uint64_t address) {
         optional_debugInfo_t toReturn = { .has_value = false };
-        const auto func = findFunction(address);
-        if (!func.has_value) {
-            return toReturn;
-        }
         toReturn = {
             true, {
-                .function = func.value,
+                .function = function,
                 .sourceFileInfo.has_value = false
             }
         };
@@ -125,12 +103,12 @@ public:
             }
         }
         const auto ownFunction = std::find_if(ownFunctions.cbegin(), ownFunctions.cend(), [&](const auto value) {
-            return std::string(value.linkedName) == std::string(func.value.linkedName);
+            return std::string(value.linkedName) == std::string(function.linkedName);
         });
         if (ownFunction == ownFunctions.cend()) {
             return toReturn;
         }
-        const uint64_t lineAddress = ownFunction->startAddress + address - func.value.startAddress;
+        const uint64_t lineAddress = ownFunction->startAddress + address - function.startAddress;
         
         const auto closest = lineInfos.upper_bound(lineAddress);
         if (closest == lineInfos.end()) {
@@ -193,12 +171,8 @@ void objectFile_addOwnFunction(objectFile* self, function func) {
     reinterpret_cast<ObjectFile*>(self)->addOwnFunction(std::move(func));
 }
 
-auto objectFile_findFunction(objectFile * me, uint64_t address) -> optional_function_t {
-    return reinterpret_cast<ObjectFile *>(me)->findFunction(address);
-}
-
-auto objectFile_getDebugInfo(objectFile* me, uint64_t address) -> optional_debugInfo_t {
-    return reinterpret_cast<ObjectFile*>(me)->getDebugInfo(address);
+auto objectFile_getDebugInfo(objectFile* me, uint64_t address, function function) -> optional_debugInfo_t {
+    return reinterpret_cast<ObjectFile*>(me)->getDebugInfo(function, address);
 }
 
 void objectFile_functionsForEach(objectFile * me, void (*func)(function *, va_list), ...) {
