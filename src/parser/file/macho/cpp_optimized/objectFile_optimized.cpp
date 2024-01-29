@@ -23,9 +23,7 @@
 #include <string>
 #include <vector>
 
-extern "C" {
 #include "../objectFile.h"
-}
 
 /**
  * This class acts as a C++ wrapper around the object file structure.
