@@ -49,6 +49,10 @@
 		BFAB6B3C2A62EDD000726B52 /* objectFile.c in Sources */ = {isa = PBXBuildFile; fileRef = BFEC818B2A5EEA36002FA3B7 /* objectFile.c */; };
 		BFAB6B3E2A62F5EE00726B52 /* objectFile_optimized.cpp in Sources */ = {isa = PBXBuildFile; fileRef = BFAB6B382A62DC4600726B52 /* objectFile_optimized.cpp */; };
 		BFAB6B3F2A62F5EE00726B52 /* objectFile_optimized.cpp in Sources */ = {isa = PBXBuildFile; fileRef = BFAB6B382A62DC4600726B52 /* objectFile_optimized.cpp */; };
+		BFACFBF62B67DA5F009FAA27 /* machoFile_optimized.cpp in Sources */ = {isa = PBXBuildFile; fileRef = BFACFBF52B67DA5F009FAA27 /* machoFile_optimized.cpp */; };
+		BFACFBF72B67DA5F009FAA27 /* machoFile_optimized.cpp in Sources */ = {isa = PBXBuildFile; fileRef = BFACFBF52B67DA5F009FAA27 /* machoFile_optimized.cpp */; };
+		BFACFBF92B67DCE4009FAA27 /* machoFile_shared.c in Sources */ = {isa = PBXBuildFile; fileRef = BFACFBF82B67DCE4009FAA27 /* machoFile_shared.c */; };
+		BFACFBFA2B67DCE4009FAA27 /* machoFile_shared.c in Sources */ = {isa = PBXBuildFile; fileRef = BFACFBF82B67DCE4009FAA27 /* machoFile_shared.c */; };
 		BFAD42AD2B5927A700ADB6AF /* objectFile_shared.c in Sources */ = {isa = PBXBuildFile; fileRef = BFAD42AC2B5927A700ADB6AF /* objectFile_shared.c */; };
 		BFAD42AE2B5927A700ADB6AF /* objectFile_shared.c in Sources */ = {isa = PBXBuildFile; fileRef = BFAD42AC2B5927A700ADB6AF /* objectFile_shared.c */; };
 		BFAD63182B5BCC4B00EE8E14 /* macho_parser.h in Headers */ = {isa = PBXBuildFile; fileRef = BFAD63162B5BCC4B00EE8E14 /* macho_parser.h */; };
@@ -99,6 +103,8 @@
 		BF971B962A58C155006BFFBB /* callstack_internals.c */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.c; path = callstack_internals.c; sourceTree = "<group>"; };
 		BFA17E6E2AC496A200931B1E /* optional_Dl_info.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = optional_Dl_info.h; sourceTree = "<group>"; };
 		BFAB6B382A62DC4600726B52 /* objectFile_optimized.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; path = objectFile_optimized.cpp; sourceTree = "<group>"; };
+		BFACFBF52B67DA5F009FAA27 /* machoFile_optimized.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; path = machoFile_optimized.cpp; sourceTree = "<group>"; };
+		BFACFBF82B67DCE4009FAA27 /* machoFile_shared.c */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.c; path = machoFile_shared.c; sourceTree = "<group>"; };
 		BFAD35292B5675E200FDFBD6 /* optional_ulong.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = optional_ulong.h; sourceTree = "<group>"; };
 		BFAD42AC2B5927A700ADB6AF /* objectFile_shared.c */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.c; path = objectFile_shared.c; sourceTree = "<group>"; };
 		BFAD42AF2B592D2000ADB6AF /* macho_utils.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = macho_utils.h; sourceTree = "<group>"; };
@@ -161,7 +167,6 @@
 			children = (
 				BFAB6B3D2A62F5E100726B52 /* cpp_optimized */,
 				BF971B762A588077006BFFBB /* machoFile.h */,
-				BF971B772A588077006BFFBB /* machoFile.c */,
 				BFEC81842A5EE937002FA3B7 /* function.h */,
 				BFEC81852A5EE937002FA3B7 /* function.c */,
 				BFEC818A2A5EEA36002FA3B7 /* objectFile.h */,
@@ -173,6 +178,7 @@
 				BFAD63162B5BCC4B00EE8E14 /* macho_parser.h */,
 				BFAD63172B5BCC4B00EE8E14 /* macho_parser.c */,
 				BFB0B1812B5E804F00CF45E1 /* macho_parser_nlist.h */,
+				BFACFBF82B67DCE4009FAA27 /* machoFile_shared.c */,
 			);
 			path = macho;
 			sourceTree = "<group>";
@@ -282,8 +288,10 @@
 		BFAB6B3D2A62F5E100726B52 /* cpp_optimized */ = {
 			isa = PBXGroup;
 			children = (
+				BF971B772A588077006BFFBB /* machoFile.c */,
 				BFEC818B2A5EEA36002FA3B7 /* objectFile.c */,
 				BFAB6B382A62DC4600726B52 /* objectFile_optimized.cpp */,
+				BFACFBF52B67DA5F009FAA27 /* machoFile_optimized.cpp */,
 			);
 			path = cpp_optimized;
 			sourceTree = "<group>";
@@ -443,9 +451,11 @@
 			buildActionMask = 2147483647;
 			files = (
 				BF971B892A588634006BFFBB /* elfFile.c in Sources */,
+				BFACFBFA2B67DCE4009FAA27 /* machoFile_shared.c in Sources */,
 				BFEC81892A5EE937002FA3B7 /* function.c in Sources */,
 				BFC2D17B2AC31E1300BD4C0B /* callstack_frame.c in Sources */,
 				BF971B982A58C155006BFFBB /* callstack_internals.c in Sources */,
+				BFACFBF72B67DA5F009FAA27 /* machoFile_optimized.cpp in Sources */,
 				BFAD42AE2B5927A700ADB6AF /* objectFile_shared.c in Sources */,
 				BF378FCB2919542100A4DAA9 /* callstack.c in Sources */,
 				BFAB6B3F2A62F5EE00726B52 /* objectFile_optimized.cpp in Sources */,
@@ -472,9 +482,11 @@
 				BFAB6B3C2A62EDD000726B52 /* objectFile.c in Sources */,
 				BF86E32328F45DE100F6D20E /* callstack_parser.c in Sources */,
 				BFAD63192B5BCC4B00EE8E14 /* macho_parser.c in Sources */,
+				BFACFBF62B67DA5F009FAA27 /* machoFile_optimized.cpp in Sources */,
 				BFEC81882A5EE937002FA3B7 /* function.c in Sources */,
 				BFCC50C928F8454E00E2388D /* demangler.cpp in Sources */,
 				BFAD65442B5A717F00024242 /* dwarf_parser.c in Sources */,
+				BFACFBF92B67DCE4009FAA27 /* machoFile_shared.c in Sources */,
 				BFAD42AD2B5927A700ADB6AF /* objectFile_shared.c in Sources */,
 				BF971B7A2A588077006BFFBB /* machoFile.c in Sources */,
 				BFC2D17A2AC31E1300BD4C0B /* callstack_frame.c in Sources */,
