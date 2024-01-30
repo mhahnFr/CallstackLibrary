@@ -116,5 +116,9 @@ void machoFile_destroy(binaryFile*) {
 }
 
 void machoFile_delete(binaryFile* me) {
-    delete reinterpret_cast<MachoFile*>(machoFileOrNull(reinterpret_cast<binaryFile*>(me->concrete)));
+    auto tmp = machoFileOrNull(reinterpret_cast<binaryFile*>(me->concrete));
+    if (tmp == nullptr) {
+        return;
+    }
+    delete reinterpret_cast<MachoFile*>(tmp->priv);
 }

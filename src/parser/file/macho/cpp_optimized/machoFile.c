@@ -108,5 +108,9 @@ void machoFile_destroy(struct binaryFile * me) {
 
 void machoFile_delete(struct binaryFile * self) {
     self->destroy(self);
-    free(self->concrete);
+    struct machoFile* me = machoFileOrNull(self);
+    if (me == NULL) {
+        return;
+    }
+    free(me->priv);
 }
