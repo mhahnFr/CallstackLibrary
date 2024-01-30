@@ -125,6 +125,14 @@ public:
         return toReturn;
     }
     
+    inline auto getDebugInfo(uint64_t address) -> optional_debugInfo_t {
+        auto func = functions.upper_bound(address);
+        if (func == functions.end()) {
+            return { .has_value = false };
+        }
+        return getDebugInfo(func->second, address);
+    }
+    
     /**
      * Performs the given function with the given arguments for each function
      * inside this object file.
@@ -173,6 +181,10 @@ void objectFile_addOwnFunction(objectFile* self, function func) {
 
 auto objectFile_getDebugInfo(objectFile* me, uint64_t address, function function) -> optional_debugInfo_t {
     return reinterpret_cast<ObjectFile*>(me)->getDebugInfo(function, address);
+}
+
+auto objectFIle_getDebugInfoFor(objectFile* me, uint64_t address) -> optional_debugInfo_t {
+    return reinterpret_cast<ObjectFile*>(me->priv)->getDebugInfo(address);
 }
 
 void objectFile_functionsForEach(objectFile * me, void (*func)(function *, va_list), ...) {

@@ -101,6 +101,7 @@ bool objectFile_parse(struct objectFile* self, dwarf_line_callback cb, ...);
 void objectFile_functionsForEach(struct objectFile * self, void (*func)(struct function *, va_list), ...);
 
 optional_debugInfo_t objectFile_getDebugInfo(struct objectFile* self, uint64_t address, struct function function);
+optional_debugInfo_t objectFile_getDebugInfoFor(struct objectFile* self, uint64_t address);
 
 /**
  * Deinitializes the given object file structure.

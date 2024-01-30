@@ -109,6 +109,31 @@ static inline const char* objectFile_getSourceFileName(struct objectFile_private
     return self->mainSourceFileCache = toReturn;
 }
 
+static inline optional_function_t objectFile_findFunction(struct objectFile* me, uint64_t address) {
+    struct objectFile_private* self = (struct objectFile_private*) me->priv;
+    struct optional_function toReturn = { .has_value = false };
+    
+    size_t i;
+    for (i = 0; i < self->functions.count && (address < self->functions.content[i].startAddress || address > self->functions.content[i].startAddress + self->functions.content[i].length); ++i);
+    
+    if (i < self->functions.count) {
+        toReturn.has_value = true;
+        toReturn.value     = self->functions.content[i];
+    }
+    
+    return toReturn;
+}
+
+optional_debugInfo_t objectFile_getDebugInfoFor(struct objectFile* self, uint64_t address) {
+    optional_function_t func = objectFile_findFunction(self, address);
+    if (!func.has_value) {
+        return (optional_debugInfo_t) {
+            .has_value = false
+        };
+    }
+    return objectFile_getDebugInfo(self, address, func.value);
+}
+
 optional_debugInfo_t objectFile_getDebugInfo(struct objectFile* me, uint64_t address, struct function function) {
     optional_debugInfo_t toReturn = { .has_value = false };
     
