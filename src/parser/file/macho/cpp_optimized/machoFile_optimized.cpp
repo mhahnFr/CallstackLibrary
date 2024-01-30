@@ -19,14 +19,14 @@
 
 #include "../machoFile.h"
 
-#include <list>
+#include <forward_list>
 #include <map>
 
 class MachoFile {
     machoFile self;
     
-    std::list<objectFile*> objectFiles;
-    std::list<function> functionStorage;
+    std::forward_list<objectFile*> objectFiles;
+    std::forward_list<function> functionStorage;
     std::map<uint64_t, std::pair<function*, objectFile*>, std::greater<uint64_t>> functions;
     
 public:
@@ -46,7 +46,7 @@ public:
     }
     
     inline void addFunction(function&& function) {
-        auto it = functionStorage.insert(functionStorage.end(), function);
+        auto it = functionStorage.insert_after(functionStorage.before_begin(), function);
         functions.emplace(std::make_pair(it->startAddress, std::make_pair(&(*it), nullptr)));
     }
     
