@@ -26,7 +26,7 @@ class MachoFile {
     machoFile self;
     
     std::list<objectFile*> objectFiles;
-    std::vector<function> functionStorage;
+    std::list<function> functionStorage;
     std::map<uint64_t, std::pair<function*, objectFile*>, std::greater<uint64_t>> functions;
     
 public:
@@ -45,7 +45,7 @@ public:
         }
     }
     
-    constexpr inline void addFunction(function&& function) {
+    inline void addFunction(function&& function) {
         auto it = functionStorage.insert(functionStorage.end(), function);
         functions.emplace(std::make_pair(it->startAddress, std::make_pair(&(*it), nullptr)));
     }
