@@ -51,16 +51,14 @@ void machoFile_addObjectFile(struct machoFile* me, struct objectFile* file) {
     self->objectFiles = file;
 }
 
-static inline optional_debugInfo_t machoFile_createLocalDebugInfo(struct machoFile_private* self, void* address) {
-    const uint64_t searchAddress = address - self->_._.startAddress + self->_.addressOffset;
-    
+static inline optional_debugInfo_t machoFile_createLocalDebugInfo(struct machoFile_private* self, uint64_t address) {
     struct function* closest = NULL;
     for (size_t i = 0; i < self->functions.count; ++i) {
         struct function* elem = &self->functions.content[i];
 
-        if (closest == NULL && elem->startAddress < searchAddress) {
+        if (closest == NULL && elem->startAddress < address) {
             closest = elem;
-        } else if (closest != NULL && elem->startAddress < searchAddress && searchAddress - elem->startAddress < searchAddress - closest->startAddress) {
+        } else if (closest != NULL && elem->startAddress < address && address - elem->startAddress < address - closest->startAddress) {
             closest = elem;
         }
     }
@@ -86,7 +84,7 @@ optional_debugInfo_t machoFile_getDebugInfo(struct machoFile* me, void* address)
         }
     }
     
-    return machoFile_createLocalDebugInfo(self, address);
+    return machoFile_createLocalDebugInfo(self, searchAddress);
 }
 
 void machoFile_destroy(struct binaryFile * me) {
