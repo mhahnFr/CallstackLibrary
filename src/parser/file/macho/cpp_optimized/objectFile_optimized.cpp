@@ -172,15 +172,15 @@ objectFile * objectFile_new() {
 }
 
 void objectFile_addFunction(objectFile * self, function func) {
-    reinterpret_cast<ObjectFile *>(self)->addFunction(std::move(func));
+    reinterpret_cast<ObjectFile *>(self->priv)->addFunction(std::move(func));
 }
 
 void objectFile_addOwnFunction(objectFile* self, function func) {
-    reinterpret_cast<ObjectFile*>(self)->addOwnFunction(std::move(func));
+    reinterpret_cast<ObjectFile*>(self->priv)->addOwnFunction(std::move(func));
 }
 
 auto objectFile_getDebugInfo(objectFile* me, uint64_t address, function function) -> optional_debugInfo_t {
-    return reinterpret_cast<ObjectFile*>(me)->getDebugInfo(function, address);
+    return reinterpret_cast<ObjectFile*>(me->priv)->getDebugInfo(function, address);
 }
 
 auto objectFIle_getDebugInfoFor(objectFile* me, uint64_t address) -> optional_debugInfo_t {
@@ -190,7 +190,7 @@ auto objectFIle_getDebugInfoFor(objectFile* me, uint64_t address) -> optional_de
 void objectFile_functionsForEach(objectFile * me, void (*func)(function *, va_list), ...) {
     va_list list;
     va_start(list, func);
-    reinterpret_cast<ObjectFile *>(me)->functionsForEach(func, list);
+    reinterpret_cast<ObjectFile *>(me->priv)->functionsForEach(func, list);
     va_end(list);
 }
 
