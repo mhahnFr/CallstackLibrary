@@ -75,9 +75,9 @@ static inline char* dwarf_stringFrom(struct dwarf_fileNameEntry* file, struct ve
     if (toReturn == NULL) {
         return NULL;
     }
-    strlcpy(toReturn, directory, size);
-    strlcat(toReturn, "/", size);
-    strlcat(toReturn, file->name, size);
+    strncpy(toReturn, directory, size);
+    strncat(toReturn, "/", size);
+    strncat(toReturn, file->name, size);
     return toReturn;
 }
 
