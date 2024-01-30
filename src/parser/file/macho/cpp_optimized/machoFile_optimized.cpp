@@ -21,11 +21,12 @@
 
 #include <forward_list>
 #include <map>
+#include <vector>
 
 class MachoFile {
     machoFile self;
     
-    std::forward_list<objectFile*> objectFiles;
+    std::vector<objectFile*> objectFiles;
     std::forward_list<function> functionStorage;
     std::map<uint64_t, std::pair<function*, objectFile*>, std::greater<uint64_t>> functions;
     
@@ -51,7 +52,7 @@ public:
     }
     
     constexpr inline void addObjectFile(objectFile* file) {
-        objectFiles.push_front(file);
+        objectFiles.push_back(file);
         objectFile_functionsForEach(file, [](function* it, va_list args) {
             MachoFile*  self = reinterpret_cast<MachoFile*> (va_arg(args, void*));
             objectFile* file = reinterpret_cast<objectFile*>(va_arg(args, void*));
