@@ -57,7 +57,7 @@ static inline int64_t getLEB128(void* begin, size_t* counter) {
         shift += 7;
         if ((0x80 & b) == 0) {
             if (shift < 32 && (b & 0x40) != 0) {
-                result |= ~0 << shift;
+                result |= ((uint64_t) ~0 << shift);
             }
             more = false;
         }
