@@ -43,6 +43,10 @@ struct machoFile {
     
     /** The address offset between Mach-O file and loaded executable. */
     uint64_t addressOffset;
+    bool inMemory;
+    uint64_t linkedit_vmaddr;
+    uint64_t linkedit_fileoff;
+    uint64_t text_vmaddr;
     
     void* priv;
 };
@@ -123,6 +127,10 @@ static inline void machoFile_create(struct machoFile* self) {
     self->_.deleter     = &machoFile_delete;
     
     self->addressOffset = 0x0;
+    self->inMemory      = false;
+    self->linkedit_fileoff = 0;
+    self->text_vmaddr = 0;
+    self->linkedit_vmaddr = 0;
     self->priv          = NULL;
 }
 
