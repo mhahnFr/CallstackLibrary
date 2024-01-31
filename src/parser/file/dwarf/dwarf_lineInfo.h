@@ -24,22 +24,45 @@
 #include <stdint.h>
 #include <stdlib.h>
 
+/**
+ * This structure represents a DWARF line program entry.
+ */
 struct dwarf_lineInfo {
+    /* The address.       */
     uint64_t address;
+    /* The line number.   */
     uint64_t line;
+    /* The column number. */
     uint64_t column;
+    /* The isa value.     */
     uint64_t isa;
+    /* The discriminator. */
     uint64_t discriminator;
     
+    /**
+     * @brief The allocated full file name.
+     *
+     * If it is `NULL` the main source file was referenced.
+     */
     const char* fileName;
     
+    /* Whether this position is a recommended breakpoint position. */
     bool isStmt;
+    /* Whether this position is a basic block.                     */
     bool basicBlock;
+    /* Whether this position is the end of a sequence.             */
     bool endSequence;
+    /* Whether this position is the end of a prologue.             */
     bool prologueEnd;
+    /* Whether this position is the beginning of an epilogue.      */
     bool epilogueBegin;
 };
 
+/**
+ * Destroys the given DWARF line info.
+ *
+ * @param self the line info to be destroyed
+ */
 static inline void dwarf_lineInfo_destroy(struct dwarf_lineInfo* self) {
     free((void*) self->fileName);
 }
