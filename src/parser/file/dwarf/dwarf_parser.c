@@ -28,6 +28,15 @@
 #include "vector_string.h"
 #include "vector_uint8.h"
 
+/**
+ * @brief Reads an unsigned LEB128 integer from the given memory at the given position.
+ *
+ * The given memory position points to the first byte after the read number once this function returns.
+ *
+ * @param begin the memory pointer
+ * @param counter the memory position
+ * @return the deducted number
+ */
 static inline uint64_t getULEB128(void* begin, size_t* counter) {
     uint64_t result = 0,
              shift  = 0;
@@ -45,6 +54,15 @@ static inline uint64_t getULEB128(void* begin, size_t* counter) {
     return result;
 }
 
+/**
+ * @brief Reads a signed LEB128 integer from the given memory at the given position.
+ *
+ * The given memory position points to the first byte after the read number once this function returns.
+ *
+ * @param begin the memory pointer
+ * @param counter the memory position
+ * @return the deducted number
+ */
 static inline int64_t getLEB128(void* begin, size_t* counter) {
     int64_t result = 0,
             shift  = 0;
@@ -65,6 +83,13 @@ static inline int64_t getLEB128(void* begin, size_t* counter) {
     return result;
 }
 
+/**
+ * @brief Constructs an allocated string from the given file name entry using the given directories.
+ *
+ * @param file the file name entry
+ * @param directories the vector with the directories
+ * @return an allocated full path or `NULL` if the allocation failed or the file entry's index was `0`
+ */
 static inline char* dwarf_stringFrom(struct dwarf_fileNameEntry* file, struct vector_string* directories) {
     if (file->dirIndex == 0) {
         return NULL;
@@ -81,6 +106,16 @@ static inline char* dwarf_stringFrom(struct dwarf_fileNameEntry* file, struct ve
     return toReturn;
 }
 
+/**
+ * Parses the DWARF line program as specified in version 4.
+ *
+ * @param begin the memory of the line program
+ * @param counter the start of the line program in the given memory
+ * @param actualSize the total size of the line program
+ * @param bit64 whether to parse as 64 Bit version
+ * @param cb the callback to be called when a line entry has been deducted
+ * @param args the arguments to pass to the callback
+ */
 static inline bool dwarf_parseLineProgramV4(void*    begin,
                                             size_t   counter,
                                             uint64_t actualSize, 
