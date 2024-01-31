@@ -32,6 +32,7 @@ extern "C" {
 struct function {
     /** The beginning address of the function inside its Mach-O file. */
     uint64_t startAddress;
+    /** The length of this function.                                  */
     uint64_t length;
     
     /** The name of the function at linking time.                     */
