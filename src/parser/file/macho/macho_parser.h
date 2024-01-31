@@ -30,6 +30,7 @@ typedef void (*macho_addFunction)(struct function, va_list);
 
 bool macho_parseSymtab(struct symtab_command* command, 
                        void*                  baseAddress,
+                       uint64_t offset,
                        bool                   bytesSwapped,
                        bool                   bit64,
                        macho_addObjectFile    objCb,

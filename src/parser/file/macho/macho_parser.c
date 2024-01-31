@@ -43,6 +43,7 @@
 
 bool macho_parseSymtab(struct symtab_command* command,
                        void*                  baseAddress,
+                       uint64_t offset,
                        bool                   bytesSwapped,
                        bool                   bit64,
                        macho_addObjectFile    objCb,
@@ -50,7 +51,7 @@ bool macho_parseSymtab(struct symtab_command* command,
                        ...) {
     if (objCb == NULL && funCb == NULL) return false;
     
-    const char*    stringBegin = baseAddress + macho_maybeSwap(32, bytesSwapped, command->stroff);
+    const char*    stringBegin = baseAddress + (macho_maybeSwap(32, bytesSwapped, command->stroff) + offset);
     const uint32_t nsyms       = macho_maybeSwap(32, bytesSwapped, command->nsyms),
                    symoff      = macho_maybeSwap(32, bytesSwapped, command->symoff);
     
@@ -61,7 +62,7 @@ bool macho_parseSymtab(struct symtab_command* command,
     struct objectFile*       currObj = NULL;
     
     for (uint32_t i = 0; i < nsyms; ++i) {
-        struct macho_parser_nlist entry = macho_parser_nlist_from(baseAddress + symoff + i * macho_parser_nlist_sizeof(bit64), bit64, bytesSwapped);
+        struct macho_parser_nlist entry = macho_parser_nlist_from(baseAddress + symoff + offset + i * macho_parser_nlist_sizeof(bit64), bit64, bytesSwapped);
         switch (entry.n_type) {
             case N_BNSYM:
                 if (currFun.has_value) {
