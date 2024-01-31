@@ -24,11 +24,18 @@
 
 #include "../../../../DC4C/vector.h"
 
+/**
+ * This structure represents a line entry in the DWARF line program.
+ */
 struct dwarf_fileNameEntry {
+    /** The file name this entry is in.             */
     const char* name;
     
+    /** The index of the directory the file was in. */
     uint64_t dirIndex;
+    /** The last modified time stamp of the file.   */
     uint64_t modTime;
+    /** The size in bytes of the file.              */
     uint64_t size;
 };
 
