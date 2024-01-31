@@ -17,6 +17,7 @@
  * this library, see the file LICENSE.  If not, see <https://www.gnu.org/licenses/>.
  */
 
+#include <mach-o/dyld.h>
 #include <mach-o/fat.h>
 #include <mach-o/loader.h>
 
@@ -53,6 +54,18 @@ static inline bool machoFile_readAndParseFile(struct machoFile * self) {
     
     struct stat fileStats;
     if (stat(self->_.fileName, &fileStats) != 0) {
+        const uint32_t size = _dyld_image_count();
+        const void* header = NULL;
+        for (uint32_t i = 0; i < size; ++i) {
+            if (strcmp(_dyld_get_image_name(i), self->_.fileName) == 0) {
+                header = _dyld_get_image_header(i);
+                break;
+            }
+        }
+        if (header != NULL) {
+            self->inMemory = true;
+            return machoFile_parseFile(self, (void*) header);
+        }
         return false;
     }
     void * buffer = malloc(fileStats.st_size);
@@ -141,6 +154,11 @@ static inline bool machoFile_handleSegment64(struct machoFile *          self,
     if (strcmp(segment->segname, SEG_PAGEZERO) == 0) {
         self->addressOffset = macho_maybeSwap(64, bitsReversed, segment->vmaddr)
                             + macho_maybeSwap(64, bitsReversed, segment->vmsize);
+    } else if (strcmp(segment->segname, SEG_LINKEDIT) == 0) {
+        self->linkedit_vmaddr  = macho_maybeSwap(64, bitsReversed, segment->vmaddr);
+        self->linkedit_fileoff = macho_maybeSwap(64, bitsReversed, segment->fileoff);
+    } else if (strcmp(segment->segname, SEG_TEXT) == 0) {
+        self->text_vmaddr = macho_maybeSwap(64, bitsReversed, segment->vmaddr);
     }
     return true;
 }
@@ -180,7 +198,7 @@ static inline bool machoFile_parseFileImpl(struct machoFile * self,
                 break;
                 
             case LC_SYMTAB:
-                result = macho_parseSymtab((void*) lc, baseAddress, bitsReversed, false, machoFile_addObjectFileImpl, machoFile_addFunctionImpl, self);
+                result = macho_parseSymtab((void*) lc, baseAddress, self->inMemory ? (self->linkedit_vmaddr - self->text_vmaddr) - self->linkedit_fileoff : 0, bitsReversed, false, machoFile_addObjectFileImpl, machoFile_addFunctionImpl, self);
                 break;
         }
         if (!result) {
@@ -214,7 +232,7 @@ static inline bool machoFile_parseFileImpl64(struct machoFile * self,
                 break;
                 
             case LC_SYMTAB:
-                result = macho_parseSymtab((void*) lc, baseAddress, bitsReversed, true, machoFile_addObjectFileImpl, machoFile_addFunctionImpl, self);
+                result = macho_parseSymtab((void*) lc, baseAddress, self->inMemory ? (self->linkedit_vmaddr - self->text_vmaddr) - self->linkedit_fileoff : 0, bitsReversed, true, machoFile_addObjectFileImpl, machoFile_addFunctionImpl, self);
                 break;
         }
         if (!result) {
