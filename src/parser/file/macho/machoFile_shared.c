@@ -43,42 +43,57 @@
 
 #include "../../callstack_parser.h"
 
-/**
- * Caches the represented file from disk and parses it.
- *
- * @param self the Mach-O file object
- * @return whether the file was successfully read and parsed
- */
-static inline bool machoFile_readAndParseFile(struct machoFile * self) {
-    if (self->_.fileName == NULL) return false;
-    
-    struct stat fileStats;
-    if (stat(self->_.fileName, &fileStats) != 0) {
-        const uint32_t size = _dyld_image_count();
-        const void* header = NULL;
-        for (uint32_t i = 0; i < size; ++i) {
-            if (strcmp(_dyld_get_image_name(i), self->_.fileName) == 0) {
-                header = _dyld_get_image_header(i);
-                break;
-            }
+static inline bool machoFile_readAndParseFile(struct machoFile* self) {
+    // TODO: Do we need to check whether it is loaded?
+    const uint32_t size = _dyld_image_count();
+    const void* header = NULL;
+    for (uint32_t i = 0; i < size; ++i) {
+        if (strcmp(_dyld_get_image_name(i), self->_.fileName) == 0) {
+            header = _dyld_get_image_header(i);
+            break;
         }
-        if (header != NULL) {
-            self->inMemory = true;
-            return machoFile_parseFile(self, (void*) header);
-        }
-        return false;
     }
-    void * buffer = malloc(fileStats.st_size);
-    if (buffer == NULL) {
-        return false;
-    }
-    FILE * file = fopen(self->_.fileName, "r");
-    const size_t count = fread(buffer, 1, fileStats.st_size, file);
-    fclose(file);
-    const bool toReturn = (off_t) count == fileStats.st_size && machoFile_parseFile(self, buffer);
-    free(buffer);
-    return toReturn;
+    __builtin_printf("%s%s\033[0m\n", header == NULL ? "\033[31m" : "\033[32m", self->_.fileName);
+    self->inMemory = true;
+    return machoFile_parseFile(self, self->_.startAddress);
 }
+
+///**
+// * Caches the represented file from disk and parses it.
+// *
+// * @param self the Mach-O file object
+// * @return whether the file was successfully read and parsed
+// */
+//static inline bool machoFile_readAndParseFile(struct machoFile * self) {
+//    if (self->_.fileName == NULL) return false;
+//    
+//    struct stat fileStats;
+//    if (stat(self->_.fileName, &fileStats) != 0) {
+//        const uint32_t size = _dyld_image_count();
+//        const void* header = NULL;
+//        for (uint32_t i = 0; i < size; ++i) {
+//            if (strcmp(_dyld_get_image_name(i), self->_.fileName) == 0) {
+//                header = _dyld_get_image_header(i);
+//                break;
+//            }
+//        }
+//        if (header != NULL) {
+//            self->inMemory = true;
+//            return machoFile_parseFile(self, (void*) header);
+//        }
+//        return false;
+//    }
+//    void * buffer = malloc(fileStats.st_size);
+//    if (buffer == NULL) {
+//        return false;
+//    }
+//    FILE * file = fopen(self->_.fileName, "r");
+//    const size_t count = fread(buffer, 1, fileStats.st_size, file);
+//    fclose(file);
+//    const bool toReturn = (off_t) count == fileStats.st_size && machoFile_parseFile(self, buffer);
+//    free(buffer);
+//    return toReturn;
+//}
 
 bool machoFile_addr2String(struct binaryFile* me, void* address, struct callstack_frame* frame) {
     struct machoFile * self = machoFileOrNull(me);
