@@ -41,6 +41,9 @@ struct machoFile* machoFile_new(void)  {
 void machoFile_addFunction(struct machoFile* me, struct function function) {
     struct machoFile_private* self = me->priv;
     
+    if (me->inMemory) {
+        function.startAddress -= me->text_vmaddr;
+    }
     vector_function_push_back(&self->functions, function);
 }
 

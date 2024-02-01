@@ -47,8 +47,11 @@ public:
     }
     
     inline void addFunction(function&& function) {
+        const auto address = self.inMemory ? function.startAddress - self.text_vmaddr : function.startAddress;
+        function.startAddress = address;
+        
         auto it = functionStorage.insert_after(functionStorage.before_begin(), function);
-        functions.emplace(std::make_pair(it->startAddress, std::make_pair(&(*it), nullptr)));
+        functions.emplace(std::make_pair(address, std::make_pair(&(*it), nullptr)));
     }
     
     constexpr inline void addObjectFile(objectFile* file) {
