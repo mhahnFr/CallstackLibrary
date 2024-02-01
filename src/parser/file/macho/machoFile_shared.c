@@ -43,17 +43,20 @@
 
 #include "../../callstack_parser.h"
 
-static inline bool machoFile_readAndParseFile(struct machoFile* self) {
-    // TODO: Do we need to check whether it is loaded?
+static inline bool machoFile_isLoaded(const char* fileName) {
     const uint32_t size = _dyld_image_count();
-    const void* header = NULL;
     for (uint32_t i = 0; i < size; ++i) {
-        if (strcmp(_dyld_get_image_name(i), self->_.fileName) == 0) {
-            header = _dyld_get_image_header(i);
-            break;
+        if (strcmp(_dyld_get_image_name(i), fileName) == 0) {
+            return true;
         }
     }
-    __builtin_printf("%s%s\033[0m\n", header == NULL ? "\033[31m" : "\033[32m", self->_.fileName);
+    return false;
+}
+
+static inline bool machoFile_readAndParseFile(struct machoFile* self) {
+    // TODO: Do we need to check whether it is loaded?
+    __builtin_printf("%s%s\033[0m\n", machoFile_isLoaded(self->_.fileName) ? "\033[32m" : "\033[31m", self->_.fileName);
+    
     self->inMemory = true;
     return machoFile_parseFile(self, self->_.startAddress);
 }
@@ -69,18 +72,6 @@ static inline bool machoFile_readAndParseFile(struct machoFile* self) {
 //    
 //    struct stat fileStats;
 //    if (stat(self->_.fileName, &fileStats) != 0) {
-//        const uint32_t size = _dyld_image_count();
-//        const void* header = NULL;
-//        for (uint32_t i = 0; i < size; ++i) {
-//            if (strcmp(_dyld_get_image_name(i), self->_.fileName) == 0) {
-//                header = _dyld_get_image_header(i);
-//                break;
-//            }
-//        }
-//        if (header != NULL) {
-//            self->inMemory = true;
-//            return machoFile_parseFile(self, (void*) header);
-//        }
 //        return false;
 //    }
 //    void * buffer = malloc(fileStats.st_size);
