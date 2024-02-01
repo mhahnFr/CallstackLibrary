@@ -56,9 +56,9 @@ static inline optional_debugInfo_t machoFile_createLocalDebugInfo(struct machoFi
     for (size_t i = 0; i < self->functions.count; ++i) {
         struct function* elem = &self->functions.content[i];
 
-        if (closest == NULL && elem->startAddress < address) {
+        if (closest == NULL && elem->startAddress <= address) {
             closest = elem;
-        } else if (closest != NULL && elem->startAddress < address && address - elem->startAddress < address - closest->startAddress) {
+        } else if (closest != NULL && elem->startAddress <= address && address - elem->startAddress < address - closest->startAddress) {
             closest = elem;
         }
     }
