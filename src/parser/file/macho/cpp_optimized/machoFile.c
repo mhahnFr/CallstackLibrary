@@ -41,9 +41,6 @@ struct machoFile* machoFile_new(void)  {
 void machoFile_addFunction(struct machoFile* me, struct function function) {
     struct machoFile_private* self = me->priv;
     
-    if (me->inMemory) {
-        function.startAddress -= me->text_vmaddr;
-    }
     vector_function_push_back(&self->functions, function);
 }
 
@@ -79,7 +76,8 @@ static inline optional_debugInfo_t machoFile_createLocalDebugInfo(struct machoFi
 optional_debugInfo_t machoFile_getDebugInfo(struct machoFile* me, void* address) {
     struct machoFile_private* self = me->priv;
     
-    const uint64_t searchAddress = (uint64_t) (address - self->_._.startAddress) + self->_.addressOffset;
+    const uint64_t searchAddress = (uint64_t) (address - self->_._.startAddress) 
+                                 + (me->inMemory ? me->text_vmaddr : self->_.addressOffset);
     for (struct objectFile* it = self->objectFiles; it != NULL; it = it->next) {
         optional_debugInfo_t result = objectFile_getDebugInfoFor(it, searchAddress);
         if (result.has_value) {

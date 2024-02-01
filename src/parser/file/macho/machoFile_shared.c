@@ -128,7 +128,9 @@ bool machoFile_addr2String(struct binaryFile* me, void* address, struct callstac
             char* toReturn = NULL;
             asprintf(&toReturn, "%s + %td",
                      name,
-                     (ptrdiff_t) (address - self->_.startAddress + self->addressOffset - result.value.function.startAddress));
+                     (ptrdiff_t) (address - self->_.startAddress 
+                                  + (self->inMemory ? self->text_vmaddr : self->addressOffset)
+                                  - result.value.function.startAddress));
             free(name);
             frame->function = toReturn;
         }
