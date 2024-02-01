@@ -64,7 +64,7 @@ public:
     inline auto getDebugInfo(void* addr) -> optional_debugInfo_t {
         const uint64_t address = (reinterpret_cast<uint64_t>(addr) - reinterpret_cast<uint64_t>(self._.startAddress)) 
                                + (self.inMemory ? self.text_vmaddr : self.addressOffset);
-        auto it = functions.upper_bound(address);
+        auto it = functions.lower_bound(address);
         if (it == functions.end()) {
             return { .has_value = false };
         }
