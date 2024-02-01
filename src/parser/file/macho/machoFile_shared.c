@@ -89,11 +89,11 @@ static inline bool machoFile_readAndParseFile(struct machoFile* self) {
 bool machoFile_addr2String(struct binaryFile* me, void* address, struct callstack_frame* frame) {
     struct machoFile * self = machoFileOrNull(me);
     if (self == NULL) {
-        return NULL;
+        return false;
     }
     if (!self->_.parsed &&
         !(self->_.parsed = machoFile_readAndParseFile(self))) {
-        return NULL;
+        return false;
     }
     
     optional_debugInfo_t result = machoFile_getDebugInfo(self, address);
@@ -206,7 +206,9 @@ static inline bool machoFile_parseFileImpl(struct machoFile * self,
                 break;
                 
             case LC_SYMTAB:
-                result = macho_parseSymtab((void*) lc, baseAddress, self->inMemory ? (self->linkedit_vmaddr - self->text_vmaddr) - self->linkedit_fileoff : 0, bitsReversed, false, machoFile_addObjectFileImpl, machoFile_addFunctionImpl, self);
+                result = macho_parseSymtab((void*) lc, baseAddress, 
+                                           self->inMemory ? (self->linkedit_vmaddr - self->text_vmaddr) - self->linkedit_fileoff : 0,
+                                           bitsReversed, false, machoFile_addObjectFileImpl, machoFile_addFunctionImpl, self);
                 break;
         }
         if (!result) {
@@ -240,7 +242,9 @@ static inline bool machoFile_parseFileImpl64(struct machoFile * self,
                 break;
                 
             case LC_SYMTAB:
-                result = macho_parseSymtab((void*) lc, baseAddress, self->inMemory ? (self->linkedit_vmaddr - self->text_vmaddr) - self->linkedit_fileoff : 0, bitsReversed, true, machoFile_addObjectFileImpl, machoFile_addFunctionImpl, self);
+                result = macho_parseSymtab((void*) lc, baseAddress, 
+                                           self->inMemory ? (self->linkedit_vmaddr - self->text_vmaddr) - self->linkedit_fileoff : 0,
+                                           bitsReversed, true, machoFile_addObjectFileImpl, machoFile_addFunctionImpl, self);
                 break;
         }
         if (!result) {
