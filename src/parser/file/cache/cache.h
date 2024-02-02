@@ -20,6 +20,8 @@
 #ifndef cache_h
 #define cache_h
 
+#include "vector_boolString.h"
+
 #include "../binaryFile.h"
 
 /**
@@ -39,7 +41,7 @@
  * @param startAddress the start address of the binary file
  * @return the binary file structure representation
  */
-struct binaryFile * cache_findOrAddFile(struct binaryFile ** cache, const char * fileName, void* startAddress);
+struct binaryFile * cache_findOrAddFile(struct binaryFile ** cache, const char * fileName, void* startAddress, bool loaded);
 
 /**
  * @brief Clears the given cache.
@@ -49,5 +51,9 @@ struct binaryFile * cache_findOrAddFile(struct binaryFile ** cache, const char *
  * @param cache the cache to be cleared
  */
 void cache_clear(struct binaryFile ** cache);
+
+void cache_loaded_load(struct vector_boolString* cache);
+bool cache_isLoaded(struct vector_boolString* cache, const char* fileName);
+void cache_loaded_clear(struct vector_boolString* cache);
 
 #endif /* cache_h */

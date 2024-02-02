@@ -1,7 +1,7 @@
 /*
  * Callstack Library - Library creating human-readable call stacks.
  *
- * Copyright (C) 2023 - 2024  mhahnFr
+ * Copyright (C) 2024  mhahnFr
  *
  * This file is part of the CallstackLibrary. This library is free software:
  * you can redistribute it and/or modify it under the terms of the
@@ -17,15 +17,16 @@
  * this library, see the file LICENSE.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-#include <stddef.h>
+#include <mach-o/dyld.h>
 
-#include "../include/callstack_internals.h"
+#include "../cache/cache.h"
 
-#include "parser/file/cache/cache.h"
-
-bool callstack_autoClearCaches = true;
-
-void callstack_clearCaches(void) {
-    cache_clear(NULL);
-    cache_loaded_clear(NULL);
+void cache_loaded_load(struct vector_boolString* cache) {
+    const uint32_t size = _dyld_image_count();
+    for (uint32_t i = 0; i < size; ++i) {
+        vector_boolString_push_back(cache, (struct pair_boolString) {
+            true,
+            _dyld_get_image_name(i)
+        });
+    }
 }

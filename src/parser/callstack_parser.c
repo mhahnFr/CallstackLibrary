@@ -51,7 +51,7 @@ static inline char* callstack_parser_createLine(const char* name, ptrdiff_t diff
 #endif
 
     char* ret;
-    if (asprintf(&ret, "%s + %td", result, diff) < 0) {
+    if (asprintf(&ret, "DYLD: %s + %td", result, diff) < 0) {
         ret = strdup(result);
     }
     if (del) {
@@ -98,7 +98,8 @@ static inline bool callstack_parser_parseImpl(struct callstack_parser* self,
         
         struct binaryFile* file = cache_findOrAddFile(callstack_parser_getCache(self),
                                                       info->value.dli_fname,
-                                                      info->value.dli_fbase);
+                                                      info->value.dli_fbase,
+                                                      cache_isLoaded(callstack_parser_getLoadedCache(self), info->value.dli_fname));
         if (file == NULL || !file->addr2String(file, callstack->backtrace[i], frame)) {
             if (!callstack_parser_createDynamicLine(&info->value,
                                                     callstack->backtrace[i],
@@ -136,4 +137,5 @@ enum callstack_type callstack_parser_parse(struct callstack_parser * self,
 
 void callstack_parser_destroy(struct callstack_parser * self) {
     cache_clear(&self->parsedFiles);
+    cache_loaded_clear(&self->loadedFiles);
 }

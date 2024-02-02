@@ -20,9 +20,11 @@
 #ifndef callstack_parser_h
 #define callstack_parser_h
 
+#include "file/binaryFile.h"
+#include "file/cache/vector_boolString.h"
+
 #include "../../include/callstack.h"
 #include "../../include/callstack_internals.h"
-#include "file/binaryFile.h"
 
 /**
  * The structure of a callstack parser.
@@ -30,6 +32,7 @@
 struct callstack_parser {
     /** A list of the already parsed files. */
     struct binaryFile * parsedFiles;
+    struct vector_boolString loadedFiles;
 };
 
 /**
@@ -39,6 +42,7 @@ struct callstack_parser {
  */
 static inline void callstack_parser_create(struct callstack_parser * self) {
     self->parsedFiles = NULL;
+    vector_boolString_create(&self->loadedFiles);
 }
 
 /**
@@ -70,6 +74,10 @@ enum callstack_type callstack_parser_parse(struct callstack_parser * self,
  */
 static inline struct binaryFile ** callstack_parser_getCache(struct callstack_parser * self) {
     return callstack_autoClearCaches ? &self->parsedFiles : NULL;
+}
+
+static inline struct vector_boolString* callstack_parser_getLoadedCache(struct callstack_parser* self) {
+    return callstack_autoClearCaches ? &self->loadedFiles : NULL;
 }
 
 /**

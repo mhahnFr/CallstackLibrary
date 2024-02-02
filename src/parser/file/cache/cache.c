@@ -23,16 +23,19 @@
 #include "cache.h"
 
 /** The global cache. */
-struct binaryFile * parsedFiles = NULL;
+static struct binaryFile* parsedFiles = NULL;
+static struct vector_boolString loadedFiles = (struct vector_boolString) {
+    0, 0, NULL
+};
 
-struct binaryFile * cache_findOrAddFile(struct binaryFile ** cache, const char * fileName, void* startAddress) {
+struct binaryFile * cache_findOrAddFile(struct binaryFile ** cache, const char * fileName, void* startAddress, bool loaded) {
     if (cache == NULL) cache = &parsedFiles;
     
     struct binaryFile * it;
     for (it = *cache; it != NULL && strcmp(it->fileName, fileName) != 0; it = it->next);
     
     if (it == NULL) {
-        it = binaryFile_new(fileName, startAddress);
+        it = binaryFile_new(fileName, startAddress, loaded);
         if (it == NULL) {
             return NULL;
         }
@@ -52,4 +55,28 @@ void cache_clear(struct binaryFile ** cache) {
         it->deleter(it);
     }
     *cache = NULL;
+}
+
+bool cache_isLoaded(struct vector_boolString* cache, const char* fileName) {
+    if (cache == NULL) cache = &loadedFiles;
+    
+    if (cache->count == 0) {
+        cache_loaded_load(cache);
+    }
+    
+    for (size_t i = 0; i < cache->count; ++i) {
+        const struct pair_boolString* elem = &cache->content[i];
+        
+        if (strcmp(elem->second, fileName) == 0) {
+            return elem->first;
+        }
+    }
+    vector_boolString_push_back(cache, (struct pair_boolString) { false, fileName });
+    return false;
+}
+
+void cache_loaded_clear(struct vector_boolString* cache) {
+    if (cache == NULL) cache = &loadedFiles;
+    
+    vector_boolString_destroy(cache);
 }
