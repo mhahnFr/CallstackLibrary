@@ -56,7 +56,7 @@ struct machoFile {
  *
  * @return the allocated Mach-I file structure or `NULL` on error
  */
-struct machoFile * machoFile_new(void);
+struct machoFile * machoFile_new(const char* fileName);
 
 /**
  * Returns the represented Mach-O file structure from the given binary
@@ -118,11 +118,12 @@ bool machoFile_isLoaded(struct machoFile* self);
  *
  * @param self the Mach-O file structure to be initialized
  */
-static inline void machoFile_create(struct machoFile* self) {
+static inline void machoFile_create(struct machoFile* self, const char* fileName) {
     binaryFile_create(&self->_);
     
     self->_.type     = MACHO_FILE;
     self->_.concrete = self;
+    self->_.fileName = fileName;
     
     self->_.addr2String = &machoFile_addr2String;
     self->_.destroy     = &machoFile_destroy;
@@ -133,8 +134,7 @@ static inline void machoFile_create(struct machoFile* self) {
     self->text_vmaddr      = 0;
     self->linkedit_vmaddr  = 0;
     self->priv             = NULL;
-    
-    self->inMemory = machoFile_isLoaded(self);
+    self->inMemory         = machoFile_isLoaded(self);
 }
 
 void machoFile_clearCaches(void);

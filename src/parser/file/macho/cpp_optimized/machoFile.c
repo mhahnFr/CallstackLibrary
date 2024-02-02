@@ -26,11 +26,11 @@ struct machoFile_private {
     struct vector_function functions;
 };
 
-struct machoFile* machoFile_new(void)  {
+struct machoFile* machoFile_new(const char* fileName)  {
     struct machoFile_private* toReturn = malloc(sizeof(struct machoFile_private));
     
     if (toReturn != NULL) {
-        machoFile_create(&toReturn->_);
+        machoFile_create(&toReturn->_, fileName);
         vector_function_create(&toReturn->functions);
         toReturn->objectFiles = NULL;
         toReturn->_.priv = toReturn;

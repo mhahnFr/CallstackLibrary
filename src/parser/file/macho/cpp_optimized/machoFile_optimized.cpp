@@ -31,8 +31,8 @@ class MachoFile {
     std::map<uint64_t, std::pair<function*, objectFile*>, std::greater<uint64_t>> functions;
     
 public:
-    inline MachoFile() {
-        machoFile_create(*this);
+    inline MachoFile(const char* fileName) {
+        machoFile_create(*this, fileName);
         self.priv = this;
     }
     
@@ -92,9 +92,9 @@ public:
     }
 };
 
-auto machoFile_new() -> machoFile* {
+auto machoFile_new(const char* fileName) -> machoFile* {
     try {
-        return *(new MachoFile());
+        return *(new MachoFile(fileName));
     } catch (...) {
         return nullptr;
     }

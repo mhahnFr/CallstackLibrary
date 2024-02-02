@@ -38,7 +38,7 @@ struct binaryFile * binaryFile_new(const char * fileName, void* startAddress) {
     struct binaryFile * toReturn;
     
 #ifdef __APPLE__
-    struct machoFile * tmp = machoFile_new();
+    struct machoFile * tmp = machoFile_new(fileName);
     toReturn = tmp == NULL ? NULL : &tmp->_;
 #elif defined(__linux__)
     struct elfFile * tmp = elfFile_new();
