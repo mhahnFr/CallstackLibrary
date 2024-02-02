@@ -42,27 +42,28 @@ enum binaryFileType {
  * This structure represents a generic binary executable file.
  */
 struct binaryFile {
-    /** The type of this binary file.                        */
+    /** The type of this binary file.                               */
     enum binaryFileType type;
-    /** A pointer to the concrete structure.                 */
+    /** A pointer to the concrete structure.                        */
     void * concrete;
     
-    /** Indicates whether this file has already been parsed. */
+    /** Indicates whether this file has already been parsed.        */
     bool parsed;
     
-    /** The name of the represented binary file.             */
+    /** The name of the represented binary file.                    */
     const char * fileName;
     
+    /** The start address in memory of the represented binary file. */
     void* startAddress;
     
-    /** A pointer to the next binary file structure.         */
+    /** A pointer to the next binary file structure.                */
     struct binaryFile * next;
     
-    /** Translating method, heavily WIP.                     */
+    /** Translating method, heavily WIP.                            */
     bool (*addr2String)(struct binaryFile*, void*, struct callstack_frame*);
-    /** The appropriate deinitializing method.               */
+    /** The appropriate deinitializing method.                      */
     void (*destroy)    (struct binaryFile *);
-    /** The appropriate deleting method.                     */
+    /** The appropriate deleting method.                            */
     void (*deleter)    (struct binaryFile *);
 };
 
@@ -99,7 +100,23 @@ char * binaryFile_toRelativePath(char * path);
  * @return a newly allocated relative path
  */
 char * binaryFile_toRelativePathFree(char * path);
+/**
+ * @brief Converts the given path to an absolute path.
+ *
+ * If `CXX_FUNCTIONS` is not defined, the given path is only duplicated.
+ *
+ * @param path the path to create an absolute one from
+ * @return a newly allocated absolute path
+ */
 char * binaryFile_toAbsolutePath(char * path);
+/**
+ * @brief Converts the given path to an absolute path and frees the given path.
+ *
+ * If `CXX_FUNCTIONS` is not defined, the given path is only duplicated.
+ *
+ * @param path the path to create an absolute one from
+ * @return a newly allocated absolute path
+ */
 char * binaryFile_toAbsolutePathFree(char * path);
 
 struct binaryFile* binaryFile_findOrAddFile(const char* fileName, void* startAddress);

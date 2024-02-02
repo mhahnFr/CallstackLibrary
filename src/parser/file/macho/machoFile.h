@@ -48,6 +48,7 @@ struct machoFile {
     uint64_t linkedit_fileoff;
     uint64_t text_vmaddr;
     
+    /** Pointer to the private part of this object.                   */
     void* priv;
 };
 
@@ -91,8 +92,21 @@ bool machoFile_parseFile(struct machoFile * self, void * baseAddress);
 void machoFile_addObjectFile(struct machoFile *  self,
                              struct objectFile * file);
 
+/**
+ * Adds the given function to the given Mach-O file structure.
+ *
+ * @param self the Mach-O file structure
+ * @param function the function to be added
+ */
 void machoFile_addFunction(struct machoFile* self, struct function function);
 
+/**
+ * Creates a debug info for the given address if possible.
+ *
+ * @param self the Mach-O file structure
+ * @param address the address whose debug info to deduct
+ * @return the optionally deducted debug information
+ */
 optional_debugInfo_t machoFile_getDebugInfo(struct machoFile* self,
                                             void*             address);
 

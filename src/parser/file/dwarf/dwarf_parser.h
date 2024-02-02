@@ -25,8 +25,20 @@
 
 #include "dwarf_lineInfo.h"
 
+/**
+ * @brief This type represents the function called by `dwarf_parseLineProgram`.
+ *
+ * It takes a DWARF line info structure and the additionally passed arguments.
+ */
 typedef void (*dwarf_line_callback)(struct dwarf_lineInfo, va_list);
 
-bool dwarf_parseLineProgram(void* begin, dwarf_line_callback, va_list args);
+/**
+ * Parses the DWARF line program.
+ *
+ * @param begin the begin of the line program
+ * @param cb the callback called when a line info has been deducted
+ * @param args additional arguments that are passed to the callback function
+ */
+bool dwarf_parseLineProgram(void* begin, dwarf_line_callback cb, va_list args);
 
 #endif /* dwarf_parser_h */
