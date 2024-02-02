@@ -46,38 +46,35 @@
 
 static struct vector_boolString loadedFiles = { 0, 0, NULL };
 
+/**
+ * Caches the represented file from disk and parses it.
+ *
+ * @param self the Mach-O file object
+ * @return whether the file was successfully read and parsed
+ */
 static inline bool machoFile_readAndParseFile(struct machoFile* self) {
-    // TODO: Do we need to check whether it is loaded?
-//    __builtin_printf("%s%s\033[0m\n", self->_.loaded ? "\033[32m" : "\033[31m", self->_.fileName);
-    
-    self->inMemory = true;
-    return machoFile_parseFile(self, self->_.startAddress);
+    if (self->_.fileName == NULL) return false;
+
+    struct stat fileStats;
+    if (stat(self->_.fileName, &fileStats) != 0) {
+        return false;
+    }
+    void * buffer = malloc(fileStats.st_size);
+    if (buffer == NULL) {
+        return false;
+    }
+    FILE * file = fopen(self->_.fileName, "r");
+    const size_t count = fread(buffer, 1, fileStats.st_size, file);
+    fclose(file);
+    const bool toReturn = (off_t) count == fileStats.st_size && machoFile_parseFile(self, buffer);
+    free(buffer);
+    return toReturn;
 }
 
-///**
-// * Caches the represented file from disk and parses it.
-// *
-// * @param self the Mach-O file object
-// * @return whether the file was successfully read and parsed
-// */
-//static inline bool machoFile_readAndParseFile(struct machoFile * self) {
-//    if (self->_.fileName == NULL) return false;
-//    
-//    struct stat fileStats;
-//    if (stat(self->_.fileName, &fileStats) != 0) {
-//        return false;
-//    }
-//    void * buffer = malloc(fileStats.st_size);
-//    if (buffer == NULL) {
-//        return false;
-//    }
-//    FILE * file = fopen(self->_.fileName, "r");
-//    const size_t count = fread(buffer, 1, fileStats.st_size, file);
-//    fclose(file);
-//    const bool toReturn = (off_t) count == fileStats.st_size && machoFile_parseFile(self, buffer);
-//    free(buffer);
-//    return toReturn;
-//}
+static inline bool machoFile_loadFile(struct machoFile* self) {
+    return self->inMemory ? machoFile_parseFile(self, self->_.startAddress)
+                          : machoFile_readAndParseFile(self);
+}
 
 static inline void machoFile_loadLoadedFiles(void) {
     const uint32_t size = _dyld_image_count();
@@ -110,7 +107,7 @@ bool machoFile_addr2String(struct binaryFile* me, void* address, struct callstac
         return false;
     }
     if (!self->_.parsed &&
-        !(self->_.parsed = machoFile_readAndParseFile(self))) {
+        !(self->_.parsed = machoFile_loadFile(self))) {
         return false;
     }
     
