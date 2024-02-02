@@ -111,6 +111,8 @@ void machoFile_destroy(struct binaryFile * self);
  */
 void machoFile_delete(struct binaryFile * self);
 
+bool machoFile_isLoaded(struct machoFile* self);
+
 /**
  * Initializes the given Mach-O file structure.
  *
@@ -126,13 +128,16 @@ static inline void machoFile_create(struct machoFile* self) {
     self->_.destroy     = &machoFile_destroy;
     self->_.deleter     = &machoFile_delete;
     
-    self->addressOffset = 0x0;
-    self->inMemory      = false;
+    self->addressOffset    = 0;
     self->linkedit_fileoff = 0;
-    self->text_vmaddr = 0;
-    self->linkedit_vmaddr = 0;
-    self->priv          = NULL;
+    self->text_vmaddr      = 0;
+    self->linkedit_vmaddr  = 0;
+    self->priv             = NULL;
+    
+    self->inMemory = machoFile_isLoaded(self);
 }
+
+void machoFile_clearCaches(void);
 
 #ifdef __cplusplus
 } // extern "C"

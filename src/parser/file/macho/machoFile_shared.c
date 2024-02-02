@@ -40,14 +40,15 @@
 #include "machoFile.h"
 #include "macho_parser.h"
 #include "macho_utils.h"
-
-#include "../cache/cache.h"
+#include "vector_boolString.h"
 
 #include "../../callstack_parser.h"
 
+static struct vector_boolString loadedFiles = { 0, 0, NULL };
+
 static inline bool machoFile_readAndParseFile(struct machoFile* self) {
     // TODO: Do we need to check whether it is loaded?
-    __builtin_printf("%s%s\033[0m\n", self->_.loaded ? "\033[32m" : "\033[31m", self->_.fileName);
+//    __builtin_printf("%s%s\033[0m\n", self->_.loaded ? "\033[32m" : "\033[31m", self->_.fileName);
     
     self->inMemory = true;
     return machoFile_parseFile(self, self->_.startAddress);
@@ -77,6 +78,31 @@ static inline bool machoFile_readAndParseFile(struct machoFile* self) {
 //    free(buffer);
 //    return toReturn;
 //}
+
+static inline void machoFile_loadLoadedFiles(void) {
+    const uint32_t size = _dyld_image_count();
+    
+    for (uint32_t i = 0; i < size; ++i) {
+        vector_boolString_push_back(&loadedFiles, (pair_boolString_t) { true, _dyld_get_image_name(i) });
+    }
+}
+
+bool machoFile_isLoaded(struct machoFile* self) {
+    if (loadedFiles.count == 0) {
+        machoFile_loadLoadedFiles();
+    }
+    
+    vector_iterate(pair_boolString_t, &loadedFiles, {
+        if (strcmp(element->second, self->_.fileName) == 0) {
+            return element->first;
+        }
+    })
+    return false;
+}
+
+void machoFile_clearCaches(void) {
+    vector_boolString_destroy(&loadedFiles);
+}
 
 bool machoFile_addr2String(struct binaryFile* me, void* address, struct callstack_frame* frame) {
     struct machoFile * self = machoFileOrNull(me);
