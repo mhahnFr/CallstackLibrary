@@ -41,21 +41,13 @@
 #include "macho_parser.h"
 #include "macho_utils.h"
 
-#include "../../callstack_parser.h"
+#include "../cache/cache.h"
 
-static inline bool machoFile_isLoaded(const char* fileName) {
-    const uint32_t size = _dyld_image_count();
-    for (uint32_t i = 0; i < size; ++i) {
-        if (strcmp(_dyld_get_image_name(i), fileName) == 0) {
-            return true;
-        }
-    }
-    return false;
-}
+#include "../../callstack_parser.h"
 
 static inline bool machoFile_readAndParseFile(struct machoFile* self) {
     // TODO: Do we need to check whether it is loaded?
-    __builtin_printf("%s%s\033[0m\n", machoFile_isLoaded(self->_.fileName) ? "\033[32m" : "\033[31m", self->_.fileName);
+    __builtin_printf("%s%s\033[0m\n", self->_.loaded ? "\033[32m" : "\033[31m", self->_.fileName);
     
     self->inMemory = true;
     return machoFile_parseFile(self, self->_.startAddress);
