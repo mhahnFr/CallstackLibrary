@@ -19,13 +19,12 @@
 
 #include <stddef.h>
 
-#include "../include/callstack_internals.h"
+#include "parser/file/binaryFile.h"
 
-#include "parser/file/cache/cache.h"
+#include "../include/callstack_internals.h"
 
 bool callstack_autoClearCaches = true;
 
 void callstack_clearCaches(void) {
-    cache_clear(NULL);
-    cache_loaded_clear(NULL);
+    binaryFile_clearCaches();
 }

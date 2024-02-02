@@ -26,11 +26,15 @@
 
 #ifdef __APPLE__
  #include "macho/machoFile.h"
+ #define LCS_MACHO
 #elif defined(__linux__)
  #include "elf/elfFile.h"
+ #define LCS_ELF
 #endif
 
-struct binaryFile * binaryFile_new(const char * fileName, void* startAddress, bool loaded) {
+static struct binaryFile* parsedFiles = NULL;
+
+struct binaryFile * binaryFile_new(const char * fileName, void* startAddress) {
     struct binaryFile * toReturn;
     
 #ifdef __APPLE__
@@ -46,7 +50,6 @@ struct binaryFile * binaryFile_new(const char * fileName, void* startAddress, bo
     if (toReturn != NULL) {
         toReturn->fileName = fileName;
         toReturn->startAddress = startAddress;
-        toReturn->loaded = loaded;
     }
     return toReturn;
 }
@@ -55,7 +58,6 @@ void binaryFile_create(struct binaryFile * self) {
     self->fileName = NULL;
     self->next     = NULL;
     self->parsed   = false;
-    self->loaded   = false;
 }
 
 /**
@@ -118,4 +120,35 @@ char * binaryFile_toAbsolutePath(char * path) {
 
 char * binaryFile_toAbsolutePathFree(char * path) {
     return binaryFile_toAbsolutePathIntern(path, true);
+}
+
+struct binaryFile* binaryFile_findOrAddFile(const char* fileName, void* startAddress) {
+    struct binaryFile* it;
+    for (it = parsedFiles; it != NULL && strcmp(it->fileName, fileName) != 0; it = it->next);
+    
+    if (it == NULL) {
+        it = binaryFile_new(fileName, startAddress);
+        if (it == NULL) {
+            return NULL;
+        }
+        it->next    = parsedFiles;
+        parsedFiles = it;
+    }
+    return it;
+}
+
+void binaryFile_clearCaches(void) {
+#ifdef LCS_MACHO
+    // TODO: Clear macho caches
+#elif defined(LCS_ELF)
+    // TODO: Clear ELF caches
+#endif
+    
+    struct binaryFile* tmp;
+    
+    for (struct binaryFile* it = parsedFiles; it != NULL; it = tmp) {
+        tmp = it->next;
+        it->deleter(it);
+    }
+    parsedFiles = NULL;
 }

@@ -49,7 +49,6 @@ struct binaryFile {
     
     /** Indicates whether this file has already been parsed. */
     bool parsed;
-    bool loaded;
     
     /** The name of the represented binary file.             */
     const char * fileName;
@@ -73,7 +72,7 @@ struct binaryFile {
  * @param fileName the name of the represented binary file
  * @param startAddress the start address of the represented binary file
  */
-struct binaryFile* binaryFile_new(const char* fileName, void* startAddress, bool loaded);
+struct binaryFile* binaryFile_new(const char* fileName, void* startAddress);
 
 /**
  * Initializes the given binary file structure.
@@ -102,6 +101,9 @@ char * binaryFile_toRelativePath(char * path);
 char * binaryFile_toRelativePathFree(char * path);
 char * binaryFile_toAbsolutePath(char * path);
 char * binaryFile_toAbsolutePathFree(char * path);
+
+struct binaryFile* binaryFile_findOrAddFile(const char* fileName, void* startAddress);
+void binaryFile_clearCaches(void);
 
 #ifdef __cplusplus
 } // extern "C"
