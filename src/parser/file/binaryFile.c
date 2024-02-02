@@ -139,9 +139,7 @@ struct binaryFile* binaryFile_findOrAddFile(const char* fileName, void* startAdd
 
 void binaryFile_clearCaches(void) {
 #ifdef LCS_MACHO
-    // TODO: Clear macho caches
-#elif defined(LCS_ELF)
-    // TODO: Clear ELF caches
+    machoFile_clearCaches();
 #endif
     
     struct binaryFile* tmp;

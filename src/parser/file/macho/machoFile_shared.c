@@ -99,6 +99,7 @@ bool machoFile_isLoaded(struct machoFile* self) {
 
 void machoFile_clearCaches(void) {
     vector_boolString_destroy(&loadedFiles);
+    vector_boolString_create(&loadedFiles);
 }
 
 bool machoFile_addr2String(struct binaryFile* me, void* address, struct callstack_frame* frame) {
