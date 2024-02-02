@@ -37,10 +37,10 @@ static struct binaryFile* parsedFiles = NULL;
 struct binaryFile * binaryFile_new(const char * fileName, void* startAddress) {
     struct binaryFile * toReturn;
     
-#ifdef __APPLE__
+#ifdef LCS_MACHO
     struct machoFile * tmp = machoFile_new(fileName);
     toReturn = tmp == NULL ? NULL : &tmp->_;
-#elif defined(__linux__)
+#elif definded(LCS_ELF)
     struct elfFile * tmp = elfFile_new();
     toReturn = tmp == NULL ? NULL : &tmp->_;
 #else
