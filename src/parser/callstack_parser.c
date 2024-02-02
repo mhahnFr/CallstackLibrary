@@ -50,7 +50,7 @@ static inline char* callstack_parser_createLine(const char* name, ptrdiff_t diff
 #endif
 
     char* ret;
-    if (asprintf(&ret, "DYLD: %s + %td", result, diff) < 0) {
+    if (asprintf(&ret, "%s + %td", result, diff) < 0) {
         ret = strdup(result);
     }
     if (del) {
