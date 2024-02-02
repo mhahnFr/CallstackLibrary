@@ -21,7 +21,6 @@
 #define callstack_parser_h
 
 #include "file/binaryFile.h"
-#include "file/cache/vector_boolString.h"
 
 #include "../../include/callstack.h"
 #include "../../include/callstack_internals.h"
@@ -30,9 +29,7 @@
  * The structure of a callstack parser.
  */
 struct callstack_parser {
-    /** A list of the already parsed files. */
-    struct binaryFile * parsedFiles;
-    struct vector_boolString loadedFiles;
+    bool clearCaches;
 };
 
 /**
@@ -40,9 +37,8 @@ struct callstack_parser {
  *
  * @param self The callstack parser object to construct.
  */
-static inline void callstack_parser_create(struct callstack_parser * self) {
-    self->parsedFiles = NULL;
-    vector_boolString_create(&self->loadedFiles);
+static inline void callstack_parser_create(struct callstack_parser* self) {
+    self->clearCaches = callstack_autoClearCaches;
 }
 
 /**
@@ -50,7 +46,11 @@ static inline void callstack_parser_create(struct callstack_parser * self) {
  *
  * @param self The callstack parser object to destroy.
  */
-void callstack_parser_destroy(struct callstack_parser * self);
+static inline void callstack_parser_destroy(struct callstack_parser* self) {
+    if (self->clearCaches) {
+        callstack_clearCaches();
+    }
+}
 
 /**
  * @brief Parses the debug symbols to create a human readable callstack.
@@ -65,20 +65,6 @@ void callstack_parser_destroy(struct callstack_parser * self);
  */
 enum callstack_type callstack_parser_parse(struct callstack_parser * self,
                                            struct callstack * callstack);
-
-/**
- * Returns the appropriate cache for the given parser structure.
- *
- * @param self the parser structure
- * @return the appropriate cache
- */
-static inline struct binaryFile ** callstack_parser_getCache(struct callstack_parser * self) {
-    return callstack_autoClearCaches ? &self->parsedFiles : NULL;
-}
-
-static inline struct vector_boolString* callstack_parser_getLoadedCache(struct callstack_parser* self) {
-    return callstack_autoClearCaches ? &self->loadedFiles : NULL;
-}
 
 /**
  * @brief Demangles the given name if possible and enabled.

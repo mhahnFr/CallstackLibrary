@@ -89,6 +89,8 @@ static inline bool callstack_parser_createDynamicLine(Dl_info*         info,
  */
 static inline bool callstack_parser_parseImpl(struct callstack_parser* self,
                                               struct callstack*        callstack) {
+    (void) self;
+    
     for (size_t i = 0; i < callstack->backtraceSize; ++i) {
         optional_Dl_info_t*     info  = &callstack->frames[i].info;
         struct callstack_frame* frame = &callstack->frames[i];
@@ -130,7 +132,4 @@ enum callstack_type callstack_parser_parse(struct callstack_parser * self,
     }
     
     return TRANSLATED;
-}
-
-void callstack_parser_destroy(struct callstack_parser * self) {
 }
