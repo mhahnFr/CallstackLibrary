@@ -77,31 +77,11 @@ static inline void objectFile_create(struct objectFile * self) {
     self->parsed       = false;
 }
 
-/**
- * Adds the given function structure to the given object file structure.
- *
- * @param self the object file structure to add to
- * @param function the function structure to be added
- */
-void objectFile_addFunction(struct objectFile * self,
-                            struct function     function);
-
 void objectFile_addOwnFunction(struct objectFile* self, struct function function);
 
 bool objectFile_parse(struct objectFile* self, dwarf_line_callback cb, ...);
 
-/**
- * @brief Invokes the given function for each function object inside the given object file.
- *
- * The additional parameters are passed as `va_list` to the given function.
- *
- * @param self the object file instance
- * @param func the function to be invoked
- */
-void objectFile_functionsForEach(struct objectFile * self, void (*func)(struct function *, va_list), ...);
-
 optional_debugInfo_t objectFile_getDebugInfo(struct objectFile* self, uint64_t address, struct function function);
-optional_debugInfo_t objectFile_getDebugInfoFor(struct objectFile* self, uint64_t address);
 
 /**
  * Deinitializes the given object file structure.
