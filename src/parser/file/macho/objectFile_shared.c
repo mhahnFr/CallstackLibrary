@@ -66,8 +66,8 @@ static inline bool objectFile_handleSegment(struct segment_command* command,
     return true;
 }
 
-static inline void objectFile_addFunctionCallback(struct function function, va_list args) {
-    objectFile_addOwnFunction(va_arg(args, void*), function);
+static inline void objectFile_addFunctionCallback(struct pair_funcFile f, va_list args) {
+    objectFile_addOwnFunction(va_arg(args, void*), f.first);
 }
 
 static inline bool objectFile_parseMachOImpl64(struct objectFile* self,

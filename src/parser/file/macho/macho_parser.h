@@ -24,9 +24,10 @@
 
 #include "function.h"
 #include "objectFile.h"
+#include "OptionalFuncFilePair.h"
 
 typedef void (*macho_addObjectFile)(struct objectFile*, va_list);
-typedef void (*macho_addFunction)(struct function, va_list);
+typedef void (*macho_addFunction)(pair_funcFile_t, va_list);
 
 bool macho_parseSymtab(struct symtab_command* command, 
                        void*                  baseAddress,

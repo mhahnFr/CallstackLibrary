@@ -190,10 +190,12 @@ static inline bool machoFile_handleSegment64(struct machoFile *          self,
 static inline void machoFile_addObjectFileImpl(struct objectFile* objectFile, va_list args) {
     struct machoFile* self = va_arg(args, void*);
     
-    machoFile_addObjectFile(self, objectFile);
+    // TODO: Add to the cache (so far this is a memory leak!)
+    (void) self;
+    (void) objectFile;
 }
 
-static inline void machoFile_addFunctionImpl(struct function function, va_list args) {
+static inline void machoFile_addFunctionImpl(struct pair_funcFile function, va_list args) {
     struct machoFile* self = va_arg(args, void*);
     
     machoFile_addFunction(self, function);

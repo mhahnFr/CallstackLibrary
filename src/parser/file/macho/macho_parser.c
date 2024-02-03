@@ -82,16 +82,19 @@ bool macho_parseSymtab(struct symtab_command* command,
                     va_end(args);
                     return false;
                 }
-                if (currObj == NULL) {
-                    if (funCb != NULL) {
-                        va_list copy;
-                        va_copy(copy, args);
-                        funCb(currFun.value, copy);
-                        va_end(copy);
-                    }
+                // TODO: a
+//                if (currObj == NULL) {
+                if (funCb != NULL) {
+                    va_list copy;
+                    va_copy(copy, args);
+                    funCb((pair_funcFile_t) { currFun.value, currObj }, copy);
+                    va_end(copy);
                 } else {
-                    objectFile_addFunction(currObj, currFun.value);
+                    function_destroy(&currFun.value);
                 }
+//                } else {
+//                    objectFile_addFunction(currObj, currFun.value);
+//                }
                 currFun.has_value = false;
                 break;
                 
@@ -145,9 +148,11 @@ bool macho_parseSymtab(struct symtab_command* command,
                 if (funCb != NULL && (entry.n_type & N_TYPE) == N_SECT) {
                     va_list copy;
                     va_copy(copy, args);
-                    funCb((struct function) {
-                        .linkedName = strdup(stringBegin + entry.n_strx),
-                        .startAddress = entry.n_value
+                    funCb((pair_funcFile_t) {
+                        (struct function) {
+                            .linkedName = strdup(stringBegin + entry.n_strx),
+                            .startAddress = entry.n_value
+                        }, NULL
                     }, copy);
                     va_end(copy);
                 }

@@ -26,9 +26,7 @@
 class MachoFile {
     machoFile self;
     
-    std::vector<objectFile*> objectFiles;
-    std::forward_list<function> functionStorage;
-    std::map<uint64_t, std::pair<function*, objectFile*>, std::greater<uint64_t>> functions;
+    std::map<uint64_t, std::pair<function, objectFile*>, std::greater<uint64_t>> functions;
     
 public:
     inline MachoFile(const char* fileName) {
@@ -38,27 +36,21 @@ public:
     
     inline ~MachoFile() noexcept {
         machoFile_destroy(&self._);
-        for (auto& file : objectFiles) {
-            objectFile_delete(file);
-        }
-        for (auto& func : functionStorage) {
-            function_destroy(&func);
+        
+        for (auto& [address, funcFile] : functions) {
+            function_destroy(&funcFile.first);
         }
     }
     
-    inline void addFunction(function&& function) {
-        auto it = functionStorage.insert_after(functionStorage.before_begin(), function);
-        functions.emplace(std::make_pair(it->startAddress, std::make_pair(&(*it), nullptr)));
-    }
-    
-    constexpr inline void addObjectFile(objectFile* file) {
-        objectFiles.push_back(file);
-        objectFile_functionsForEach(file, [](function* it, va_list args) {
-            MachoFile*  self = reinterpret_cast<MachoFile*> (va_arg(args, void*));
-            objectFile* file = reinterpret_cast<objectFile*>(va_arg(args, void*));
-            
-            self->functions.insert_or_assign(it->startAddress, std::make_pair(it, file));
-        }, this, file);
+    inline void addFunction(pair_funcFile_t&& function) {
+        auto it = functions.find(function.first.startAddress);
+        if (it == functions.end()) {
+            functions.emplace(std::make_pair(function.first.startAddress, dc4c::to_cpp(function)));
+        } else {
+            if (function.second != nullptr) {
+                it->second = dc4c::to_cpp(function);
+            }
+        }
     }
     
     inline auto getDebugInfo(void* addr) -> optional_debugInfo_t {
@@ -70,12 +62,12 @@ public:
         }
         optional_debugInfo_t info = { .has_value = false };
         if (it->second.second != nullptr) {
-            info = objectFile_getDebugInfo(it->second.second, address, *it->second.first);
+            info = objectFile_getDebugInfo(it->second.second, address, it->second.first);
         }
         if (!info.has_value) {
             info = {
                 true, {
-                    *it->second.first,
+                    it->second.first,
                     .sourceFileInfo.has_value = false
                 }
             };
@@ -100,12 +92,8 @@ auto machoFile_new(const char* fileName) -> machoFile* {
     }
 }
 
-void machoFile_addFunction(machoFile* me, function function) {
+void machoFile_addFunction(machoFile* me, pair_funcFile_t function) {
     reinterpret_cast<MachoFile*>(me->priv)->addFunction(std::move(function));
-}
-
-void machoFile_addObjectFile(machoFile* me, objectFile* file) {
-    reinterpret_cast<MachoFile*>(me->priv)->addObjectFile(file);
 }
 
 auto machoFile_getDebugInfo(machoFile* me, void* address) -> optional_debugInfo_t {
