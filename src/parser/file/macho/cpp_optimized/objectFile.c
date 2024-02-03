@@ -31,8 +31,6 @@ struct objectFile_private {
     /** The object file structure.                       */
     struct objectFile _;
     
-    /** A vector with the functions of this object file. */
-    struct vector_function functions;
     struct vector_function ownFunctions;
     struct vector_dwarfLineInfo lineInfos;
     const char* mainSourceFileCache;
@@ -45,18 +43,10 @@ struct objectFile * objectFile_new(void) {
     }
     objectFile_create(&self->_);
     self->_.priv = self;
-    vector_function_create(&self->functions);
     vector_function_create(&self->ownFunctions);
     vector_dwarfLineInfo_create(&self->lineInfos);
     self->mainSourceFileCache = NULL;
     return &self->_;
-}
-
-void objectFile_addFunction(struct objectFile * me,
-                            struct function     function) {
-    struct objectFile_private * self = (struct objectFile_private *) me->priv;
-    
-    vector_function_push_back(&self->functions, function);
 }
 
 void objectFile_addOwnFunction(struct objectFile* me,
@@ -109,31 +99,6 @@ static inline const char* objectFile_getSourceFileName(struct objectFile_private
     return self->mainSourceFileCache = toReturn;
 }
 
-static inline optional_function_t objectFile_findFunction(struct objectFile* me, uint64_t address) {
-    struct objectFile_private* self = (struct objectFile_private*) me->priv;
-    struct optional_function toReturn = { .has_value = false };
-    
-    size_t i;
-    for (i = 0; i < self->functions.count && (address < self->functions.content[i].startAddress || address > self->functions.content[i].startAddress + self->functions.content[i].length); ++i);
-    
-    if (i < self->functions.count) {
-        toReturn.has_value = true;
-        toReturn.value     = self->functions.content[i];
-    }
-    
-    return toReturn;
-}
-
-optional_debugInfo_t objectFile_getDebugInfoFor(struct objectFile* self, uint64_t address) {
-    optional_function_t func = objectFile_findFunction(self, address);
-    if (!func.has_value) {
-        return (optional_debugInfo_t) {
-            .has_value = false
-        };
-    }
-    return objectFile_getDebugInfo(self, address, func.value);
-}
-
 optional_debugInfo_t objectFile_getDebugInfo(struct objectFile* me, uint64_t address, struct function function) {
     optional_debugInfo_t toReturn = { .has_value = false };
     
@@ -179,37 +144,9 @@ optional_debugInfo_t objectFile_getDebugInfo(struct objectFile* me, uint64_t add
     return toReturn;
 }
 
-void objectFile_functionsForEach(struct objectFile * me, void (*func)(struct function *, va_list), ...) {
-    struct objectFile_private * self = (struct objectFile_private *) me->priv;
-    
-    va_list list;
-    va_start(list, func);
-    for (size_t i = 0; i < self->functions.count; ++i) {
-        va_list copy;
-        va_copy(copy, list);
-        func(&self->functions.content[i], copy);
-        va_end(copy);
-    }
-    va_end(list);
-}
-
-/**
- * Calls the destroy function for the given function object.
- *
- * @param f the function to be destroyed
- * @param args ignored
- */
-static inline void objectFile_functionDestroy(struct function * f, va_list args) {
-    (void) args;
-    
-    function_destroy(f);
-}
-
 void objectFile_destroy(struct objectFile * me) {
     struct objectFile_private * self = (struct objectFile_private *) me->priv;
 
-    objectFile_functionsForEach(me, &objectFile_functionDestroy);
-    vector_function_destroy(&self->functions);
     for (size_t i = 0; i < self->ownFunctions.count; ++i) {
         function_destroy(&self->ownFunctions.content[i]);
     }
