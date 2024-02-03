@@ -41,8 +41,16 @@ struct machoFile* machoFile_new(const char* fileName)  {
 void machoFile_addFunction(struct machoFile* me, pair_funcFile_t function) {
     struct machoFile_private* self = me->priv;
     
-    // TODO: Add only once, take the better one if doubled
-    vector_pairFuncFile_push_back(&self->functions, function);
+    size_t i;
+    for (i = 0; i < self->functions.count && function.first.startAddress != self->functions.content[i].first.startAddress; ++i);
+    
+    if (i == self->functions.count) {
+        vector_pairFuncFile_push_back(&self->functions, function);
+    } else {
+        if (self->functions.content[i].second == NULL) {
+            self->functions.content[i] = function;
+        }
+    }
 }
 
 optional_debugInfo_t machoFile_getDebugInfo(struct machoFile* me, void* address) {
