@@ -84,21 +84,12 @@ bool machoFile_addr2String(struct binaryFile* self, void* address, struct callst
 bool machoFile_parseFile(struct machoFile * self, void * baseAddress);
 
 /**
- * Adds the givne object file structure to the given Mach-O file structure.
- *
- * @param self the Mach-O file structure
- * @param file the object file structure
- */
-void machoFile_addObjectFile(struct machoFile *  self,
-                             struct objectFile * file);
-
-/**
  * Adds the given function to the given Mach-O file structure.
  *
  * @param self the Mach-O file structure
  * @param function the function to be added
  */
-void machoFile_addFunction(struct machoFile* self, struct function function);
+void machoFile_addFunction(struct machoFile* self, pair_funcFile_t function);
 
 /**
  * Creates a debug info for the given address if possible.
