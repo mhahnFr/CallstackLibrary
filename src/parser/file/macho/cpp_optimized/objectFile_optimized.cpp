@@ -31,8 +31,6 @@
 class ObjectFile {
     /** The object file structure.                                     */
     objectFile self;
-    /** A mapping of the contained functions to their start addresses. */
-    std::map<uint64_t, function, std::greater<uint64_t>> functions;
     std::vector<function> ownFunctions;
     std::map<uint64_t, dwarf_lineInfo, std::greater<uint64_t>> lineInfos;
     std::optional<std::string> fullName;
@@ -64,24 +62,12 @@ class ObjectFile {
 public:
     ~ObjectFile() {
         objectFile_destroy(&self);
-        for (auto & elem : functions) {
-            function_destroy(&elem.second);
-        }
         for (auto& elem : ownFunctions) {
             function_destroy(&elem);
         }
         for (auto& [address, info] : lineInfos) {
             dwarf_lineInfo_destroy(&info);
         }
-    }
-    
-    /**
-     * Adds the given function structure to this object file representation.
-     *
-     * @param function the function structure to be added
-     */
-    inline void addFunction(function && function) {
-        functions.emplace(std::make_pair(function.startAddress, function));
     }
     
     inline void addOwnFunction(function&& function) {
@@ -125,30 +111,6 @@ public:
         return toReturn;
     }
     
-    inline auto getDebugInfo(uint64_t address) -> optional_debugInfo_t {
-        auto func = functions.upper_bound(address);
-        if (func == functions.end()) {
-            return { .has_value = false };
-        }
-        return getDebugInfo(func->second, address);
-    }
-    
-    /**
-     * Performs the given function with the given arguments for each function
-     * inside this object file.
-     *
-     * @param func the function to be executed
-     * @param args the additional arguments to be passed
-     */
-    inline void functionsForEach(void (*func)(function *, va_list), va_list & args) {
-        for (auto & elem : functions) {
-            va_list copy;
-            va_copy(copy, args);
-            func(std::addressof(elem.second), copy);
-            va_end(copy);
-        }
-    }
-    
     inline operator objectFile *() {
         return &self;
     }
@@ -171,27 +133,12 @@ objectFile * objectFile_new() {
     }
 }
 
-void objectFile_addFunction(objectFile * self, function func) {
-    reinterpret_cast<ObjectFile *>(self->priv)->addFunction(std::move(func));
-}
-
 void objectFile_addOwnFunction(objectFile* self, function func) {
     reinterpret_cast<ObjectFile*>(self->priv)->addOwnFunction(std::move(func));
 }
 
 auto objectFile_getDebugInfo(objectFile* me, uint64_t address, function function) -> optional_debugInfo_t {
     return reinterpret_cast<ObjectFile*>(me->priv)->getDebugInfo(function, address);
-}
-
-auto objectFIle_getDebugInfoFor(objectFile* me, uint64_t address) -> optional_debugInfo_t {
-    return reinterpret_cast<ObjectFile*>(me->priv)->getDebugInfo(address);
-}
-
-void objectFile_functionsForEach(objectFile * me, void (*func)(function *, va_list), ...) {
-    va_list list;
-    va_start(list, func);
-    reinterpret_cast<ObjectFile *>(me->priv)->functionsForEach(func, list);
-    va_end(list);
 }
 
 void objectFile_destroy(objectFile * self) {
