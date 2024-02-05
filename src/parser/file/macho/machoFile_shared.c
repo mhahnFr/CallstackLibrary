@@ -189,14 +189,6 @@ static inline bool machoFile_handleSegment64(struct machoFile *          self,
     return true;
 }
 
-static inline void machoFile_addObjectFileImpl(struct objectFile* objectFile, va_list args) {
-    struct machoFile* self = va_arg(args, void*);
-    
-    // TODO: Add to the cache (so far this is a memory leak!)
-    (void) self;
-    (void) objectFile;
-}
-
 static inline void machoFile_addFunctionImpl(struct pair_funcFile function, va_list args) {
     struct machoFile* self = va_arg(args, void*);
     
@@ -228,7 +220,7 @@ static inline bool machoFile_parseFileImpl(struct machoFile * self,
             case LC_SYMTAB:
                 result = macho_parseSymtab((void*) lc, baseAddress, 
                                            self->inMemory ? (self->linkedit_vmaddr - self->text_vmaddr) - self->linkedit_fileoff : 0,
-                                           bitsReversed, false, machoFile_addObjectFileImpl, machoFile_addFunctionImpl, self);
+                                           bitsReversed, false, NULL, machoFile_addFunctionImpl, self);
                 break;
         }
         if (!result) {
@@ -264,7 +256,7 @@ static inline bool machoFile_parseFileImpl64(struct machoFile * self,
             case LC_SYMTAB:
                 result = macho_parseSymtab((void*) lc, baseAddress, 
                                            self->inMemory ? (self->linkedit_vmaddr - self->text_vmaddr) - self->linkedit_fileoff : 0,
-                                           bitsReversed, true, machoFile_addObjectFileImpl, machoFile_addFunctionImpl, self);
+                                           bitsReversed, true, NULL, machoFile_addFunctionImpl, self);
                 break;
         }
         if (!result) {
