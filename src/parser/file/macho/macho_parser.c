@@ -24,6 +24,7 @@
 
 #include "macho_parser.h"
 
+#include "cache.h"
 #include "macho_parser_nlist.h"
 
 /*
@@ -58,6 +59,8 @@ bool macho_parseSymtab(struct symtab_command* command,
     va_list args;
     va_start(args, funCb);
     
+    const char* path = NULL;
+    const char* sourceFileName = NULL;
     struct optional_function currFun = { .has_value = false };
     struct objectFile*       currObj = NULL;
     
@@ -109,19 +112,40 @@ bool macho_parseSymtab(struct symtab_command* command,
                         va_end(copy);
                     }
                     currObj = NULL;
-                } else if (currObj == NULL) {
-                    currObj = objectFile_new();
-                    currObj->directory = strdup(value);
+                    path = NULL;
+                    sourceFileName = NULL;
+                } else if (path == NULL) {
+                    path = value;
                 } else {
-                    currObj->sourceFile = strdup(value);
+                    sourceFileName = value;
                 }
                 break;
             }
                 
-            case N_OSO:
-                currObj->name         = strdup(stringBegin + entry.n_strx);
+            case N_OSO: {
+                if (currObj != NULL) {
+                    if (currFun.has_value) {
+                        function_destroy(&currFun.value);
+                    }
+                    objectFile_delete(currObj);
+                    va_end(args);
+                    return false;
+                }
+                
+                char* fileName = strdup(stringBegin + entry.n_strx);
+                currObj = macho_cache_findOrAdd(fileName);
+                if (currObj == NULL) {
+                    if (currFun.has_value) {
+                        function_destroy(&currFun.value);
+                    }
+                    va_end(args);
+                    return false;
+                }
+                currObj->directory = path == NULL ? NULL : strdup(path);
+                currObj->sourceFile = sourceFileName == NULL ? NULL : strdup(sourceFileName);
                 currObj->lastModified = entry.n_value;
                 break;
+            }
                 
             case N_FUN: {
                 if (!currFun.has_value) {
