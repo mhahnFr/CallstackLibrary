@@ -69,7 +69,6 @@ bool macho_parseSymtab(struct symtab_command* command,
         switch (entry.n_type) {
             case N_BNSYM:
                 if (currFun.has_value) {
-                    if (currObj != NULL) objectFile_delete(currObj);
                     function_destroy(&currFun.value);
                     va_end(args);
                     return false;
@@ -81,7 +80,6 @@ bool macho_parseSymtab(struct symtab_command* command,
                 
             case N_ENSYM:
                 if (!currFun.has_value) {
-                    if (currObj != NULL) objectFile_delete(currObj);
                     va_end(args);
                     return false;
                 }
@@ -103,9 +101,7 @@ bool macho_parseSymtab(struct symtab_command* command,
                         // Beginning, ignore
                         continue;
                     }
-                    if (objCb == NULL) {
-                        objectFile_delete(currObj);
-                    } else {
+                    if (objCb != NULL) {
                         va_list copy;
                         va_copy(copy, args);
                         objCb(currObj, copy);
@@ -127,7 +123,6 @@ bool macho_parseSymtab(struct symtab_command* command,
                     if (currFun.has_value) {
                         function_destroy(&currFun.value);
                     }
-                    objectFile_delete(currObj);
                     va_end(args);
                     return false;
                 }
@@ -149,7 +144,6 @@ bool macho_parseSymtab(struct symtab_command* command,
                 
             case N_FUN: {
                 if (!currFun.has_value) {
-                    if (currObj != NULL) objectFile_delete(currObj);
                     va_end(args);
                     return false;
                 }
