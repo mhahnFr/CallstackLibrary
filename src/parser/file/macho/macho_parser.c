@@ -82,8 +82,6 @@ bool macho_parseSymtab(struct symtab_command* command,
                     va_end(args);
                     return false;
                 }
-                // TODO: a
-//                if (currObj == NULL) {
                 if (funCb != NULL) {
                     va_list copy;
                     va_copy(copy, args);
@@ -92,9 +90,6 @@ bool macho_parseSymtab(struct symtab_command* command,
                 } else {
                     function_destroy(&currFun.value);
                 }
-//                } else {
-//                    objectFile_addFunction(currObj, currFun.value);
-//                }
                 currFun.has_value = false;
                 break;
                 
