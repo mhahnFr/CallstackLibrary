@@ -133,6 +133,7 @@ bool macho_parseSymtab(struct symtab_command* command,
                     if (currFun.has_value) {
                         function_destroy(&currFun.value);
                     }
+                    free(fileName);
                     va_end(args);
                     return false;
                 }

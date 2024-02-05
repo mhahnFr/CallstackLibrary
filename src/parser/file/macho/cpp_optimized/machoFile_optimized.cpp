@@ -48,7 +48,10 @@ public:
             functions.emplace(std::make_pair(function.first.startAddress, dc4c::to_cpp(function)));
         } else {
             if (function.second != nullptr) {
+                function_destroy(&it->second.first);
                 it->second = dc4c::to_cpp(function);
+            } else {
+                function_destroy(&function.first);
             }
         }
     }

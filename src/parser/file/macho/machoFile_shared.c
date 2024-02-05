@@ -37,6 +37,7 @@
 #include <stdlib.h>
 #include <sys/stat.h>
 
+#include "cache.h"
 #include "machoFile.h"
 #include "macho_parser.h"
 #include "macho_utils.h"
@@ -100,6 +101,7 @@ bool machoFile_isLoaded(struct machoFile* self) {
 void machoFile_clearCaches(void) {
     vector_boolString_destroy(&loadedFiles);
     vector_boolString_create(&loadedFiles);
+    macho_cache_destroy();
 }
 
 bool machoFile_addr2String(struct binaryFile* me, void* address, struct callstack_frame* frame) {

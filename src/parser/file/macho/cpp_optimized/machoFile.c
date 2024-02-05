@@ -48,7 +48,10 @@ void machoFile_addFunction(struct machoFile* me, pair_funcFile_t function) {
         vector_pairFuncFile_push_back(&self->functions, function);
     } else {
         if (self->functions.content[i].second == NULL) {
+            function_destroy(&self->functions.content[i].first);
             self->functions.content[i] = function;
+        } else {
+            function_destroy(&function.first);
         }
     }
 }
