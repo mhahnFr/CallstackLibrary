@@ -43,6 +43,20 @@ struct objectFile* macho_cache_findOrAdd(char* fileName) {
     return it;
 }
 
+void macho_cache_delete(struct objectFile* file) {
+    if (cache.objectFiles == file) {
+        cache.objectFiles = cache.objectFiles->next;
+    } else {
+        struct objectFile* prev;
+        for (prev = cache.objectFiles; prev != NULL && prev->next != file; prev = prev->next);
+        
+        if (prev != NULL) {
+            prev->next = file->next;
+        }
+    }
+    objectFile_delete(file);
+}
+
 void macho_cache_destroy(void) {
     struct objectFile* tmp;
     for (struct objectFile* it = cache.objectFiles; it != NULL; it = tmp) {

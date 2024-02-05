@@ -20,9 +20,12 @@
 #ifndef cache_h
 #define cache_h
 
+#include <stdbool.h>
+
 #include "objectFile.h"
 
 struct objectFile* macho_cache_findOrAdd(char* fileName);
+void macho_cache_delete(struct objectFile* file);
 void macho_cache_destroy(void);
 
 #endif /* cache_h */
