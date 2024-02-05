@@ -17,6 +17,8 @@
  * this library, see the file LICENSE.  If not, see <https://www.gnu.org/licenses/>.
  */
 
+#include <string.h>
+
 #include "cache.h"
 
 static struct macho_cache {
@@ -24,6 +26,22 @@ static struct macho_cache {
 } cache = {
     NULL
 };
+
+struct objectFile* macho_cache_findOrAdd(char* fileName) {
+    struct objectFile* it;
+    for (it = cache.objectFiles; it != NULL && strcmp(it->name, fileName) != 0; it = it->next);
+    
+    if (it == NULL) {
+        it = objectFile_new();
+        if (it == NULL) {
+            return NULL;
+        }
+        it->name = fileName;
+        it->next = cache.objectFiles;
+        cache.objectFiles = it;
+    }
+    return it;
+}
 
 void macho_cache_destroy(void) {
     struct objectFile* tmp;

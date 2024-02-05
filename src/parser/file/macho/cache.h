@@ -22,7 +22,7 @@
 
 #include "objectFile.h"
 
-struct objectFile* macho_cache_findOrAdd(const char* fileName);
+struct objectFile* macho_cache_findOrAdd(char* fileName);
 void macho_cache_destroy(void);
 
 #endif /* cache_h */
