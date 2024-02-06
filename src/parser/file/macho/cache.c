@@ -29,7 +29,7 @@ static struct macho_cache {
     NULL
 };
 
-static inline bool macho_cache_isInArchive(char* fileName) {
+static inline bool macho_cache_isInArchive(const char* fileName) {
     if (fileName == NULL) return false;
     
     char* lp = strrchr(fileName, '(');
@@ -38,14 +38,16 @@ static inline bool macho_cache_isInArchive(char* fileName) {
     return lp != NULL && rp != NULL && lp < rp;
 }
 
-static inline char* macho_cache_getArchiveName(char* fileName) {
+static inline char* macho_cache_getArchiveName(const char* fileName) {
     if (fileName == NULL) return NULL;
     
     const char* lp = strrchr(fileName, '(');
     if (lp == NULL) return NULL;
+    
     const size_t size = lp - fileName + 1;
     char* toReturn = malloc(size);
     if (toReturn == NULL) return NULL;
+    
     strlcpy(toReturn, fileName, size);
     toReturn[size - 1] = '\0';
     return toReturn;
