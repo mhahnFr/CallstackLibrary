@@ -21,7 +21,7 @@
 #include <string.h>
 
 #include "cache.h"
-#include <secure/_string.h>
+#include "archive.h"
 
 static struct macho_cache {
     struct objectFile* objectFiles;
@@ -53,11 +53,17 @@ static inline char* macho_cache_getArchiveName(const char* fileName) {
     return toReturn;
 }
 
+static inline void macho_cache_archiveCallback(struct objectFile* file) {
+    file->next = cache.objectFiles;
+    cache.objectFiles = file;
+}
+
 static inline bool macho_cache_loadArchiveFree(char* archiveName) {
-    // TODO: Implement
+    if (archiveName == NULL) return false;
     
+    const bool success = macho_archive_parse(archiveName, macho_cache_archiveCallback);
     free(archiveName);
-    return false;
+    return success;
 }
 
 struct objectFile* macho_cache_findOrAdd(char* fileName) {
