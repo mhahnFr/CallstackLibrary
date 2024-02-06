@@ -17,6 +17,7 @@
  * this library, see the file LICENSE.  If not, see <https://www.gnu.org/licenses/>.
  */
 
+#include <stdbool.h>
 #include <string.h>
 
 #include "cache.h"
@@ -27,11 +28,33 @@ static struct macho_cache {
     NULL
 };
 
+static inline bool macho_cache_isInArchive(char* fileName) {
+    // TODO: Implement
+    return false;
+}
+
+static inline char* macho_cache_getArchiveName(char* fileName) {
+    // TODO: Implement
+    return NULL;
+}
+
+static inline bool macho_cache_loadArchiveFree(char* archiveName) {
+    // TODO: Implement
+    return false;
+}
+
 struct objectFile* macho_cache_findOrAdd(char* fileName) {
     struct objectFile* it;
     for (it = cache.objectFiles; it != NULL && strcmp(it->name, fileName) != 0; it = it->next);
     
     if (it == NULL) {
+        if (macho_cache_isInArchive(fileName)) {
+            char* archiveName = macho_cache_getArchiveName(fileName); // FIXME: This leak!
+            if (macho_cache_loadArchiveFree(archiveName)) {
+                return macho_cache_findOrAdd(fileName);
+            }
+        }
+        
         it = objectFile_new();
         if (it == NULL) {
             return NULL;
