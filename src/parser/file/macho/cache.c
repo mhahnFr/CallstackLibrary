@@ -21,6 +21,7 @@
 #include <string.h>
 
 #include "cache.h"
+#include <secure/_string.h>
 
 static struct macho_cache {
     struct objectFile* objectFiles;
@@ -29,17 +30,31 @@ static struct macho_cache {
 };
 
 static inline bool macho_cache_isInArchive(char* fileName) {
-    // TODO: Implement
-    return false;
+    if (fileName == NULL) return false;
+    
+    char* lp = strrchr(fileName, '(');
+    char* rp = strrchr(fileName, ')');
+    
+    return lp != NULL && rp != NULL && lp < rp;
 }
 
 static inline char* macho_cache_getArchiveName(char* fileName) {
-    // TODO: Implement
-    return NULL;
+    if (fileName == NULL) return NULL;
+    
+    const char* lp = strrchr(fileName, '(');
+    if (lp == NULL) return NULL;
+    const size_t size = lp - fileName + 1;
+    char* toReturn = malloc(size);
+    if (toReturn == NULL) return NULL;
+    strlcpy(toReturn, fileName, size);
+    toReturn[size - 1] = '\0';
+    return toReturn;
 }
 
 static inline bool macho_cache_loadArchiveFree(char* archiveName) {
     // TODO: Implement
+    
+    free(archiveName);
     return false;
 }
 
@@ -49,7 +64,7 @@ struct objectFile* macho_cache_findOrAdd(char* fileName) {
     
     if (it == NULL) {
         if (macho_cache_isInArchive(fileName)) {
-            char* archiveName = macho_cache_getArchiveName(fileName); // FIXME: This leak!
+            char* archiveName = macho_cache_getArchiveName(fileName);
             if (macho_cache_loadArchiveFree(archiveName)) {
                 return macho_cache_findOrAdd(fileName);
             }
