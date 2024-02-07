@@ -143,6 +143,16 @@ static inline bool objectFile_parseMachO(struct objectFile* self,
     return false;
 }
 
+bool objectFile_parseWithBuffer(struct objectFile* self, void* buffer, dwarf_line_callback cb, ...) {
+    if (self == NULL) return false;
+    
+    va_list args;
+    va_start(args, cb);
+    const bool success = objectFile_parseMachO(self, buffer, cb, args);
+    va_end(args);
+    return success;
+}
+
 bool objectFile_parse(struct objectFile* self, dwarf_line_callback cb, ...) {
     if (self == NULL) return false;
     
