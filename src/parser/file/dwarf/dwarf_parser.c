@@ -103,6 +103,7 @@ static inline char* dwarf_stringFrom(struct dwarf_fileNameEntry* file, struct ve
     strncpy(toReturn, directory, size);
     strncat(toReturn, "/", size);
     strncat(toReturn, file->name, size);
+    toReturn[size - 1] = '\0';
     return toReturn;
 }
 
