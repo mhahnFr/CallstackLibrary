@@ -28,15 +28,15 @@
  * This structure represents a DWARF line program entry.
  */
 struct dwarf_lineInfo {
-    /* The address.       */
+    /** The address.       */
     uint64_t address;
-    /* The line number.   */
+    /** The line number.   */
     uint64_t line;
-    /* The column number. */
+    /** The column number. */
     uint64_t column;
-    /* The isa value.     */
+    /** The isa value.     */
     uint64_t isa;
-    /* The discriminator. */
+    /** The discriminator. */
     uint64_t discriminator;
     
     /**
@@ -46,15 +46,15 @@ struct dwarf_lineInfo {
      */
     const char* fileName;
     
-    /* Whether this position is a recommended breakpoint position. */
+    /** Whether this position is a recommended breakpoint position. */
     bool isStmt;
-    /* Whether this position is a basic block.                     */
+    /** Whether this position is a basic block.                     */
     bool basicBlock;
-    /* Whether this position is the end of a sequence.             */
+    /** Whether this position is the end of a sequence.             */
     bool endSequence;
-    /* Whether this position is the end of a prologue.             */
+    /** Whether this position is the end of a prologue.             */
     bool prologueEnd;
-    /* Whether this position is the beginning of an epilogue.      */
+    /** Whether this position is the beginning of an epilogue.      */
     bool epilogueBegin;
 };
 
