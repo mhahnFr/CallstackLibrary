@@ -70,6 +70,17 @@ public:
         }
     }
     
+    inline auto parseBuffer(void* buffer) -> bool {
+        const auto result = objectFile_parseWithBuffer(&self, buffer, dwarfLineCallback, this);
+        if (!result) {
+            for (auto& elem : ownFunctions) {
+                function_destroy(&elem);
+            }
+            ownFunctions.clear();
+        }
+        return result;
+    }
+    
     inline void addOwnFunction(function&& function) {
         ownFunctions.emplace_back(function);
     }
@@ -131,6 +142,10 @@ objectFile * objectFile_new() {
     } catch (...) {
         return nullptr;
     }
+}
+
+auto objectFile_parseBuffer(objectFile* self, void* buffer) -> bool {
+    return reinterpret_cast<ObjectFile*>(self->priv)->parseBuffer(buffer);
 }
 
 void objectFile_addOwnFunction(objectFile* self, function func) {
