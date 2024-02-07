@@ -137,6 +137,9 @@ bool macho_parseSymtab(struct symtab_command* command,
                     va_end(args);
                     return false;
                 }
+                if (currObj->name != fileName) {
+                    free(fileName);
+                }
                 currObj->directory = path == NULL ? NULL : strdup(path);
                 currObj->sourceFile = sourceFileName == NULL ? NULL : strdup(sourceFileName);
                 currObj->lastModified = entry.n_value;
