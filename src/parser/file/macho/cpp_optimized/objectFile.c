@@ -99,6 +99,19 @@ static inline const char* objectFile_getSourceFileName(struct objectFile_private
     return self->mainSourceFileCache = toReturn;
 }
 
+bool objectFile_parseBuffer(struct objectFile* me, void* buffer) {
+    struct objectFile_private* self = me->priv;
+    
+    const bool result = objectFile_parseWithBuffer(me, buffer, objectFile_dwarfLineCallback, self);
+    if (!result) {
+        for (size_t i = 0; i < self->ownFunctions.count; ++i) {
+            function_destroy(&self->ownFunctions.content[i]);
+        }
+        vector_function_clear(&self->ownFunctions);
+    }
+    return result;
+}
+
 optional_debugInfo_t objectFile_getDebugInfo(struct objectFile* me, uint64_t address, struct function function) {
     optional_debugInfo_t toReturn = { .has_value = false };
     
