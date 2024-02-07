@@ -76,8 +76,7 @@ static inline bool macho_archive_parseImpl(void* buffer, const char* fileName, c
         file->name = macho_archive_constructName(name, fileName);
         free(name);
         
-        // TODO: Make the object file parse itself with file
-        
+        file->parsed = objectFile_parseBuffer(file, objectFile);
         cb(file);
         
         counter += strtoll(fileHeader->ar_size, NULL, 10) - nameLength; // FIXME: Length!
