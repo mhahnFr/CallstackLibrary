@@ -60,22 +60,30 @@ static inline bool macho_archive_parseImpl(void* buffer, const char* fileName, c
     }
     counter += SARMAG;
     
-    const size_t exSize = strlen(AR_EFMT1);
+    const size_t exSize  = strlen(AR_EFMT1),
+                 endSize = strlen(ARFMAG);
     while (counter < totalSize) {
         struct ar_hdr* fileHeader = buffer + counter;
         counter += sizeof(struct ar_hdr);
+        if (strncmp(fileHeader->ar_fmag, ARFMAG, endSize) != 0) return false;
         
         char* name;
         size_t nameLength = 0;
         if (strncmp(fileHeader->ar_name, AR_EFMT1, exSize) == 0) {
             const size_t size = macho_archive_parseNumber(fileHeader->ar_name + exSize, (sizeof fileHeader->ar_name / sizeof(char)) - exSize, 10);
-            name = malloc(size + 1); // TODO: Abort parsing, but what's with the already parsed object files?
+            name = malloc(size + 1);
+            if (name == NULL) {
+                return false;
+            }
             strlcpy(name, buffer + counter, size + 1);
             counter += size;
             nameLength = size;
         } else {
             // TODO: Gather the correct length
-            name = malloc(17); // TODO: Abort parsing, but what's with the already parsed object files?
+            name = malloc(17);
+            if (name == NULL) {
+                return false;
+            }
             strlcpy(name, fileHeader->ar_name, 17);
         }
         
