@@ -40,6 +40,7 @@ static inline char* macho_archive_constructName(const char* fileName, const char
     strlcat(toReturn, "(", size);
     strlcat(toReturn, fileName, size);
     strlcat(toReturn, ")", size);
+    toReturn[size - 1] = '\0';
     return toReturn;
 }
 
@@ -50,6 +51,12 @@ static inline size_t macho_archive_parseNumber(const char* string, const size_t 
     copy[length] = '\0';
     
     return strtoll(copy, NULL, base);
+}
+
+static inline size_t macho_archive_stringLength(const char* string, const size_t maximumLength) {
+    long i;
+    for (i = maximumLength - 1; i >= 0 && string[i] == ' '; --i);
+    return i + 1;
 }
 
 static inline bool macho_archive_parseImpl(void* buffer, const char* fileName, const size_t totalSize, macho_archive_callback cb) {
@@ -76,15 +83,17 @@ static inline bool macho_archive_parseImpl(void* buffer, const char* fileName, c
                 return false;
             }
             strlcpy(name, buffer + counter, size + 1);
+            name[size] = '\0';
             counter += size;
             nameLength = size;
         } else {
-            // TODO: Gather the correct length
-            name = malloc(17);
+            const size_t nameLength = macho_archive_stringLength(fileHeader->ar_name, sizeof fileHeader->ar_name);
+            name = malloc(nameLength + 1);
             if (name == NULL) {
                 return false;
             }
-            strlcpy(name, fileHeader->ar_name, 17);
+            strlcpy(name, fileHeader->ar_name, nameLength + 1);
+            name[nameLength] = '\0';
         }
         
         void* objectFile = buffer + counter;
