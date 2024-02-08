@@ -19,9 +19,7 @@
 
 #include "../machoFile.h"
 
-#include <forward_list>
 #include <map>
-#include <vector>
 
 class MachoFile {
     machoFile self;
