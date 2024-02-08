@@ -22,9 +22,11 @@
 
 #include <stdbool.h>
 
+#include "machoFile.h"
 #include "objectFile.h"
 
 struct objectFile* macho_cache_findOrAdd(char* fileName);
+bool macho_cache_isLoaded(struct machoFile* file);
 void macho_cache_delete(struct objectFile* file);
 void macho_cache_destroy(void);
 

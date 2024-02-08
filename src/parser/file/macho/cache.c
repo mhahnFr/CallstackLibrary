@@ -20,13 +20,17 @@
 #include <stdbool.h>
 #include <string.h>
 
-#include "cache.h"
+#include <mach-o/dyld.h>
+
 #include "archive.h"
+#include "cache.h"
+#include "vector_boolString.h"
 
 static struct macho_cache {
     struct objectFile* objectFiles;
+    struct vector_boolString loadedFiles;
 } cache = {
-    NULL
+    NULL, vector_initializer
 };
 
 static inline bool macho_cache_isInArchive(const char* fileName) {
@@ -66,6 +70,14 @@ static inline bool macho_cache_loadArchiveFree(char* archiveName) {
     return success;
 }
 
+static inline void macho_cache_loadLoadedFiles(void) {
+    const uint32_t size = _dyld_image_count();
+    
+    for (uint32_t i = 0; i < size; ++i) {
+        vector_boolString_push_back(&cache.loadedFiles, (pair_boolString_t) { true, _dyld_get_image_name(i) });
+    }
+}
+
 struct objectFile* macho_cache_findOrAdd(char* fileName) {
     struct objectFile* it;
     for (it = cache.objectFiles; it != NULL && strcmp(it->name, fileName) != 0; it = it->next);
@@ -89,6 +101,19 @@ struct objectFile* macho_cache_findOrAdd(char* fileName) {
     return it;
 }
 
+bool macho_cache_isLoaded(struct machoFile* file) {
+    if (cache.loadedFiles.count == 0) {
+        macho_cache_loadLoadedFiles();
+    }
+    
+    vector_iterate(pair_boolString_t, &cache.loadedFiles, {
+        if (strcmp(element->second, file->_.fileName) == 0) {
+            return element->first;
+        }
+    })
+    return false;
+}
+
 void macho_cache_delete(struct objectFile* file) {
     if (cache.objectFiles == file) {
         cache.objectFiles = cache.objectFiles->next;
@@ -110,4 +135,6 @@ void macho_cache_destroy(void) {
         objectFile_delete(it);
     }
     cache.objectFiles = NULL;
+    vector_boolString_destroy(&cache.loadedFiles);
+    vector_boolString_create(&cache.loadedFiles);
 }

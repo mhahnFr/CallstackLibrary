@@ -17,7 +17,6 @@
  * this library, see the file LICENSE.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-#include <mach-o/dyld.h>
 #include <mach-o/fat.h>
 #include <mach-o/loader.h>
 
@@ -41,11 +40,8 @@
 #include "machoFile.h"
 #include "macho_parser.h"
 #include "macho_utils.h"
-#include "vector_boolString.h"
 
 #include "../../callstack_parser.h"
-
-static struct vector_boolString loadedFiles = { 0, 0, NULL };
 
 /**
  * Caches the represented file from disk and parses it.
@@ -77,30 +73,26 @@ static inline bool machoFile_loadFile(struct machoFile* self) {
                           : machoFile_readAndParseFile(self);
 }
 
-static inline void machoFile_loadLoadedFiles(void) {
-    const uint32_t size = _dyld_image_count();
+void machoFile_create(struct machoFile* self, const char* fileName) {
+    binaryFile_create(&self->_);
     
-    for (uint32_t i = 0; i < size; ++i) {
-        vector_boolString_push_back(&loadedFiles, (pair_boolString_t) { true, _dyld_get_image_name(i) });
-    }
-}
-
-bool machoFile_isLoaded(struct machoFile* self) {
-    if (loadedFiles.count == 0) {
-        machoFile_loadLoadedFiles();
-    }
+    self->_.type     = MACHO_FILE;
+    self->_.concrete = self;
+    self->_.fileName = fileName;
     
-    vector_iterate(pair_boolString_t, &loadedFiles, {
-        if (strcmp(element->second, self->_.fileName) == 0) {
-            return element->first;
-        }
-    })
-    return false;
+    self->_.addr2String = &machoFile_addr2String;
+    self->_.destroy     = &machoFile_destroy;
+    self->_.deleter     = &machoFile_delete;
+    
+    self->addressOffset    = 0;
+    self->linkedit_fileoff = 0;
+    self->text_vmaddr      = 0;
+    self->linkedit_vmaddr  = 0;
+    self->priv             = NULL;
+    self->inMemory         = macho_cache_isLoaded(self);
 }
 
 void machoFile_clearCaches(void) {
-    vector_boolString_destroy(&loadedFiles);
-    vector_boolString_create(&loadedFiles);
     macho_cache_destroy();
 }
 

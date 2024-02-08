@@ -26,8 +26,8 @@
 #include "../debugInfo.h"
 #include "../UInt64Vector.h"
 
-#include "objectFile.h"
 #include "FunctionVector.h"
+#include "objectFile.h"
 #include "OptionalFuncFilePair.h"
 
 #ifdef __cplusplus
@@ -116,31 +116,12 @@ void machoFile_destroy(struct binaryFile * self);
  */
 void machoFile_delete(struct binaryFile * self);
 
-bool machoFile_isLoaded(struct machoFile* self);
-
 /**
  * Initializes the given Mach-O file structure.
  *
  * @param self the Mach-O file structure to be initialized
  */
-static inline void machoFile_create(struct machoFile* self, const char* fileName) {
-    binaryFile_create(&self->_);
-    
-    self->_.type     = MACHO_FILE;
-    self->_.concrete = self;
-    self->_.fileName = fileName;
-    
-    self->_.addr2String = &machoFile_addr2String;
-    self->_.destroy     = &machoFile_destroy;
-    self->_.deleter     = &machoFile_delete;
-    
-    self->addressOffset    = 0;
-    self->linkedit_fileoff = 0;
-    self->text_vmaddr      = 0;
-    self->linkedit_vmaddr  = 0;
-    self->priv             = NULL;
-    self->inMemory         = machoFile_isLoaded(self);
-}
+void machoFile_create(struct machoFile* self, const char* fileName);
 
 void machoFile_clearCaches(void);
 
