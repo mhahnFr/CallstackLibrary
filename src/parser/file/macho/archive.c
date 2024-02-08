@@ -43,6 +43,15 @@ static inline char* macho_archive_constructName(const char* fileName, const char
     return toReturn;
 }
 
+static inline size_t macho_archive_parseNumber(const char* string, const size_t length, const int base) {
+    char copy[length + 1];
+    
+    strlcpy(copy, string, length + 1);
+    copy[length] = '\0';
+    
+    return strtoll(copy, NULL, base);
+}
+
 static inline bool macho_archive_parseImpl(void* buffer, const char* fileName, const size_t totalSize, macho_archive_callback cb) {
     size_t counter = 0;
     const char* magic = buffer;
@@ -59,7 +68,7 @@ static inline bool macho_archive_parseImpl(void* buffer, const char* fileName, c
         char* name;
         size_t nameLength = 0;
         if (strncmp(fileHeader->ar_name, AR_EFMT1, exSize) == 0) {
-            const size_t size = strtoll(fileHeader->ar_name + exSize, NULL, 10); // FIXME: Length!
+            const size_t size = macho_archive_parseNumber(fileHeader->ar_name + exSize, (sizeof fileHeader->ar_name / sizeof(char)) - exSize, 10);
             name = malloc(size + 1); // TODO: Abort parsing, but what's with the already parsed object files?
             strlcpy(name, buffer + counter, size + 1);
             counter += size;
@@ -72,14 +81,14 @@ static inline bool macho_archive_parseImpl(void* buffer, const char* fileName, c
         
         void* objectFile = buffer + counter;
         struct objectFile* file = objectFile_new();
-        file->lastModified = strtoll(fileHeader->ar_date, NULL, 10); // FIXME: Length!
+        file->lastModified = macho_archive_parseNumber(fileHeader->ar_date, sizeof fileHeader->ar_date / sizeof(char), 10);
         file->name = macho_archive_constructName(name, fileName);
         free(name);
         
         file->parsed = objectFile_parseBuffer(file, objectFile);
         cb(file);
         
-        counter += strtoll(fileHeader->ar_size, NULL, 10) - nameLength; // FIXME: Length!
+        counter += macho_archive_parseNumber(fileHeader->ar_size, sizeof fileHeader->ar_size / sizeof(char), 10) - nameLength;
         for (; counter < totalSize && *((char*) (buffer + counter)) == '\n'; ++counter);
     }
     return true;
