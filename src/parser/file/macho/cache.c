@@ -24,13 +24,15 @@
 
 #include "archive.h"
 #include "cache.h"
+#include "vector_string.h"
 #include "vector_boolString.h"
 
 static struct macho_cache {
     struct objectFile* objectFiles;
     struct vector_boolString loadedFiles;
+    struct vector_string loadedArchives;
 } cache = {
-    NULL, vector_initializer
+    NULL, vector_initializer, vector_initializer
 };
 
 static inline bool macho_cache_isInArchive(const char* fileName) {
@@ -62,11 +64,10 @@ static inline void macho_cache_archiveCallback(struct objectFile* file) {
     cache.objectFiles = file;
 }
 
-static inline bool macho_cache_loadArchiveFree(char* archiveName) {
+static inline bool macho_cache_loadArchive(const char* archiveName) {
     if (archiveName == NULL) return false;
     
     const bool success = macho_archive_parse(archiveName, macho_cache_archiveCallback);
-    free(archiveName);
     return success;
 }
 
@@ -78,6 +79,15 @@ static inline void macho_cache_loadLoadedFiles(void) {
     }
 }
 
+static inline bool macho_cache_archiveLoaded(const char* archiveName) {
+    vector_iterate(const char*, &cache.loadedArchives, {
+        if (strcmp(archiveName, *element) == 0) {
+            return true;
+        }
+    })
+    return false;
+}
+
 struct objectFile* macho_cache_findOrAdd(char* fileName) {
     struct objectFile* it;
     for (it = cache.objectFiles; it != NULL && strcmp(it->name, fileName) != 0; it = it->next);
@@ -85,8 +95,11 @@ struct objectFile* macho_cache_findOrAdd(char* fileName) {
     if (it == NULL) {
         if (macho_cache_isInArchive(fileName)) {
             char* archiveName = macho_cache_getArchiveName(fileName);
-            if (macho_cache_loadArchiveFree(archiveName)) {
+            if (!macho_cache_archiveLoaded(archiveName) && macho_cache_loadArchive(archiveName)) {
+                vector_string_push_back(&cache.loadedArchives, archiveName);
                 return macho_cache_findOrAdd(fileName);
+            } else {
+                free(archiveName);
             }
         }
         
@@ -137,4 +150,7 @@ void macho_cache_destroy(void) {
     cache.objectFiles = NULL;
     vector_boolString_destroy(&cache.loadedFiles);
     vector_boolString_create(&cache.loadedFiles);
+    vector_iterate(const char*, &cache.loadedArchives, free((void*) *element);)
+    vector_string_destroy(&cache.loadedArchives);
+    vector_string_create(&cache.loadedArchives);
 }
