@@ -122,6 +122,7 @@
 		BFAD631D2B5BD7FE00EE8E14 /* fileNameEntry.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = fileNameEntry.h; sourceTree = "<group>"; };
 		BFAD65412B5A717F00024242 /* dwarf_parser.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = dwarf_parser.h; sourceTree = "<group>"; };
 		BFAD65422B5A717F00024242 /* dwarf_parser.c */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.c; path = dwarf_parser.c; sourceTree = "<group>"; };
+		BFAD6F5A2B7A175F0016D689 /* vector_string.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = vector_string.h; sourceTree = "<group>"; };
 		BFADAB062ADDA923004B4695 /* lcs_dlfcn.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = lcs_dlfcn.h; sourceTree = "<group>"; };
 		BFB01C162B70E64E00AD0090 /* cache.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = cache.h; sourceTree = "<group>"; };
 		BFB01C172B70E64E00AD0090 /* cache.c */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.c; path = cache.c; sourceTree = "<group>"; };
@@ -195,6 +196,7 @@
 				BFB01C172B70E64E00AD0090 /* cache.c */,
 				BFABCB742B72421100790948 /* archive.h */,
 				BFABCB752B72421100790948 /* archive.c */,
+				BFAD6F5A2B7A175F0016D689 /* vector_string.h */,
 			);
 			path = macho;
 			sourceTree = "<group>";
