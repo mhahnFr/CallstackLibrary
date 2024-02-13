@@ -25,9 +25,32 @@
 #include "machoFile.h"
 #include "objectFile.h"
 
+/**
+ * Finds or adds the object file object with the given file name.
+ *
+ * @param fileName the name of the object file
+ * @return the object file object or `NULL` if unable to allocate
+ */
 struct objectFile* macho_cache_findOrAdd(char* fileName);
+
+/**
+ * Returns whether the given MachO file is loaded by the dynamic loader.
+ *
+ * @param file the file to be checked
+ * @return whether the file is loaded
+ */
 bool macho_cache_isLoaded(struct machoFile* file);
+
+/**
+ * Deletes the given object file object from the cache.
+ *
+ * @param file the file to be deleted
+ */
 void macho_cache_delete(struct objectFile* file);
+
+/**
+ * Destroys the whole cache and its contents.
+ */
 void macho_cache_destroy(void);
 
 #endif /* cache_h */
