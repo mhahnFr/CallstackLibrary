@@ -1,7 +1,7 @@
 /*
  * Callstack Library - Library creating human-readable call stacks.
  *
- * Copyright (C) 2022 - 2023  mhahnFr
+ * Copyright (C) 2022 - 2024  mhahnFr
  *
  * This file is part of the CallstackLibrary. This library is free software:
  * you can redistribute it and/or modify it under the terms of the
@@ -45,15 +45,6 @@ static inline struct callstack * callstack_allocate(void) {
  */
 void callstack_createWithBacktrace(struct callstack * self,
                                    void * trace[], size_t traceLength);
-
-/**
- * @brief Calculates the length of all the strings inside of the translated callstack.
- *
- * Returns 0 if the callstack is not translated.
- *
- * @return The total length of the string array inside the callstack.
- */
-size_t callstack_getTotalStringLength(struct callstack * self);
 
 /**
  * @brief Creates a backtrace into the given buffer.
