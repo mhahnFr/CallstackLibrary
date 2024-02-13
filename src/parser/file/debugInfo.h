@@ -46,7 +46,6 @@ typedef_optional_named(sourceFileInfo, struct sourceFileInfo);
  */
 struct debugInfo {
     /** The deducted name of the function.                    */
-//    const char* functionName;
     struct function function;
     
     /** The source file info if it was successfully deducted. */
