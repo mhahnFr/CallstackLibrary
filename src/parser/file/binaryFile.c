@@ -32,6 +32,7 @@
  #define LCS_ELF
 #endif
 
+/** A list of the already parsed files. */
 static struct binaryFile* parsedFiles = NULL;
 
 struct binaryFile * binaryFile_new(const char * fileName, void* startAddress) {
@@ -48,7 +49,7 @@ struct binaryFile * binaryFile_new(const char * fileName, void* startAddress) {
 #endif
     
     if (toReturn != NULL) {
-        toReturn->fileName = fileName;
+        toReturn->fileName     = fileName;
         toReturn->startAddress = startAddress;
     }
     return toReturn;
