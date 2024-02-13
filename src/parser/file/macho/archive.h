@@ -24,8 +24,23 @@
 
 #include "objectFile.h"
 
+/**
+ * @brief The function signature of the callback function called when an
+ * object file was extracted.
+ *
+ * Takes an object file as parameter.
+ */
 typedef void (*macho_archive_callback)(struct objectFile*);
 
+/**
+ * @brief Parses the given archive file.
+ *
+ * Calls the callback once an object file has been extracted and parsed.
+ *
+ * @param fileName the name of the archive file
+ * @param cb the callback to be called with an object file
+ * @return whether the archive was parsed successfully
+ */
 bool macho_archive_parse(const char* fileName, macho_archive_callback cb);
 
 #endif /* archive_h */
