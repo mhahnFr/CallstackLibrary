@@ -59,7 +59,14 @@ struct binaryFile {
     /** A pointer to the next binary file structure.                */
     struct binaryFile * next;
     
-    /** Translating method, heavily WIP.                            */
+    /**
+     * @brief The translating method.
+     *
+     * Attempts to translate the given address into the given callstack
+     * frame object.
+     *
+     * Returns whether the address could be translated.
+     */
     bool (*addr2String)(struct binaryFile*, void*, struct callstack_frame*);
     /** The appropriate deinitializing method.                      */
     void (*destroy)    (struct binaryFile *);
@@ -119,7 +126,20 @@ char * binaryFile_toAbsolutePath(char * path);
  */
 char * binaryFile_toAbsolutePathFree(char * path);
 
+/**
+ * @brief Finds the appropriate binary file object in the cache.
+ *
+ * If no object was found, it is created and added to the cache.
+ *
+ * @param fileName the name of the file
+ * @param startAddress the start address
+ * @return the binary file object or `NULL` if unable to allocate
+ */
 struct binaryFile* binaryFile_findOrAddFile(const char* fileName, void* startAddress);
+
+/**
+ * Clears the caches created by the binary file implementations.
+ */
 void binaryFile_clearCaches(void);
 
 #ifdef __cplusplus
