@@ -88,6 +88,7 @@ static inline optional_function_t objectFile_findOwnFunction(struct objectFile_p
 
 static inline const char* objectFile_getSourceFileName(struct objectFile_private* self) {
     if (self->mainSourceFileCache != NULL) return self->mainSourceFileCache;
+    if (self->_.directory == NULL || self->_.sourceFile == NULL) return "<< Unknown >>";
     
     const size_t size = strlen(self->_.directory) + strlen(self->_.sourceFile) + 1;
     char* toReturn = malloc(size);
@@ -96,6 +97,7 @@ static inline const char* objectFile_getSourceFileName(struct objectFile_private
     }
     strlcpy(toReturn, self->_.directory, size);
     strlcat(toReturn, self->_.sourceFile, size);
+    toReturn[size - 1] = '\0';
     return self->mainSourceFileCache = toReturn;
 }
 
@@ -113,13 +115,8 @@ bool objectFile_parseBuffer(struct objectFile* me, void* buffer) {
 }
 
 optional_debugInfo_t objectFile_getDebugInfo(struct objectFile* me, uint64_t address, struct function function) {
-    optional_debugInfo_t toReturn = {
-        true, (struct debugInfo) {
-            .function = function,
-            .sourceFileInfo.has_value = false
-        }
-    };
-    struct objectFile_private* self = (struct objectFile_private*) me->priv;
+    optional_debugInfo_t       toReturn = { .has_value = false };
+    struct objectFile_private* self     = me->priv;
     
     if (!me->parsed) {
         if (!(me->parsed = objectFile_parseIntern(self))) {
@@ -145,14 +142,17 @@ optional_debugInfo_t objectFile_getDebugInfo(struct objectFile* me, uint64_t add
     if (closest == NULL) {
         return toReturn;
     }
-    toReturn.value.sourceFileInfo = (optional_sourceFileInfo_t) {
-        true, (struct sourceFileInfo) {
-            closest->line,
-            closest->column,
-            closest->fileName == NULL ? objectFile_getSourceFileName(self) : closest->fileName
+    return (optional_debugInfo_t) {
+        true, (struct debugInfo) {
+            function, (optional_sourceFileInfo_t) {
+                true, (struct sourceFileInfo) {
+                    closest->line,
+                    closest->column,
+                    closest->fileName == NULL ? objectFile_getSourceFileName(self) : closest->fileName
+                }
+            }
         }
     };
-    return toReturn;
 }
 
 void objectFile_destroy(struct objectFile * me) {

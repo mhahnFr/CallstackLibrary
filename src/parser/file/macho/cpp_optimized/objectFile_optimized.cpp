@@ -54,7 +54,11 @@ class ObjectFile {
     
     inline auto getName() -> const std::string& {
         if (!fullName.has_value()) {
-            fullName = std::string(self.directory) + std::string(self.sourceFile);
+            if (self.directory == nullptr || self.sourceFile == nullptr) {
+                fullName = "";
+            } else {
+                fullName = std::string(self.directory) + std::string(self.sourceFile);
+            }
         }
         return *fullName;
     }
@@ -86,19 +90,14 @@ public:
     }
     
     inline auto getDebugInfo(const function& function, uint64_t address) {
-        optional_debugInfo_t toReturn = {
-            true, {
-                .function = function,
-                .sourceFileInfo.has_value = false
-            }
-        };
+        optional_debugInfo_t toReturn = { .has_value = false };
         
         if (!self.parsed) {
             if (!(self.parsed = parse())) {
                 return toReturn;
             }
         }
-        const auto ownFunction = std::find_if(ownFunctions.cbegin(), ownFunctions.cend(), [&](const auto value) {
+        const auto ownFunction = std::find_if(ownFunctions.cbegin(), ownFunctions.cend(), [&](const auto& value) {
             return std::string(value.linkedName) == std::string(function.linkedName);
         });
         if (ownFunction == ownFunctions.cend()) {
@@ -110,14 +109,17 @@ public:
         if (closest == lineInfos.end()) {
             return toReturn;
         }
-        toReturn.value.sourceFileInfo = (optional_sourceFileInfo_t) {
+        toReturn = {
             true, {
-                closest->second.line,
-                closest->second.column,
-                closest->second.fileName == nullptr ? getName().c_str() : closest->second.fileName
+                function, {
+                    true, {
+                        closest->second.line,
+                        closest->second.column,
+                        closest->second.fileName == nullptr ? getName().c_str() : closest->second.fileName
+                    }
+                }
             }
         };
-        
         return toReturn;
     }
     
