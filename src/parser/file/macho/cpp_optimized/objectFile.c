@@ -113,9 +113,7 @@ bool objectFile_parseBuffer(struct objectFile* me, void* buffer) {
 }
 
 optional_debugInfo_t objectFile_getDebugInfo(struct objectFile* me, uint64_t address, struct function function) {
-    optional_debugInfo_t toReturn = { .has_value = false };
-    
-    toReturn = (optional_debugInfo_t) {
+    optional_debugInfo_t toReturn = {
         true, (struct debugInfo) {
             .function = function,
             .sourceFileInfo.has_value = false

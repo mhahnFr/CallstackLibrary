@@ -86,8 +86,7 @@ public:
     }
     
     inline auto getDebugInfo(const function& function, uint64_t address) {
-        optional_debugInfo_t toReturn = { .has_value = false };
-        toReturn = {
+        optional_debugInfo_t toReturn = {
             true, {
                 .function = function,
                 .sourceFileInfo.has_value = false
