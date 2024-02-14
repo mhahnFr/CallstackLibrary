@@ -62,6 +62,12 @@ public:
             return { .has_value = false };
         }
         optional_debugInfo_t info = { .has_value = false };
+        if (machoFile_getDSYMBundle(&self) != nullptr) {
+            info = objectFile_getDebugInfo(self.dSYMFile.file, address, it->second.first);
+            if (info.has_value) {
+                return info;
+            }
+        }
         if (it->second.second != nullptr) {
             info = objectFile_getDebugInfo(it->second.second, address, it->second.first);
         }
@@ -101,8 +107,11 @@ auto machoFile_getDebugInfo(machoFile* me, void* address) -> optional_debugInfo_
     return reinterpret_cast<MachoFile*>(me->priv)->getDebugInfo(address);
 }
 
-void machoFile_destroy(binaryFile*) {
-    // Nothing to do so far.    - mhahnFr
+void machoFile_destroy(binaryFile* me) {
+    auto self = reinterpret_cast<machoFile*>(me->concrete);
+    if (self->dSYMFile.file != nullptr) {
+        objectFile_delete(self->dSYMFile.file);
+    }
 }
 
 void machoFile_delete(binaryFile* me) {
