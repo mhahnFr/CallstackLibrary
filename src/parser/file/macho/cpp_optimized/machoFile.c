@@ -83,7 +83,17 @@ optional_debugInfo_t machoFile_getDebugInfo(struct machoFile* me, void* address)
             }
         };
     }
-    return objectFile_getDebugInfo(closest->second, searchAddress, closest->first);
+    optional_debugInfo_t info = { .has_value = false };
+    info = objectFile_getDebugInfo(closest->second, searchAddress, closest->first);
+    if (!info.has_value) {
+        info = (optional_debugInfo_t) {
+            true, (struct debugInfo) {
+                closest->first,
+                .sourceFileInfo.has_value = false
+            }
+        };
+    }
+    return info;
 }
 
 void machoFile_destroy(struct binaryFile * me) {
