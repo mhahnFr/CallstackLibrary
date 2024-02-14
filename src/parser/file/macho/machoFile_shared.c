@@ -154,6 +154,11 @@ static inline bool machoFile_handleSegment(struct machoFile *       self,
     if (strcmp(segment->segname, SEG_PAGEZERO) == 0) {
         self->addressOffset = macho_maybeSwap(32, bitsReversed, segment->vmaddr)
                             + macho_maybeSwap(32, bitsReversed, segment->vmsize);
+    } else if (strcmp(segment->segname, SEG_LINKEDIT) == 0) {
+        self->linkedit_vmaddr  = macho_maybeSwap(32, bitsReversed, segment->vmaddr);
+        self->linkedit_fileoff = macho_maybeSwap(32, bitsReversed, segment->fileoff);
+    } else if (strcmp(segment->segname, SEG_TEXT) == 0) {
+        self->text_vmaddr = macho_maybeSwap(32, bitsReversed, segment->vmaddr);
     }
     return true;
 }
