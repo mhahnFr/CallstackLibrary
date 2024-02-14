@@ -90,6 +90,43 @@ void machoFile_create(struct machoFile* self, const char* fileName) {
     self->linkedit_vmaddr  = 0;
     self->priv             = NULL;
     self->inMemory         = macho_cache_isLoaded(self);
+    
+    self->dSYMFile.triedParsing = false;
+    self->dSYMFile.file         = NULL;
+}
+
+static inline struct objectFile* machoFile_findDSYMBundle(struct machoFile* self) {
+    const char* const dsymAmendment = ".dSYM/Contents/Resources/DWARF/";
+    const char* rawName = strrchr(self->_.fileName, '/');
+    if (rawName == NULL) return NULL;
+    rawName++;
+    const size_t size = strlen(self->_.fileName) + strlen(dsymAmendment) + strlen(rawName) + 1;
+    char* name = malloc(size);
+    if (name == NULL) return NULL;
+    strlcpy(name, self->_.fileName, size);
+    strlcat(name, dsymAmendment, size);
+    strlcat(name, rawName, size);
+    name[size - 1] = '\0';
+    
+    struct stat s;
+    if (stat(name, &s) != 0) {
+        free(name);
+        return NULL;
+    }
+    
+    struct objectFile* toReturn = objectFile_new();
+    if (toReturn == NULL) return NULL;
+    
+    toReturn->name = name;
+    return toReturn;
+}
+
+struct objectFile* machoFile_getDSYMBundle(struct machoFile* self) {
+    if (!self->dSYMFile.triedParsing) {
+        self->dSYMFile.file = machoFile_findDSYMBundle(self);
+        self->dSYMFile.triedParsing = true;
+    }
+    return self->dSYMFile.file;
 }
 
 void machoFile_clearCaches(void) {

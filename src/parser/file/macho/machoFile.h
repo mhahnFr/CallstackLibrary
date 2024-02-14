@@ -47,6 +47,10 @@ struct machoFile {
     uint64_t linkedit_vmaddr;
     uint64_t linkedit_fileoff;
     uint64_t text_vmaddr;
+    struct {
+        bool triedParsing;
+        struct objectFile* file;
+    } dSYMFile;
     
     /** Pointer to the private part of this object.                   */
     void* priv;
@@ -100,6 +104,8 @@ void machoFile_addFunction(struct machoFile* self, pair_funcFile_t function);
  */
 optional_debugInfo_t machoFile_getDebugInfo(struct machoFile* self,
                                             void*             address);
+
+struct objectFile* machoFile_getDSYMBundle(struct machoFile* self);
 
 /**
  * Deinitializes the given binary file structure if it is a Mach-O file structure.
