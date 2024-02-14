@@ -314,7 +314,7 @@ static inline bool dwarf_parseLineProgramV4(void*    begin,
     return true;
 }
 
-bool dwarf_parseLineProgram(void* begin, dwarf_line_callback cb, va_list args, size_t sectionSize) {
+bool dwarf_parseLineProgram(void* begin, dwarf_line_callback cb, va_list args, uint64_t sectionSize) {
     size_t counter = 0;
     
     const uint32_t size = *((uint32_t*) begin);

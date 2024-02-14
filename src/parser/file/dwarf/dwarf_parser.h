@@ -22,6 +22,7 @@
 
 #include <stdarg.h>
 #include <stdbool.h>
+#include <stdint.h>
 
 #include "dwarf_lineInfo.h"
 
@@ -39,6 +40,6 @@ typedef void (*dwarf_line_callback)(struct dwarf_lineInfo, va_list);
  * @param cb the callback called when a line info has been deducted
  * @param args additional arguments that are passed to the callback function
  */
-bool dwarf_parseLineProgram(void* begin, dwarf_line_callback cb, va_list args, size_t sectionSize);
+bool dwarf_parseLineProgram(void* begin, dwarf_line_callback cb, va_list args, uint64_t sectionSize);
 
 #endif /* dwarf_parser_h */
