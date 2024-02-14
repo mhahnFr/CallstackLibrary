@@ -39,7 +39,9 @@ static inline bool objectFile_handleSegment64(struct segment_command_64* command
         
         if (strcmp("__DWARF", section->segname) == 0 &&
             strcmp("__debug_line", section->sectname) == 0) {
-            if (!dwarf_parseLineProgram(baseAddress + macho_maybeSwap(32, bitsSwapped, section->offset), cb, args)) {
+            if (!dwarf_parseLineProgram(baseAddress + macho_maybeSwap(32, bitsSwapped, section->offset), 
+                                        cb, args,
+                                        macho_maybeSwap(64, bitsSwapped, section->size))) {
                 return false;
             }
         }
@@ -58,7 +60,9 @@ static inline bool objectFile_handleSegment(struct segment_command* command,
         
         if (strcmp("__DWARF", section->segname) == 0 &&
             strcmp("__debug_line", section->sectname) == 0) {
-            if (!dwarf_parseLineProgram(baseAddress + macho_maybeSwap(32, bitsSwapped, section->offset), cb, args)) {
+            if (!dwarf_parseLineProgram(baseAddress + macho_maybeSwap(32, bitsSwapped, section->offset), 
+                                        cb, args,
+                                        macho_maybeSwap(32, bitsSwapped, section->size))) {
                 return false;
             }
         }

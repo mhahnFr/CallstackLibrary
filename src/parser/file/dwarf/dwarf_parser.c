@@ -88,11 +88,11 @@ static inline int64_t getLEB128(void* begin, size_t* counter) {
  *
  * @param file the file name entry
  * @param directories the vector with the directories
- * @return an allocated full path or `NULL` if the allocation failed or the file entry's index was `0`
+ * @return an allocated full path or `NULL` if the allocation failed or the file entry's name was `NULL`
  */
 static inline char* dwarf_stringFrom(struct dwarf_fileNameEntry* file, struct vector_string* directories) {
     if (file->dirIndex == 0) {
-        return NULL;
+        return file->name == NULL ? NULL : strdup(file->name);
     }
     const char* directory = directories->content[file->dirIndex - 1];
     const size_t size  = strlen(directory) + strlen(file->name) + 2;
@@ -114,6 +114,7 @@ static inline char* dwarf_stringFrom(struct dwarf_fileNameEntry* file, struct ve
  * @param counter the start of the line program in the given memory
  * @param actualSize the total size of the line program
  * @param bit64 whether to parse as 64 Bit version
+ * @param sectionSize the total size of the section
  * @param cb the callback to be called when a line entry has been deducted
  * @param args the arguments to pass to the callback
  */
@@ -121,6 +122,7 @@ static inline bool dwarf_parseLineProgramV4(void*    begin,
                                             size_t   counter,
                                             uint64_t actualSize, 
                                             bool     bit64,
+                                            uint64_t sectionSize,
                                             dwarf_line_callback cb, va_list args) {
     uint64_t headerLength;
     if (bit64) {
@@ -305,10 +307,14 @@ static inline bool dwarf_parseLineProgramV4(void*    begin,
     vector_uint8_destroy(&stdOpcodeLengths);
     vector_string_destroy(&includeDirectories);
     vector_dwarfFileEntry_destroy(&fileNames);
+    
+    if (counter < sectionSize - 2 - (bit64 ? 12 : 4)) {
+        return dwarf_parseLineProgram(begin + counter, cb, args, sectionSize - 2 - (bit64 ? 12 : 4) - counter);
+    }
     return true;
 }
 
-bool dwarf_parseLineProgram(void* begin, dwarf_line_callback cb, va_list args) {
+bool dwarf_parseLineProgram(void* begin, dwarf_line_callback cb, va_list args, size_t sectionSize) {
     size_t counter = 0;
     
     const uint32_t size = *((uint32_t*) begin);
@@ -328,7 +334,7 @@ bool dwarf_parseLineProgram(void* begin, dwarf_line_callback cb, va_list args) {
     counter += 2;
     
     switch (version) {
-        case 4: return dwarf_parseLineProgramV4(begin, counter, actualSize, bit64, cb, args);
+        case 4: return dwarf_parseLineProgramV4(begin, counter, actualSize, bit64, sectionSize, cb, args);
             
         default: return false;
     }
