@@ -75,15 +75,22 @@ optional_debugInfo_t machoFile_getDebugInfo(struct machoFile* me, void* address)
     
     if (closest == NULL) {
         return (optional_debugInfo_t) { .has_value = false };
-    } else if (closest->second == NULL) {
+    }
+    optional_debugInfo_t info = { .has_value = false };
+    if (machoFile_getDSYMBundle(me) != NULL) {
+        info = objectFile_getDebugInfo(me->dSYMFile.file, searchAddress, closest->first);
+        if (info.has_value) {
+            return info;
+        }
+    }
+    if (closest->second == NULL) {
         return (optional_debugInfo_t) {
             true, (struct debugInfo) {
-                .function = closest->first,
+                closest->first,
                 .sourceFileInfo.has_value = false
             }
         };
     }
-    optional_debugInfo_t info = { .has_value = false };
     info = objectFile_getDebugInfo(closest->second, searchAddress, closest->first);
     if (!info.has_value) {
         info = (optional_debugInfo_t) {
@@ -105,6 +112,9 @@ void machoFile_destroy(struct binaryFile * me) {
     
     vector_iterate(pair_funcFile_t, &self->functions, function_destroy(&element->first);)
     vector_pairFuncFile_destroy(&self->functions);
+    if (tmp->dSYMFile.file != NULL) {
+        objectFile_delete(tmp->dSYMFile.file);
+    }
 }
 
 void machoFile_delete(struct binaryFile * self) {
