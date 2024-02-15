@@ -137,8 +137,13 @@ bool macho_parseSymtab(struct symtab_command* command,
                     va_end(args);
                     return false;
                 }
-                currObj->directory = path == NULL ? NULL : strdup(path);
-                currObj->sourceFile = sourceFileName == NULL ? NULL : strdup(sourceFileName);
+                if (currObj->directory == NULL) {
+                    currObj->directory = path == NULL ? NULL : strdup(path);
+                }
+                if (currObj->sourceFile == NULL) {
+                    currObj->sourceFile = sourceFileName == NULL ? NULL : strdup(sourceFileName);
+                }
+                // Last modified is the same - to be checked by macho_cache_findOrAdd().
                 currObj->lastModified = entry.n_value;
                 break;
             }
