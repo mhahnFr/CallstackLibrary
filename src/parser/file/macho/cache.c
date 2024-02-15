@@ -88,16 +88,16 @@ static inline bool macho_cache_archiveLoaded(const char* archiveName) {
     return false;
 }
 
-struct objectFile* macho_cache_findOrAdd(const char* fileName) {
+struct objectFile* macho_cache_findOrAdd(const char* fileName, uint64_t lastModified) {
     struct objectFile* it;
     for (it = cache.objectFiles; it != NULL && strcmp(it->name, fileName) != 0; it = it->next);
     
-    if (it == NULL) {
+    if (it == NULL || it->lastModified != lastModified) {
         if (macho_cache_isInArchive(fileName)) {
             char* archiveName = macho_cache_getArchiveName(fileName);
             if (!macho_cache_archiveLoaded(archiveName) && macho_cache_loadArchive(archiveName)) {
                 vector_string_push_back(&cache.loadedArchives, archiveName);
-                return macho_cache_findOrAdd(fileName);
+                return macho_cache_findOrAdd(fileName, lastModified);
             } else {
                 free(archiveName);
             }
@@ -107,8 +107,9 @@ struct objectFile* macho_cache_findOrAdd(const char* fileName) {
         if (it == NULL) {
             return NULL;
         }
-        it->name = strdup(fileName);
-        it->next = cache.objectFiles;
+        it->name          = strdup(fileName);
+        it->lastModified  = lastModified;
+        it->next          = cache.objectFiles;
         cache.objectFiles = it;
     }
     return it;

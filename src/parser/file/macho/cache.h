@@ -21,6 +21,7 @@
 #define cache_h
 
 #include <stdbool.h>
+#include <stdint.h>
 
 #include "machoFile.h"
 #include "objectFile.h"
@@ -31,7 +32,7 @@
  * @param fileName the name of the object file
  * @return the object file object or `NULL` if unable to allocate
  */
-struct objectFile* macho_cache_findOrAdd(const char* fileName);
+struct objectFile* macho_cache_findOrAdd(const char* fileName, uint64_t lastModified);
 
 /**
  * Returns whether the given MachO file is loaded by the dynamic loader.

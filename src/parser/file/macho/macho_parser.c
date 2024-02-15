@@ -127,9 +127,10 @@ bool macho_parseSymtab(struct symtab_command* command,
                     return false;
                 }
                 
-                const char* fileName = stringBegin + entry.n_strx;
-                // TODO: Different time stamps mean different object file objects!
-                currObj = macho_cache_findOrAdd(fileName);
+                const char*    fileName     = stringBegin + entry.n_strx;
+                const uint64_t lastModified = entry.n_value;
+                
+                currObj = macho_cache_findOrAdd(fileName, lastModified);
                 if (currObj == NULL) {
                     if (currFun.has_value) {
                         function_destroy(&currFun.value);
@@ -143,8 +144,6 @@ bool macho_parseSymtab(struct symtab_command* command,
                 if (currObj->sourceFile == NULL) {
                     currObj->sourceFile = sourceFileName == NULL ? NULL : strdup(sourceFileName);
                 }
-                // Last modified is the same - to be checked by macho_cache_findOrAdd().
-                currObj->lastModified = entry.n_value;
                 break;
             }
                 
