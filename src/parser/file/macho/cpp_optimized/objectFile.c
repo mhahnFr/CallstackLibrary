@@ -123,11 +123,16 @@ optional_debugInfo_t objectFile_getDebugInfo(struct objectFile* me, uint64_t add
             return toReturn;
         }
     }
-    optional_function_t ownFunction = objectFile_findOwnFunction(self, function.linkedName);
-    if (!ownFunction.has_value) {
-        return toReturn;
+    uint64_t lineAddress;
+    if (me->isDsymBundle) {
+        lineAddress = address;
+    } else {
+        optional_function_t ownFunction = objectFile_findOwnFunction(self, function.linkedName);
+        if (!ownFunction.has_value) {
+            return toReturn;
+        }
+        lineAddress = ownFunction.value.startAddress + address - function.startAddress;
     }
-    const uint64_t lineAddress = ownFunction.value.startAddress + address - function.startAddress;
     
     struct dwarf_lineInfo* closest = NULL;
     for (size_t i = 0; i < self->lineInfos.count; ++i) {

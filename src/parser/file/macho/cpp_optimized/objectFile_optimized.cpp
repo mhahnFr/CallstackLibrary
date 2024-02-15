@@ -97,13 +97,18 @@ public:
                 return toReturn;
             }
         }
-        const auto ownFunction = std::find_if(ownFunctions.cbegin(), ownFunctions.cend(), [&](const auto& value) {
-            return std::string(value.linkedName) == std::string(function.linkedName);
-        });
-        if (ownFunction == ownFunctions.cend()) {
-            return toReturn;
+        uint64_t lineAddress;
+        if (self.isDsymBundle) {
+            lineAddress = address;
+        } else {
+            const auto ownFunction = std::find_if(ownFunctions.cbegin(), ownFunctions.cend(), [&](const auto& value) {
+                return std::string(value.linkedName) == std::string(function.linkedName);
+            });
+            if (ownFunction == ownFunctions.cend()) {
+                return toReturn;
+            }
+            lineAddress = ownFunction->startAddress + address - function.startAddress;
         }
-        const uint64_t lineAddress = ownFunction->startAddress + address - function.startAddress;
         
         const auto closest = lineInfos.upper_bound(lineAddress);
         if (closest == lineInfos.end()) {
