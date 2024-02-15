@@ -92,7 +92,7 @@ struct objectFile* macho_cache_findOrAdd(const char* fileName, uint64_t lastModi
     struct objectFile* it;
     for (it = cache.objectFiles; it != NULL && strcmp(it->name, fileName) != 0; it = it->next);
     
-    if (it == NULL || it->lastModified != lastModified) {
+    if (it == NULL || it->lastModified != (time_t) lastModified) {
         if (macho_cache_isInArchive(fileName)) {
             char* archiveName = macho_cache_getArchiveName(fileName);
             if (!macho_cache_archiveLoaded(archiveName) && macho_cache_loadArchive(archiveName)) {
