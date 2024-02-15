@@ -88,7 +88,7 @@ static inline bool macho_cache_archiveLoaded(const char* archiveName) {
     return false;
 }
 
-struct objectFile* macho_cache_findOrAdd(char* fileName) {
+struct objectFile* macho_cache_findOrAdd(const char* fileName) {
     struct objectFile* it;
     for (it = cache.objectFiles; it != NULL && strcmp(it->name, fileName) != 0; it = it->next);
     
@@ -107,7 +107,7 @@ struct objectFile* macho_cache_findOrAdd(char* fileName) {
         if (it == NULL) {
             return NULL;
         }
-        it->name = fileName;
+        it->name = strdup(fileName);
         it->next = cache.objectFiles;
         cache.objectFiles = it;
     }

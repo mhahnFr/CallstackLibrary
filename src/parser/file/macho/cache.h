@@ -31,7 +31,7 @@
  * @param fileName the name of the object file
  * @return the object file object or `NULL` if unable to allocate
  */
-struct objectFile* macho_cache_findOrAdd(char* fileName);
+struct objectFile* macho_cache_findOrAdd(const char* fileName);
 
 /**
  * Returns whether the given MachO file is loaded by the dynamic loader.

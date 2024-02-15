@@ -127,18 +127,15 @@ bool macho_parseSymtab(struct symtab_command* command,
                     return false;
                 }
                 
-                char* fileName = strdup(stringBegin + entry.n_strx);
+                const char* fileName = stringBegin + entry.n_strx;
+                // TODO: Different time stamps mean different object file objects!
                 currObj = macho_cache_findOrAdd(fileName);
                 if (currObj == NULL) {
                     if (currFun.has_value) {
                         function_destroy(&currFun.value);
                     }
-                    free(fileName);
                     va_end(args);
                     return false;
-                }
-                if (currObj->name != fileName) {
-                    free(fileName);
                 }
                 currObj->directory = path == NULL ? NULL : strdup(path);
                 currObj->sourceFile = sourceFileName == NULL ? NULL : strdup(sourceFileName);
