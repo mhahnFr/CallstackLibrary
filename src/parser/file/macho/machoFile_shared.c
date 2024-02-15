@@ -117,7 +117,8 @@ static inline struct objectFile* machoFile_findDSYMBundle(struct machoFile* self
     struct objectFile* toReturn = objectFile_new();
     if (toReturn == NULL) return NULL;
     
-    toReturn->name = name;
+    toReturn->name         = name;
+    toReturn->isDsymBundle = true;
     return toReturn;
 }
 

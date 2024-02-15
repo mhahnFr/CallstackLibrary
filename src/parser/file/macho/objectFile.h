@@ -48,6 +48,7 @@ struct objectFile {
     time_t lastModified;
     
     bool parsed;
+    bool isDsymBundle;
     
     /** A pointer to the underlying object.             */
     void * priv;
@@ -75,6 +76,7 @@ static inline void objectFile_create(struct objectFile * self) {
     self->next         = NULL;
     self->lastModified = 0;
     self->parsed       = false;
+    self->isDsymBundle = false;
 }
 
 void objectFile_addOwnFunction(struct objectFile* self, struct function function);
