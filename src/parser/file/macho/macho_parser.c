@@ -44,7 +44,7 @@
 
 bool macho_parseSymtab(struct symtab_command* command,
                        void*                  baseAddress,
-                       uint64_t offset,
+                       uint64_t               offset,
                        bool                   bytesSwapped,
                        bool                   bit64,
                        macho_addObjectFile    objCb,
@@ -59,10 +59,10 @@ bool macho_parseSymtab(struct symtab_command* command,
     va_list args;
     va_start(args, funCb);
     
-    const char* path = NULL;
-    const char* sourceFileName = NULL;
-    struct optional_function currFun = { .has_value = false };
-    struct objectFile*       currObj = NULL;
+    const char*              path           = NULL;
+    const char*              sourceFileName = NULL;
+    struct optional_function currFun        = { .has_value = false };
+    struct objectFile*       currObj        = NULL;
     
     for (uint32_t i = 0; i < nsyms; ++i) {
         struct macho_parser_nlist entry = macho_parser_nlist_from(baseAddress + symoff + offset + i * macho_parser_nlist_sizeof(bit64), bit64, bytesSwapped);
