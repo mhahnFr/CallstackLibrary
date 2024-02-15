@@ -28,9 +28,9 @@
 #include "vector_boolString.h"
 
 static struct macho_cache {
-    struct objectFile* objectFiles;
+    struct objectFile*       objectFiles;
     struct vector_boolString loadedFiles;
-    struct vector_string loadedArchives;
+    struct vector_string     loadedArchives;
 } cache = {
     NULL, vector_initializer, vector_initializer
 };
@@ -67,8 +67,7 @@ static inline void macho_cache_archiveCallback(struct objectFile* file) {
 static inline bool macho_cache_loadArchive(const char* archiveName) {
     if (archiveName == NULL) return false;
     
-    const bool success = macho_archive_parse(archiveName, macho_cache_archiveCallback);
-    return success;
+    return macho_archive_parse(archiveName, macho_cache_archiveCallback);
 }
 
 static inline void macho_cache_loadLoadedFiles(void) {
