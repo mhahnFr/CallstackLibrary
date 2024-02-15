@@ -151,7 +151,6 @@ void macho_cache_destroy(void) {
     cache.objectFiles = NULL;
     vector_boolString_destroy(&cache.loadedFiles);
     vector_boolString_create(&cache.loadedFiles);
-    vector_iterate(const char*, &cache.loadedArchives, free((void*) *element);)
-    vector_string_destroy(&cache.loadedArchives);
+    vector_string_destroyWith(&cache.loadedArchives, (void (*)(const char*)) free);
     vector_string_create(&cache.loadedArchives);
 }
