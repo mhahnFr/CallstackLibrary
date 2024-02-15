@@ -164,7 +164,7 @@ bool objectFile_parse(struct objectFile* self, dwarf_line_callback cb, ...) {
     if (stat(self->name, &fileStats) != 0) {
         return false;
     }
-    if (self->lastModified != 0 && fileStats.st_mtime > self->lastModified) {
+    if (self->lastModified != 0 && fileStats.st_mtime != self->lastModified) {
         return false;
     }
     void* buffer = malloc(fileStats.st_size);
