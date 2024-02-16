@@ -68,6 +68,12 @@ static inline bool machoFile_readAndParseFile(struct machoFile* self) {
     return toReturn;
 }
 
+/**
+ * Loads and parses the Mach-O file represented by the given Mach-O file abstraction object.
+ *
+ * @param self the Mach-O file abstraction object
+ * @return whether the file was parsed successfully
+ */
 static inline bool machoFile_loadFile(struct machoFile* self) {
     return self->inMemory ? machoFile_parseFile(self, self->_.startAddress)
                           : machoFile_readAndParseFile(self);
@@ -95,6 +101,12 @@ void machoFile_create(struct machoFile* self, const char* fileName) {
     self->dSYMFile.file         = NULL;
 }
 
+/**
+ * Returns an object file abstraction object representing the dSYM DWARF file of the given Mach-O file.
+ *
+ * @param self the Mach-O file abstraction object
+ * @return the object file object or `NULL` if either no dSYM bundle was found or the allocation failed
+ */
 static inline struct objectFile* machoFile_findDSYMBundle(struct machoFile* self) {
     const char* const dsymAmendment = ".dSYM/Contents/Resources/DWARF/";
     const char* rawName = strrchr(self->_.fileName, '/');
@@ -224,6 +236,12 @@ static inline bool machoFile_handleSegment64(struct machoFile *          self,
     return true;
 }
 
+/**
+ * Adds the given function / object file pair to the Mach-O file abstraction object passed via the `va_list`.
+ *
+ * @param function the function / object file object pair
+ * @param args the argument list
+ */
 static inline void machoFile_addFunctionImpl(struct pair_funcFile function, va_list args) {
     struct machoFile* self = va_arg(args, void*);
     
