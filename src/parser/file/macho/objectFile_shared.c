@@ -29,8 +29,8 @@
 #include "macho_utils.h"
 
 static inline bool objectFile_handleSegment64(struct segment_command_64* command,
-                                              void* baseAddress,
-                                              bool  bitsSwapped,
+                                              void*                      baseAddress,
+                                              bool                       bitsSwapped,
                                               dwarf_line_callback cb, va_list args) {
     const uint32_t nsects = macho_maybeSwap(32, bitsSwapped, command->nsects);
     
@@ -50,8 +50,8 @@ static inline bool objectFile_handleSegment64(struct segment_command_64* command
 }
 
 static inline bool objectFile_handleSegment(struct segment_command* command, 
-                                            void* baseAddress,
-                                            bool  bitsSwapped,
+                                            void*                   baseAddress,
+                                            bool                    bitsSwapped,
                                             dwarf_line_callback cb, va_list args) {
     const uint32_t nsects = macho_maybeSwap(32, bitsSwapped, command->nsects);
     
@@ -75,8 +75,8 @@ static inline void objectFile_addFunctionCallback(struct pair_funcFile f, va_lis
 }
 
 static inline bool objectFile_parseMachOImpl64(struct objectFile* self,
-                                               void* baseAddress,
-                                               bool  bitsSwapped,
+                                               void*              baseAddress,
+                                               bool               bitsSwapped,
                                                dwarf_line_callback cb, va_list args) {
     struct mach_header_64* header = baseAddress;
     struct load_command*   lc     = (void*) header + sizeof(struct mach_header_64);
@@ -107,8 +107,8 @@ static inline bool objectFile_parseMachOImpl64(struct objectFile* self,
 }
 
 static inline bool objectFile_parseMachOImpl(struct objectFile* self,
-                                             void* baseAddress,
-                                             bool  bitsSwapped,
+                                             void*              baseAddress,
+                                             bool               bitsSwapped,
                                              dwarf_line_callback cb, va_list args) {
     struct mach_header*  header = baseAddress;
     struct load_command* lc     = (void*) header + sizeof(struct mach_header);
@@ -139,9 +139,15 @@ static inline bool objectFile_parseMachOImpl(struct objectFile* self,
 }
 
 static inline bool objectFile_parseMachO(struct objectFile* self,
-                                         void* buffer,
+                                         void*              buffer,
                                          dwarf_line_callback cb, va_list args) {
     struct mach_header* header = buffer;
+    
+    const uint32_t fileType = macho_maybeSwap(32, header->magic == MH_CIGAM || header->magic == MH_CIGAM_64, header->filetype);
+    if (fileType != MH_OBJECT && fileType != MH_DSYM) {
+        return false;
+    }
+    
     switch (header->magic) {
         case MH_MAGIC: return objectFile_parseMachOImpl(self, buffer, false, cb, args);
         case MH_CIGAM: return objectFile_parseMachOImpl(self, buffer, true,  cb, args);
