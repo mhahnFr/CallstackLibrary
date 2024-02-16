@@ -27,9 +27,10 @@
 #include "objectFile.h"
 
 /**
- * Finds or adds the object file object with the given file name.
+ * Finds or adds the object file object with the given file name and the given timestamp.
  *
  * @param fileName the name of the object file
+ * @param lastModified the timestamp of the last modification
  * @return the object file object or `NULL` if unable to allocate
  */
 struct objectFile* macho_cache_findOrAdd(const char* fileName, uint64_t lastModified);
