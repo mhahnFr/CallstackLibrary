@@ -77,7 +77,7 @@ optional_debugInfo_t machoFile_getDebugInfo(struct machoFile* me, void* address)
         return (optional_debugInfo_t) { .has_value = false };
     }
     optional_debugInfo_t info = { .has_value = false };
-    if (machoFile_getDSYMBundle(me) != NULL) {
+    if (machoFile_getDSYMBundle(me) != NULL && memcmp(me->uuid, me->dSYMFile.file->uuid, 16) == 0) {
         info = objectFile_getDebugInfo(me->dSYMFile.file, searchAddress, closest->first);
         if (info.has_value) {
             return info;

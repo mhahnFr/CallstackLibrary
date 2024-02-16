@@ -19,6 +19,7 @@
 
 #include "../machoFile.h"
 
+#include <cstring>
 #include <map>
 
 class MachoFile {
@@ -62,7 +63,7 @@ public:
             return { .has_value = false };
         }
         optional_debugInfo_t info = { .has_value = false };
-        if (machoFile_getDSYMBundle(&self) != nullptr) {
+        if (machoFile_getDSYMBundle(&self) != nullptr && memcmp(self.dSYMFile.file->uuid, self.uuid, 16) == 0) {
             info = objectFile_getDebugInfo(self.dSYMFile.file, address, it->second.first);
             if (info.has_value) {
                 return info;
