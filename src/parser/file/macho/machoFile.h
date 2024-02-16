@@ -51,6 +51,7 @@ struct machoFile {
         bool triedParsing;
         struct objectFile* file;
     } dSYMFile;
+    uint8_t uuid[16];
     
     /** Pointer to the private part of this object.                   */
     void* priv;

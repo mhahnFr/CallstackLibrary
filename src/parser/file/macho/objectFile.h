@@ -47,6 +47,8 @@ struct objectFile {
     
     time_t lastModified;
     
+    uint8_t uuid[16];
+    
     bool parsed;
     bool isDsymBundle;
     
