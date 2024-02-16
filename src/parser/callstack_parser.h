@@ -29,6 +29,7 @@
  * The structure of a callstack parser.
  */
 struct callstack_parser {
+    /** Indicates whether to clear the caches on destruction. */
     bool clearCaches;
 };
 
