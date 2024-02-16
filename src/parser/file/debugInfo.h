@@ -27,7 +27,7 @@
 #include "../../../DC4C/optional.h"
 
 /**
- * Representa the deducted information about the source file,
+ * Represents the deducted information about the source file.
  */
 struct sourceFileInfo {
     /** The line number.               */
