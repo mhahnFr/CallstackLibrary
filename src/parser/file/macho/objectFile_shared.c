@@ -92,6 +92,11 @@ static inline bool objectFile_parseMachOImpl64(struct objectFile* self,
             case LC_SYMTAB:
                 result = macho_parseSymtab((void*) lc, baseAddress, 0, bitsSwapped, true, NULL, objectFile_addFunctionCallback, self);
                 break;
+                
+            case LC_UUID: 
+                memcpy(&self->uuid, &((struct uuid_command*) ((void*) lc))->uuid, 16);
+                result = true;
+                break;
         }
         if (!result) {
             return false;
@@ -118,6 +123,11 @@ static inline bool objectFile_parseMachOImpl(struct objectFile* self,
                 
             case LC_SYMTAB:
                 result = macho_parseSymtab((void*) lc, baseAddress, 0, bitsSwapped, false, NULL, objectFile_addFunctionCallback, self);
+                break;
+                
+            case LC_UUID:
+                memcpy(&self->uuid, &((struct uuid_command*) ((void*) lc))->uuid, 16);
+                result = true;
                 break;
         }
         if (!result) {

@@ -257,6 +257,11 @@ static inline bool machoFile_parseFileImpl(struct machoFile * self,
                                            self->inMemory ? (self->linkedit_vmaddr - self->text_vmaddr) - self->linkedit_fileoff : 0,
                                            bitsReversed, false, NULL, machoFile_addFunctionImpl, self);
                 break;
+                
+            case LC_UUID:
+                memcpy(&self->uuid, &((struct uuid_command*) ((void*) lc))->uuid, 16);
+                result = true;
+                break;
         }
         if (!result) {
             return false;
@@ -292,6 +297,11 @@ static inline bool machoFile_parseFileImpl64(struct machoFile * self,
                 result = macho_parseSymtab((void*) lc, baseAddress, 
                                            self->inMemory ? (self->linkedit_vmaddr - self->text_vmaddr) - self->linkedit_fileoff : 0,
                                            bitsReversed, true, NULL, machoFile_addFunctionImpl, self);
+                break;
+                
+            case LC_UUID:
+                memcpy(&self->uuid, &((struct uuid_command*) ((void*) lc))->uuid, 16);
+                result = true;
                 break;
         }
         if (!result) {
