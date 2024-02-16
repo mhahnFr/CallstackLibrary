@@ -63,7 +63,7 @@ public:
             return { .has_value = false };
         }
         optional_debugInfo_t info = { .has_value = false };
-        if (machoFile_getDSYMBundle(&self) != nullptr && memcmp(self.dSYMFile.file->uuid, self.uuid, 16) == 0) {
+        if (machoFile_getDSYMBundle(&self) != nullptr && memcmp(objectFile_getUUID(self.dSYMFile.file), self.uuid, 16) == 0) {
             info = objectFile_getDebugInfo(self.dSYMFile.file, address, it->second.first);
             if (info.has_value) {
                 return info;

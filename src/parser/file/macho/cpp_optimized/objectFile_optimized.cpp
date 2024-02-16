@@ -128,6 +128,13 @@ public:
         return toReturn;
     }
     
+    inline auto getUUID() -> uint8_t* {
+        if (!self.parsed) {
+            self.parsed = parse();
+        }
+        return self.uuid;
+    }
+    
     inline operator objectFile *() {
         return &self;
     }
@@ -160,6 +167,10 @@ void objectFile_addOwnFunction(objectFile* self, function func) {
 
 auto objectFile_getDebugInfo(objectFile* me, uint64_t address, function function) -> optional_debugInfo_t {
     return reinterpret_cast<ObjectFile*>(me->priv)->getDebugInfo(function, address);
+}
+
+auto objectFile_getUUID(objectFile* me) -> uint8_t* {
+    return reinterpret_cast<ObjectFile*>(me->priv)->getUUID();
 }
 
 void objectFile_destroy(objectFile * self) {

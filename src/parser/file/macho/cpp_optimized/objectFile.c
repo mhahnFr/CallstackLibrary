@@ -160,6 +160,13 @@ optional_debugInfo_t objectFile_getDebugInfo(struct objectFile* me, uint64_t add
     };
 }
 
+uint8_t* objectFile_getUUID(struct objectFile* me) {
+    if (!me->parsed) {
+        me->parsed = objectFile_parseIntern(me->priv);
+    }
+    return me->uuid;
+}
+
 void objectFile_destroy(struct objectFile * me) {
     struct objectFile_private * self = (struct objectFile_private *) me->priv;
 

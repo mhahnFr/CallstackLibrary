@@ -79,6 +79,8 @@ static inline void objectFile_create(struct objectFile * self) {
     self->lastModified = 0;
     self->parsed       = false;
     self->isDsymBundle = false;
+    
+    bzero(self->uuid, 16);
 }
 
 void objectFile_addOwnFunction(struct objectFile* self, struct function function);
@@ -87,6 +89,8 @@ bool objectFile_parseBuffer(struct objectFile* self, void* buffer);
 
 bool objectFile_parse(struct objectFile* self, dwarf_line_callback cb, ...);
 bool objectFile_parseWithBuffer(struct objectFile* self, void* buffer, dwarf_line_callback cb, ...);
+
+uint8_t* objectFile_getUUID(struct objectFile* self);
 
 optional_debugInfo_t objectFile_getDebugInfo(struct objectFile* self, uint64_t address, struct function function);
 
