@@ -1,7 +1,7 @@
 /*
- * Callstack Library - A library creating human readable call stacks.
+ * Callstack Library - Library creating human-readable call stacks.
  *
- * Copyright (C) 2022 - 2023  mhahnFr
+ * Copyright (C) 2022 - 2024  mhahnFr
  *
  * This file is part of the CallstackLibrary. This library is free software:
  * you can redistribute it and/or modify it under the terms of the
@@ -20,10 +20,6 @@
 #ifndef callstack_type_h
 #define callstack_type_h
 
-#ifdef __cplusplus
-extern "C" {
-#endif
-
 /**
  * The type of the callstack.
  */
@@ -35,9 +31,5 @@ enum callstack_type {
     /** Not translated.                       */
     NONE
 };
-
-#ifdef __cplusplus
-} // extern "C"
-#endif
 
 #endif /* callstack_type_h */
