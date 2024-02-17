@@ -38,23 +38,27 @@ extern "C" {
  * This structure represents an object file.
  */
 struct objectFile {
-    /** The name of the corresponding source file.      */
+    /** The name of the corresponding source file.              */
     char * sourceFile;
-    /** The directory of the corresponding source file. */
+    /** The directory of the corresponding source file.         */
     char * directory;
-    /** The full path of the represented object file.   */
+    /** The full path of the represented object file.           */
     char * name;
     
+    /** The timestamp of the last modification.                 */
     time_t lastModified;
     
+    /** The UUID of the represented Mach-O object file.         */
     uint8_t uuid[16];
     
+    /** Whether the file was successfully parsed.               */
     bool parsed;
+    /** Whether the represented file is part of a .dSYM bundle. */
     bool isDsymBundle;
     
-    /** A pointer to the underlying object.             */
+    /** A pointer to the underlying object.                     */
     void * priv;
-    /** Pointer to the next element in a list.          */
+    /** Pointer to the next element in a list.                  */
     struct objectFile * next;
 };
 
@@ -83,15 +87,70 @@ static inline void objectFile_create(struct objectFile * self) {
     bzero(self->uuid, 16);
 }
 
+/**
+ * Adds the given function to the given object file.
+ *
+ * @param self the object file object
+ * @param function the function to be added
+ */
 void objectFile_addOwnFunction(struct objectFile* self, struct function function);
 
+/**
+ * Parses the given buffer into the given object file object.
+ *
+ * @param self the object file object
+ * @param buffer the Mach-O buffer to be parsed
+ * @return whether the parsing was successful
+ */
 bool objectFile_parseBuffer(struct objectFile* self, void* buffer);
 
+/**
+ * @brief Parses the Mach-O file represented by the given object file object.
+ *
+ * The DWARF line information is extracted and for every line entry the given
+ * callback is called with the additionally given arguments.
+ *
+ * @param self the object file object to be parsed
+ * @param cb the callback to be called for every DWARF line entry
+ * @return whether the parsing was successful
+ */
 bool objectFile_parse(struct objectFile* self, dwarf_line_callback cb, ...);
+
+/**
+ * @brief Parses the given buffer into the given object file object.
+ *
+ * The DWARF line information is extracted and for every line entry the given
+ * callback is called with the additionally given arguments.
+ *
+ * @param self the object file object
+ * @param buffer the Mach-O buffer
+ * @param cb the callback to be called for DWARF line entries
+ * @return whether the buffer was parsed successfully
+ */
 bool objectFile_parseWithBuffer(struct objectFile* self, void* buffer, dwarf_line_callback cb, ...);
 
+/**
+ * @brief Returns the UUID of the given object file object.
+ *
+ * Prefer using this method since the object file needs to be
+ * parsed before the UUID is available.
+ *
+ * @param self the object file object
+ * @return the Mach-O UUID
+ */
 uint8_t* objectFile_getUUID(struct objectFile* self);
 
+/**
+ * @brief Extracts the debug information for the given address inside the given function
+ * from the given object file object.
+ *
+ * If no information could be deducted, an empty optional is returned.
+ *
+ * @param self the object file object
+ * @param address the address inside the function
+ * @param function the function
+ * @return the optionally deducted debug information
+ */
 optional_debugInfo_t objectFile_getDebugInfo(struct objectFile* self, uint64_t address, struct function function);
 
 /**
