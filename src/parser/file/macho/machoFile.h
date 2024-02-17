@@ -38,29 +38,38 @@ extern "C" {
  * This structure represents a Mach-O binary file.
  */
 struct machoFile {
-    /** The super part of this structure.                             */
+    /** The super part of this structure.                                       */
     struct binaryFile _;
     
-    /** The address offset between Mach-O file and loaded executable. */
+    /** The address offset between Mach-O file and loaded executable.           */
     uint64_t addressOffset;
+    /** Whether the represented file is currently loaded by the dynamic loader. */
     bool inMemory;
+    /** The VM address of the linkedit segment.                                 */
     uint64_t linkedit_vmaddr;
+    /** The file offset of the linkedit segment.                                */
     uint64_t linkedit_fileoff;
+    /** The VM address of the text segment.                                     */
     uint64_t text_vmaddr;
+    /** Information about the dSYM bundle file.                                 */
     struct {
+        /** Whether the file was already tried to be deducted. */
         bool triedParsing;
+        /** The object file representation.                    */
         struct objectFile* file;
     } dSYMFile;
+    /** The UUID of the represented Mach-O file.                                */
     uint8_t uuid[16];
     
-    /** Pointer to the private part of this object.                   */
+    /** Pointer to the private part of this object.                             */
     void* priv;
 };
 
 /**
  * Allocates and initializes a Mach-O file structure.
  *
- * @return the allocated Mach-I file structure or `NULL` on error
+ * @param fileName the name of the file
+ * @return the allocated Mach-O file structure or `NULL` on error
  */
 struct machoFile * machoFile_new(const char* fileName);
 
@@ -75,7 +84,15 @@ static inline struct machoFile* machoFileOrNull(struct binaryFile * self) {
     return (struct machoFile*) (self->type == MACHO_FILE ? self->concrete : NULL);
 }
 
-/* Heavily WIP. */
+/**
+ * Stores all debug information that is possible to deduct about the given address 
+ * into the given callstack frame object.
+ *
+ * @param self the binary file the given address is in
+ * @param address the address about which to find debug information
+ * @param frame the callstack frame object to store the debug information in
+ * @return whether it was possible to deduct some debug information
+ */
 bool machoFile_addr2String(struct binaryFile* self, void* address, struct callstack_frame* frame);
 
 /**
@@ -89,10 +106,10 @@ bool machoFile_addr2String(struct binaryFile* self, void* address, struct callst
 bool machoFile_parseFile(struct machoFile * self, void * baseAddress);
 
 /**
- * Adds the given function to the given Mach-O file structure.
+ * Adds the given function / object file pair to the given Mach-O file structure.
  *
  * @param self the Mach-O file structure
- * @param function the function to be added
+ * @param function the function / object file pair to be added
  */
 void machoFile_addFunction(struct machoFile* self, pair_funcFile_t function);
 
@@ -106,6 +123,13 @@ void machoFile_addFunction(struct machoFile* self, pair_funcFile_t function);
 optional_debugInfo_t machoFile_getDebugInfo(struct machoFile* self,
                                             void*             address);
 
+/**
+ * Returns the object file object representing the dSYM bundle debug
+ * information file for the given Mach-O file.
+ *
+ * @param self the Mach-O file abstraction structure
+ * @return the object file object representing the dSYM bundle debug file or `NULL` if none was found or the allocation failed
+ */
 struct objectFile* machoFile_getDSYMBundle(struct machoFile* self);
 
 /**
@@ -130,6 +154,9 @@ void machoFile_delete(struct binaryFile * self);
  */
 void machoFile_create(struct machoFile* self, const char* fileName);
 
+/**
+ * Clears the caches created by the Mach-O binary file implementation.
+ */
 void machoFile_clearCaches(void);
 
 #ifdef __cplusplus
