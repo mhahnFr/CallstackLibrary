@@ -141,11 +141,16 @@ static inline bool objectFile_parseMachOImpl(struct objectFile* self,
 static inline bool objectFile_parseMachO(struct objectFile* self,
                                          void*              buffer,
                                          dwarf_line_callback cb, va_list args) {
+    if (buffer == NULL) return false;
+    
     struct mach_header* header = buffer;
     
-    const uint32_t fileType = macho_maybeSwap(32, header->magic == MH_CIGAM || header->magic == MH_CIGAM_64, header->filetype);
-    if (fileType != MH_OBJECT && fileType != MH_DSYM) {
-        return false;
+    if (header->magic == MH_MAGIC    || header->magic == MH_CIGAM ||
+        header->magic == MH_MAGIC_64 || header->magic == MH_CIGAM_64) {
+        const uint32_t fileType = macho_maybeSwap(32, header->magic == MH_CIGAM || header->magic == MH_CIGAM_64, header->filetype);
+        if (fileType != MH_OBJECT && fileType != MH_DSYM) {
+            return false;
+        }
     }
     
     switch (header->magic) {
@@ -155,10 +160,11 @@ static inline bool objectFile_parseMachO(struct objectFile* self,
         case MH_MAGIC_64: return objectFile_parseMachOImpl64(self, buffer, false, cb, args);
         case MH_CIGAM_64: return objectFile_parseMachOImpl64(self, buffer, true,  cb, args);
             
-        // We do not parse fat Mach-O object files for now.
-        // If this becomes necessary, refer to the implementation
-        // of machoFile_parseFat.
-        //                                          - mhahnFr
+        case FAT_MAGIC:
+        case FAT_MAGIC_64: return objectFile_parseMachO(self, macho_parseFat(buffer, false, self->name), cb, args);
+            
+        case FAT_CIGAM:
+        case FAT_CIGAM_64: return objectFile_parseMachO(self, macho_parseFat(buffer, true, self->name), cb, args);
     }
     return false;
 }
