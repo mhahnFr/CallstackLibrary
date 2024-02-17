@@ -27,14 +27,30 @@
 
 #include "macho_utils.h"
 
+/**
+ * Represents a unified version of the `nlist` structure.
+ */
 struct macho_parser_nlist {
+    /** The index into the string table.           */
     uint32_t n_strx;
+    /** The type of this entry.                    */
     uint8_t  n_type;
+    /** The index of the section the symbol is in. */
     uint8_t  n_sect;
+    /** Additional description of the symbol.      */
     int32_t  n_desc;
+    /** The value (payload).                       */
     uint64_t n_value;
 };
 
+/**
+ * Constructs a unified nlist entry from the given information.
+ *
+ * @param pointer the pointer to the real nlist entry
+ * @param bit64 whether the binary is 64 bit encoded
+ * @param bytesSwapped whether the byte order needs to be swapped to match the host byte order
+ * @return the translated and unified nlist entry
+ */
 static inline struct macho_parser_nlist macho_parser_nlist_from(void* pointer, bool bit64, bool bytesSwapped) {
     struct macho_parser_nlist toReturn;
     if (bit64) {
@@ -61,6 +77,12 @@ static inline struct macho_parser_nlist macho_parser_nlist_from(void* pointer, b
     return toReturn;
 }
 
+/**
+ * Returns the size of the real nlist structure used.
+ *
+ * @param bit64 whether the 64 bit version is used
+ * @return the size in bytes of the real nöist structure used
+ */
 static inline size_t macho_parser_nlist_sizeof(bool bit64) {
     return bit64 ? sizeof(struct nlist_64) : sizeof(struct nlist);
 }
