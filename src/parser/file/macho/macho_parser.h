@@ -20,6 +20,7 @@
 #ifndef macho_parser_h
 #define macho_parser_h
 
+#include <mach-o/fat.h>
 #include <mach-o/loader.h>
 
 #include "function.h"
@@ -37,5 +38,7 @@ bool macho_parseSymtab(struct symtab_command* command,
                        macho_addObjectFile    objCb,
                        macho_addFunction      funCb,
                        ...);
+
+void* macho_parseFat(struct fat_header* fatHeader, bool bitsReversed, const char* fileName);
 
 #endif /* macho_parser_h */
