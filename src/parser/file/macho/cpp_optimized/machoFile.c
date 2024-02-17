@@ -21,9 +21,15 @@
 
 #include "../vector_pairFuncFile.h"
 
+/**
+ * This structure contains the additions needed by this C implementation
+ * of the Mach-O file abstraction.
+ */
 struct machoFile_private {
+    /** The super part of this structure.        */
     struct machoFile _;
     
+    /** The function / object file object pairs. */
     struct vector_pairFuncFile functions;
 };
 
