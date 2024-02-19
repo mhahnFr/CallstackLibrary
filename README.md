@@ -1,6 +1,19 @@
 # Welcome to the CallstackLibrary!
-This repository contains a library which can create human-readable callstacks. It features a C API, but
-there is also a C++ wrapper for it.
+The CallstackLibrary is a library designed to create human-readable callstacks for natively compiled applications.
+
+It can be used with pure **C**, although some optimizations and features using **C++** optionally can be enabled.
+
+Its API is available for both **C** and **C++**.
+
+## Quickstart
+Use the CallstackLibrary for creating human-readable callstacks and for creating C++ exceptions that can print their
+stacktrace.
+
+1. Clone the repository: `git clone --recursive https://github.com/mhahnFr/CallstackLibrary.git`
+2. Build it: `cd CallstackLibrary && make`
+3. Link your code with `-L<path/to/library> -lcallstack -ldl`
+
+Now, you can use the headers [``callstack.h``][2] and [``callstack_exception.hpp``][5], respectively.
 
 ## Usage
 In order to get started, you can either download a compiled version of the library [here][1].  
@@ -20,10 +33,6 @@ In order to use this library, simply include the header [``callstack.h``][2].
 
 The complete set of features is described in the [wiki][3].
 
-## Upcoming features
-The callstacks are currently created using the information of the dynamic linker.
-In the future, parsing of the debug symbols will be added.
-
 ### Final notes
 This library is licensed under the terms of the GPL 3.0.
 
@@ -33,3 +42,4 @@ This library is licensed under the terms of the GPL 3.0.
 [2]: https://github.com/mhahnFr/CallstackLibrary/blob/main/include/callstack.h
 [3]: https://github.com/mhahnFr/CallstackLibrary/wiki
 [4]: https://github.com/mhahnFr
+[5]: https://github.com/mhahnFr/CallstackLibrary/blob/main/include/callstack_exception.hpp
