@@ -22,12 +22,22 @@
 #include <cstring>
 #include <map>
 
+/**
+ * This class wraps around the Mach-O file representation.
+ */
 class MachoFile {
+    /** The represented Mach-O file representation.                                   */
     machoFile self;
-    
+
+    /** Mapping of the functions inside the represented Mach-O file to their address. */
     std::map<uint64_t, std::pair<function, objectFile*>, std::greater<uint64_t>> functions;
     
 public:
+    /**
+     * Constructs a Mach-O file representation using the given file name.
+     *
+     * @param fileName the file name of the represented Mach-O file
+     */
     inline MachoFile(const char* fileName) {
         machoFile_create(*this, fileName);
         self.priv = this;
@@ -41,6 +51,11 @@ public:
         }
     }
     
+    /**
+     * Adds the given function / object file pair to this Mach-O file representation.
+     *
+     * @param function the function / object file pair to be added
+     */
     inline void addFunction(pair_funcFile_t&& function) {
         auto it = functions.find(function.first.startAddress);
         if (it == functions.end()) {
@@ -55,6 +70,12 @@ public:
         }
     }
     
+    /**
+     * Extracts the available debug information for the given absolute address.
+     *
+     * @param addr the absolute instruction address
+     * @return the optionally deducted debug information
+     */
     inline auto getDebugInfo(void* addr) -> optional_debugInfo_t {
         const uint64_t address = (reinterpret_cast<uint64_t>(addr) - reinterpret_cast<uint64_t>(self._.startAddress)) 
                                + (self.inMemory ? self.text_vmaddr : self.addressOffset);
