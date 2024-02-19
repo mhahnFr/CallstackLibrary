@@ -28,11 +28,14 @@
  * This structure acts as a wrapper around the object file structure.
  */
 struct objectFile_private {
-    /** The object file structure.                       */
+    /** The object file structure.                             */
     struct objectFile _;
     
+    /** The functions found in the represented object file.    */
     struct vector_function ownFunctions;
+    /** The DWARF line infos found in the object file.         */
     struct vector_dwarfLineInfo lineInfos;
+    /** Cache for the full name of the referenced source file. */
     const char* mainSourceFileCache;
 };
 
@@ -56,12 +59,26 @@ void objectFile_addOwnFunction(struct objectFile* me,
     vector_function_push_back(&self->ownFunctions, function);
 }
 
+/**
+ * The callback function for adding a deducted DWARF line information.
+ *
+ * @param info the DWARF line info entry
+ * @param args the variadic arguments - should include as the first argument the object file object
+ */
 static inline void objectFile_dwarfLineCallback(struct dwarf_lineInfo info, va_list args) {
     struct objectFile_private* self = va_arg(args, void*);
     
     vector_dwarfLineInfo_push_back(&self->lineInfos, info);
 }
 
+/**
+ * @brief Parses the represented object file.
+ *
+ * If the parsing fails, the intermediate objects are cleaned up.
+ *
+ * @param self the object file object
+ * @return whether the parsing was successful
+ */
 static inline bool objectFile_parseIntern(struct objectFile_private* self) {
     const bool result = objectFile_parse(&self->_, objectFile_dwarfLineCallback, self);
     if (!result) {
@@ -73,6 +90,13 @@ static inline bool objectFile_parseIntern(struct objectFile_private* self) {
     return result;
 }
 
+/**
+ * Finds and returns the function with the given name deducted from the represented object file.
+ *
+ * @param self the object file object
+ * @param name the name of the desired function
+ * @return the optionally found function
+ */
 static inline optional_function_t objectFile_findOwnFunction(struct objectFile_private* self, const char* name) {
     optional_function_t toReturn = { .has_value = false };
     
@@ -86,6 +110,14 @@ static inline optional_function_t objectFile_findOwnFunction(struct objectFile_p
     return toReturn;
 }
 
+/**
+ * @brief Returns the full source file name found in the referencing Mach-O executable / library file.
+ *
+ * @note Do not free the returned string.
+ *
+ * @param self the object file object
+ * @return the full source file name or `NULL` if the allocation failed
+ */
 static inline const char* objectFile_getSourceFileName(struct objectFile_private* self) {
     if (self->mainSourceFileCache != NULL) return self->mainSourceFileCache;
     if (self->_.directory == NULL || self->_.sourceFile == NULL) return "<< Unknown >>";
