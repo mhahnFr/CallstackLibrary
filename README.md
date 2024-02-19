@@ -16,14 +16,36 @@ stacktrace.
 Now, you can use the headers [``callstack.h``][2] and [``callstack_exception.hpp``][5], respectively.
 
 ## Usage
-In order to get started, you can either download a compiled version of the library [here][1].  
-Alternatively, you can also build it from source:
-- Clone the repository: ``git clone --recursive https://github.com/mhahnFr/CallstackLibrary.git``
-- and build the library: ``cd CallstackLibrary && make``.
+### Installation
+Get started by either downloading a prebuilt version of this library [here][1].
+Alternatively you can also build it from source:
+1. Clone the repository: `git clone --recursive https://github.com/mhahnFr/CallstackLibrary.git`
+2. go into the cloned repository: `cd CallstackLibrary`
+3. and build the library: `make`
 
-On some systems, you might need to install the ``libexecinfo-dev`` to compile the library successfully.
-If this is the case, add ``-lexecinfo`` to the linking flags.
+> **Note**: On some systems, you might need to install the `libexecinfo-dev` to compile the library successfully.
+> 
+> If this is the case, add `-lexecinfo` to your linking flags: `-L<path/to/library> -lcallstack -ldl -lexecinfo`
 
+Or in one step:
+```shell
+git clone --recursive https://github.com/mhahnFr/CallstackLibrary.git && cd CallstackLibrary && make
+```
+
+To enable the optional optimizations using **C++** add `CXX_OPTIMIZED=true` as argument to `make`, for the optional
+**C++** exclusive functions add `CXX_FUNCTIONS=true` as argument.  
+**Example**:
+```shell
+make CXX_OPTIMIZED=true CXX_FUNCTIONS=true
+```
+
+Once you have a copy of the CallstackLibrary you can install it using the following command:
+```shell
+make INSTALL_PATH=/usr/local install
+```
+If you downloaded a release you can simply move the headers and the library anywhere you like.
+
+### How to use
 In order to use this library, simply include the header [``callstack.h``][2].
 
 **Linking**:
