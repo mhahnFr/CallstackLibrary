@@ -29,18 +29,33 @@
  * This class acts as a C++ wrapper around the object file structure.
  */
 class ObjectFile {
-    /** The object file structure.                                     */
+    /** The object file structure.                               */
     objectFile self;
+    /** The functions inside the represented object file.        */
     std::vector<function> ownFunctions;
+    /** Mapping of the DWARF line info entries to their address. */
     std::map<uint64_t, dwarf_lineInfo, std::greater<uint64_t>> lineInfos;
+    /** The full name of the represented source file.            */
     std::optional<std::string> fullName;
     
+    /**
+     * The callback function adding the given DWARF line entry to the object file object passed
+     * via the variadic argument list.
+     *
+     * @param info the DWAF line info entry
+     * @param args the arguments - should contain the object file object as first argument
+     */
     static inline void dwarfLineCallback(dwarf_lineInfo info, va_list args) {
         ObjectFile* self = reinterpret_cast<ObjectFile*>(va_arg(args, void*));
         
         self->lineInfos.emplace(std::make_pair(info.address, info));
     }
     
+    /**
+     * Parses the represented object file.
+     *
+     * @return whether the parsing was successful
+     */
     inline auto parse() -> bool {
         const auto result = objectFile_parse(&self, dwarfLineCallback, this);
         if (!result) {
@@ -52,6 +67,11 @@ class ObjectFile {
         return result;
     }
     
+    /**
+     * Returns the full name of the represented source file.
+     *
+     * @return the full source file name
+     */
     inline auto getName() -> const std::string& {
         if (!fullName.has_value()) {
             if (self.directory == nullptr || self.sourceFile == nullptr) {
@@ -74,6 +94,12 @@ public:
         }
     }
     
+    /**
+     * Parses the given buffer as represented object file.
+     *
+     * @param buffer the buffer to be parsed
+     * @return whether the parsing was successful
+     */
     inline auto parseBuffer(void* buffer) -> bool {
         const auto result = objectFile_parseWithBuffer(&self, buffer, dwarfLineCallback, this);
         if (!result) {
@@ -85,10 +111,22 @@ public:
         return result;
     }
     
+    /**
+     * Adds the given function to this object file object.
+     *
+     * @param function the function to be added
+     */
     inline void addOwnFunction(function&& function) {
         ownFunctions.emplace_back(function);
     }
     
+    /**
+     * Extracts the available debug information for the given address inside the given function.
+     *
+     * @param function the function inside the address is
+     * @param address the address
+     * @return the optionally deducted debug information
+     */
     inline auto getDebugInfo(const function& function, uint64_t address) {
         optional_debugInfo_t toReturn = { .has_value = false };
         
@@ -128,6 +166,13 @@ public:
         return toReturn;
     }
     
+    /**
+     * @brief Returns the UUID of the represented Mach-O file.
+     *
+     * Parses the represented source file if it has not already been parsed.
+     *
+     * @return the UUID of the represented Mach-O file
+     */
     inline auto getUUID() -> uint8_t* {
         if (!self.parsed) {
             self.parsed = parse();
