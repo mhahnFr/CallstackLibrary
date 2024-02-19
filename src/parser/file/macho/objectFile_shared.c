@@ -28,20 +28,33 @@
 #include "macho_parser.h"
 #include "macho_utils.h"
 
+/**
+ * @brief Handles the given 64 bit segment command.
+ *
+ * If the given segment contains the DWARF debug line information, it is parsed using the given
+ * DWARF line callback and the given additional arguments.
+ *
+ * @param command the command to process
+ * @param baseAddress the beginning of the Mach-O file
+ * @param bytesSwapped whether the bytes need to be swapped to match the host byte order
+ * @param cb the DWARF line callback
+ * @param args the arguments to pass to the callback
+ * @return whether the handling (and optional DWARF parsing) was successful
+ */
 static inline bool objectFile_handleSegment64(struct segment_command_64* command,
                                               void*                      baseAddress,
-                                              bool                       bitsSwapped,
+                                              bool                       bytesSwapped,
                                               dwarf_line_callback cb, va_list args) {
-    const uint32_t nsects = macho_maybeSwap(32, bitsSwapped, command->nsects);
+    const uint32_t nsects = macho_maybeSwap(32, bytesSwapped, command->nsects);
     
     for (size_t i = 0; i < nsects; ++i) {
         struct section_64* section = (void*) command + sizeof(struct segment_command_64) + i * sizeof(struct section_64);
         
         if (strcmp("__DWARF", section->segname) == 0 &&
             strcmp("__debug_line", section->sectname) == 0) {
-            if (!dwarf_parseLineProgram(baseAddress + macho_maybeSwap(32, bitsSwapped, section->offset), 
+            if (!dwarf_parseLineProgram(baseAddress + macho_maybeSwap(32, bytesSwapped, section->offset), 
                                         cb, args,
-                                        macho_maybeSwap(64, bitsSwapped, section->size))) {
+                                        macho_maybeSwap(64, bytesSwapped, section->size))) {
                 return false;
             }
         }
@@ -49,20 +62,33 @@ static inline bool objectFile_handleSegment64(struct segment_command_64* command
     return true;
 }
 
-static inline bool objectFile_handleSegment(struct segment_command* command, 
+/**
+ * @brief Handles the given 32 bit segment command.
+ *
+ * If the given segment contains the DWARF debug line information, it is parsed using the given
+ * DWARF line callback and the given additional arguments.
+ *
+ * @param command the command to process
+ * @param baseAddress the beginning of the Mach-O file
+ * @param bytesSwapped whether the bytes need to be swapped to match the host byte order
+ * @param cb the DWARF line callback
+ * @param args the arguments to pass to the callback
+ * @return whether the handling (and optional DWARF parsing) was successful
+ */
+static inline bool objectFile_handleSegment(struct segment_command* command,
                                             void*                   baseAddress,
-                                            bool                    bitsSwapped,
+                                            bool                    bytesSwapped,
                                             dwarf_line_callback cb, va_list args) {
-    const uint32_t nsects = macho_maybeSwap(32, bitsSwapped, command->nsects);
+    const uint32_t nsects = macho_maybeSwap(32, bytesSwapped, command->nsects);
     
     for (size_t i = 0; i < nsects; ++i) {
         struct section* section = (void*) command + sizeof(struct segment_command) + i * sizeof(struct section);
         
         if (strcmp("__DWARF", section->segname) == 0 &&
             strcmp("__debug_line", section->sectname) == 0) {
-            if (!dwarf_parseLineProgram(baseAddress + macho_maybeSwap(32, bitsSwapped, section->offset), 
+            if (!dwarf_parseLineProgram(baseAddress + macho_maybeSwap(32, bytesSwapped, section->offset), 
                                         cb, args,
-                                        macho_maybeSwap(32, bitsSwapped, section->size))) {
+                                        macho_maybeSwap(32, bytesSwapped, section->size))) {
                 return false;
             }
         }
@@ -70,27 +96,43 @@ static inline bool objectFile_handleSegment(struct segment_command* command,
     return true;
 }
 
+/**
+ * The callback adding the function / object file pair to the object file object passed via the variadic argument list.
+ *
+ * @param f the function / object file pair
+ * @param args the arguments - should contain as first argument the object file object ot add the pair to
+ */
 static inline void objectFile_addFunctionCallback(struct pair_funcFile f, va_list args) {
     objectFile_addOwnFunction(va_arg(args, void*), f.first);
 }
 
+/**
+ * Parses the Mach-O file into the given object file object. (64 bit version).
+ *
+ * @param self the object file object
+ * @param baseAddress the beginning address of the Mach-O file to be parsed
+ * @param bytesSwapped whether the bytes need to be swapped to match the host byte order
+ * @param cb the DWARF line callback
+ * @param args the arguments to pass to the callback function
+ * @return whether the parsing was successful
+ */
 static inline bool objectFile_parseMachOImpl64(struct objectFile* self,
                                                void*              baseAddress,
-                                               bool               bitsSwapped,
+                                               bool               bytesSwapped,
                                                dwarf_line_callback cb, va_list args) {
     struct mach_header_64* header = baseAddress;
     struct load_command*   lc     = (void*) header + sizeof(struct mach_header_64);
-    const  uint32_t        ncmds  = macho_maybeSwap(32, bitsSwapped, header->ncmds);
+    const  uint32_t        ncmds  = macho_maybeSwap(32, bytesSwapped, header->ncmds);
     
     for (size_t i = 0; i < ncmds; ++i) {
         bool result = true;
-        switch (macho_maybeSwap(32, bitsSwapped, lc->cmd)) {
+        switch (macho_maybeSwap(32, bytesSwapped, lc->cmd)) {
             case LC_SEGMENT_64:
-                result = objectFile_handleSegment64((void*) lc, baseAddress, bitsSwapped, cb, args);
+                result = objectFile_handleSegment64((void*) lc, baseAddress, bytesSwapped, cb, args);
                 break;
                 
             case LC_SYMTAB:
-                result = macho_parseSymtab((void*) lc, baseAddress, 0, bitsSwapped, true, NULL, objectFile_addFunctionCallback, self);
+                result = macho_parseSymtab((void*) lc, baseAddress, 0, bytesSwapped, true, NULL, objectFile_addFunctionCallback, self);
                 break;
                 
             case LC_UUID: 
@@ -101,28 +143,38 @@ static inline bool objectFile_parseMachOImpl64(struct objectFile* self,
         if (!result) {
             return false;
         }
-        lc = (void*) lc + macho_maybeSwap(32, bitsSwapped, lc->cmdsize);
+        lc = (void*) lc + macho_maybeSwap(32, bytesSwapped, lc->cmdsize);
     }
     return true;
 }
 
+/**
+ * Parses the Mach-O file into the given object file object.
+ *
+ * @param self the object file object
+ * @param baseAddress the beginning address of the Mach-O file to be parsed
+ * @param bytesSwapped whether the bytes need to be swapped to match the host byte order
+ * @param cb the DWARF line callback
+ * @param args the arguments to pass to the callback function
+ * @return whether the parsing was successful
+ */
 static inline bool objectFile_parseMachOImpl(struct objectFile* self,
                                              void*              baseAddress,
-                                             bool               bitsSwapped,
+                                             bool               bytesSwapped,
                                              dwarf_line_callback cb, va_list args) {
     struct mach_header*  header = baseAddress;
     struct load_command* lc     = (void*) header + sizeof(struct mach_header);
-    const  uint32_t      ncmds  = macho_maybeSwap(32, bitsSwapped, header->ncmds);
+    const  uint32_t      ncmds  = macho_maybeSwap(32, bytesSwapped, header->ncmds);
     
     for (size_t i = 0; i < ncmds; ++i) {
         bool result = true;
-        switch (macho_maybeSwap(32, bitsSwapped, lc->cmd)) {
+        switch (macho_maybeSwap(32, bytesSwapped, lc->cmd)) {
             case LC_SEGMENT:
-                result = objectFile_handleSegment((void*) lc, baseAddress, bitsSwapped, cb, args);
+                result = objectFile_handleSegment((void*) lc, baseAddress, bytesSwapped, cb, args);
                 break;
                 
             case LC_SYMTAB:
-                result = macho_parseSymtab((void*) lc, baseAddress, 0, bitsSwapped, false, NULL, objectFile_addFunctionCallback, self);
+                result = macho_parseSymtab((void*) lc, baseAddress, 0, bytesSwapped, false, NULL, objectFile_addFunctionCallback, self);
                 break;
                 
             case LC_UUID:
@@ -133,11 +185,23 @@ static inline bool objectFile_parseMachOImpl(struct objectFile* self,
         if (!result) {
             return false;
         }
-        lc = (void*) lc + macho_maybeSwap(32, bitsSwapped, lc->cmdsize);
+        lc = (void*) lc + macho_maybeSwap(32, bytesSwapped, lc->cmdsize);
     }
     return true;
 }
 
+/**
+ * @brief Parses the Mach-O file into the given object file object.
+ *
+ * The Mach-O file needs to be an object file or a dSYM companion file to be parsed.
+ * Optionally, it may be in a fat archive.
+ *
+ * @param self the object file object
+ * @param buffer the buffer of the Mach-O file
+ * @param cb the DWARF line callback
+ * @param args the arguments to pass to the callback function
+ * @return whether the parsing was successful
+ */
 static inline bool objectFile_parseMachO(struct objectFile* self,
                                          void*              buffer,
                                          dwarf_line_callback cb, va_list args) {
