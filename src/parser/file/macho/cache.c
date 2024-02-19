@@ -27,14 +27,28 @@
 #include "vector_string.h"
 #include "vector_boolString.h"
 
+/**
+ * This structure represents the cache for the Mach-O implementation.
+ */
 static struct macho_cache {
+    /** The already loaded object files.                */
     struct objectFile*       objectFiles;
+    /** The Mach-O files loaded by the dynamic loader.  */
     struct vector_boolString loadedFiles;
+    /** The already loaded archives (static libraries). */
     struct vector_string     loadedArchives;
 } cache = {
     NULL, vector_initializer, vector_initializer
 };
 
+/**
+ * @brief Returns whether the given file name is inside an archive.
+ *
+ * If `NULL` is passed, `false` is returned.
+ *
+ * @param fileName the file name to be checked
+ * @return whether the file name is inside an archive
+ */
 static inline bool macho_cache_isInArchive(const char* fileName) {
     if (fileName == NULL) return false;
     
@@ -44,6 +58,14 @@ static inline bool macho_cache_isInArchive(const char* fileName) {
     return lp != NULL && rp != NULL && lp < rp;
 }
 
+/**
+ * @brief Returns the archive name of the given file name.
+ *
+ * The returned string is allocated and needs to be `free`d.
+ *
+ * @param fileName the full file name
+ * @return the archive name or `NULL` if the allocation failed or the given file name is not inside an archive
+ */
 static inline char* macho_cache_getArchiveName(const char* fileName) {
     if (fileName == NULL) return NULL;
     
@@ -59,17 +81,33 @@ static inline char* macho_cache_getArchiveName(const char* fileName) {
     return toReturn;
 }
 
+/**
+ * The callback function for the archive parser adds the given object file object to the cache.
+ *
+ * @param file the object file object to be added
+ */
 static inline void macho_cache_archiveCallback(struct objectFile* file) {
     file->next = cache.objectFiles;
     cache.objectFiles = file;
 }
 
+/**
+ * @brief Loads the archive of the given file name.
+ *
+ * When `NULL` is passed, `false` is returned.
+ *
+ * @param archiveName the file name of the archive to be loaded
+ * @return whether the archive was loaded successfully
+ */
 static inline bool macho_cache_loadArchive(const char* archiveName) {
     if (archiveName == NULL) return false;
     
     return macho_archive_parse(archiveName, macho_cache_archiveCallback);
 }
 
+/**
+ * Queries and adds to the cache the Mach-O files currently loaded by the dynamic loader.
+ */
 static inline void macho_cache_loadLoadedFiles(void) {
     const uint32_t size = _dyld_image_count();
     
@@ -78,6 +116,12 @@ static inline void macho_cache_loadLoadedFiles(void) {
     }
 }
 
+/**
+ * Returns whether the given archive was already loaded.
+ *
+ * @param archiveName the file name of the archive
+ * @return whether the archive was already loaded
+ */
 static inline bool macho_cache_archiveLoaded(const char* archiveName) {
     vector_iterate(const char*, &cache.loadedArchives, {
         if (strcmp(archiveName, *element) == 0) {
