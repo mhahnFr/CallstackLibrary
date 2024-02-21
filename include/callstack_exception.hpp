@@ -1,7 +1,7 @@
 /*
  * Callstack Library - Library creating human-readable call stacks.
  *
- * Copyright (C) 2023  mhahnFr
+ * Copyright (C) 2023 - 2024  mhahnFr
  *
  * This file is part of the CallstackLibrary. This library is free software:
  * you can redistribute it and/or modify it under the terms of the
@@ -173,7 +173,7 @@ public:
                 << "(" << callstack_frame_getShortestName(&frames[i]) << ") "
                 << (frames[i].function == LCS_NULL ? "<< Unknown >>" : frames[i].function)
                 << (frames[i].sourceFile == LCS_NULL ? ""
-                    : (" (" + std::string(frames[i].sourceFile) + ":" + toString(frames[i].sourceLine) + ")"))
+                    : (" (" + std::string(callstack_frame_getShortestSourceFile(&frames[i])) + ":" + toString(frames[i].sourceLine) + ")"))
                 << std::endl;
         }
     }
