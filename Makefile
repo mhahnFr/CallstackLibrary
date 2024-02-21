@@ -107,7 +107,7 @@ ifeq ($(CXX_FUNCTIONS),true)
 endif
 
 ifeq ($(shell uname -s),Darwin)
-	LDFLAGS += -current_version 1.0.0 -compatibility_version 1 -install_name $(abspath $@)
+	LDFLAGS += -current_version 1.1 -compatibility_version 1 -install_name $(abspath $@)
 	OBJS    += $(DARWIN_OBJS)
 	DEPS    += $(DARWIN_DEPS)
 else ifeq ($(shell uname -s),Linux)
