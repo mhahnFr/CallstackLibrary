@@ -44,6 +44,11 @@ To enable the optional optimizations using **C++** add `CXX_OPTIMIZED=true` as a
 > make CXX_OPTIMIZED=true CXX_FUNCTIONS=true
 > ```
 
+> [!NOTE]
+> When statically linking against the CallstackLibrary with **C++** exclusive functions or optimizations enabled
+> make sure to also link against the C++ standard library of your compiler (this is usually already the case when
+> linking C++ code).
+
 More information about the **C++** exclusive functions and optimizations [here][6].
 
 Once you have a copy of the CallstackLibrary you can install it using the following command:
@@ -67,6 +72,100 @@ Link with `-lcallstack`
 > - Example **FreeBSD**: `-rdynamic -L<path/to/library> -lcallstack -ldl -lexecinfo`
 
 ### Callstacks
+```C
+// main.c
+
+#include <stdio.h> // For printf(...)
+
+#include <callstack.h>
+
+void printCallstack(void) {
+    struct callstack* callstack = callstack_new();
+    struct callstack_frame* frames = callstack_toArray(callstack);
+
+    printf("The current callstack:\n");
+    for (size_t i = 0; i < callstack_getFrameCount(callstack); ++i) {
+        printf("In: (%s) %s (%s:%ld)\n", callstack_frame_getShortestName(&frames[i]), 
+                                         frames[i].function,
+                                         frames[i].sourceFile == NULL ? "???" : callstack_frame_getShortestSourceFile(&frames[i]),
+                                         frames[i].sourceLine);
+    }
+    callstack_delete(callstack);
+}
+
+void bar(void) { printCallstack(); }
+
+void foo(void)  { bar();  }
+void bar2(void) { foo();  }
+void foo2(void) { bar2(); }
+
+int main(void) {
+    foo2();
+}
+```
+Compiled and linked on macOS with `cc -g main.c -I<path/to/library>/include -L<path/to/library> -lcallstack` creates the following output:
+```
+The current callstack:
+In: (a.out) printCallstack (main.c:8)
+In: (a.out) bar (main.c:21)
+In: (a.out) foo (main.c:23)
+In: (a.out) bar2 (main.c:24)
+In: (a.out) foo2 (main.c:25)
+In: (a.out) main (main.c:28)
+In: (/usr/lib/dyld) start + 1903 (???:0)
+```
+
+#### C++
+The [example above][7] can be written in C++ using the C++ wrapper class as follows:
+```C++
+// main.cpp
+
+#include <iostream>
+
+#include <callstack.h>
+
+void printCallstack() {
+    lcs::callstack callstack;
+    callstack_frame* frames = callstack_toArray(callstack);
+    
+    std::cout << "The current callstack:" << std::endl;
+    for (size_t i = 0; i < callstack_getFrameCount(callstack); ++i) {
+        std::cout << "In: (" << callstack_frame_getShortestName(&frames[i])
+                  << ") "    << frames[i].function
+                  << " ("    << (frames[i].sourceFile == NULL ? "???" : callstack_frame_getShortestSourceFile(&frames[i]))
+                  << ":"     << frames[i].sourceLine
+                  << ")"     << std::endl;
+    }   
+}
+
+void bar(void) { printCallstack(); }
+
+void foo(void)  { bar();  }
+void bar2(void) { foo();  }
+void foo2(void) { bar2(); }
+
+int main(void) {
+    foo2();
+}
+```
+Compiled and linked on macOS with `c++ -g main.cpp -I<path/to/library>/include -L<path/to/library> -lcallstack` and
+after enabling **C++** functions of the library:
+```
+The current callstack:
+In: (a.out) lcs::callstack::callstack(bool) (include/callstack.hpp:77)
+In: (a.out) printCallstack() (main.cpp:8)
+In: (a.out) bar() (main.cpp:21)
+In: (a.out) foo() (main.cpp:23)
+In: (a.out) bar2() (main.cpp:24)
+In: (a.out) foo2() (main.cpp:25)
+In: (a.out) main (main.cpp:28)
+In: (/usr/lib/dyld) start + 1903 (???:0)
+```
+
+> [!TIP]
+> The **C++** functions can be enabled as described [here][8].
+
+### Callstack exceptions
 _Description and examples coming soon!_
 
 ## Symbolization
