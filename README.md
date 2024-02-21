@@ -139,13 +139,13 @@ void printCallstack() {
     }   
 }
 
-void bar(void) { printCallstack(); }
+void bar() { printCallstack(); }
 
-void foo(void)  { bar();  }
-void bar2(void) { foo();  }
-void foo2(void) { bar2(); }
+void foo()  { bar();  }
+void bar2() { foo();  }
+void foo2() { bar2(); }
 
-int main(void) {
+int main() {
     foo2();
 }
 ```
@@ -167,7 +167,91 @@ In: (/usr/lib/dyld) start + 1903 (???:0)
 > The **C++** functions can be enabled as described [here][6].
 
 ### Callstack exceptions
-_Description and examples coming soon!_
+With the [callstack exception][8] an exception capable of printing its construction stacktrace is available.
+
+It can be thrown directly:
+```C++
+// main.cpp
+
+#include <iostream>
+
+#include <callstack_exception.hpp>
+
+void printCallstack() {
+    throw lcs::exception("Callstack exception with a message");
+}
+
+void bar2() { printCallstack(); }
+void foo2() { bar2();           }
+
+void bar() { foo2(); }
+void foo() { bar();  }
+
+int main() {
+    try {
+        foo();
+    } catch (std::exception& e) {
+        std::cerr << e.what() << std::endl;
+    }
+}
+```
+Compiled and linked on macOS using `c++ -g main.cpp -I<path/to/library>/include -L<path/to/library> -lcallstack` and
+after [enabling **C++** functions][6] of the library creates the following output:
+```
+lcs::exception: "Callstack exception with a message", stacktrace:
+At: (a.out) lcs::exception::exception(char const*, bool) (include/callstack_exception.hpp:123)
+in: (a.out) printCallstack() (main.cpp:8)
+in: (a.out) bar2() (main.cpp:11)
+in: (a.out) foo2() (main.cpp:12)
+in: (a.out) bar() (main.cpp:14)
+in: (a.out) foo() (main.cpp:15)
+in: (a.out) main (main.cpp:19)
+in: (/usr/lib/dyld) start + 1903
+```
+
+#### Extending the callstack exception
+The [callstack exception][8] can easily serve as base class for other exceptions:
+```C++
+// main.cpp
+
+#include <iostream>
+
+#include <callstack_exception.hpp>
+
+class CustomStacktraceException: public lcs::exception {};
+
+void printCallstack() {
+    throw CustomStacktraceException();
+}
+
+void bar2() { printCallstack(); }
+void foo2() { bar2();           }
+
+void bar() { foo2(); }
+void foo() { bar();  }
+
+int main() {
+    try {
+        foo();
+    } catch (std::exception& e) {
+        std::cerr << e.what() << std::endl;
+    }
+}
+```
+Compiled and linked on macOS using `c++ -g main.cpp -I<path/to/library>/include -L<path/to/library> -lcallstack` and
+after [enabling **C++** functions][6] of the library creates the following output:
+```
+CustomStacktraceException, stacktrace:
+At: (a.out) CustomStacktraceException::CustomStacktraceException() (main.cpp:7)
+in: (a.out) CustomStacktraceException::CustomStacktraceException() (main.cpp:7)
+in: (a.out) printCallstack() (main.cpp:10)
+in: (a.out) bar2() (main.cpp:13)
+in: (a.out) foo2() (main.cpp:14)
+in: (a.out) bar() (main.cpp:16)
+in: (a.out) foo() (main.cpp:17)
+in: (a.out) main (main.cpp:21)
+in: (/usr/lib/dyld) start + 1903
+```
 
 ## Symbolization
 The generated callstacks are generally symbolized using the information obtained by the dynamic loader (hence the
@@ -202,3 +286,4 @@ This library is licensed under the terms of the GPL 3.0.
 [5]: https://github.com/mhahnFr/CallstackLibrary/blob/main/include/callstack_exception.hpp
 [6]: https://github.com/mhahnFr/CallstackLibrary/wiki/Home#enabling-additional-c-exclusive-functions
 [7]: #callstacks
+[8]: https://github.com/mhahnFr/CallstackLibrary/wiki/callstack.hpp#class-callstack
