@@ -163,7 +163,7 @@ In: (/usr/lib/dyld) start + 1903 (???:0)
 ```
 
 > [!TIP]
-> The **C++** functions can be enabled as described [here][8].
+> The **C++** functions can be enabled as described [here][6].
 
 ### Callstack exceptions
 _Description and examples coming soon!_
@@ -200,3 +200,4 @@ This library is licensed under the terms of the GPL 3.0.
 [4]: https://github.com/mhahnFr
 [5]: https://github.com/mhahnFr/CallstackLibrary/blob/main/include/callstack_exception.hpp
 [6]: https://github.com/mhahnFr/CallstackLibrary/wiki/Home#enabling-additional-c-exclusive-functions
+[7]: #callstacks
