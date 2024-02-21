@@ -67,9 +67,10 @@ In order to use this library, simply include the header [``callstack.h``][2].
 Link with `-lcallstack`
 
 > [!TIP]
-> - Example **macOS**: `-L<path/to/library> -lcallstack`
-> - Example **Linux**: `-rdynamic -L<path/to/library> -lcallstack -ldl`
-> - Example **FreeBSD**: `-rdynamic -L<path/to/library> -lcallstack -ldl -lexecinfo`
+> Examples:
+> - **macOS**: `-L<path/to/library> -lcallstack`
+> - **Linux**: `-rdynamic -L<path/to/library> -lcallstack -ldl`
+> - **FreeBSD**: `-rdynamic -L<path/to/library> -lcallstack -ldl -lexecinfo`
 
 ### Callstacks
 ```C
@@ -177,7 +178,7 @@ On macOS the debug information available in the Mach-O binaries is used. The fol
 - `.dSYM` bundles
 - `Mach-O` debug symbol maps (DWARF inside the object files)
 
-> [!INFO]
+> [!NOTE]
 > The parser currently supports DWARF in version 4.
 
 > [!TIP]
