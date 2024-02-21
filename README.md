@@ -150,7 +150,7 @@ int main() {
 }
 ```
 Compiled and linked on macOS with `c++ -g main.cpp -I<path/to/library>/include -L<path/to/library> -lcallstack` and
-after enabling **C++** functions of the library:
+after [enabling **C++** functions][6] of the library:
 ```
 The current callstack:
 In: (a.out) lcs::callstack::callstack(bool) (include/callstack.hpp:77)
