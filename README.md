@@ -36,17 +36,21 @@ git clone --recursive https://github.com/mhahnFr/CallstackLibrary.git && cd Call
 ```
 
 To enable the optional optimizations using **C++** add `CXX_OPTIMIZED=true` as argument to `make`, for the optional
-**C++** exclusive functions add `CXX_FUNCTIONS=true` as argument.  
-**Example**:
-```shell
-make CXX_OPTIMIZED=true CXX_FUNCTIONS=true
-```
+**C++** exclusive functions add `CXX_FUNCTIONS=true` as argument.
+
+> [!TIP]
+> **Example**:
+> ```shell
+> make CXX_OPTIMIZED=true CXX_FUNCTIONS=true
+> ```
+
+More information about the **C++** exclusive functions and optimizations [here][6].
 
 Once you have a copy of the CallstackLibrary you can install it using the following command:
 ```shell
 make INSTALL_PATH=/usr/local install
 ```
-If you downloaded a release you can simply move the headers and the library anywhere you like.
+If you downloaded a [release][1] you can simply move the headers and the library anywhere you like.
 
 ### How to use
 In order to use this library, simply include the header [``callstack.h``][2].
@@ -77,8 +81,14 @@ On macOS the debug information available in the Mach-O binaries is used. The fol
 > [!INFO]
 > The parser currently supports DWARF in version 4.
 
+> [!TIP]
+> Usually the appropriate compilation flag for debug symbols is `-g`.
+
 ### Linux and FreeBSD
 Currently only the information obtained by the dynamic loader is available on Linux and FreeBSD.
+
+> [!TIP]
+> For the best results, link your code with the flag `-rdynamic`.
 
 ## Final notes
 This library is licensed under the terms of the GPL 3.0.
@@ -90,3 +100,4 @@ This library is licensed under the terms of the GPL 3.0.
 [3]: https://github.com/mhahnFr/CallstackLibrary/wiki
 [4]: https://github.com/mhahnFr
 [5]: https://github.com/mhahnFr/CallstackLibrary/blob/main/include/callstack_exception.hpp
+[6]: https://github.com/mhahnFr/CallstackLibrary/wiki/Home#enabling-additional-c-exclusive-functions
