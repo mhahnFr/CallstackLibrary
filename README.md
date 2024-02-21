@@ -25,7 +25,8 @@ Alternatively you can also build it from source:
 2. go into the cloned repository: `cd CallstackLibrary`
 3. and build the library: `make`
 
-> **Note**: On some systems, you might need to install the `libexecinfo-dev` to compile the library successfully.
+> [!NOTE]
+> On some systems, you might need to install the `libexecinfo-dev` to compile the library successfully.
 > 
 > If this is the case, add `-lexecinfo` to your linking flags: `-L<path/to/library> -lcallstack -ldl -lexecinfo`
 
@@ -56,11 +57,10 @@ In order to use this library, simply include the header [``callstack.h``][2].
 
 Link with `-lcallstack`
 
-> Example **macOS**: `-L<path/to/library> -lcallstack`
-
-> Example **Linux**: `-rdynamic -L<path/to/library> -lcallstack -ldl`
-
-> Example **FreeBSD**: `-rdynamic -L<path/to/library> -lcallstack -ldl -lexecinfo`
+> [!TIP]
+> - Example **macOS**: `-L<path/to/library> -lcallstack`
+> - Example **Linux**: `-rdynamic -L<path/to/library> -lcallstack -ldl`
+> - Example **FreeBSD**: `-rdynamic -L<path/to/library> -lcallstack -ldl -lexecinfo`
 
 ### Callstacks
 _Description and examples coming soon!_
@@ -74,7 +74,8 @@ On macOS the debug information available in the Mach-O binaries is used. The fol
 - `.dSYM` bundles
 - `Mach-O` debug symbol maps (DWARF inside the object files)
 
-The parser currently supports DWARF in version 4.
+> [!INFO]
+> The parser currently supports DWARF in version 4.
 
 ### Linux and FreeBSD
 Currently only the information obtained by the dynamic loader is available on Linux and FreeBSD.
