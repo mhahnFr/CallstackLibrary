@@ -22,6 +22,7 @@
 
 #include <stdarg.h>
 #include <stdbool.h>
+#include <string.h>
 #include <time.h>
 
 #include "function.h"
@@ -84,7 +85,7 @@ static inline void objectFile_create(struct objectFile * self) {
     self->parsed       = false;
     self->isDsymBundle = false;
     
-    bzero(self->uuid, 16);
+    memset(self->uuid, 0, 16);
 }
 
 /**
