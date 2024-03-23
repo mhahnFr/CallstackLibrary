@@ -1,7 +1,7 @@
 #
 # Callstack Library - Library creating human-readable call stacks.
 #
-# Copyright (C) 2022 - 2023  mhahnFr
+# Copyright (C) 2022 - 2024  mhahnFr
 #
 # This file is part of the CallstackLibrary. This library is free software:
 # you can redistribute it and/or modify it under the terms of the
@@ -125,13 +125,16 @@ all: $(SHARED_N) $(STATIC_N) $(DYLIB_N)
 
 install: $(SHARED_N)
 	mkdir -p $(INSTALL_PATH)/lib
-	mkdir -p "$(INSTALL_PATH)/include"
+	mkdir -p "$(INSTALL_PATH)/include/CallstackLibrary"
+	mkdir -p "$(INSTALL_PATH)/include/DC4C"
 	cp $(SHARED_N) $(INSTALL_PATH)/lib
-	find "include" \( -name \*.h -o -name \*.hpp \) -exec cp {} "$(INSTALL_PATH)/include" \;
+	find "include" \( -name \*.h -o -name \*.hpp \) -exec cp {} "$(INSTALL_PATH)/include/CallstackLibrary" \;
+	find "../DC4C" \( -name \*.h -o -name \*.hpp \) -exec cp {} "$(INSTALL_PATH)/include/DC4C" \;
 
 uninstall:
 	- $(RM) $(INSTALL_PATH)/lib/$(SHARED_N)
-	- $(RM) $(addprefix $(INSTALL_PATH)/, $(shell find "include" -name \*.h -o -name \*.hpp))
+	- $(RM) -r "$(INSTALL_PATH)/include/CallstackLibrary"
+	- $(RM) -r "$(INSTALL_PATH)/include/DC4C"
 
 $(DYLIB_N): $(OBJS)
 	$(LD) -dynamiclib $(LDFLAGS) -o $(DYLIB_N) $(OBJS)
