@@ -57,6 +57,13 @@ make INSTALL_PATH=/usr/local install
 ```
 If you downloaded a [release][1] you can simply move the headers and the library anywhere you like.
 
+#### Uninstallation
+Uninstall the library by simply removing it and its header files from the installation directory.  
+This can be done using the following command:
+```shell
+make INSTALL_PATH=/usr/local uninstall
+```
+
 ### How to use
 In order to use this library, simply include the header [``callstack.h``][2].
 
