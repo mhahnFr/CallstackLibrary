@@ -26,6 +26,8 @@
 #include "archive.h"
 #include "objectFile.h"
 
+#include "../loader.h"
+
 /**
  * Creates name for the given file name indicating the archive it came from.
  *
@@ -143,20 +145,7 @@ static inline bool macho_archive_parseImpl(void* buffer, const char* fileName, c
 }
 
 bool macho_archive_parse(const char* fileName, macho_archive_callback cb) {
-    if (fileName == NULL) return false;
-    
-    struct stat fileStats;
-    if (stat(fileName, &fileStats) != 0) {
-        return false;
-    }
-    void* buffer = malloc(fileStats.st_size);
-    if (buffer == NULL) {
-        return false;
-    }
-    FILE* file = fopen(fileName, "r");
-    const size_t count = fread(buffer, 1, fileStats.st_size, file);
-    fclose(file);
-    const bool toReturn = (off_t) count == fileStats.st_size && macho_archive_parseImpl(buffer, fileName, count, cb);
-    free(buffer);
-    return toReturn;
+    return loader_loadFileAndExecute(fileName, (union loader_parserFunction) { 
+        .parseFuncExtended = (loader_parserExtended) macho_archive_parseImpl
+    }, true, cb);
 }

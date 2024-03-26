@@ -30,7 +30,7 @@
 #include "macho_parser.h"
 #include "macho_utils.h"
 
-#include "../utils.h"
+#include "../loader.h"
 
 #include "../../callstack_parser.h"
 
@@ -42,7 +42,10 @@
  */
 static inline bool machoFile_loadFile(struct machoFile* self) {
     return self->inMemory ? machoFile_parseFile(self, self->_.startAddress)
-                          : loader_loadFileAndExecute(self->_.fileName, (loader_parser) machoFile_parseFile, self);
+                          : loader_loadFileAndExecute(self->_.fileName,
+                                                      (union loader_parserFunction) { (loader_parser) machoFile_parseFile },
+                                                      false,
+                                                      self);
 }
 
 void machoFile_create(struct machoFile* self, const char* fileName) {
