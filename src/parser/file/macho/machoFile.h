@@ -24,7 +24,7 @@
 
 #include "../binaryFile.h"
 #include "../debugInfo.h"
-#include "../UInt64Vector.h"
+#include "../vector_uint64.h"
 
 #include "vector_function.h"
 #include "objectFile.h"

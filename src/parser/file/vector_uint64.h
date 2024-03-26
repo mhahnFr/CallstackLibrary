@@ -1,7 +1,7 @@
 /*
  * Callstack Library - Library creating human-readable call stacks.
  *
- * Copyright (C) 2023  mhahnFr
+ * Copyright (C) 2023 - 2024  mhahnFr
  *
  * This file is part of the CallstackLibrary. This library is free software:
  * you can redistribute it and/or modify it under the terms of the
@@ -17,8 +17,8 @@
  * this library, see the file LICENSE.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-#ifndef UInt64Vector_h
-#define UInt64Vector_h
+#ifndef vector_uint64_h
+#define vector_uint64_h
 
 #include <stdint.h>
 
@@ -26,4 +26,4 @@
 
 typedef_vector_light(uint64_t);
 
-#endif /* UInt64Vector_h */
+#endif /* vector_uint64h */

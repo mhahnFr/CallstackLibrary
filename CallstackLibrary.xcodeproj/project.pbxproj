@@ -142,7 +142,7 @@
 		BFD2A03E2A659F4C007F4B81 /* .gitignore */ = {isa = PBXFileReference; lastKnownFileType = text; path = .gitignore; sourceTree = "<group>"; };
 		BFD2A03F2A659F4C007F4B81 /* pair.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = pair.h; sourceTree = "<group>"; };
 		BFD2A0402A659F4C007F4B81 /* vector.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = vector.h; sourceTree = "<group>"; };
-		BFD2A0412A659F97007F4B81 /* UInt64Vector.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = UInt64Vector.h; sourceTree = "<group>"; };
+		BFD2A0412A659F97007F4B81 /* vector_uint64.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = vector_uint64.h; sourceTree = "<group>"; };
 		BFD2A0422A65B0B7007F4B81 /* optional_pair_funcFile.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = optional_pair_funcFile.h; sourceTree = "<group>"; };
 		BFE075A32A66C0C7009C4462 /* vector_function.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = vector_function.h; sourceTree = "<group>"; };
 		BFE075A42A66C985009C4462 /* OptionalFunction.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = OptionalFunction.h; sourceTree = "<group>"; };
@@ -273,7 +273,7 @@
 				BF3031DF294C6C2300E8ADC5 /* macho */,
 				BF971B7D2A58827B006BFFBB /* binaryFile.h */,
 				BF971B7E2A58827B006BFFBB /* binaryFile.c */,
-				BFD2A0412A659F97007F4B81 /* UInt64Vector.h */,
+				BFD2A0412A659F97007F4B81 /* vector_uint64.h */,
 				BFE97A932AE82E92009E1DA4 /* fileHelper.cpp */,
 				BFE97A942AE82E92009E1DA4 /* fileHelper.h */,
 				BFB227A02B5FB9480069E896 /* debugInfo.h */,
