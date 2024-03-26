@@ -21,9 +21,9 @@
 #include <stdlib.h>
 #include <sys/stat.h>
 
-#include "utils.h"
+#include "loader.h"
 
-bool loader_loadFileAndExecute(const char* fileName, loader_parser func, void* args) {
+bool loader_loadFileAndExecute(const char* fileName, union loader_parserFunction func, bool extended, void* args) {
     if (fileName == NULL) {
         return false;
     }
@@ -39,7 +39,8 @@ bool loader_loadFileAndExecute(const char* fileName, loader_parser func, void* a
     FILE* file = fopen(fileName, "r");
     const size_t count = fread(buffer, 1, fileStats.st_size, file);
     fclose(file);
-    const bool toReturn = (off_t) count == fileStats.st_size && func(args, buffer);
+    const bool toReturn = (off_t) count == fileStats.st_size && (extended ? func.parseFuncExtended(buffer, fileName, count, args)
+                                                                          : func.parseFunc(args, buffer));
     free(buffer);
     return toReturn;
 }

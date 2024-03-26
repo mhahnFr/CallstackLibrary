@@ -17,13 +17,19 @@
  * this library, see the file LICENSE.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-#ifndef utils_h
-#define utils_h
+#ifndef loader_h
+#define loader_h
 
 #include <stdbool.h>
 
 typedef bool (*loader_parser)(void*, void*);
+typedef bool (*loader_parserExtended)(void*, const char*, size_t, void*);
 
-bool loader_loadFileAndExecute(const char* fileName, loader_parser func, void* args);
+union loader_parserFunction {
+    loader_parser parseFunc;
+    loader_parserExtended parseFuncExtended;
+};
 
-#endif /* utils_h */
+bool loader_loadFileAndExecute(const char* fileName, union loader_parserFunction func, bool extended, void* args);
+
+#endif /* loader_h */
