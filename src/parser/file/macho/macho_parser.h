@@ -24,7 +24,7 @@
 #include <mach-o/loader.h>
 
 #include "objectFile.h"
-#include "OptionalFuncFilePair.h"
+#include "optional_pair_funcFile.h"
 
 #include "../function.h"
 

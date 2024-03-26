@@ -132,7 +132,7 @@
 		BFB913412B65005500484DA2 /* lcs_stdio.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = lcs_stdio.h; sourceTree = "<group>"; };
 		BFC2D1782AC30BFA00BD4C0B /* callstack_frame.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = callstack_frame.h; sourceTree = "<group>"; };
 		BFC2D1792AC31E1300BD4C0B /* callstack_frame.c */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.c; path = callstack_frame.c; sourceTree = "<group>"; };
-		BFC579002B6E579300F53821 /* vector_pairFuncFile.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = vector_pairFuncFile.h; sourceTree = "<group>"; };
+		BFC579002B6E579300F53821 /* vector_pair_funcFile.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = vector_pair_funcFile.h; sourceTree = "<group>"; };
 		BFCC50C728F8454E00E2388D /* demangler.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; path = demangler.cpp; sourceTree = "<group>"; };
 		BFCC50C828F8454E00E2388D /* demangler.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = demangler.h; sourceTree = "<group>"; };
 		BFD2A03A2A659F4C007F4B81 /* LICENSE */ = {isa = PBXFileReference; lastKnownFileType = text; path = LICENSE; sourceTree = "<group>"; };
@@ -143,7 +143,7 @@
 		BFD2A03F2A659F4C007F4B81 /* pair.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = pair.h; sourceTree = "<group>"; };
 		BFD2A0402A659F4C007F4B81 /* vector.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = vector.h; sourceTree = "<group>"; };
 		BFD2A0412A659F97007F4B81 /* UInt64Vector.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = UInt64Vector.h; sourceTree = "<group>"; };
-		BFD2A0422A65B0B7007F4B81 /* OptionalFuncFilePair.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = OptionalFuncFilePair.h; sourceTree = "<group>"; };
+		BFD2A0422A65B0B7007F4B81 /* optional_pair_funcFile.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = optional_pair_funcFile.h; sourceTree = "<group>"; };
 		BFE075A32A66C0C7009C4462 /* FunctionVector.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = FunctionVector.h; sourceTree = "<group>"; };
 		BFE075A42A66C985009C4462 /* OptionalFunction.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = OptionalFunction.h; sourceTree = "<group>"; };
 		BFE97A932AE82E92009E1DA4 /* fileHelper.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; path = fileHelper.cpp; sourceTree = "<group>"; };
@@ -180,7 +180,7 @@
 				BFA7D7462B6CEA8300765686 /* vector_boolString.h */,
 				BF971B762A588077006BFFBB /* machoFile.h */,
 				BFEC818A2A5EEA36002FA3B7 /* objectFile.h */,
-				BFD2A0422A65B0B7007F4B81 /* OptionalFuncFilePair.h */,
+				BFD2A0422A65B0B7007F4B81 /* optional_pair_funcFile.h */,
 				BFE075A32A66C0C7009C4462 /* FunctionVector.h */,
 				BFAD42AC2B5927A700ADB6AF /* objectFile_shared.c */,
 				BFAD42AF2B592D2000ADB6AF /* macho_utils.h */,
@@ -188,7 +188,7 @@
 				BFAD63172B5BCC4B00EE8E14 /* macho_parser.c */,
 				BFB0B1812B5E804F00CF45E1 /* macho_parser_nlist.h */,
 				BFACFBF82B67DCE4009FAA27 /* machoFile_shared.c */,
-				BFC579002B6E579300F53821 /* vector_pairFuncFile.h */,
+				BFC579002B6E579300F53821 /* vector_pair_funcFile.h */,
 				BFB01C162B70E64E00AD0090 /* cache.h */,
 				BFB01C172B70E64E00AD0090 /* cache.c */,
 				BFABCB742B72421100790948 /* archive.h */,

@@ -28,7 +28,7 @@
 
 #include "FunctionVector.h"
 #include "objectFile.h"
-#include "OptionalFuncFilePair.h"
+#include "optional_pair_funcFile.h"
 
 #ifdef __cplusplus
 extern "C" {

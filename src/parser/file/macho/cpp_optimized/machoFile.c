@@ -19,7 +19,7 @@
 
 #include "../machoFile.h"
 
-#include "../vector_pairFuncFile.h"
+#include "../vector_pair_funcFile.h"
 
 /**
  * This structure contains the additions needed by this C implementation

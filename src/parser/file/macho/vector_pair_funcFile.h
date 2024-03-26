@@ -17,13 +17,13 @@
  * this library, see the file LICENSE.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-#ifndef vector_pairFuncFile_h
-#define vector_pairFuncFile_h
+#ifndef vector_pair_funcFile_h
+#define vector_pair_funcFile_h
 
-#include "OptionalFuncFilePair.h"
+#include "optional_pair_funcFile.h"
 
 #include "../../../../DC4C/vector.h"
 
 typedef_vector_light_named(pairFuncFile, pair_funcFile_t);
 
-#endif /* vector_pairFuncFile_h */
+#endif /* vector_pair_funcFile_h */

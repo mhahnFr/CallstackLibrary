@@ -17,8 +17,8 @@
  * this library, see the file LICENSE.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-#ifndef OptionalFuncFilePair_h
-#define OptionalFuncFilePair_h
+#ifndef optional_pair_funcFile_h
+#define optional_pair_funcFile_h
 
 #include "../../../../DC4C/pair.h"
 #include "../../../../DC4C/optional.h"
@@ -30,4 +30,4 @@
 typedef_pair_named(funcFile, struct function, struct objectFile *);
 typedef_optional_named(funcFile, struct pair_funcFile);
 
-#endif /* OptionalFuncFilePair_h */
+#endif /* optional_pair_funcFile_h */
