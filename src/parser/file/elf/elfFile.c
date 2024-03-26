@@ -17,12 +17,14 @@
  * this library, see the file LICENSE.  If not, see <https://www.gnu.org/licenses/>.
  */
 
+#include <elf.h>
 #include <stddef.h>
 #include <stdlib.h>
 
 #include "elfFile.h"
 
 #include "../debugInfo.h"
+#include "../loader.h"
 
 #include "../../callstack_parser.h"
 #include "../../lcs_stdio.h"
@@ -47,8 +49,15 @@ void elfFile_create(struct elfFile * self) {
     self->_.deleter     = &elfFile_delete;
 }
 
-static inline bool elfFile_parseFile(struct elfFile* self) {
+static inline bool elfFile_parseFileImpl(struct elfFile* self, void* buffer) {
+    // TODO: Implement
     return false;
+}
+
+static inline bool elfFile_parseFile(struct elfFile* self) {
+    return loader_loadFileAndExecute(self->_.fileName, (union loader_parserFunction) {
+        .parseFunc = (loader_parser) elfFile_parseFileImpl
+    }, false, self);
 }
 
 static inline optional_debugInfo_t elfFile_getDebugInfo(struct elfFile* self, void* address) {
