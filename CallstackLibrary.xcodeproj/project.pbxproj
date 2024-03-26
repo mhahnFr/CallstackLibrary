@@ -21,6 +21,10 @@
 		BF378FEC2919545E00A4DAA9 /* callstack_type.h in Headers */ = {isa = PBXBuildFile; fileRef = BF5A746528F1E5120017591A /* callstack_type.h */; settings = {ATTRIBUTES = (Public, ); }; };
 		BF378FEF2919546000A4DAA9 /* callstack.h in Headers */ = {isa = PBXBuildFile; fileRef = BF5A746328F1DD7F0017591A /* callstack.h */; settings = {ATTRIBUTES = (Public, ); }; };
 		BF378FF22919546B00A4DAA9 /* demangler.cpp in Sources */ = {isa = PBXBuildFile; fileRef = BFCC50C728F8454E00E2388D /* demangler.cpp */; };
+		BF3ACF5B2BB31B21005AEAF1 /* utils.h in Headers */ = {isa = PBXBuildFile; fileRef = BF3ACF592BB31B21005AEAF1 /* utils.h */; };
+		BF3ACF5C2BB31B21005AEAF1 /* utils.h in Headers */ = {isa = PBXBuildFile; fileRef = BF3ACF592BB31B21005AEAF1 /* utils.h */; };
+		BF3ACF5D2BB31B21005AEAF1 /* utils.c in Sources */ = {isa = PBXBuildFile; fileRef = BF3ACF5A2BB31B21005AEAF1 /* utils.c */; };
+		BF3ACF5E2BB31B21005AEAF1 /* utils.c in Sources */ = {isa = PBXBuildFile; fileRef = BF3ACF5A2BB31B21005AEAF1 /* utils.c */; };
 		BF5A746128F1DCA00017591A /* callstackInternal.h in Headers */ = {isa = PBXBuildFile; fileRef = BF5A745F28F1DCA00017591A /* callstackInternal.h */; };
 		BF5A746228F1DCA00017591A /* callstackInternal.c in Sources */ = {isa = PBXBuildFile; fileRef = BF5A746028F1DCA00017591A /* callstackInternal.c */; };
 		BF5A746428F1DD7F0017591A /* callstack.h in Headers */ = {isa = PBXBuildFile; fileRef = BF5A746328F1DD7F0017591A /* callstack.h */; settings = {ATTRIBUTES = (Public, ); }; };
@@ -83,6 +87,8 @@
 		BF3036C728F987C700856435 /* callstack.hpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.h; path = callstack.hpp; sourceTree = "<group>"; };
 		BF3036CC28F998AD00856435 /* callstack_create.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = callstack_create.h; sourceTree = "<group>"; };
 		BF378FC52919539B00A4DAA9 /* libcallstack.dylib */ = {isa = PBXFileReference; explicitFileType = "compiled.mach-o.dylib"; includeInIndex = 0; path = libcallstack.dylib; sourceTree = BUILT_PRODUCTS_DIR; };
+		BF3ACF592BB31B21005AEAF1 /* utils.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = utils.h; sourceTree = "<group>"; };
+		BF3ACF5A2BB31B21005AEAF1 /* utils.c */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.c; path = utils.c; sourceTree = "<group>"; };
 		BF5A745E28F1DB890017591A /* LICENSE */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text; path = LICENSE; sourceTree = "<group>"; };
 		BF5A745F28F1DCA00017591A /* callstackInternal.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = callstackInternal.h; sourceTree = "<group>"; };
 		BF5A746028F1DCA00017591A /* callstackInternal.c */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.c; path = callstackInternal.c; sourceTree = "<group>"; };
@@ -280,6 +286,8 @@
 				BFEC81842A5EE937002FA3B7 /* function.h */,
 				BFEC81852A5EE937002FA3B7 /* function.c */,
 				BFE075A42A66C985009C4462 /* optional_function.h */,
+				BF3ACF592BB31B21005AEAF1 /* utils.h */,
+				BF3ACF5A2BB31B21005AEAF1 /* utils.c */,
 			);
 			path = file;
 			sourceTree = "<group>";
@@ -353,6 +361,7 @@
 				BF378FDD2919545100A4DAA9 /* callstack_parser.h in Headers */,
 				BF971B802A58827B006BFFBB /* binaryFile.h in Headers */,
 				BF378FE02919545500A4DAA9 /* callstackInternal.h in Headers */,
+				BF3ACF5C2BB31B21005AEAF1 /* utils.h in Headers */,
 				BF971B872A588634006BFFBB /* elfFile.h in Headers */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
@@ -371,6 +380,7 @@
 				BFAD63182B5BCC4B00EE8E14 /* macho_parser.h in Headers */,
 				BF3036CD28F998AD00856435 /* callstack_create.h in Headers */,
 				BF86E32228F45DE100F6D20E /* callstack_parser.h in Headers */,
+				BF3ACF5B2BB31B21005AEAF1 /* utils.h in Headers */,
 				BF5A746128F1DCA00017591A /* callstackInternal.h in Headers */,
 				BFEC818C2A5EEA36002FA3B7 /* objectFile.h in Headers */,
 				BFE97A962AE82E92009E1DA4 /* fileHelper.h in Headers */,
@@ -464,6 +474,7 @@
 				BF971B892A588634006BFFBB /* elfFile.c in Sources */,
 				BFACFBFA2B67DCE4009FAA27 /* machoFile_shared.c in Sources */,
 				BFEC81892A5EE937002FA3B7 /* function.c in Sources */,
+				BF3ACF5E2BB31B21005AEAF1 /* utils.c in Sources */,
 				BFC2D17B2AC31E1300BD4C0B /* callstack_frame.c in Sources */,
 				BF971B982A58C155006BFFBB /* callstack_internals.c in Sources */,
 				BFACFBF72B67DA5F009FAA27 /* machoFile_optimized.cpp in Sources */,
@@ -500,6 +511,7 @@
 				BFAD65442B5A717F00024242 /* dwarf_parser.c in Sources */,
 				BFB01C1A2B70E64E00AD0090 /* cache.c in Sources */,
 				BFACFBF92B67DCE4009FAA27 /* machoFile_shared.c in Sources */,
+				BF3ACF5D2BB31B21005AEAF1 /* utils.c in Sources */,
 				BFAD42AD2B5927A700ADB6AF /* objectFile_shared.c in Sources */,
 				BFABCB782B72421100790948 /* archive.c in Sources */,
 				BF971B7A2A588077006BFFBB /* machoFile.c in Sources */,
