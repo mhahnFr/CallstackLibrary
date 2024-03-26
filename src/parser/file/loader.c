@@ -37,6 +37,10 @@ bool loader_loadFileAndExecute(const char* fileName, union loader_parserFunction
         return false;
     }
     FILE* file = fopen(fileName, "r");
+    if (file == NULL) {
+        free(buffer);
+        return false;
+    }
     const size_t count = fread(buffer, 1, fileStats.st_size, file);
     fclose(file);
     const bool toReturn = (off_t) count == fileStats.st_size && (extended ? func.parseFuncExtended(buffer, fileName, count, args)
