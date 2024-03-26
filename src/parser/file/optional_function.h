@@ -17,8 +17,8 @@
  * this library, see the file LICENSE.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-#ifndef OptionalFunction_h
-#define OptionalFunction_h
+#ifndef optional_function_h
+#define optional_function_h
 
 #include "../../../DC4C/optional.h"
 
@@ -26,4 +26,4 @@
 
 typedef_optional_named(function, struct function);
 
-#endif /* OptionalFunction_h */
+#endif /* optional_function_h */

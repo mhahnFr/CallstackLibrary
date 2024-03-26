@@ -145,7 +145,7 @@
 		BFD2A0412A659F97007F4B81 /* vector_uint64.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = vector_uint64.h; sourceTree = "<group>"; };
 		BFD2A0422A65B0B7007F4B81 /* optional_pair_funcFile.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = optional_pair_funcFile.h; sourceTree = "<group>"; };
 		BFE075A32A66C0C7009C4462 /* vector_function.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = vector_function.h; sourceTree = "<group>"; };
-		BFE075A42A66C985009C4462 /* OptionalFunction.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = OptionalFunction.h; sourceTree = "<group>"; };
+		BFE075A42A66C985009C4462 /* optional_function.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = optional_function.h; sourceTree = "<group>"; };
 		BFE97A932AE82E92009E1DA4 /* fileHelper.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; path = fileHelper.cpp; sourceTree = "<group>"; };
 		BFE97A942AE82E92009E1DA4 /* fileHelper.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = fileHelper.h; sourceTree = "<group>"; };
 		BFEC81842A5EE937002FA3B7 /* function.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = function.h; sourceTree = "<group>"; };
@@ -279,7 +279,7 @@
 				BFB227A02B5FB9480069E896 /* debugInfo.h */,
 				BFEC81842A5EE937002FA3B7 /* function.h */,
 				BFEC81852A5EE937002FA3B7 /* function.c */,
-				BFE075A42A66C985009C4462 /* OptionalFunction.h */,
+				BFE075A42A66C985009C4462 /* optional_function.h */,
 			);
 			path = file;
 			sourceTree = "<group>";
