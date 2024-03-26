@@ -17,8 +17,8 @@
  * this library, see the file LICENSE.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-#ifndef FunctionVector_h
-#define FunctionVector_h
+#ifndef vector_function_h
+#define vector_function_h
 
 #include "../../../../DC4C/vector.h"
 
@@ -26,4 +26,4 @@
 
 typedef_vector_light_named(function, struct function);
 
-#endif /* FunctionVector_h */
+#endif /* vector_function_h */

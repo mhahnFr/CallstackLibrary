@@ -20,7 +20,7 @@
 #include <stdlib.h>
 
 #include "../objectFile.h"
-#include "../FunctionVector.h"
+#include "../vector_function.h"
 
 #include "../../dwarf/vector_dwarf_lineInfo.h"
 

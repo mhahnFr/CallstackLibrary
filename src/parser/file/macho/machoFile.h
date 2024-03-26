@@ -26,7 +26,7 @@
 #include "../debugInfo.h"
 #include "../UInt64Vector.h"
 
-#include "FunctionVector.h"
+#include "vector_function.h"
 #include "objectFile.h"
 #include "optional_pair_funcFile.h"
 
