@@ -1,7 +1,7 @@
 /*
  * Callstack Library - Library creating human-readable call stacks.
  *
- * Copyright (C) 2023  mhahnFr
+ * Copyright (C) 2023 - 2024  mhahnFr
  *
  * This file is part of the CallstackLibrary. This library is free software:
  * you can redistribute it and/or modify it under the terms of the
@@ -23,8 +23,9 @@
 #include "../../../../DC4C/pair.h"
 #include "../../../../DC4C/optional.h"
 
-#include "function.h"
 #include "objectFile.h"
+
+#include "../function.h"
 
 typedef_pair_named(funcFile, struct function, struct objectFile *);
 typedef_optional_named(funcFile, struct pair_funcFile);

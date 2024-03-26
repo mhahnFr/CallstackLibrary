@@ -23,9 +23,10 @@
 #include <mach-o/fat.h>
 #include <mach-o/loader.h>
 
-#include "function.h"
 #include "objectFile.h"
 #include "OptionalFuncFilePair.h"
+
+#include "../function.h"
 
 /**
  * @brief The function prototype for the callback called with a new object file object.

@@ -1,7 +1,7 @@
 /*
  * Callstack Library - Library creating human-readable call stacks.
  *
- * Copyright (C) 2023  mhahnFr
+ * Copyright (C) 2023 - 2024  mhahnFr
  *
  * This file is part of the CallstackLibrary. This library is free software:
  * you can redistribute it and/or modify it under the terms of the
@@ -20,7 +20,7 @@
 #ifndef OptionalFunction_h
 #define OptionalFunction_h
 
-#include "../../../../DC4C/optional.h"
+#include "../../../DC4C/optional.h"
 
 #include "function.h"
 

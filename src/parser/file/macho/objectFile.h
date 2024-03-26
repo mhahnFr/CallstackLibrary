@@ -25,8 +25,8 @@
 #include <string.h>
 #include <time.h>
 
-#include "function.h"
-#include "OptionalFunction.h"
+#include "../function.h"
+#include "../OptionalFunction.h"
 
 #include "../debugInfo.h"
 #include "../dwarf/dwarf_parser.h"

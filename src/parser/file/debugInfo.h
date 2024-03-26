@@ -22,7 +22,7 @@
 
 #include <stdint.h>
 
-#include "macho/function.h"
+#include "function.h"
 
 #include "../../../DC4C/optional.h"
 
