@@ -17,9 +17,15 @@
  * this library, see the file LICENSE.  If not, see <https://www.gnu.org/licenses/>.
  */
 
+#include <stddef.h>
 #include <stdlib.h>
 
 #include "elfFile.h"
+
+#include "../debugInfo.h"
+
+#include "../../callstack_parser.h"
+#include "../../lcs_stdio.h"
 
 struct elfFile * elfFile_new(void) {
     struct elfFile * toReturn = malloc(sizeof(struct elfFile));
@@ -41,12 +47,50 @@ void elfFile_create(struct elfFile * self) {
     self->_.deleter     = &elfFile_delete;
 }
 
-bool elfFile_addr2String(struct binaryFile* self, void* address, struct callstack_frame* frame) {
-    (void) self;
-    (void) address;
-    (void) frame;
+static inline bool elfFile_parseFile(struct elfFile* self) {
+    return false;
+}
+
+static inline optional_debugInfo_t elfFile_getDebugInfo(struct elfFile* self, void* address) {
+    return (optional_debugInfo_t) { .has_value = false };
+}
+
+bool elfFile_addr2String(struct binaryFile* me, void* address, struct callstack_frame* frame) {
+    struct elfFile* self = elfFileOrNull(me);
+    if (self == NULL) return false;
     
-    return NULL;
+    if (!me->parsed &&
+        !(me->parsed = elfFile_parseFile(self))) {
+        return false;
+    }
+
+    optional_debugInfo_t result = elfFile_getDebugInfo(self, address);
+    if (result.has_value) {
+        if (result.value.function.linkedName == NULL) {
+            return false;
+        }
+        char* name = (char*) result.value.function.linkedName;
+        if (*name == '_' || *name == '\1') {
+            ++name;
+        }
+        name = callstack_parser_demangle(name);
+        if (result.value.sourceFileInfo.has_value) {
+            frame->sourceFile = binaryFile_toAbsolutePath((char*) result.value.sourceFileInfo.value.sourceFile);
+            frame->sourceFileRelative = binaryFile_toRelativePath((char*) result.value.sourceFileInfo.value.sourceFile);
+            frame->sourceLine = result.value.sourceFileInfo.value.line;
+            if (result.value.sourceFileInfo.value.column > 0) {
+                frame->sourceLineColumn = (optional_ulong_t) { true, result.value.sourceFileInfo.value.column };
+            }
+            frame->function = name;
+        } else {
+            char* toReturn = NULL;
+            asprintf(&toReturn, "%s + %td", name, (ptrdiff_t) -1); // TODO: Translate address
+            free(name);
+            frame->function = toReturn;
+        }
+        return true;
+    }
+    return false;
 }
 
 void elfFile_destroy(struct binaryFile * self) {
