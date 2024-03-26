@@ -22,6 +22,8 @@
 
 #include <stdbool.h>
 
-bool loadFileAndExecute(const char* fileName, bool (*func)(void*, void*), void* args);
+typedef bool (*loader_parser)(void*, void*);
+
+bool loader_loadFileAndExecute(const char* fileName, loader_parser func, void* args);
 
 #endif /* utils_h */

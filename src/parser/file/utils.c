@@ -23,7 +23,7 @@
 
 #include "utils.h"
 
-bool loadFileAndExecute(const char* fileName, bool (*func)(void*, void*), void* args) {
+bool loader_loadFileAndExecute(const char* fileName, loader_parser func, void* args) {
     if (fileName == NULL) {
         return false;
     }
@@ -39,7 +39,7 @@ bool loadFileAndExecute(const char* fileName, bool (*func)(void*, void*), void* 
     FILE* file = fopen(fileName, "r");
     const size_t count = fread(buffer, 1, fileStats.st_size, file);
     fclose(file);
-    const bool toReturn = (off_t) count == fileStats.st_size && func(buffer, args);
+    const bool toReturn = (off_t) count == fileStats.st_size && func(args, buffer);
     free(buffer);
     return toReturn;
 }
