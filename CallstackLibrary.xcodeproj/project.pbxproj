@@ -43,8 +43,6 @@
 		BF971B822A58827B006BFFBB /* binaryFile.c in Sources */ = {isa = PBXBuildFile; fileRef = BF971B7E2A58827B006BFFBB /* binaryFile.c */; };
 		BF971B862A588634006BFFBB /* elfFile.h in Headers */ = {isa = PBXBuildFile; fileRef = BF971B842A588634006BFFBB /* elfFile.h */; };
 		BF971B872A588634006BFFBB /* elfFile.h in Headers */ = {isa = PBXBuildFile; fileRef = BF971B842A588634006BFFBB /* elfFile.h */; };
-		BF971B882A588634006BFFBB /* elfFile.c in Sources */ = {isa = PBXBuildFile; fileRef = BF971B852A588634006BFFBB /* elfFile.c */; };
-		BF971B892A588634006BFFBB /* elfFile.c in Sources */ = {isa = PBXBuildFile; fileRef = BF971B852A588634006BFFBB /* elfFile.c */; };
 		BF971B972A58C155006BFFBB /* callstack_internals.c in Sources */ = {isa = PBXBuildFile; fileRef = BF971B962A58C155006BFFBB /* callstack_internals.c */; };
 		BF971B982A58C155006BFFBB /* callstack_internals.c in Sources */ = {isa = PBXBuildFile; fileRef = BF971B962A58C155006BFFBB /* callstack_internals.c */; };
 		BFAB6B3B2A62EDC800726B52 /* objectFile.c in Sources */ = {isa = PBXBuildFile; fileRef = BFEC818B2A5EEA36002FA3B7 /* objectFile.c */; };
@@ -471,7 +469,6 @@
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
-				BF971B892A588634006BFFBB /* elfFile.c in Sources */,
 				BFACFBFA2B67DCE4009FAA27 /* machoFile_shared.c in Sources */,
 				BFEC81892A5EE937002FA3B7 /* function.c in Sources */,
 				BF3ACF5E2BB31B21005AEAF1 /* loader.c in Sources */,
@@ -496,7 +493,6 @@
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
-				BF971B882A588634006BFFBB /* elfFile.c in Sources */,
 				BF971B972A58C155006BFFBB /* callstack_internals.c in Sources */,
 				BF86E31F28F4564600F6D20E /* callstack.c in Sources */,
 				BF971B812A58827B006BFFBB /* binaryFile.c in Sources */,
