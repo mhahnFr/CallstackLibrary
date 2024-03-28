@@ -286,7 +286,7 @@ This library is licensed under the terms of the GPL 3.0.
 
 © Copyright 2022 - 2024 [mhahnFr][4]
 
-[1]: https://github.com/mhahnFr/CallstackLibrary/releases
+[1]: https://github.com/mhahnFr/CallstackLibrary/releases/latest
 [2]: https://github.com/mhahnFr/CallstackLibrary/blob/main/include/callstack.h
 [3]: https://github.com/mhahnFr/CallstackLibrary/wiki
 [4]: https://github.com/mhahnFr
