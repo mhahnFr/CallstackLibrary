@@ -49,8 +49,53 @@ void elfFile_create(struct elfFile * self) {
     self->_.deleter     = &elfFile_delete;
 }
 
-static inline bool elfFile_parseFileImpl(struct elfFile* self, void* buffer) {
+static inline bool elfFile_parseFile32(struct elfFile* self, Elf32_Ehdr* buffer) {
     // TODO: Implement
+    return false;
+}
+
+static inline bool elfFile_parseSymtab64(struct elfFile* self, Elf64_Shdr* symtab, void* strbegin) {
+    // TODO: Implement
+    return false;
+}
+
+static inline bool elfFile_parseFile64(struct elfFile* self, Elf64_Ehdr* buffer) {
+    if (buffer->e_shoff == 0) return false;
+
+    void* sectBegin = (void*) buffer + buffer->e_shoff;
+    // TODO: e_shnum special case
+    Elf64_Shdr* strtab = NULL,
+              * symtab = NULL;
+    for (uint16_t i = 0; i < buffer->e_shnum; ++i) {
+        Elf64_Shdr* current = sectBegin + i * buffer->e_shentsize;
+        bool success = true;
+        switch (current->sh_type) {
+            case SHT_SYMTAB:
+                symtab = current;
+                break;
+
+            case SHT_STRTAB:
+                // TODO: e_shstrndx special case
+                if (i != buffer->e_shstrndx)
+                    strtab = current;
+                break;
+        }
+    }
+    __builtin_printf("%p %p\n", symtab, strtab);
+    if (symtab == NULL || strtab == NULL) return false;
+
+    return elfFile_parseSymtab64(self, symtab, (void*) buffer + strtab->sh_offset);
+}
+
+static inline bool elfFile_parseFileImpl(struct elfFile* self, void* buffer) {
+    // TODO: Care about EI_DATA
+
+    unsigned char* e_ident = buffer;
+    switch (e_ident[EI_CLASS]) {
+        case ELFCLASS32: return elfFile_parseFile32(self, buffer);
+        case ELFCLASS64: return elfFile_parseFile64(self, buffer);
+    }
+
     return false;
 }
 

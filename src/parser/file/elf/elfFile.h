@@ -28,7 +28,6 @@
 struct elfFile {
     /** The super part of this structure. */
     struct binaryFile _;
-    // ...
 };
 
 /**
