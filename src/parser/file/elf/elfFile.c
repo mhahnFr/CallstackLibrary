@@ -63,7 +63,7 @@ static inline bool elfFile_parseSymtab64(struct elfFile* self, Elf64_Shdr* symta
     uint64_t count = symtab->sh_size / sizeof(Elf64_Sym);
     Elf64_Sym* entry = symtabBegin;
     for (uint64_t i = 0; i < count; ++i, ++entry) {
-        if (ELF64_ST_TYPE(entry->st_info) == STT_FUNC) {
+        if (ELF64_ST_TYPE(entry->st_info) == STT_FUNC && entry->st_value != 0) {
             struct function f = {
                 .startAddress = entry->st_value,
                 .linkedName   = strdup(strBegin + entry->st_name),
