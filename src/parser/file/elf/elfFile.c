@@ -159,9 +159,6 @@ bool elfFile_addr2String(struct binaryFile* me, void* address, struct callstack_
             return false;
         }
         char* name = (char*) result.value.function.linkedName;
-//        if (*name == '_' || *name == '\1') {
-//            ++name;
-//        }
         name = callstack_parser_demangle(name);
         if (result.value.sourceFileInfo.has_value) {
             frame->sourceFile = binaryFile_toAbsolutePath((char*) result.value.sourceFileInfo.value.sourceFile);
@@ -173,7 +170,7 @@ bool elfFile_addr2String(struct binaryFile* me, void* address, struct callstack_
             frame->function = name;
         } else {
             char* toReturn = NULL;
-            asprintf(&toReturn, "%s + %td", name, (ptrdiff_t) -1); // TODO: Translate address
+            asprintf(&toReturn, "%s + %td", name, (ptrdiff_t) (address - self->_.startAddress - result.value.function.startAddress));
             free(name);
             frame->function = toReturn;
         }
