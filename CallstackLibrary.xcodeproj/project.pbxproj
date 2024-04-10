@@ -41,8 +41,6 @@
 		BF971B802A58827B006BFFBB /* binaryFile.h in Headers */ = {isa = PBXBuildFile; fileRef = BF971B7D2A58827B006BFFBB /* binaryFile.h */; };
 		BF971B812A58827B006BFFBB /* binaryFile.c in Sources */ = {isa = PBXBuildFile; fileRef = BF971B7E2A58827B006BFFBB /* binaryFile.c */; };
 		BF971B822A58827B006BFFBB /* binaryFile.c in Sources */ = {isa = PBXBuildFile; fileRef = BF971B7E2A58827B006BFFBB /* binaryFile.c */; };
-		BF971B862A588634006BFFBB /* elfFile.h in Headers */ = {isa = PBXBuildFile; fileRef = BF971B842A588634006BFFBB /* elfFile.h */; };
-		BF971B872A588634006BFFBB /* elfFile.h in Headers */ = {isa = PBXBuildFile; fileRef = BF971B842A588634006BFFBB /* elfFile.h */; };
 		BF971B972A58C155006BFFBB /* callstack_internals.c in Sources */ = {isa = PBXBuildFile; fileRef = BF971B962A58C155006BFFBB /* callstack_internals.c */; };
 		BF971B982A58C155006BFFBB /* callstack_internals.c in Sources */ = {isa = PBXBuildFile; fileRef = BF971B962A58C155006BFFBB /* callstack_internals.c */; };
 		BFAB6B3B2A62EDC800726B52 /* objectFile.c in Sources */ = {isa = PBXBuildFile; fileRef = BFEC818B2A5EEA36002FA3B7 /* objectFile.c */; };
@@ -105,8 +103,6 @@
 		BF971B772A588077006BFFBB /* machoFile.c */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.c; path = machoFile.c; sourceTree = "<group>"; };
 		BF971B7D2A58827B006BFFBB /* binaryFile.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = binaryFile.h; sourceTree = "<group>"; };
 		BF971B7E2A58827B006BFFBB /* binaryFile.c */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.c; path = binaryFile.c; sourceTree = "<group>"; };
-		BF971B842A588634006BFFBB /* elfFile.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = elfFile.h; sourceTree = "<group>"; };
-		BF971B852A588634006BFFBB /* elfFile.c */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.c; path = elfFile.c; sourceTree = "<group>"; };
 		BF971B952A58C0F2006BFFBB /* callstack_internals.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = callstack_internals.h; sourceTree = "<group>"; };
 		BF971B962A58C155006BFFBB /* callstack_internals.c */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.c; path = callstack_internals.c; sourceTree = "<group>"; };
 		BFA17E6E2AC496A200931B1E /* optional_Dl_info.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = optional_Dl_info.h; sourceTree = "<group>"; };
@@ -185,7 +181,6 @@
 				BF971B762A588077006BFFBB /* machoFile.h */,
 				BFEC818A2A5EEA36002FA3B7 /* objectFile.h */,
 				BFD2A0422A65B0B7007F4B81 /* optional_pair_funcFile.h */,
-				BFE075A32A66C0C7009C4462 /* vector_function.h */,
 				BFAD42AC2B5927A700ADB6AF /* objectFile_shared.c */,
 				BFAD42AF2B592D2000ADB6AF /* macho_utils.h */,
 				BFAD63162B5BCC4B00EE8E14 /* macho_parser.h */,
@@ -273,7 +268,6 @@
 			isa = PBXGroup;
 			children = (
 				BFAD631A2B5BD5B000EE8E14 /* dwarf */,
-				BF971B832A588624006BFFBB /* elf */,
 				BF3031DF294C6C2300E8ADC5 /* macho */,
 				BF971B7D2A58827B006BFFBB /* binaryFile.h */,
 				BF971B7E2A58827B006BFFBB /* binaryFile.c */,
@@ -283,20 +277,12 @@
 				BFB227A02B5FB9480069E896 /* debugInfo.h */,
 				BFEC81842A5EE937002FA3B7 /* function.h */,
 				BFEC81852A5EE937002FA3B7 /* function.c */,
+				BFE075A32A66C0C7009C4462 /* vector_function.h */,
 				BFE075A42A66C985009C4462 /* optional_function.h */,
 				BF3ACF592BB31B21005AEAF1 /* loader.h */,
 				BF3ACF5A2BB31B21005AEAF1 /* loader.c */,
 			);
 			path = file;
-			sourceTree = "<group>";
-		};
-		BF971B832A588624006BFFBB /* elf */ = {
-			isa = PBXGroup;
-			children = (
-				BF971B842A588634006BFFBB /* elfFile.h */,
-				BF971B852A588634006BFFBB /* elfFile.c */,
-			);
-			path = elf;
 			sourceTree = "<group>";
 		};
 		BFAB6B3D2A62F5E100726B52 /* cpp_optimized */ = {
@@ -360,7 +346,6 @@
 				BF971B802A58827B006BFFBB /* binaryFile.h in Headers */,
 				BF378FE02919545500A4DAA9 /* callstackInternal.h in Headers */,
 				BF3ACF5C2BB31B21005AEAF1 /* loader.h in Headers */,
-				BF971B872A588634006BFFBB /* elfFile.h in Headers */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -386,7 +371,6 @@
 				BFEC81862A5EE937002FA3B7 /* function.h in Headers */,
 				BF971B7F2A58827B006BFFBB /* binaryFile.h in Headers */,
 				BFCC50CA28F8454E00E2388D /* demangler.h in Headers */,
-				BF971B862A588634006BFFBB /* elfFile.h in Headers */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
