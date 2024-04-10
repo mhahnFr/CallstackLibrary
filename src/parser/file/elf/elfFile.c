@@ -72,7 +72,7 @@ static inline bool elfFile_parseSymtab64(struct elfFile* self, Elf64_Shdr* symta
             vector_function_push_back(&self->functions, f);
         }
     }
-    return false;
+    return true;
 }
 
 static inline bool elfFile_parseFile64(struct elfFile* self, Elf64_Ehdr* buffer) {
@@ -121,7 +121,27 @@ static inline bool elfFile_parseFile(struct elfFile* self) {
 }
 
 static inline optional_debugInfo_t elfFile_getDebugInfo(struct elfFile* self, void* address) {
-    return (optional_debugInfo_t) { .has_value = false };
+    const uint64_t translated = (uint64_t) address - (uint64_t) self->_.startAddress;
+    struct function* closest = NULL;
+    vector_iterate(struct function, &self->functions, {
+        if (closest == NULL && element->startAddress <= translated) {
+            closest = element;
+        } else if (closest != NULL && element->startAddress <= translated && translated - element->startAddress < translated - closest->startAddress) {
+            closest = element;
+        }
+    })
+    
+    // TODO: Length check
+    if (closest == NULL) {
+        return (optional_debugInfo_t) { .has_value = false };
+    }
+    return (optional_debugInfo_t) {
+        .has_value = true,
+        .value = (struct debugInfo) {
+            .function = *closest,
+            .sourceFileInfo = { .has_value = false }
+        }
+    };
 }
 
 bool elfFile_addr2String(struct binaryFile* me, void* address, struct callstack_frame* frame) {
@@ -139,9 +159,9 @@ bool elfFile_addr2String(struct binaryFile* me, void* address, struct callstack_
             return false;
         }
         char* name = (char*) result.value.function.linkedName;
-        if (*name == '_' || *name == '\1') {
-            ++name;
-        }
+//        if (*name == '_' || *name == '\1') {
+//            ++name;
+//        }
         name = callstack_parser_demangle(name);
         if (result.value.sourceFileInfo.has_value) {
             frame->sourceFile = binaryFile_toAbsolutePath((char*) result.value.sourceFileInfo.value.sourceFile);
