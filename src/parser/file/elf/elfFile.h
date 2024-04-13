@@ -25,6 +25,8 @@
 #include "../binaryFile.h"
 #include "../vector_function.h"
 
+#include "../dwarf/vector_dwarf_lineInfo.h"
+
 /**
  * This structure represents an ELF binary file.
  */
@@ -33,6 +35,7 @@ struct elfFile {
     struct binaryFile _;
     
     vector_function_t functions;
+    vector_dwarfLineInfo_t lineInfos;
 };
 
 /**

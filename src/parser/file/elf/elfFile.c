@@ -28,6 +28,8 @@
 #include "../debugInfo.h"
 #include "../loader.h"
 
+#include "../dwarf/dwarf_parser.h"
+
 #include "../../callstack_parser.h"
 #include "../../lcs_stdio.h"
 
@@ -51,6 +53,7 @@ void elfFile_create(struct elfFile * self) {
     self->_.deleter     = &elfFile_delete;
 
     vector_function_create(&self->functions);
+    vector_dwarfLineInfo_create(&self->lineInfos);
 }
 
 static inline bool elfFile_parseFile32(struct elfFile* self, Elf32_Ehdr* buffer) {
@@ -84,6 +87,20 @@ static inline char* elfFile_loadSectionStrtab(Elf64_Ehdr* header) {
     return (void*) header + sect->sh_offset;
 }
 
+static inline void elfFile_lineProgramCallback(struct dwarf_lineInfo info, va_list args) {
+    struct elfFile* self = va_arg(args, void*);
+
+    vector_dwarfLineInfo_push_back(&self->lineInfos, info);
+}
+
+static inline bool elfFile_parseLineProgram(void* section, uint64_t size, ...) {
+    va_list args;
+    va_start(args, size);
+    const bool success = dwarf_parseLineProgram(section, elfFile_lineProgramCallback, args, size);
+    va_end(args);
+    return success;
+}
+
 static inline bool elfFile_parseFile64(struct elfFile* self, Elf64_Ehdr* buffer) {
     if (buffer->e_shoff == 0) return false;
 
@@ -93,9 +110,14 @@ static inline bool elfFile_parseFile64(struct elfFile* self, Elf64_Ehdr* buffer)
     void* sectBegin = (void*) buffer + buffer->e_shoff;
     // TODO: e_shnum special case
     Elf64_Shdr* strtab = NULL,
-              * symtab = NULL;
+              * symtab = NULL,
+              * lines  = NULL;
     for (uint16_t i = 0; i < buffer->e_shnum; ++i) {
         Elf64_Shdr* current = sectBegin + i * buffer->e_shentsize;
+        if (strcmp(".debug_line", sectStrBegin + current->sh_name) == 0) {
+            lines = current;
+            continue;
+        }
         switch (current->sh_type) {
             case SHT_SYMTAB:
                 symtab = current;
@@ -110,7 +132,11 @@ static inline bool elfFile_parseFile64(struct elfFile* self, Elf64_Ehdr* buffer)
     }
     if (symtab == NULL || strtab == NULL) return false;
 
-    return elfFile_parseSymtab64(self, symtab, (void*) buffer + strtab->sh_offset, buffer);
+    bool success = true;
+    if (lines != NULL) {
+        success = elfFile_parseLineProgram((void*) buffer + lines->sh_offset, lines->sh_size, self);
+    }
+    return success && elfFile_parseSymtab64(self, symtab, (void*) buffer + strtab->sh_offset, buffer);
 }
 
 static inline bool elfFile_parseFileImpl(struct elfFile* self, void* buffer) {
@@ -198,6 +224,7 @@ void elfFile_destroy(struct binaryFile* me) {
         function_destroy(element);
     });
     vector_function_destroy(&self->functions);
+    vector_dwarfLineInfo_destroyWith(&self->lineInfos, dwarf_lineInfo_destroyValue);
 }
 
 void elfFile_delete(struct binaryFile * self) {
