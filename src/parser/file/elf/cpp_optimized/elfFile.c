@@ -59,7 +59,7 @@ static inline void elfFile_lineProgramCallback(struct dwarf_lineInfo info, va_li
     vector_dwarfLineInfo_push_back(&self->lineInfos, info);
 }
 
-static inline bool elfFile_loadFileImpl(struct elfFile_private* self, void* buffer) {
+static inline bool elfFile_loadFileImpl(struct elfFile_private* self, void* buffer) { // TODO: Error handling
     return elfFile_parseFile(&self->_, buffer, elfFile_lineProgramCallback, self);
 }
 
@@ -108,7 +108,7 @@ optional_debugInfo_t elfFile_getDebugInfo(struct elfFile* me, void* address) {
         }
     })
     if (closestInfo == NULL
-        || closest->startAddress >= closestInfo->address // FIXME: Is the startAddress not inclusive?
+        || closest->startAddress >= closestInfo->address
         || closest->startAddress + closest->length < closestInfo->address) {
         return toReturn;
     }
