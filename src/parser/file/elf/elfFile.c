@@ -170,8 +170,9 @@ static inline optional_debugInfo_t elfFile_getDebugInfo(struct elfFile* self, vo
         }
     })
     
-    // TODO: Length check
-    if (closest == NULL) {
+    if (closest == NULL
+        || closest->startAddress > translated
+        || closest->startAddress + closest->length < translated) {
         return toReturn;
     }
     toReturn = (optional_debugInfo_t) {
@@ -190,7 +191,9 @@ static inline optional_debugInfo_t elfFile_getDebugInfo(struct elfFile* self, vo
             closestInfo = element;
         }
     })
-    if (closestInfo == NULL) {
+    if (closestInfo == NULL
+        || closest->startAddress >= closestInfo->address // FIXME: Is the startAddress not inclusive?
+        || closest->startAddress + closest->length < closestInfo->address) {
         return toReturn;
     }
     toReturn.value.sourceFileInfo = (optional_sourceFileInfo_t) {
