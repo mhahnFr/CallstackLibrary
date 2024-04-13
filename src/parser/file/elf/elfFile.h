@@ -28,6 +28,10 @@
 
 #include "../dwarf/dwarf_parser.h"
 
+#ifdef __cplusplus
+extern "C" {
+#endif
+
 /**
  * This structure represents an ELF binary file.
  */
@@ -60,8 +64,8 @@ void elfFile_create(struct elfFile * self);
  * @param self the binary file structure to be casted
  * @return the ELF file structure on success or `NULL`
  */
-static inline struct elfFile * elfFileOrNull(struct binaryFile * self) {
-    return self->type == ELF_FILE ? self->concrete : NULL;
+static inline struct elfFile* elfFileOrNull(struct binaryFile * self) {
+    return self->type == ELF_FILE ? (struct elfFile*) self->concrete : NULL;
 }
 
 optional_debugInfo_t elfFile_getDebugInfo(struct elfFile* self, void* address);
@@ -85,5 +89,9 @@ void elfFile_destroy(struct binaryFile * self);
  * @param self the binary file structure to be deleted
  */
 void elfFile_delete(struct binaryFile * self);
+
+#ifdef __cplusplus
+} // extern "C"
+#endif
 
 #endif /* elfFile_h */

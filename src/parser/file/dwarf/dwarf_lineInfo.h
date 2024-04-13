@@ -26,6 +26,10 @@
 #include <stdint.h>
 #include <stdlib.h>
 
+#ifdef __cplusplus
+extern "C" {
+#endif
+
 /**
  * This structure represents a DWARF line program entry.
  */
@@ -72,5 +76,9 @@ static inline void dwarf_lineInfo_destroyValue(struct dwarf_lineInfo self) {
 static inline void dwarf_lineInfo_destroy(struct dwarf_lineInfo* self) {
     dwarf_lineInfo_destroyValue(*self);
 }
+
+#ifdef __cplusplus
+} // extern "C"
+#endif
 
 #endif /* dwarfLineInfo_h */
