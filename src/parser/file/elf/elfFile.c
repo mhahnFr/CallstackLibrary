@@ -158,6 +158,8 @@ static inline bool elfFile_parseFile(struct elfFile* self) {
 }
 
 static inline optional_debugInfo_t elfFile_getDebugInfo(struct elfFile* self, void* address) {
+    optional_debugInfo_t toReturn = { .has_value = false };
+
     const uint64_t translated = (uint64_t) address - (uint64_t) self->_.startAddress;
     struct function* closest = NULL;
     vector_iterate(struct function, &self->functions, {
@@ -170,15 +172,36 @@ static inline optional_debugInfo_t elfFile_getDebugInfo(struct elfFile* self, vo
     
     // TODO: Length check
     if (closest == NULL) {
-        return (optional_debugInfo_t) { .has_value = false };
+        return toReturn;
     }
-    return (optional_debugInfo_t) {
+    toReturn = (optional_debugInfo_t) {
         .has_value = true,
         .value = (struct debugInfo) {
             .function = *closest,
             .sourceFileInfo = { .has_value = false }
         }
     };
+    
+    struct dwarf_lineInfo* closestInfo = NULL;
+    vector_iterate(struct dwarf_lineInfo, &self->lineInfos, {
+        if (closestInfo == NULL && element->address < translated) {
+            closestInfo = element;
+        } else if (closestInfo != NULL && element->address < translated && translated - element->address < translated - closestInfo->address) {
+            closestInfo = element;
+        }
+    })
+    if (closestInfo == NULL) {
+        return toReturn;
+    }
+    toReturn.value.sourceFileInfo = (optional_sourceFileInfo_t) {
+        .has_value = true,
+        .value = {
+            closestInfo->line,
+            closestInfo->column,
+            closestInfo->fileName
+        }
+    };
+    return toReturn;
 }
 
 bool elfFile_addr2String(struct binaryFile* me, void* address, struct callstack_frame* frame) {
