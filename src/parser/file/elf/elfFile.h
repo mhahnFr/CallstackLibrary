@@ -23,9 +23,10 @@
 #define elfFile_h
 
 #include "../binaryFile.h"
-#include "../vector_function.h"
+#include "../debugInfo.h"
+#include "../function.h"
 
-#include "../dwarf/vector_dwarf_lineInfo.h"
+#include "../dwarf/dwarf_parser.h"
 
 /**
  * This structure represents an ELF binary file.
@@ -34,8 +35,7 @@ struct elfFile {
     /** The super part of this structure. */
     struct binaryFile _;
     
-    vector_function_t functions;
-    vector_dwarfLineInfo_t lineInfos;
+    void* priv;
 };
 
 /**
@@ -63,6 +63,11 @@ void elfFile_create(struct elfFile * self);
 static inline struct elfFile * elfFileOrNull(struct binaryFile * self) {
     return self->type == ELF_FILE ? self->concrete : NULL;
 }
+
+optional_debugInfo_t elfFile_getDebugInfo(struct elfFile* self, void* address);
+bool elfFile_loadFile(struct elfFile* self);
+bool elfFile_parseFile(struct elfFile* self, void* buffer, dwarf_line_callback cb, ...);
+void elfFile_addFunction(struct elfFile* self, struct function f);
 
 /* Heavily WIP. */
 bool elfFile_addr2String(struct binaryFile* self, void* address, struct callstack_frame* frame);
