@@ -75,8 +75,20 @@ static inline bool elfFile_parseSymtab64(struct elfFile* self, Elf64_Shdr* symta
     return true;
 }
 
+static inline char* elfFile_loadSectionStrtab(Elf64_Ehdr* header) {
+    const uint16_t index = header->e_shstrndx;
+    if (index == SHN_UNDEF) {
+        return NULL;
+    }
+    Elf64_Shdr* sect = (void*) header + header->e_shoff + index * header->e_shentsize;
+    return (void*) header + sect->sh_offset;
+}
+
 static inline bool elfFile_parseFile64(struct elfFile* self, Elf64_Ehdr* buffer) {
     if (buffer->e_shoff == 0) return false;
+
+    char* sectStrBegin = elfFile_loadSectionStrtab(buffer);
+    if (sectStrBegin == NULL) return false;
 
     void* sectBegin = (void*) buffer + buffer->e_shoff;
     // TODO: e_shnum special case
@@ -84,7 +96,6 @@ static inline bool elfFile_parseFile64(struct elfFile* self, Elf64_Ehdr* buffer)
               * symtab = NULL;
     for (uint16_t i = 0; i < buffer->e_shnum; ++i) {
         Elf64_Shdr* current = sectBegin + i * buffer->e_shentsize;
-        bool success = true;
         switch (current->sh_type) {
             case SHT_SYMTAB:
                 symtab = current;
