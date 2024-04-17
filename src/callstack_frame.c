@@ -1,20 +1,22 @@
 /*
  * Callstack Library - Library creating human-readable call stacks.
  *
- * Copyright (C) 2023  mhahnFr
+ * Copyright (C) 2023 - 2024  mhahnFr
  *
- * This file is part of the CallstackLibrary. This library is free software:
- * you can redistribute it and/or modify it under the terms of the
- * GNU General Public License as published by the Free Software Foundation,
- * either version 3 of the License, or (at your option) any later version.
+ * This file is part of the CallstackLibrary. 
  *
- * This library is distributed in the hope that it will be useful,
+ * The CallstackLibrary is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation, either version 3 of the License, or
+ * (at your option) any later version.
+ *
+ * The CallstackLibrary is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
  * GNU General Public License for more details.
  *
- * You should have received a copy of the GNU General Public License along with
- * this library, see the file LICENSE.  If not, see <https://www.gnu.org/licenses/>.
+ * You should have received a copy of the GNU General Public License along with the
+ * CallstackLibrary, see the file LICENSE.  If not, see <https://www.gnu.org/licenses/>.
  */
 
 #include <string.h>
@@ -42,12 +44,16 @@ static inline char * maybeStrdup(const char * str) {
 }
 
 void callstack_frame_copyHere(struct callstack_frame * destination, const struct callstack_frame * source) {
-    destination->binaryFile = maybeStrdup(source->binaryFile);
-    destination->function   = maybeStrdup(source->function);
-    destination->sourceFile = maybeStrdup(source->sourceFile);
-    destination->sourceLine = source->sourceLine;
-    
-    memcpy(&destination->info, &source->info, sizeof(optional_Dl_info_t));
+    *destination = (struct callstack_frame) {
+        source->info,
+        maybeStrdup(source->binaryFile),
+        maybeStrdup(source->binaryFileRelative),
+        maybeStrdup(source->function),
+        maybeStrdup(source->sourceFile),
+        maybeStrdup(source->sourceFileRelative),
+        source->sourceLine,
+        source->sourceLineColumn
+    };
 }
 
 char * callstack_frame_getShortestName(const struct callstack_frame * self) {
