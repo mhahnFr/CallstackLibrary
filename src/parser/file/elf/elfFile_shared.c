@@ -39,6 +39,7 @@ void elfFile_create(struct elfFile* self) {
 }
 
 static inline char* elfFile_loadSectionStrtab64(Elf64_Ehdr* header) {
+    // TODO: e_shstrndx special case
     const uint16_t index = header->e_shstrndx;
     if (index == SHN_UNDEF) {
         return NULL;
@@ -72,9 +73,11 @@ static inline bool elfFile_parseFile64(struct elfFile* self, Elf64_Ehdr* buffer,
 
     void* sectBegin = (void*) buffer + buffer->e_shoff;
     // TODO: e_shnum special case
-    Elf64_Shdr* strtab = NULL,
-              * symtab = NULL,
-              * lines  = NULL;
+    Elf64_Shdr* strtab   = NULL,
+              * symtab   = NULL,
+              * lines    = NULL,
+              * dystrtab = NULL,
+              * dysymtab = NULL;
     for (uint16_t i = 0; i < buffer->e_shnum; ++i) {
         Elf64_Shdr* current = sectBegin + i * buffer->e_shentsize;
         if (strcmp(".debug_line", sectStrBegin + current->sh_name) == 0) {
@@ -86,14 +89,26 @@ static inline bool elfFile_parseFile64(struct elfFile* self, Elf64_Ehdr* buffer,
                 symtab = current;
                 break;
 
+            case SHT_DYNSYM:
+                dysymtab = current;
+                break;
+
             case SHT_STRTAB:
-                // TODO: e_shstrndx special case
-                if (i != buffer->e_shstrndx)
+                if (strcmp(".strtab", sectStrBegin + current->sh_name) == 0) {
                     strtab = current;
+                } else if (strcmp(".dynstr", sectStrBegin + current->sh_name) == 0) {
+                    dystrtab = current;
+                }
                 break;
         }
     }
-    if (symtab == NULL || strtab == NULL) return false;
+    if (symtab == NULL || strtab == NULL) {
+        if (dystrtab == NULL || dysymtab == NULL) {
+            return false;
+        }
+        symtab = dysymtab;
+        strtab = dystrtab;
+    }
 
     bool success = true;
     if (lines != NULL) {
