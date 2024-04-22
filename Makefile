@@ -1,24 +1,27 @@
 #
-# Callstack Library - Library creating human-readable call stacks.
+# CallstackLibrary - Library creating human-readable call stacks.
 #
 # Copyright (C) 2022 - 2024  mhahnFr
 #
-# This file is part of the CallstackLibrary. This library is free software:
-# you can redistribute it and/or modify it under the terms of the
-# GNU General Public License as published by the Free Software Foundation,
-# either version 3 of the License, or (at your option) any later version.
+# This file is part of the CallstackLibrary.
 #
-# This library is distributed in the hope that it will be useful,
+# The CallstackLibrary is free software: you can redistribute it and/or modify
+# it under the terms of the GNU General Public License as published by
+# the Free Software Foundation, either version 3 of the License, or
+# (at your option) any later version.
+#
+# The CallstackLibrary is distributed in the hope that it will be useful,
 # but WITHOUT ANY WARRANTY; without even the implied warranty of
 # MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
 # GNU General Public License for more details.
 #
-# You should have received a copy of the GNU General Public License along with
-# this library, see the file LICENSE.  If not, see <https://www.gnu.org/licenses/>.
+# You should have received a copy of the GNU General Public License along with the
+# CallstackLibrary, see the file LICENSE.  If not, see <https://www.gnu.org/licenses/>.
 #
 
 CXX_FUNCTIONS = false
 CXX_OPTIMIZED = false
+USE_BUILTINS  = true
 
 # Library names
 CORE_NAME = libcallstack
@@ -92,6 +95,10 @@ endif
 
 # Compile and link flags
 COM_FLAGS = -Wall -Wextra -fPIC -Ofast
+ifeq ($(USE_BUILTINS),true)
+	COM_FLAGS += -DLCS_USE_BUILTINS
+endif
+
 CFLAGS    = $(COM_FLAGS) -std=gnu11
 CXXFLAGS  = $(COM_FLAGS) -std=gnu++17
 LDFLAGS   = -ldl
@@ -129,7 +136,7 @@ install: $(SHARED_N)
 	mkdir -p "$(INSTALL_PATH)/include/DC4C"
 	cp $(SHARED_N) $(INSTALL_PATH)/lib
 	find "include" \( -name \*.h -o -name \*.hpp \) -exec cp {} "$(INSTALL_PATH)/include/CallstackLibrary" \;
-	find "../DC4C" \( -name \*.h -o -name \*.hpp \) -exec cp {} "$(INSTALL_PATH)/include/DC4C" \;
+	find "DC4C" \( -name \*.h -o -name \*.hpp \) -exec cp {} "$(INSTALL_PATH)/include/DC4C" \;
 
 uninstall:
 	- $(RM) $(INSTALL_PATH)/lib/$(SHARED_N)
