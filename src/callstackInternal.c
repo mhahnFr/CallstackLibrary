@@ -1,28 +1,31 @@
 /*
- * Callstack Library - Library creating human-readable call stacks.
+ * CallstackLibrary - Library creating human-readable call stacks.
  *
- * Copyright (C) 2022 - 2023  mhahnFr
+ * Copyright (C) 2022 - 2024  mhahnFr
  *
- * This file is part of the CallstackLibrary. This library is free software:
- * you can redistribute it and/or modify it under the terms of the
- * GNU General Public License as published by the Free Software Foundation,
- * either version 3 of the License, or (at your option) any later version.
+ * This file is part of the CallstackLibrary.
  *
- * This library is distributed in the hope that it will be useful,
+ * The CallstackLibrary is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation, either version 3 of the License, or
+ * (at your option) any later version.
+ *
+ * The CallstackLibrary is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
  * GNU General Public License for more details.
  *
- * You should have received a copy of the GNU General Public License along with
- * this library, see the file LICENSE.  If not, see <https://www.gnu.org/licenses/>.
+ * You should have received a copy of the GNU General Public License along with the
+ * CallstackLibrary, see the file LICENSE.  If not, see <https://www.gnu.org/licenses/>.
  */
-
-#include "callstackInternal.h"
-#include "parser/callstack_parser.h"
-#include "../include/callstack_defs.h"
 
 #include <execinfo.h>
 #include <string.h>
+
+#include "callstackInternal.h"
+#include "parser/callstack_parser.h"
+#include "../include/lcs_builtins.h"
+#include "../include/callstack_defs.h"
 
 void callstack_createWithBacktrace(struct callstack * self,
                                    void * trace[], size_t traceLength) {
@@ -32,14 +35,18 @@ void callstack_createWithBacktrace(struct callstack * self,
     self->backtraceSize = traceLength;
 }
 
-int callstack_backtrace(void * buffer[], int bufferSize, void * address) {
-    int i,
+int callstack_backtrace(void* buffer[], int bufferSize, void* address) {
+    int i      = 0,
         frames = backtrace(buffer, bufferSize);
     
     if (frames < 0) return frames;
     
+#ifdef LCS_USE_BUILTINS
     for (i = 0; buffer[i] != address && i < bufferSize; ++i);
     (void) memmove(buffer, buffer + i, ((size_t) bufferSize - i) * sizeof(void *));
+#else
+    (void) address;
+#endif
     return frames - i;
 }
 
