@@ -144,6 +144,7 @@
 		BFD2A0402A659F4C007F4B81 /* vector.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = vector.h; sourceTree = "<group>"; };
 		BFD2A0412A659F97007F4B81 /* vector_uint64.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = vector_uint64.h; sourceTree = "<group>"; };
 		BFD2A0422A65B0B7007F4B81 /* optional_pair_funcFile.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = optional_pair_funcFile.h; sourceTree = "<group>"; };
+		BFD7BAD02BD65E67005C2AC8 /* lcs_builtins.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = lcs_builtins.h; sourceTree = "<group>"; };
 		BFE075A32A66C0C7009C4462 /* vector_function.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = vector_function.h; sourceTree = "<group>"; };
 		BFE075A42A66C985009C4462 /* optional_function.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = optional_function.h; sourceTree = "<group>"; };
 		BFE97A932AE82E92009E1DA4 /* fileHelper.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; path = fileHelper.cpp; sourceTree = "<group>"; };
@@ -260,6 +261,7 @@
 				BFADAB062ADDA923004B4695 /* lcs_dlfcn.h */,
 				BF6660D82AE6B9EC002D2BDE /* callstack_exception.hpp */,
 				BFAD35292B5675E200FDFBD6 /* optional_ulong.h */,
+				BFD7BAD02BD65E67005C2AC8 /* lcs_builtins.h */,
 			);
 			path = include;
 			sourceTree = "<group>";
