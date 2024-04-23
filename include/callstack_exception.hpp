@@ -112,7 +112,7 @@ public:
      * @param printStacktrace whether to automatically append the stacktrace to the exception message
      */
     explicit inline exception(const bool printStacktrace = true) LCS_NOEXCEPT
-        : std::exception(), message(), shouldPrintStacktrace(printStacktrace), cs(lcs_returnAddress(0)) {}
+        : std::exception(), message(), shouldPrintStacktrace(printStacktrace), cs(reinterpret_cast<void*>(lcs_returnAddress(0))) {}
 
     /**
      * @brief Constructs an exception with the given message.
@@ -123,7 +123,7 @@ public:
      * @param printStacktrace whether to automatically append the stacktrace
      */
     explicit inline exception(const char * message, const bool printStacktrace = true) LCS_NOEXCEPT
-        : std::exception(), message(message), shouldPrintStacktrace(printStacktrace), cs(lcs_returnAddress(0)) {}
+        : std::exception(), message(message), shouldPrintStacktrace(printStacktrace), cs(reinterpret_cast<void*>(lcs_returnAddress(0))) {}
 
     /**
      * Constructs an exception with the given message.
@@ -132,7 +132,7 @@ public:
      * @param printStacktrace whether to automatically append the stacktrace
      */
     explicit inline exception(const std::string & message, const bool printStacktrace = true) LCS_NOEXCEPT
-        : std::exception(), message(message), shouldPrintStacktrace(printStacktrace), cs(lcs_returnAddress(0)) {}
+        : std::exception(), message(message), shouldPrintStacktrace(printStacktrace), cs(reinterpret_cast<void*>(lcs_returnAddress(0))) {}
     
     inline exception(const exception & other)
         : std::exception(other), message(other.message), shouldPrintStacktrace(other.shouldPrintStacktrace), cs(other.cs) {}
