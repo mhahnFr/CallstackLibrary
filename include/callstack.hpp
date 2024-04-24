@@ -34,7 +34,6 @@
  #endif
 
  #include "callstack_create.h"
- #include "lcs_builtins.h"
 
 /**
  * This namespace contains a wrapper class for the `struct callstack`.
@@ -79,7 +78,7 @@ namespace lcs {
          */
         inline explicit callstack(bool emplace = true) {
             if (emplace) {
-                if (!callstack_emplaceWithAddress(*this, lcs_returnAddress(0))) {
+                if (!callstack_emplace(*this)) {
                     error();
                 }
             } else {
