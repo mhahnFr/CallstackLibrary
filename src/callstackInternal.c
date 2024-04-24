@@ -23,8 +23,8 @@
 #include <string.h>
 
 #include "callstackInternal.h"
+#include "lcs_builtins.h"
 #include "parser/callstack_parser.h"
-#include "../include/lcs_builtins.h"
 #include "../include/callstack_defs.h"
 
 void callstack_createWithBacktrace(struct callstack * self,

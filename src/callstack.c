@@ -20,7 +20,7 @@
  */
 
 #include "callstackInternal.h"
-#include "../include/lcs_builtins.h"
+#include "lcs_builtins.h"
 
 #include <execinfo.h>
 #include <stdlib.h>
