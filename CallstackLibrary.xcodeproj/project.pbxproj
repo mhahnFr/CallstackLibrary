@@ -241,6 +241,7 @@
 			children = (
 				BF3031E1294C6C4700E8ADC5 /* parser */,
 				BF5A745F28F1DCA00017591A /* callstackInternal.h */,
+				BFD7BAD02BD65E67005C2AC8 /* lcs_builtins.h */,
 				BF86E31E28F4564600F6D20E /* callstack.c */,
 				BF5A746028F1DCA00017591A /* callstackInternal.c */,
 				BF971B962A58C155006BFFBB /* callstack_internals.c */,
@@ -263,7 +264,6 @@
 				BFADAB062ADDA923004B4695 /* lcs_dlfcn.h */,
 				BF6660D82AE6B9EC002D2BDE /* callstack_exception.hpp */,
 				BFAD35292B5675E200FDFBD6 /* optional_ulong.h */,
-				BFD7BAD02BD65E67005C2AC8 /* lcs_builtins.h */,
 			);
 			path = include;
 			sourceTree = "<group>";
