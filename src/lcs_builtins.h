@@ -26,8 +26,6 @@
 extern "C" {
 #endif
 
-// FIXME: This cannot work in framework headers!!!
-
 #ifdef LCS_USE_BUILTINS
  #define lcs_returnAddress(level) (__builtin_return_address(level))
 #else
