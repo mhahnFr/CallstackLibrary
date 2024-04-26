@@ -27,11 +27,11 @@
 #define DW_FORM_line_strp 0x1f
 #define DW_FORM_strp_sup  0x1d
 
-#define DW_FROM_strx  0x1a
-#define DW_FROM_strx1 0x25
-#define DW_FROM_strx2 0x26
-#define DW_FROM_strx3 0x27
-#define DW_FROM_strx4 0x28
+#define DW_FORM_strx  0x1a
+#define DW_FORM_strx1 0x25
+#define DW_FORM_strx2 0x26
+#define DW_FORM_strx3 0x27
+#define DW_FORM_strx4 0x28
 
 #define DW_FORM_data1  0x0b
 #define DW_FORM_data2  0x05
@@ -40,7 +40,7 @@
 #define DW_FORM_data16 0x1e
 
 #define DW_FORM_udata 0x0f
-#define DW_FROM_sdata 0x0d
+#define DW_FORM_sdata 0x0d
 
 #define DW_FORM_block  0x09
 #define DW_FORM_block1 0x0a
