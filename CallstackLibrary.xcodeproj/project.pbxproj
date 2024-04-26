@@ -135,6 +135,7 @@
 		BFB32CF02BDBE3B2008F5448 /* parser.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = parser.h; sourceTree = "<group>"; };
 		BFB32CF12BDBEBEF008F5448 /* fileAttribute.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = fileAttribute.h; sourceTree = "<group>"; };
 		BFB32CF22BDBEC66008F5448 /* vector_fileAttribute.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = vector_fileAttribute.h; sourceTree = "<group>"; };
+		BFB32CF32BDBF81F008F5448 /* lcs_section.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = lcs_section.h; sourceTree = "<group>"; };
 		BFB5316D2BD6B0DB00075D80 /* pair_uint64.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = pair_uint64.h; sourceTree = "<group>"; };
 		BFB5316E2BD6B0ED00075D80 /* vector_pair_uint64.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = vector_pair_uint64.h; sourceTree = "<group>"; };
 		BFB7D8852BDBAC5600F62068 /* definitions.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = definitions.h; sourceTree = "<group>"; };
@@ -292,6 +293,7 @@
 				BFE075A42A66C985009C4462 /* optional_function.h */,
 				BF3ACF592BB31B21005AEAF1 /* loader.h */,
 				BF3ACF5A2BB31B21005AEAF1 /* loader.c */,
+				BFB32CF32BDBF81F008F5448 /* lcs_section.h */,
 			);
 			path = file;
 			sourceTree = "<group>";
