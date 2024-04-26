@@ -25,10 +25,11 @@
 #include <string.h>
 #include <time.h>
 
+#include "../debugInfo.h"
 #include "../function.h"
+#include "../lcs_section.h"
 #include "../optional_function.h"
 
-#include "../debugInfo.h"
 #include "../dwarf/dwarf_parser.h"
 
 #ifdef __cplusplus
@@ -52,6 +53,10 @@ struct objectFile {
     /** The UUID of the represented Mach-O object file.         */
     uint8_t uuid[16];
     
+    struct lcs_section debugLine;
+    struct lcs_section debugLineStr;
+    struct lcs_section debugStr;
+
     /** Whether the file was successfully parsed.               */
     bool parsed;
     /** Whether the represented file is part of a .dSYM bundle. */
@@ -86,6 +91,10 @@ static inline void objectFile_create(struct objectFile * self) {
     self->isDsymBundle = false;
     
     memset(self->uuid, 0, 16);
+
+    lcs_section_create(&self->debugLine);
+    lcs_section_create(&self->debugLineStr);
+    lcs_section_create(&self->debugStr);
 }
 
 /**
