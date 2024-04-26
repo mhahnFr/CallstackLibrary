@@ -50,6 +50,28 @@ typedef void (*dwarf_line_callback)(struct dwarf_lineInfo, va_list);
  */
 bool dwarf_parseLineProgram(void* begin, dwarf_line_callback cb, va_list args, uint64_t sectionSize);
 
+/**
+ * @brief Reads an unsigned LEB128 integer from the given memory at the given position.
+ *
+ * The given memory position points to the first byte after the read number once this function returns.
+ *
+ * @param begin the memory pointer
+ * @param counter the memory position
+ * @return the deducted number
+ */
+uint64_t getULEB128(void* begin, size_t* counter);
+
+/**
+ * @brief Reads a signed LEB128 integer from the given memory at the given position.
+ *
+ * The given memory position points to the first byte after the read number once this function returns.
+ *
+ * @param begin the memory pointer
+ * @param counter the memory position
+ * @return the deducted number
+ */
+int64_t getLEB128(void* begin, size_t* counter);
+
 #ifdef __cplusplus
 } // extern "C"
 #endif

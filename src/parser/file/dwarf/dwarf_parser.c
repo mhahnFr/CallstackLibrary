@@ -23,21 +23,13 @@
 #include <string.h>
 
 #include "dwarf_parser.h"
+#include "v5/parser.h"
 
 #include "fileNameEntry.h"
 #include "vector_string.h"
 #include "vector_uint8.h"
 
-/**
- * @brief Reads an unsigned LEB128 integer from the given memory at the given position.
- *
- * The given memory position points to the first byte after the read number once this function returns.
- *
- * @param begin the memory pointer
- * @param counter the memory position
- * @return the deducted number
- */
-static inline uint64_t getULEB128(void* begin, size_t* counter) {
+uint64_t getULEB128(void* begin, size_t* counter) {
     uint64_t result = 0,
              shift  = 0;
     
@@ -54,16 +46,7 @@ static inline uint64_t getULEB128(void* begin, size_t* counter) {
     return result;
 }
 
-/**
- * @brief Reads a signed LEB128 integer from the given memory at the given position.
- *
- * The given memory position points to the first byte after the read number once this function returns.
- *
- * @param begin the memory pointer
- * @param counter the memory position
- * @return the deducted number
- */
-static inline int64_t getLEB128(void* begin, size_t* counter) {
+int64_t getLEB128(void* begin, size_t* counter) {
     int64_t result = 0,
             shift  = 0;
     
@@ -335,7 +318,8 @@ bool dwarf_parseLineProgram(void* begin, dwarf_line_callback cb, va_list args, u
     
     switch (version) {
         case 4: return dwarf_parseLineProgramV4(begin, counter, actualSize, bit64, sectionSize, cb, args);
-            
+        case 5: return dwarf5_parseLineProgram(begin + counter, actualSize, bit64, sectionSize, cb, args);
+
         default: return false;
     }
     return false;
