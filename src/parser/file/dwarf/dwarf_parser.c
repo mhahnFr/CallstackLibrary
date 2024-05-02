@@ -3,18 +3,20 @@
  *
  * Copyright (C) 2024  mhahnFr
  *
- * This file is part of the CallstackLibrary. This library is free software:
- * you can redistribute it and/or modify it under the terms of the
- * GNU General Public License as published by the Free Software Foundation,
- * either version 3 of the License, or (at your option) any later version.
+ * This file is part of the CallstackLibrary.
  *
- * This library is distributed in the hope that it will be useful,
+ * The CallstackLibrary is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation, either version 3 of the License, or
+ * (at your option) any later version.
+ *
+ * The CallstackLibrary is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
  * GNU General Public License for more details.
  *
- * You should have received a copy of the GNU General Public License along with
- * this library, see the file LICENSE.  If not, see <https://www.gnu.org/licenses/>.
+ * You should have received a copy of the GNU General Public License along with the
+ * CallstackLibrary, see the file LICENSE.  If not, see <https://www.gnu.org/licenses/>.
  */
 
 #include <stdarg.h>
@@ -93,48 +95,47 @@ static inline char* dwarf_stringFrom(struct dwarf_fileNameEntry* file, struct ve
 /**
  * Parses the DWARF line program as specified in version 4.
  *
- * @param begin the memory of the line program
  * @param counter the start of the line program in the given memory
  * @param actualSize the total size of the line program
  * @param bit64 whether to parse as 64 Bit version
- * @param sectionSize the total size of the section
  * @param cb the callback to be called when a line entry has been deducted
  * @param args the arguments to pass to the callback
  */
-static inline bool dwarf_parseLineProgramV4(void*    begin,
-                                            size_t   counter,
-                                            uint64_t actualSize, 
-                                            bool     bit64,
-                                            uint64_t sectionSize,
-                                            dwarf_line_callback cb, va_list args) {
+static inline bool dwarf4_parseLineProgram(struct lcs_section debugLine,
+                                           struct lcs_section debugLineStr,
+                                           struct lcs_section debugStr,
+                                           size_t   counter,
+                                           uint64_t actualSize,
+                                           bool     bit64,
+                                           dwarf_line_callback cb, va_list args) {
     uint64_t headerLength;
     if (bit64) {
-        headerLength = *((uint64_t*) (begin + counter));
+        headerLength = *((uint64_t*) (debugLine.content + counter));
         counter += 8;
     } else {
-        headerLength = *((uint32_t*) (begin + counter));
+        headerLength = *((uint32_t*) (debugLine.content + counter));
         counter += 4;
     }
     (void) headerLength;
     
-    const uint8_t minimumInstructionLength = *((uint8_t*) (begin + counter++));
-    const uint8_t maximumOperations        = *((uint8_t*) (begin + counter++));
-    const bool    defaultIsStmt            = *((uint8_t*) (begin + counter++));
-    const int8_t  lineBase                 = *((int8_t*)  (begin + counter++));
-    const uint8_t lineRange                = *((uint8_t*) (begin + counter++));
-    const uint8_t opCodeBase               = *((uint8_t*) (begin + counter++));
-    
+    const uint8_t minimumInstructionLength = *((uint8_t*) (debugLine.content + counter++));
+    const uint8_t maximumOperations        = *((uint8_t*) (debugLine.content + counter++));
+    const bool    defaultIsStmt            = *((uint8_t*) (debugLine.content + counter++));
+    const int8_t  lineBase                 = *((int8_t*)  (debugLine.content + counter++));
+    const uint8_t lineRange                = *((uint8_t*) (debugLine.content + counter++));
+    const uint8_t opCodeBase               = *((uint8_t*) (debugLine.content + counter++));
+
     vector_uint8_t stdOpcodeLengths;
     vector_uint8_create(&stdOpcodeLengths);
     vector_uint8_reserve(&stdOpcodeLengths, opCodeBase - 2);
     for (uint8_t i = 1; i < opCodeBase; ++i) {
-        vector_uint8_push_back(&stdOpcodeLengths, *((uint8_t*) (begin + counter++)));
+        vector_uint8_push_back(&stdOpcodeLengths, *((uint8_t*) (debugLine.content + counter++)));
     }
     
     vector_string_t includeDirectories;
     vector_string_create(&includeDirectories);
-    while (*((uint8_t*) (begin + counter)) != 0x0) {
-        const char* string = begin + counter;
+    while (*((uint8_t*) (debugLine.content + counter)) != 0x0) {
+        const char* string = debugLine.content + counter;
         vector_string_push_back(&includeDirectories, string);
         counter += strlen(string) + 1;
     }
@@ -142,13 +143,13 @@ static inline bool dwarf_parseLineProgramV4(void*    begin,
     
     vector_dwarfFileEntry_t fileNames;
     vector_dwarfFileEntry_create(&fileNames);
-    while (*((uint8_t*) (begin + counter)) != 0x0) {
-        const char* string = begin + counter;
+    while (*((uint8_t*) (debugLine.content + counter)) != 0x0) {
+        const char* string = debugLine.content + counter;
         counter += strlen(string) + 1;
         
-        const uint64_t dirIndex     = getULEB128(begin, &counter),
-                       modification = getULEB128(begin, &counter),
-                       size         = getULEB128(begin, &counter);
+        const uint64_t dirIndex     = getULEB128(debugLine.content, &counter),
+                       modification = getULEB128(debugLine.content, &counter),
+                       size         = getULEB128(debugLine.content, &counter);
         vector_dwarfFileEntry_push_back(&fileNames, (struct dwarf_fileNameEntry) { string, dirIndex, modification, size });
     }
     ++counter;
@@ -168,10 +169,10 @@ static inline bool dwarf_parseLineProgramV4(void*    begin,
           epilogueBegin = false;
     
     while (counter - 4 < actualSize) {
-        const uint8_t opCode = *((uint8_t*) (begin + counter++));
+        const uint8_t opCode = *((uint8_t*) (debugLine.content + counter++));
         if (opCode == 0) {
-            const uint64_t length = getULEB128(begin, &counter);
-            const uint8_t  actualOpCode = *((uint8_t*) (begin + counter++));
+            const uint64_t length = getULEB128(debugLine.content, &counter);
+            const uint8_t  actualOpCode = *((uint8_t*) (debugLine.content + counter++));
             switch (actualOpCode) {
                 case 1: {
                     endSequence = true;
@@ -192,7 +193,7 @@ static inline bool dwarf_parseLineProgramV4(void*    begin,
                 }
                     
                 case 2: {
-                    const size_t newAddress = *((size_t*) (begin + counter));
+                    const size_t newAddress = *((size_t*) (debugLine.content + counter));
                     counter += sizeof(size_t);
                     address = newAddress;
                     opIndex = 0;
@@ -202,8 +203,8 @@ static inline bool dwarf_parseLineProgramV4(void*    begin,
 //                case 3: // TODO: Add another file
 //                    break;
                     
-                case 4: discriminator = getULEB128(begin, &counter); break;
-                    
+                case 4: discriminator = getULEB128(debugLine.content, &counter); break;
+
                 default: counter += length - 1; break;
             }
         } else if (opCode < opCodeBase) {
@@ -224,15 +225,15 @@ static inline bool dwarf_parseLineProgramV4(void*    begin,
                 }
                     
                 case 2: {
-                    const uint64_t operationAdvance = getULEB128(begin, &counter);
+                    const uint64_t operationAdvance = getULEB128(debugLine.content, &counter);
                     address += minimumInstructionLength * ((opIndex + operationAdvance) / maximumOperations);
                     opIndex = (opIndex + operationAdvance) % maximumOperations;
                     break;
                 }
                     
-                case 3: line += getLEB128(begin, &counter);   break;
-                case 4: file = getULEB128(begin, &counter);   break;
-                case 5: column = getULEB128(begin, &counter); break;
+                case 3: line += getLEB128(debugLine.content, &counter);   break;
+                case 4: file = getULEB128(debugLine.content, &counter);   break;
+                case 5: column = getULEB128(debugLine.content, &counter); break;
                 case 6: isStmt = !isStmt;                     break;
                 case 7: basicBlock = true;                    break;
                     
@@ -247,7 +248,7 @@ static inline bool dwarf_parseLineProgramV4(void*    begin,
                     
                 case 9: {
                     opIndex = 0;
-                    const uint16_t adder = *((uint16_t*) (begin + counter));
+                    const uint16_t adder = *((uint16_t*) (debugLine.content + counter));
                     counter += 2;
                     address += adder;
                     break;
@@ -255,11 +256,11 @@ static inline bool dwarf_parseLineProgramV4(void*    begin,
                     
                 case 10: prologueEnd = true;                break;
                 case 11: epilogueBegin = true;              break;
-                case 12: isa = getULEB128(begin, &counter); break;
-                    
+                case 12: isa = getULEB128(debugLine.content, &counter); break;
+
                 default:
                     for (uint64_t i = 0; i < stdOpcodeLengths.content[opCode - 1]; ++i) {
-                        getLEB128(begin, &counter);
+                        getLEB128(debugLine.content, &counter);
                     }
                     break;
             }
@@ -291,34 +292,40 @@ static inline bool dwarf_parseLineProgramV4(void*    begin,
     vector_string_destroy(&includeDirectories);
     vector_dwarfFileEntry_destroy(&fileNames);
     
-    if (counter < sectionSize - 2 - (bit64 ? 12 : 4)) {
-        return dwarf_parseLineProgram(begin + counter, cb, args, sectionSize - 2 - (bit64 ? 12 : 4) - counter);
+    if (counter < debugLine.size - 2 - (bit64 ? 12 : 4)) {
+        return dwarf_parseLineProgram((struct lcs_section) {
+            debugLine.content + counter,
+            debugLine.size - 2 - (bit64 ? 12 : 4) - counter
+        }, debugLineStr, debugStr, cb, args);
     }
     return true;
 }
 
-bool dwarf_parseLineProgram(void* begin, dwarf_line_callback cb, va_list args, uint64_t sectionSize) {
+bool dwarf_parseLineProgram(struct lcs_section debugLine,
+                            struct lcs_section debugLineStr,
+                            struct lcs_section debugStr,
+                            dwarf_line_callback cb, va_list args) {
     size_t counter = 0;
     
-    const uint32_t size = *((uint32_t*) begin);
+    const uint32_t size = *((uint32_t*) debugLine.content);
     counter += 4;
     
     bool     bit64;
     uint64_t actualSize;
     if (size == 0xffffffff) {
-        actualSize = *((uint64_t*) (begin + counter));
+        actualSize = *((uint64_t*) (debugLine.content + counter));
         bit64      = true;
         counter += 8;
     } else {
         actualSize = size;
         bit64      = false;
     }
-    const uint16_t version = *((uint16_t*) (begin + counter));
+    const uint16_t version = *((uint16_t*) (debugLine.content + counter));
     counter += 2;
     
     switch (version) {
-        case 4: return dwarf_parseLineProgramV4(begin, counter, actualSize, bit64, sectionSize, cb, args);
-        case 5: return dwarf5_parseLineProgram(begin + counter, actualSize, bit64, sectionSize, cb, args);
+        case 4: return dwarf4_parseLineProgram(debugLine, debugLineStr, debugStr, counter, actualSize, bit64, cb, args);
+        case 5: return dwarf5_parseLineProgram(debugLine, debugLineStr, debugStr, counter, actualSize, bit64, cb, args);
 
         default: return false;
     }
