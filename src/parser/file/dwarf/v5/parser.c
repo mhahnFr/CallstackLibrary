@@ -37,10 +37,10 @@ static inline char* dwarf5_stringFromSection(uint64_t offset, uint64_t type, str
     return toReturn;
 }
 
-static inline char* dwarf5_readString(void* buffer, 
-                                      size_t* counter,
+static inline char* dwarf5_readString(void*    buffer, 
+                                      size_t*  counter,
                                       uint64_t type,
-                                      bool bit64,
+                                      bool     bit64,
                                       struct lcs_section debugLineStr,
                                       struct lcs_section debugStr) {
     if (type == DW_FORM_string) {
@@ -207,7 +207,11 @@ static inline void dwarf5_consumeSome(void* buffer, size_t* counter, uint64_t ty
     }
 }
 
-static inline vector_fileAttribute_t dwarf5_parseFileAttributes(void* buffer, size_t* counter, bool bit64, struct lcs_section debugLineStr, struct lcs_section debugStr) {
+static inline vector_fileAttribute_t dwarf5_parseFileAttributes(void*   buffer,
+                                                                size_t* counter,
+                                                                bool    bit64,
+                                                                struct lcs_section debugLineStr,
+                                                                struct lcs_section debugStr) {
     const uint8_t entryFormatCount = *((uint8_t*) (buffer + (*counter)++));
     vector_pair_uint64_t entryFormats = vector_initializer;
     vector_pair_uint64_reserve(&entryFormats, entryFormatCount);
@@ -221,8 +225,13 @@ static inline vector_fileAttribute_t dwarf5_parseFileAttributes(void* buffer, si
     vector_fileAttribute_t attributes = vector_initializer;
     vector_fileAttribute_reserve(&attributes, attributeCount);
     for (uint64_t i = 0; i < attributeCount; ++i) {
-        struct fileAttribute attribute;
-        bzero(&attribute, sizeof(struct fileAttribute));
+        struct fileAttribute attribute = {
+            .path = NULL,
+            .md5  = NULL,
+            .size      = 0,
+            .index     = 0,
+            .timestamp = 0,
+        };
         vector_iterate(pair_uint64_t, &entryFormats, {
             switch (element->first) {
                 case DW_LNCT_path:
