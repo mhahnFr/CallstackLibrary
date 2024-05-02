@@ -153,7 +153,7 @@ static inline uint8_t* dwarf5_readMD5(void* buffer, size_t* counter) {
     return toReturn;
 }
 
-static inline void dwarf5_consumeSome(void* buffer, size_t* counter, uint64_t type) {
+static inline void dwarf5_consumeSome(void* buffer, size_t* counter, uint64_t type, bool bit64) {
     switch (type) {
         case DW_FORM_block: {
             const uint64_t length = getULEB128(buffer, counter);
@@ -179,51 +179,31 @@ static inline void dwarf5_consumeSome(void* buffer, size_t* counter, uint64_t ty
             break;
         }
 
-        case DW_FORM_data1:
-            ++(*counter);
+        case DW_FORM_data1:  ++(*counter);   break;
+        case DW_FORM_data2:  *counter += 2;  break;
+        case DW_FORM_data4:  *counter += 4;  break;
+        case DW_FORM_data8:  *counter += 8;  break;
+        case DW_FORM_data16: *counter += 16; break;
+
+        case DW_FORM_strp:
+        case DW_FORM_string:
+        case DW_FORM_line_strp:
+            (void) dwarf5_readString(buffer, counter, type, bit64,
+                                     (struct lcs_section) { .content = NULL, .size = 0 },
+                                     (struct lcs_section) { .content = NULL, .size = 0 });
             break;
 
-        case DW_FORM_data2:
-            *counter += 2;
-            break;
+        case DW_FORM_sdata: getLEB128(buffer, counter);  break;
+        case DW_FORM_udata: getULEB128(buffer, counter); break;
 
-        case DW_FORM_data4:
-            *counter += 4;
-            break;
-
-        case DW_FORM_data8:
-            *counter += 8;
-            break;
-
-        case DW_FORM_data16:
-            *counter += 16;
-            break;
-
-        case DW_FORM_flag: abort();
-        case DW_FORM_line_strp: abort();
-
-        case DW_FORM_sdata:
-            getLEB128(buffer, counter);
-            break;
-
-        case DW_FORM_sec_offset: abort();
-
-        case DW_FORM_string: {
-            char* str = buffer + *counter;
-            *counter += strlen(str) + 1;
-            break;
-        }
-
-        case DW_FORM_strp: abort();
-        case DW_FORM_strx: abort();
-        case DW_FORM_strx1: abort();
-        case DW_FORM_strx2: abort();
-        case DW_FORM_strx3: abort();
+        case DW_FORM_sec_offset:
+        case DW_FORM_flag:
+        case DW_FORM_strx:
+        case DW_FORM_strx1:
+        case DW_FORM_strx2:
+        case DW_FORM_strx3:
         case DW_FORM_strx4: abort();
 
-        case DW_FORM_udata:
-            getULEB128(buffer, counter);
-            break;
     }
 }
 
@@ -267,7 +247,7 @@ static inline vector_fileAttribute_t dwarf5_parseFileAttributes(void* buffer, si
                     break;
 
                 default:
-                    dwarf5_consumeSome(buffer, counter, element->second);
+                    dwarf5_consumeSome(buffer, counter, element->second, bit64);
                     break; // Skip as defined by the paired value
             }
             vector_fileAttribute_push_back(&attributes, attribute);
