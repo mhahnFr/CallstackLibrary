@@ -5,12 +5,12 @@
  *
  * This file is part of the CallstackLibrary.
  *
- * CallstackLibrary is free software: you can redistribute it and/or modify
+ * The CallstackLibrary is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
  * the Free Software Foundation, either version 3 of the License, or
  * (at your option) any later version.
  *
- * CallstackLibrary is distributed in the hope that it will be useful,
+ * The CallstackLibrary is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
  * GNU General Public License for more details.
@@ -24,10 +24,12 @@
 
 #include "../dwarf_parser.h"
 
-bool dwarf5_parseLineProgram(void*    begin,
+bool dwarf5_parseLineProgram(struct lcs_section debugLine,
+                             struct lcs_section debugLineStr,
+                             struct lcs_section debugStr,
+                             size_t   counter,
                              uint64_t actualSize,
                              bool     bit64,
-                             uint64_t sectionSize,
                              dwarf_line_callback cb, va_list args);
 
 #endif /* dwaf_v5_parser_h */

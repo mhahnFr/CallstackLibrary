@@ -5,12 +5,12 @@
  *
  * This file is part of the CallstackLibrary.
  *
- * CallstackLibrary is free software: you can redistribute it and/or modify
+ * The CallstackLibrary is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
  * the Free Software Foundation, either version 3 of the License, or
  * (at your option) any later version.
  *
- * CallstackLibrary is distributed in the hope that it will be useful,
+ * The CallstackLibrary is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
  * GNU General Public License for more details.
@@ -268,40 +268,41 @@ static inline vector_fileAttribute_t dwarf5_parseFileAttributes(void* buffer, si
     return attributes;
 }
 
-bool dwarf5_parseLineProgram(void*    buffer,
+bool dwarf5_parseLineProgram(struct lcs_section debugLine,
+                             struct lcs_section debugLineStr,
+                             struct lcs_section debugStr,
+                             size_t   counter,
                              uint64_t actualSize,
                              bool     bit64,
-                             uint64_t sectionSize,
                              dwarf_line_callback cb, va_list args) {
-    size_t counter = 0;
-    const uint8_t addressSize = *((uint8_t*) (buffer + counter++));
-    const uint8_t segmentSelectorSize = *((uint8_t*) (buffer + counter++));
+    const uint8_t addressSize = *((uint8_t*) (debugLine.content + counter++));
+    const uint8_t segmentSelectorSize = *((uint8_t*) (debugLine.content + counter++));
 
     uint64_t headerLength;
     if (bit64) {
-        headerLength = *((uint64_t*) (buffer + counter));
+        headerLength = *((uint64_t*) (debugLine.content + counter));
         counter += 8;
     } else {
-        headerLength = *((uint32_t*) (buffer + counter));
+        headerLength = *((uint32_t*) (debugLine.content + counter));
         counter += 4;
     }
 
-    const uint8_t minimumInstructionLength = *((uint8_t*) (buffer + counter++));
-    const uint8_t maximumOperationsPerInstruction = *((uint8_t*) (buffer + counter++));
-    const bool    defaultIsStmt = *((uint8_t*) (buffer + counter++));
-    const int8_t  lineBase = *((int8_t*) (buffer + counter++));
-    const uint8_t lineRange = *((uint8_t*) (buffer + counter++));
-    const uint8_t opcodeBase = *((uint8_t*) (buffer + counter++));
+    const uint8_t minimumInstructionLength = *((uint8_t*) (debugLine.content + counter++));
+    const uint8_t maximumOperationsPerInstruction = *((uint8_t*) (debugLine.content + counter++));
+    const bool    defaultIsStmt = *((uint8_t*) (debugLine.content + counter++));
+    const int8_t  lineBase = *((int8_t*) (debugLine.content + counter++));
+    const uint8_t lineRange = *((uint8_t*) (debugLine.content + counter++));
+    const uint8_t opcodeBase = *((uint8_t*) (debugLine.content + counter++));
 
     vector_uint8_t stdOpcodeLengths;
     vector_uint8_create(&stdOpcodeLengths);
     vector_uint8_reserve(&stdOpcodeLengths, opcodeBase - 2);
     for (uint8_t i = 1; i < opcodeBase; ++i) {
-        vector_uint8_push_back(&stdOpcodeLengths, *((uint8_t*) (buffer + counter++)));
+        vector_uint8_push_back(&stdOpcodeLengths, *((uint8_t*) (debugLine.content + counter++)));
     }
 
-    vector_fileAttribute_t directories = dwarf5_parseFileAttributes(buffer, &counter, bit64),
-                                 files = dwarf5_parseFileAttributes(buffer, &counter, bit64);
+    vector_fileAttribute_t directories = dwarf5_parseFileAttributes(debugLine.content, &counter, bit64),
+                                 files = dwarf5_parseFileAttributes(debugLine.content, &counter, bit64);
 
     return false;
 }
