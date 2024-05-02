@@ -5,12 +5,12 @@
  *
  * This file is part of the CallstackLibrary.
  *
- * CallstackLibrary is free software: you can redistribute it and/or modify
+ * The CallstackLibrary is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
  * the Free Software Foundation, either version 3 of the License, or
  * (at your option) any later version.
  *
- * CallstackLibrary is distributed in the hope that it will be useful,
+ * The CallstackLibrary is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
  * GNU General Public License for more details.
@@ -56,5 +56,22 @@
 #define DW_LNCT_timestamp       0x3
 #define DW_LNCT_size            0x4
 #define DW_LNCT_MD5             0x5
+
+#define DW_LNS_copy               0x01
+#define DW_LNS_advance_pc         0x02
+#define DW_LNS_advance_line       0x03
+#define DW_LNS_set_file           0x04
+#define DW_LNS_set_column         0x05
+#define DW_LNS_negate_stmt        0x06
+#define DW_LNS_set_basic_block    0x07
+#define DW_LNS_const_add_pc       0x08
+#define DW_LNS_fixed_advance_pc   0x09
+#define DW_LNS_set_prologue_end   0x0a
+#define DW_LNS_set_epilogue_begin 0x0b
+#define DW_LNS_set_isa            0x0c
+
+#define DW_LNE_end_sequence      0x01
+#define DW_LNE_set_address       0x02
+#define DW_LNE_set_discriminator 0x04
 
 #endif /* dwarf_v5_definitions_h */
