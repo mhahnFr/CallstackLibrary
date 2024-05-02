@@ -28,12 +28,21 @@
 #include "../vector_uint8.h"
 #include "../vector_pair_uint64.h"
 
-static inline char* dwarf5_stringFromSection(uint64_t offset, uint64_t type) {
-    // TODO: Implement
-    return NULL;
+static inline char* dwarf5_stringFromSection(uint64_t offset, uint64_t type, struct lcs_section debugLineStr, struct lcs_section debugStr) {
+    char* toReturn = NULL;
+    switch (type) {
+        case DW_FORM_line_strp: toReturn = debugLineStr.content + offset; break;
+        case DW_FORM_strp:      toReturn = debugStr.content + offset;     break;
+    }
+    return toReturn;
 }
 
-static inline char* dwarf5_readString(void* buffer, size_t* counter, uint64_t type, bool bit64) {
+static inline char* dwarf5_readString(void* buffer, 
+                                      size_t* counter,
+                                      uint64_t type,
+                                      bool bit64,
+                                      struct lcs_section debugLineStr,
+                                      struct lcs_section debugStr) {
     if (type == DW_FORM_string) {
         char* toReturn = (buffer + *counter);
         *counter += strlen(toReturn) + 1;
@@ -50,7 +59,7 @@ static inline char* dwarf5_readString(void* buffer, size_t* counter, uint64_t ty
         offset = *((uint32_t*) (buffer + *counter));
         *counter += 4;
     }
-    return dwarf5_stringFromSection(offset, type);
+    return dwarf5_stringFromSection(offset, type, debugLineStr, debugStr);
 }
 
 static inline uint64_t dwarf5_readIndex(void* buffer, size_t* counter, uint64_t type) {
@@ -218,7 +227,7 @@ static inline void dwarf5_consumeSome(void* buffer, size_t* counter, uint64_t ty
     }
 }
 
-static inline vector_fileAttribute_t dwarf5_parseFileAttributes(void* buffer, size_t* counter, bool bit64) {
+static inline vector_fileAttribute_t dwarf5_parseFileAttributes(void* buffer, size_t* counter, bool bit64, struct lcs_section debugLineStr, struct lcs_section debugStr) {
     const uint8_t entryFormatCount = *((uint8_t*) (buffer + (*counter)++));
     vector_pair_uint64_t entryFormats = vector_initializer;
     vector_pair_uint64_reserve(&entryFormats, entryFormatCount);
@@ -237,7 +246,7 @@ static inline vector_fileAttribute_t dwarf5_parseFileAttributes(void* buffer, si
         vector_iterate(pair_uint64_t, &entryFormats, {
             switch (element->first) {
                 case DW_LNCT_path:
-                    attribute.path = dwarf5_readString(buffer, counter, element->second, bit64);
+                    attribute.path = dwarf5_readString(buffer, counter, element->second, bit64, debugLineStr, debugStr);
                     break;
 
                 case DW_LNCT_directory_index:
@@ -301,8 +310,8 @@ bool dwarf5_parseLineProgram(struct lcs_section debugLine,
         vector_uint8_push_back(&stdOpcodeLengths, *((uint8_t*) (debugLine.content + counter++)));
     }
 
-    vector_fileAttribute_t directories = dwarf5_parseFileAttributes(debugLine.content, &counter, bit64),
-                                 files = dwarf5_parseFileAttributes(debugLine.content, &counter, bit64);
+    vector_fileAttribute_t directories = dwarf5_parseFileAttributes(debugLine.content, &counter, bit64, debugLineStr, debugStr),
+                                 files = dwarf5_parseFileAttributes(debugLine.content, &counter, bit64, debugLineStr, debugStr);
 
     return false;
 }
