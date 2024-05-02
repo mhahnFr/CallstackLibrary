@@ -37,7 +37,7 @@ static inline void objectFile_handleSection(struct objectFile* self,
     if (strcmp("__DWARF", segname) == 0) {
         if (strcmp("__debug_line", sectname) == 0) {
             self->debugLine = section;
-        } else if (strcmp("__debug_line_str", sectname) == 0) {
+        } else if (strncmp("__debug_line_str", sectname, 16) == 0) {
             self->debugLineStr = section;
         } else if (strcmp("__debug_str", sectname) == 0) {
             self->debugStr = section;
