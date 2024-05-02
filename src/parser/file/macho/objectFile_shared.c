@@ -3,18 +3,20 @@
  *
  * Copyright (C) 2024  mhahnFr
  *
- * This file is part of the CallstackLibrary. This library is free software:
- * you can redistribute it and/or modify it under the terms of the
- * GNU General Public License as published by the Free Software Foundation,
- * either version 3 of the License, or (at your option) any later version.
+ * This file is part of the CallstackLibrary.
  *
- * This library is distributed in the hope that it will be useful,
+ * The CallstackLibrary is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation, either version 3 of the License, or
+ * (at your option) any later version.
+ *
+ * The CallstackLibrary is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
  * GNU General Public License for more details.
  *
- * You should have received a copy of the GNU General Public License along with
- * this library, see the file LICENSE.  If not, see <https://www.gnu.org/licenses/>.
+ * You should have received a copy of the GNU General Public License along with the
+ * CallstackLibrary, see the file LICENSE.  If not, see <https://www.gnu.org/licenses/>.
  */
 
 #include <stdio.h>
@@ -28,6 +30,21 @@
 #include "macho_parser.h"
 #include "macho_utils.h"
 
+static inline void objectFile_handleSection(struct objectFile* self,
+                                            struct lcs_section section,
+                                            const char*        segname,
+                                            const char*        sectname) {
+    if (strcmp("__DWARF", segname) == 0) {
+        if (strcmp("__debug_line", sectname) == 0) {
+            self->debugLine = section;
+        } else if (strcmp("__debug_line_str", sectname) == 0) {
+            self->debugLineStr = section;
+        } else if (strcmp("__debug_str", sectname) == 0) {
+            self->debugStr = section;
+        }
+    }
+}
+
 /**
  * @brief Handles the given 64 bit segment command.
  *
@@ -37,27 +54,20 @@
  * @param command the command to process
  * @param baseAddress the beginning of the Mach-O file
  * @param bytesSwapped whether the bytes need to be swapped to match the host byte order
- * @param cb the DWARF line callback
- * @param args the arguments to pass to the callback
  * @return whether the handling (and optional DWARF parsing) was successful
  */
-static inline bool objectFile_handleSegment64(struct segment_command_64* command,
+static inline bool objectFile_handleSegment64(struct objectFile*         self,
+                                              struct segment_command_64* command,
                                               void*                      baseAddress,
-                                              bool                       bytesSwapped,
-                                              dwarf_line_callback cb, va_list args) {
+                                              bool                       bytesSwapped) {
     const uint32_t nsects = macho_maybeSwap(32, bytesSwapped, command->nsects);
     
     for (size_t i = 0; i < nsects; ++i) {
         struct section_64* section = (void*) command + sizeof(struct segment_command_64) + i * sizeof(struct section_64);
-        
-        if (strcmp("__DWARF", section->segname) == 0 &&
-            strcmp("__debug_line", section->sectname) == 0) {
-            if (!dwarf_parseLineProgram(baseAddress + macho_maybeSwap(32, bytesSwapped, section->offset), 
-                                        cb, args,
-                                        macho_maybeSwap(64, bytesSwapped, section->size))) {
-                return false;
-            }
-        }
+        objectFile_handleSection(self, (struct lcs_section) {
+            baseAddress + macho_maybeSwap(32, bytesSwapped, section->offset),
+            macho_maybeSwap(64, bytesSwapped, section->size)
+        }, section->segname, section->sectname);
     }
     return true;
 }
@@ -71,27 +81,20 @@ static inline bool objectFile_handleSegment64(struct segment_command_64* command
  * @param command the command to process
  * @param baseAddress the beginning of the Mach-O file
  * @param bytesSwapped whether the bytes need to be swapped to match the host byte order
- * @param cb the DWARF line callback
- * @param args the arguments to pass to the callback
  * @return whether the handling (and optional DWARF parsing) was successful
  */
-static inline bool objectFile_handleSegment(struct segment_command* command,
+static inline bool objectFile_handleSegment(struct objectFile*      self,
+                                            struct segment_command* command,
                                             void*                   baseAddress,
-                                            bool                    bytesSwapped,
-                                            dwarf_line_callback cb, va_list args) {
+                                            bool                    bytesSwapped) {
     const uint32_t nsects = macho_maybeSwap(32, bytesSwapped, command->nsects);
     
     for (size_t i = 0; i < nsects; ++i) {
         struct section* section = (void*) command + sizeof(struct segment_command) + i * sizeof(struct section);
-        
-        if (strcmp("__DWARF", section->segname) == 0 &&
-            strcmp("__debug_line", section->sectname) == 0) {
-            if (!dwarf_parseLineProgram(baseAddress + macho_maybeSwap(32, bytesSwapped, section->offset), 
-                                        cb, args,
-                                        macho_maybeSwap(32, bytesSwapped, section->size))) {
-                return false;
-            }
-        }
+        objectFile_handleSection(self, (struct lcs_section) {
+            baseAddress + macho_maybeSwap(32, bytesSwapped, section->offset),
+            macho_maybeSwap(32, bytesSwapped, section->size)
+        }, section->segname, section->sectname);
     }
     return true;
 }
@@ -112,14 +115,11 @@ static inline void objectFile_addFunctionCallback(struct pair_funcFile f, va_lis
  * @param self the object file object
  * @param baseAddress the beginning address of the Mach-O file to be parsed
  * @param bytesSwapped whether the bytes need to be swapped to match the host byte order
- * @param cb the DWARF line callback
- * @param args the arguments to pass to the callback function
  * @return whether the parsing was successful
  */
 static inline bool objectFile_parseMachOImpl64(struct objectFile* self,
                                                void*              baseAddress,
-                                               bool               bytesSwapped,
-                                               dwarf_line_callback cb, va_list args) {
+                                               bool               bytesSwapped) {
     struct mach_header_64* header = baseAddress;
     struct load_command*   lc     = (void*) header + sizeof(struct mach_header_64);
     const  uint32_t        ncmds  = macho_maybeSwap(32, bytesSwapped, header->ncmds);
@@ -128,7 +128,7 @@ static inline bool objectFile_parseMachOImpl64(struct objectFile* self,
         bool result = true;
         switch (macho_maybeSwap(32, bytesSwapped, lc->cmd)) {
             case LC_SEGMENT_64:
-                result = objectFile_handleSegment64((void*) lc, baseAddress, bytesSwapped, cb, args);
+                result = objectFile_handleSegment64(self, (void*) lc, baseAddress, bytesSwapped);
                 break;
                 
             case LC_SYMTAB:
@@ -154,14 +154,11 @@ static inline bool objectFile_parseMachOImpl64(struct objectFile* self,
  * @param self the object file object
  * @param baseAddress the beginning address of the Mach-O file to be parsed
  * @param bytesSwapped whether the bytes need to be swapped to match the host byte order
- * @param cb the DWARF line callback
- * @param args the arguments to pass to the callback function
  * @return whether the parsing was successful
  */
 static inline bool objectFile_parseMachOImpl(struct objectFile* self,
                                              void*              baseAddress,
-                                             bool               bytesSwapped,
-                                             dwarf_line_callback cb, va_list args) {
+                                             bool               bytesSwapped) {
     struct mach_header*  header = baseAddress;
     struct load_command* lc     = (void*) header + sizeof(struct mach_header);
     const  uint32_t      ncmds  = macho_maybeSwap(32, bytesSwapped, header->ncmds);
@@ -170,7 +167,7 @@ static inline bool objectFile_parseMachOImpl(struct objectFile* self,
         bool result = true;
         switch (macho_maybeSwap(32, bytesSwapped, lc->cmd)) {
             case LC_SEGMENT:
-                result = objectFile_handleSegment((void*) lc, baseAddress, bytesSwapped, cb, args);
+                result = objectFile_handleSegment(self, (void*) lc, baseAddress, bytesSwapped);
                 break;
                 
             case LC_SYMTAB:
@@ -217,20 +214,25 @@ static inline bool objectFile_parseMachO(struct objectFile* self,
         }
     }
     
+    bool success = false;
     switch (header->magic) {
-        case MH_MAGIC: return objectFile_parseMachOImpl(self, buffer, false, cb, args);
-        case MH_CIGAM: return objectFile_parseMachOImpl(self, buffer, true,  cb, args);
-            
-        case MH_MAGIC_64: return objectFile_parseMachOImpl64(self, buffer, false, cb, args);
-        case MH_CIGAM_64: return objectFile_parseMachOImpl64(self, buffer, true,  cb, args);
-            
+        case MH_MAGIC: success = objectFile_parseMachOImpl(self, buffer, false); break;
+        case MH_CIGAM: success = objectFile_parseMachOImpl(self, buffer, true);  break;
+
+        case MH_MAGIC_64: success = objectFile_parseMachOImpl64(self, buffer, false); break;
+        case MH_CIGAM_64: success = objectFile_parseMachOImpl64(self, buffer, true);  break;
+
         case FAT_MAGIC:
         case FAT_MAGIC_64: return objectFile_parseMachO(self, macho_parseFat(buffer, false, self->name), cb, args);
             
         case FAT_CIGAM:
         case FAT_CIGAM_64: return objectFile_parseMachO(self, macho_parseFat(buffer, true, self->name), cb, args);
     }
-    return false;
+
+    if (success && self->debugLine.size > 0) {
+        success = dwarf_parseLineProgram(self->debugLine, self->debugLineStr, self->debugStr, cb, args);
+    }
+    return success;
 }
 
 bool objectFile_parseWithBuffer(struct objectFile* self, void* buffer, dwarf_line_callback cb, ...) {
