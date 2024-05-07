@@ -1,5 +1,5 @@
 /*
- * Callstack Library - Library creating human-readable call stacks.
+ * CallstackLibrary - Library creating human-readable call stacks.
  *
  * Copyright (C) 2024  mhahnFr
  *
@@ -230,7 +230,7 @@ static inline bool objectFile_parseMachO(struct objectFile* self,
     }
 
     if (success && self->debugLine.size > 0) {
-        success = dwarf_parseLineProgram(self->debugLine, self->debugLineStr, self->debugStr, cb, args);
+        dwarf_parseLineProgram(self->debugLine, self->debugLineStr, self->debugStr, cb, args);
     }
     return success;
 }
