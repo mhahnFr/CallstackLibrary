@@ -3,18 +3,20 @@
  *
  * Copyright (C) 2023 - 2024  mhahnFr
  *
- * This file is part of the CallstackLibrary. This library is free software:
- * you can redistribute it and/or modify it under the terms of the
- * GNU General Public License as published by the Free Software Foundation,
- * either version 3 of the License, or (at your option) any later version.
+ * This file is part of the CallstackLibrary.
  *
- * This library is distributed in the hope that it will be useful,
+ * The CallstackLibrary is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation, either version 3 of the License, or
+ * (at your option) any later version.
+ *
+ * The CallstackLibrary is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
  * GNU General Public License for more details.
  *
- * You should have received a copy of the GNU General Public License along with
- * this library, see the file LICENSE.  If not, see <https://www.gnu.org/licenses/>.
+ * You should have received a copy of the GNU General Public License along with the
+ * CallstackLibrary, see the file LICENSE.  If not, see <https://www.gnu.org/licenses/>.
  */
 
 #include <algorithm>
@@ -45,8 +47,8 @@ class ObjectFile {
      * @param info the DWAF line info entry
      * @param args the arguments - should contain the object file object as first argument
      */
-    static inline void dwarfLineCallback(dwarf_lineInfo info, va_list args) {
-        ObjectFile* self = reinterpret_cast<ObjectFile*>(va_arg(args, void*));
+    static inline void dwarfLineCallback(dwarf_lineInfo info, void* args) {
+        ObjectFile* self = reinterpret_cast<ObjectFile*>(args);
         
         self->lineInfos.emplace(std::make_pair(info.address, info));
     }

@@ -68,8 +68,8 @@ void objectFile_addOwnFunction(struct objectFile* me,
  * @param info the DWARF line info entry
  * @param args the variadic arguments - should include as the first argument the object file object
  */
-static inline void objectFile_dwarfLineCallback(struct dwarf_lineInfo info, va_list args) {
-    struct objectFile_private* self = va_arg(args, void*);
+static inline void objectFile_dwarfLineCallback(struct dwarf_lineInfo info, void* args) {
+    struct objectFile_private* self = args;
     
     vector_dwarfLineInfo_push_back(&self->lineInfos, info);
 }

@@ -201,7 +201,7 @@ static inline bool objectFile_parseMachOImpl(struct objectFile* self,
  */
 static inline bool objectFile_parseMachO(struct objectFile* self,
                                          void*              buffer,
-                                         dwarf_line_callback cb, va_list args) {
+                                         dwarf_line_callback cb, void* args) {
     if (buffer == NULL) return false;
     
     struct mach_header* header = buffer;
@@ -235,17 +235,13 @@ static inline bool objectFile_parseMachO(struct objectFile* self,
     return success;
 }
 
-bool objectFile_parseWithBuffer(struct objectFile* self, void* buffer, dwarf_line_callback cb, ...) {
+bool objectFile_parseWithBuffer(struct objectFile* self, void* buffer, dwarf_line_callback cb, void* args) {
     if (self == NULL) return false;
-    
-    va_list args;
-    va_start(args, cb);
-    const bool success = objectFile_parseMachO(self, buffer, cb, args);
-    va_end(args);
-    return success;
+
+    return objectFile_parseMachO(self, buffer, cb, args);
 }
 
-bool objectFile_parse(struct objectFile* self, dwarf_line_callback cb, ...) {
+bool objectFile_parse(struct objectFile* self, dwarf_line_callback cb, void* args) {
     if (self == NULL) return false;
     
     struct stat fileStats;
@@ -266,10 +262,7 @@ bool objectFile_parse(struct objectFile* self, dwarf_line_callback cb, ...) {
     }
     const size_t count = fread(buffer, 1, fileStats.st_size, file);
     fclose(file);
-    va_list args;
-    va_start(args, cb);
     const bool success = (off_t) count == fileStats.st_size && objectFile_parseMachO(self, buffer, cb, args);
-    va_end(args);
     free(buffer);
     return success;
 }
