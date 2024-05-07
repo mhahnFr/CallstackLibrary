@@ -22,11 +22,14 @@
 #ifndef dwarf_parser_h
 #define dwarf_parser_h
 
-#include <stdarg.h>
 #include <stdbool.h>
 #include <stdint.h>
 
 #include "dwarf_lineInfo.h"
+#include "vector_uint8.h"
+
+#include "v4/parser.h"
+#include "v5/parser.h"
 
 #include "../lcs_section.h"
 
@@ -39,12 +42,39 @@ extern "C" {
  *
  * It takes a DWARF line info structure and the additionally passed arguments.
  */
-typedef void (*dwarf_line_callback)(struct dwarf_lineInfo, va_list);
+typedef void (*dwarf_line_callback)(struct dwarf_lineInfo, void*);
+
+struct dwarf_parser {
+    uint16_t version;
+    bool bit64;
+    bool defaultIsStmt;
+
+    uint8_t opCodeBase, maximumOperationsPerInstruction, lineRange, minimumInstructionLength;
+    int8_t lineBase;
+
+    vector_uint8_t stdOpcodeLengths;
+
+    struct lcs_section debugLine,
+    debugStr,
+    debugLineStr;
+
+    dwarf_line_callback cb;
+    void* args;
+
+    void  (*destroy)    (struct dwarf_parser*);
+    bool  (*parseHeader)(struct dwarf_parser*, size_t*);
+    char* (*getFileName)(struct dwarf_parser*, uint64_t);
+
+    union {
+        struct dwarf4_parser v4;
+        struct dwarf5_parser v5;
+    } specific;
+};
 
 bool dwarf_parseLineProgram(struct lcs_section debugLine,
                             struct lcs_section debugLineStr,
                             struct lcs_section debugStr,
-                            dwarf_line_callback cb, va_list args);
+                            dwarf_line_callback cb, void* args);
 
 /**
  * @brief Reads an unsigned LEB128 integer from the given memory at the given position.
