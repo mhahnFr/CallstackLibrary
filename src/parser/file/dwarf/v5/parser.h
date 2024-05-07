@@ -19,17 +19,17 @@
  * CallstackLibrary, see the file LICENSE.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-#ifndef dwaf_v5_parser_h
-#define dwaf_v5_parser_h
+#ifndef dwarf_v5_parser_h
+#define dwarf_v5_parser_h
 
-#include "../dwarf_parser.h"
+#include "vector_fileAttribute.h"
 
-bool dwarf5_parseLineProgram(struct lcs_section debugLine,
-                             struct lcs_section debugLineStr,
-                             struct lcs_section debugStr,
-                             size_t   counter,
-                             uint64_t actualSize,
-                             bool     bit64,
-                             dwarf_line_callback cb, va_list args);
+struct dwarf_parser;
 
-#endif /* dwaf_v5_parser_h */
+struct dwarf5_parser {
+    vector_fileAttribute_t directories, files;
+};
+
+void dwarf5_parser_create(struct dwarf_parser* self);
+
+#endif /* dwarf_v5_parser_h */
