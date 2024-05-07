@@ -36,6 +36,9 @@ void elfFile_create(struct elfFile* self) {
     self->_.addr2String = &elfFile_addr2String;
     self->_.destroy     = &elfFile_destroy;
     self->_.deleter     = &elfFile_delete;
+    lcs_section_create(&self->debugLine);
+    lcs_section_create(&self->debugLineStr);
+    lcs_section_create(&self->debugStr);
 }
 
 static inline char* elfFile_loadSectionStrtab64(Elf64_Ehdr* header) {
@@ -65,7 +68,14 @@ static inline bool elfFile_parseSymtab64(struct elfFile* self, Elf64_Shdr* symta
     return true;
 }
 
-static inline bool elfFile_parseFile64(struct elfFile* self, Elf64_Ehdr* buffer, dwarf_line_callback cb, va_list args) {
+static inline struct lcs_section elfFile_sectionToLCSSection(void* buffer, Elf64_Shdr* section) {
+    return (struct lcs_section) {
+        .content = buffer + section->sh_offset,
+        .size = section->sh_size
+    };
+}
+
+static inline bool elfFile_parseFile64(struct elfFile* self, Elf64_Ehdr* buffer, dwarf_line_callback cb, void* args) {
     if (buffer->e_shoff == 0) return false;
 
     char* sectStrBegin = elfFile_loadSectionStrtab64(buffer);
@@ -75,13 +85,18 @@ static inline bool elfFile_parseFile64(struct elfFile* self, Elf64_Ehdr* buffer,
     // TODO: e_shnum special case
     Elf64_Shdr* strtab   = NULL,
               * symtab   = NULL,
-              * lines    = NULL,
               * dystrtab = NULL,
               * dysymtab = NULL;
     for (uint16_t i = 0; i < buffer->e_shnum; ++i) {
         Elf64_Shdr* current = sectBegin + i * buffer->e_shentsize;
         if (strcmp(".debug_line", sectStrBegin + current->sh_name) == 0) {
-            lines = current;
+            self->debugLine = elfFile_sectionToLCSSection(buffer, current);
+            continue;
+        } else if (strcmp(".debug_str", sectStrBegin + current->sh_name) == 0) {
+            self->debugStr = elfFile_sectionToLCSSection(buffer, current);
+            continue;
+        } else if (strcmp(".debug_line_str", sectStrBegin + current->sh_name) == 0) {
+            self->debugLineStr = elfFile_sectionToLCSSection(buffer, current);
             continue;
         }
         switch (current->sh_type) {
@@ -110,21 +125,15 @@ static inline bool elfFile_parseFile64(struct elfFile* self, Elf64_Ehdr* buffer,
         strtab = dystrtab;
     }
 
-    bool success = true;
-    if (lines != NULL) {
-        success = dwarf_parseLineProgram((void*) buffer + lines->sh_offset, cb, args, lines->sh_size);
-    }
-    return success && elfFile_parseSymtab64(self, symtab, (void*) buffer + strtab->sh_offset, buffer);
+    return elfFile_parseSymtab64(self, symtab, (void*) buffer + strtab->sh_offset, buffer);
 }
 
-static inline bool elfFile_parseFile32(struct elfFile* self, Elf32_Ehdr* buffer, dwarf_line_callback cb, va_list args) {
+static inline bool elfFile_parseFile32(struct elfFile* self, Elf32_Ehdr* buffer, dwarf_line_callback cb, void* args) {
     // TODO: Implement
     return false;
 }
 
-bool elfFile_parseFile(struct elfFile* self, void* buffer, dwarf_line_callback cb, ...) {
-    va_list args;
-    va_start(args, cb);
+bool elfFile_parseFile(struct elfFile* self, void* buffer, dwarf_line_callback cb, void* args) {
     // TODO: Care about EI_DATA
 
     bool success = false;
@@ -134,7 +143,10 @@ bool elfFile_parseFile(struct elfFile* self, void* buffer, dwarf_line_callback c
         case ELFCLASS64: success = elfFile_parseFile64(self, buffer, cb, args); break;
     }
 
-    va_end(args);
+    if (success && self->debugLine.size > 0) {
+        dwarf_parseLineProgram(self->debugLine, self->debugLineStr, self->debugStr, cb, args);
+    }
+
     return success;
 }
 

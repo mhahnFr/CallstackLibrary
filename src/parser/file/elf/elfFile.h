@@ -25,6 +25,7 @@
 #include "../binaryFile.h"
 #include "../debugInfo.h"
 #include "../function.h"
+#include "../lcs_section.h"
 
 #include "../dwarf/dwarf_parser.h"
 
@@ -38,6 +39,8 @@ extern "C" {
 struct elfFile {
     /** The super part of this structure. */
     struct binaryFile _;
+
+    struct lcs_section debugLine, debugLineStr, debugStr;
     
     void* priv;
 };
@@ -70,7 +73,7 @@ static inline struct elfFile* elfFileOrNull(struct binaryFile * self) {
 
 optional_debugInfo_t elfFile_getDebugInfo(struct elfFile* self, void* address);
 bool elfFile_loadFile(struct elfFile* self);
-bool elfFile_parseFile(struct elfFile* self, void* buffer, dwarf_line_callback cb, ...);
+bool elfFile_parseFile(struct elfFile* self, void* buffer, dwarf_line_callback cb, void* args);
 void elfFile_addFunction(struct elfFile* self, struct function f);
 
 /* Heavily WIP. */
