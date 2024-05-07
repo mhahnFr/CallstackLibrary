@@ -53,8 +53,8 @@ void elfFile_addFunction(struct elfFile* me, struct function f) {
     vector_function_push_back(&self->functions, f);
 }
 
-static inline void elfFile_lineProgramCallback(struct dwarf_lineInfo info, va_list args) {
-    struct elfFile_private* self = va_arg(args, void*);
+static inline void elfFile_lineProgramCallback(struct dwarf_lineInfo info, void* args) {
+    struct elfFile_private* self = args;
 
     vector_dwarfLineInfo_push_back(&self->lineInfos, info);
 }

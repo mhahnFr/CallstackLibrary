@@ -61,7 +61,7 @@ public:
                 auto self = reinterpret_cast<ElfFile*>(arg);
 
                 return elfFile_parseFile(*self, buffer, [](auto info, auto args) {
-                    auto self = reinterpret_cast<ElfFile*>(va_arg(args, void*));
+                    auto self = reinterpret_cast<ElfFile*>(args);
 
                     if (self->lineInfos.find(info.address) == self->lineInfos.end()) {
                         self->lineInfos.emplace(std::make_pair(info.address, info));
