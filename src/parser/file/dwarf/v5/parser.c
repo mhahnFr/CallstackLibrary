@@ -263,6 +263,7 @@ static inline vector_fileAttribute_t dwarf5_parseFileAttributes(void*   buffer,
         })
         vector_fileAttribute_push_back(&attributes, attribute);
     }
+    vector_pair_uint64_destroy(&entryFormats);
 
     return attributes;
 }
@@ -309,7 +310,7 @@ bool dwarf5_parseLineProgram(struct lcs_section debugLine,
 
     vector_uint8_t stdOpcodeLengths;
     vector_uint8_create(&stdOpcodeLengths);
-    vector_uint8_reserve(&stdOpcodeLengths, opcodeBase - 2);
+    vector_uint8_reserve(&stdOpcodeLengths, opcodeBase - 1);
     for (uint8_t i = 1; i < opcodeBase; ++i) {
         vector_uint8_push_back(&stdOpcodeLengths, *((uint8_t*) (debugLine.content + counter++)));
     }
@@ -442,6 +443,10 @@ bool dwarf5_parseLineProgram(struct lcs_section debugLine,
             discriminator = 0;
         }
     }
+
+    vector_uint8_destroy(&stdOpcodeLengths);
+    vector_fileAttribute_destroy(&files);
+    vector_fileAttribute_destroy(&directories);
 
     return true;
 }
