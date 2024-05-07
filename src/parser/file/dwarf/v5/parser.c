@@ -72,6 +72,7 @@ static inline uint64_t dwarf5_readIndex(void* buffer, size_t* counter, uint64_t 
         case DW_FORM_data2:
             toReturn = *((uint16_t*) (buffer + *counter));
             *counter += 2;
+            break;
 
         case DW_FORM_udata:
             toReturn = getULEB128(buffer, counter);
@@ -259,8 +260,8 @@ static inline vector_fileAttribute_t dwarf5_parseFileAttributes(void*   buffer,
                     dwarf5_consumeSome(buffer, counter, element->second, bit64);
                     break; // Skip as defined by the paired value
             }
-            vector_fileAttribute_push_back(&attributes, attribute);
         })
+        vector_fileAttribute_push_back(&attributes, attribute);
     }
 
     return attributes;
