@@ -19,14 +19,11 @@
  * CallstackLibrary, see the file LICENSE.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-#include <string.h>
-
 #include "definitions.h"
 #include "parser.h"
-#include "vector_fileAttribute.h"
 
-#include "../vector_uint8.h"
 #include "../vector_pair_uint64.h"
+#include "../dwarf_parser.h"
 
 static inline char* dwarf5_stringFromSection(uint64_t offset, uint64_t type, struct lcs_section debugLineStr, struct lcs_section debugStr) {
     char* toReturn = NULL;
@@ -208,21 +205,17 @@ static inline void dwarf5_consumeSome(void* buffer, size_t* counter, uint64_t ty
     }
 }
 
-static inline vector_fileAttribute_t dwarf5_parseFileAttributes(void*   buffer,
-                                                                size_t* counter,
-                                                                bool    bit64,
-                                                                struct lcs_section debugLineStr,
-                                                                struct lcs_section debugStr) {
-    const uint8_t entryFormatCount = *((uint8_t*) (buffer + (*counter)++));
+static inline vector_fileAttribute_t dwarf5_parseFileAttributes(struct dwarf_parser* self, size_t* counter) {
+    const uint8_t entryFormatCount = *((uint8_t*) (self->debugLine.content + (*counter)++));
     vector_pair_uint64_t entryFormats = vector_initializer;
     vector_pair_uint64_reserve(&entryFormats, entryFormatCount);
     for (uint8_t i = 0; i < entryFormatCount; ++i) {
-        const uint64_t contentType = getULEB128(buffer, counter),
-                          formCode = getULEB128(buffer, counter);
+        const uint64_t contentType = getULEB128(self->debugLine.content, counter),
+                          formCode = getULEB128(self->debugLine.content, counter);
         vector_pair_uint64_push_back(&entryFormats, (pair_uint64_t) { contentType, formCode });
     }
 
-    const uint64_t attributeCount = getULEB128(buffer, counter);
+    const uint64_t attributeCount = getULEB128(self->debugLine.content, counter);
     vector_fileAttribute_t attributes = vector_initializer;
     vector_fileAttribute_reserve(&attributes, attributeCount);
     for (uint64_t i = 0; i < attributeCount; ++i) {
@@ -236,28 +229,28 @@ static inline vector_fileAttribute_t dwarf5_parseFileAttributes(void*   buffer,
         vector_iterate(pair_uint64_t, &entryFormats, {
             switch (element->first) {
                 case DW_LNCT_path:
-                    attribute.path = dwarf5_readString(buffer, counter, element->second, bit64, debugLineStr, debugStr);
+                    attribute.path = dwarf5_readString(self->debugLine.content, counter, element->second, self->bit64, self->debugLineStr, self->debugStr);
                     break;
 
                 case DW_LNCT_directory_index:
-                    attribute.index = dwarf5_readIndex(buffer, counter, element->second);
+                    attribute.index = dwarf5_readIndex(self->debugLine.content, counter, element->second);
                     break;
 
                 case DW_LNCT_timestamp:
-                    attribute.timestamp = dwarf5_readTimestamp(buffer, counter, element->second);
+                    attribute.timestamp = dwarf5_readTimestamp(self->debugLine.content, counter, element->second);
                     break;
 
                 case DW_LNCT_size:
-                    attribute.size = dwarf5_readSize(buffer, counter, element->second);
+                    attribute.size = dwarf5_readSize(self->debugLine.content, counter, element->second);
                     break;
 
                 case DW_LNCT_MD5:
                     // TODO: Check
-                    attribute.md5 = dwarf5_readMD5(buffer, counter); // Always DW_FROM_data16
+                    attribute.md5 = dwarf5_readMD5(self->debugLine.content, counter); // Always DW_FROM_data16
                     break;
 
                 default:
-                    dwarf5_consumeSome(buffer, counter, element->second, bit64);
+                    dwarf5_consumeSome(self->debugLine.content, counter, element->second, self->bit64);
                     break; // Skip as defined by the paired value
             }
         })
@@ -282,171 +275,54 @@ static inline char* dwarf5_constructFileName(const struct fileAttribute* file, c
     return toReturn;
 }
 
-bool dwarf5_parseLineProgram(struct lcs_section debugLine,
-                             struct lcs_section debugLineStr,
-                             struct lcs_section debugStr,
-                             size_t   counter,
-                             uint64_t actualSize,
-                             bool     bit64,
-                             dwarf_line_callback cb, va_list args) {
-    const uint8_t addressSize = *((uint8_t*) (debugLine.content + counter++));
-    const uint8_t segmentSelectorSize = *((uint8_t*) (debugLine.content + counter++));
+static inline char* dwarf5_getFileName(struct dwarf_parser* self, uint64_t file) {
+    return dwarf5_constructFileName(&self->specific.v5.files.content[file], &self->specific.v5.directories);
+}
+
+static inline bool dwarf5_parseLineProgramHeader(struct dwarf_parser* self, size_t* counter) {
+    const uint8_t addressSize = *((uint8_t*) (self->debugLine.content + (*counter)++));
+    const uint8_t segmentSelectorSize = *((uint8_t*) (self->debugLine.content + (*counter)++));
+    (void) addressSize;
+    (void) segmentSelectorSize;
 
     uint64_t headerLength;
-    if (bit64) {
-        headerLength = *((uint64_t*) (debugLine.content + counter));
-        counter += 8;
+    if (self->bit64) {
+        headerLength = *((uint64_t*) (self->debugLine.content + (*counter)));
+        *counter += 8;
     } else {
-        headerLength = *((uint32_t*) (debugLine.content + counter));
-        counter += 4;
+        headerLength = *((uint32_t*) (self->debugLine.content + (*counter)));
+        *counter += 4;
+    }
+    (void) headerLength;
+
+    self->minimumInstructionLength        = *((uint8_t*) (self->debugLine.content + (*counter)++));
+    self->maximumOperationsPerInstruction = *((uint8_t*) (self->debugLine.content + (*counter)++));
+    self->defaultIsStmt                   = *((uint8_t*) (self->debugLine.content + (*counter)++));
+    self->lineBase                        = *((int8_t*)  (self->debugLine.content + (*counter)++));
+    self->lineRange                       = *((uint8_t*) (self->debugLine.content + (*counter)++));
+    self->opCodeBase                      = *((uint8_t*) (self->debugLine.content + (*counter)++));
+
+    vector_uint8_reserve(&self->stdOpcodeLengths, self->opCodeBase - 1);
+    for (uint8_t i = 1; i < self->opCodeBase; ++i) {
+        vector_uint8_push_back(&self->stdOpcodeLengths, *((uint8_t*) (self->debugLine.content + (*counter)++)));
     }
 
-    const uint8_t minimumInstructionLength        = *((uint8_t*) (debugLine.content + counter++));
-    const uint8_t maximumOperationsPerInstruction = *((uint8_t*) (debugLine.content + counter++));
-    const bool    defaultIsStmt                   = *((uint8_t*) (debugLine.content + counter++));
-    const int8_t  lineBase                        = *((int8_t*)  (debugLine.content + counter++));
-    const uint8_t lineRange                       = *((uint8_t*) (debugLine.content + counter++));
-    const uint8_t opcodeBase                      = *((uint8_t*) (debugLine.content + counter++));
-
-    vector_uint8_t stdOpcodeLengths;
-    vector_uint8_create(&stdOpcodeLengths);
-    vector_uint8_reserve(&stdOpcodeLengths, opcodeBase - 1);
-    for (uint8_t i = 1; i < opcodeBase; ++i) {
-        vector_uint8_push_back(&stdOpcodeLengths, *((uint8_t*) (debugLine.content + counter++)));
-    }
-
-    vector_fileAttribute_t directories = dwarf5_parseFileAttributes(debugLine.content, &counter, bit64, debugLineStr, debugStr),
-                                 files = dwarf5_parseFileAttributes(debugLine.content, &counter, bit64, debugLineStr, debugStr);
-
-    uint64_t address       = 0,
-             opIndex       = 0,
-             file          = 1,
-             line          = 1,
-             column        = 0,
-             isa           = 0,
-             discriminator = 0;
-
-    bool isStmt        = defaultIsStmt,
-         basicBlock    = false,
-         endSequence   = false,
-         prologueEnd   = false,
-         epilogueBegin = false;
-
-    while (counter - (bit64 ? 12 : 4) < actualSize) {
-        const uint8_t opCode = *((uint8_t*) (debugLine.content + counter++));
-        if (opCode == 0) {
-            const uint64_t length = getULEB128(debugLine.content, &counter);
-            const uint8_t actualOpCode = *((uint8_t*) (debugLine.content + counter++));
-            switch (actualOpCode) {
-                case DW_LNE_end_sequence: {
-                    endSequence = true;
-                    va_list copy;
-                    va_copy(copy, args);
-                    cb((struct dwarf_lineInfo) {
-                        address, line, column, isa, discriminator,
-                        dwarf5_constructFileName(&files.content[file], &directories),
-                        isStmt, basicBlock, endSequence, prologueEnd, epilogueBegin
-                    }, copy);
-                    va_end(copy);
-
-                    address = opIndex = column = isa = discriminator = 0;
-                    file = line = 1;
-                    basicBlock = endSequence = prologueEnd = epilogueBegin = false;
-                    isStmt = defaultIsStmt;
-                    break;
-                }
-
-                case DW_LNE_set_address: 
-                    address = *((size_t*) (debugLine.content + counter));
-                    counter += sizeof(size_t);
-                    opIndex = 0;
-                    break;
-
-                case DW_LNE_set_discriminator: discriminator = getULEB128(debugLine.content, &counter); break;
-
-                default: counter += length - 1; break;
-            }
-        } else if (opCode < opcodeBase) {
-            switch (opCode) {
-                case DW_LNS_copy: {
-                    va_list copy;
-                    va_copy(copy, args);
-                    cb((struct dwarf_lineInfo) {
-                        address, line, column, isa, discriminator,
-                        dwarf5_constructFileName(&files.content[file], &directories),
-                        isStmt, basicBlock, endSequence, prologueEnd, epilogueBegin
-                    }, copy);
-                    va_end(copy);
-
-                    discriminator = 0;
-                    basicBlock = prologueEnd = epilogueBegin = false;
-                    break;
-                }
-
-                case DW_LNS_advance_pc: {
-                    const uint64_t operationAdvance = getULEB128(debugLine.content, &counter);
-                    address += minimumInstructionLength * ((opIndex + operationAdvance) / maximumOperationsPerInstruction);
-                    opIndex = (opIndex + operationAdvance) % maximumOperationsPerInstruction;
-                    break;
-                }
-
-                case DW_LNS_advance_line:    line += getLEB128(debugLine.content, &counter);   break;
-                case DW_LNS_set_file:        file = getULEB128(debugLine.content, &counter);   break;
-                case DW_LNS_set_column:      column = getULEB128(debugLine.content, &counter); break;
-                case DW_LNS_negate_stmt:     isStmt = !isStmt;                                 break;
-                case DW_LNS_set_basic_block: basicBlock = true;                                break;
-
-                case DW_LNS_const_add_pc: {
-                    const uint8_t adjustedOpCode = 255 - opcodeBase;
-                    const uint8_t operationAdvance = adjustedOpCode / lineRange;
-                    address += minimumInstructionLength * ((opIndex + operationAdvance) / maximumOperationsPerInstruction);
-                    opIndex = (opIndex + operationAdvance) % maximumOperationsPerInstruction;
-                    break;
-                }
-
-                case DW_LNS_fixed_advance_pc: {
-                    opIndex = 0;
-                    address += *((uint16_t*) (debugLine.content + counter));
-                    counter += 2;
-                    break;
-                }
-
-                case DW_LNS_set_prologue_end:   prologueEnd = true;                            break;
-                case DW_LNS_set_epilogue_begin: epilogueBegin = true;                          break;
-                case DW_LNS_set_isa:            isa = getULEB128(debugLine.content, &counter); break;
-
-                default:
-                    for (uint64_t i = 0; i < stdOpcodeLengths.content[opCode - 1]; ++i) {
-                        getLEB128(debugLine.content, &counter);
-                    }
-                    break;
-            }
-        } else {
-            uint8_t adjustedOpCode   = opCode - opcodeBase;
-            uint8_t operationAdvance = adjustedOpCode / lineRange;
-            address += minimumInstructionLength * ((opIndex + operationAdvance) / maximumOperationsPerInstruction);
-            opIndex = (opIndex + operationAdvance) % maximumOperationsPerInstruction;
-            line += lineBase + (adjustedOpCode % lineRange);
-
-            va_list copy;
-            va_copy(copy, args);
-            cb((struct dwarf_lineInfo) {
-                address, line, column, isa, discriminator,
-                dwarf5_constructFileName(&files.content[file], &directories),
-                isStmt, basicBlock, endSequence, prologueEnd, epilogueBegin
-            }, copy);
-            va_end(copy);
-
-            basicBlock    = false;
-            prologueEnd   = false;
-            epilogueBegin = false;
-            discriminator = 0;
-        }
-    }
-
-    vector_uint8_destroy(&stdOpcodeLengths);
-    vector_fileAttribute_destroy(&files);
-    vector_fileAttribute_destroy(&directories);
-
+    self->specific.v5.directories = dwarf5_parseFileAttributes(self, counter);
+    self->specific.v5.files       = dwarf5_parseFileAttributes(self, counter);
     return true;
+}
+
+static inline void dwarf5_parser_destroy(struct dwarf_parser* self) {
+    vector_fileAttribute_destroy(&self->specific.v5.files);
+    vector_fileAttribute_destroy(&self->specific.v5.directories);
+}
+
+void dwarf5_parser_create(struct dwarf_parser* self) {
+    self->specific.v5 = (struct dwarf5_parser) {
+        .directories = vector_initializer,
+        .files       = vector_initializer
+    };
+    self->destroy     = dwarf5_parser_destroy;
+    self->parseHeader = dwarf5_parseLineProgramHeader;
+    self->getFileName = dwarf5_getFileName;
 }
