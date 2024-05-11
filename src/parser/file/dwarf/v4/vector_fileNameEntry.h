@@ -19,20 +19,13 @@
  * CallstackLibrary, see the file LICENSE.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-#ifndef dwarf_v4_parser_h
-#define dwarf_v4_parser_h
+#ifndef vector_fileNameEntry_h
+#define vector_fileNameEntry_h
 
-#include "vector_fileNameEntry.h"
+#include "fileNameEntry.h"
 
-#include "../vector_string.h"
+#include "../../../../../DC4C/vector.h"
 
-struct dwarf_parser;
+typedef_vector_light_named(dwarfFileEntry, struct dwarf_fileNameEntry);
 
-struct dwarf4_parser {
-    vector_string_t includeDirectories;
-    vector_dwarfFileEntry_t fileNames;
-};
-
-void dwarf4_parser_create(struct dwarf_parser* self);
-
-#endif /* dwarf_v4_parser_h */
+#endif /* vector_fileNameEntry_h */

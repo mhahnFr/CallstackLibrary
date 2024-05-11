@@ -147,6 +147,7 @@
 		BFC2D1782AC30BFA00BD4C0B /* callstack_frame.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = callstack_frame.h; sourceTree = "<group>"; };
 		BFC2D1792AC31E1300BD4C0B /* callstack_frame.c */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.c; path = callstack_frame.c; sourceTree = "<group>"; };
 		BFC579002B6E579300F53821 /* vector_pair_funcFile.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = vector_pair_funcFile.h; sourceTree = "<group>"; };
+		BFCA0A692BEF62E600C2D3F1 /* vector_fileNameEntry.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = vector_fileNameEntry.h; sourceTree = "<group>"; };
 		BFCC50C728F8454E00E2388D /* demangler.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; path = demangler.cpp; sourceTree = "<group>"; };
 		BFCC50C828F8454E00E2388D /* demangler.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = demangler.h; sourceTree = "<group>"; };
 		BFD2A03A2A659F4C007F4B81 /* LICENSE */ = {isa = PBXFileReference; lastKnownFileType = text; path = LICENSE; sourceTree = "<group>"; };
@@ -322,7 +323,6 @@
 				BFAD65422B5A717F00024242 /* dwarf_parser.c */,
 				BFAD631B2B5BD67900EE8E14 /* vector_string.h */,
 				BFAD631C2B5BD74100EE8E14 /* vector_uint8.h */,
-				BFAD631D2B5BD7FE00EE8E14 /* fileNameEntry.h */,
 				BFB227A12B5FD3930069E896 /* dwarf_lineInfo.h */,
 				BFF6F7522B60176B0064D068 /* vector_dwarf_lineInfo.h */,
 			);
@@ -332,6 +332,8 @@
 		BFB5C2B72BEA834F005D2EBA /* v4 */ = {
 			isa = PBXGroup;
 			children = (
+				BFAD631D2B5BD7FE00EE8E14 /* fileNameEntry.h */,
+				BFCA0A692BEF62E600C2D3F1 /* vector_fileNameEntry.h */,
 				BFB5C2B82BEA835B005D2EBA /* parser.h */,
 				BFB5C2B92BEA8CC8005D2EBA /* parser.c */,
 			);
