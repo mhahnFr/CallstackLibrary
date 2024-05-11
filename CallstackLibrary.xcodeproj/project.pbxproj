@@ -121,7 +121,6 @@
 		BFAD42AF2B592D2000ADB6AF /* macho_utils.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = macho_utils.h; sourceTree = "<group>"; };
 		BFAD63162B5BCC4B00EE8E14 /* macho_parser.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = macho_parser.h; sourceTree = "<group>"; };
 		BFAD63172B5BCC4B00EE8E14 /* macho_parser.c */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.c; path = macho_parser.c; sourceTree = "<group>"; };
-		BFAD631B2B5BD67900EE8E14 /* vector_string.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = vector_string.h; sourceTree = "<group>"; };
 		BFAD631C2B5BD74100EE8E14 /* vector_uint8.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = vector_uint8.h; sourceTree = "<group>"; };
 		BFAD631D2B5BD7FE00EE8E14 /* fileNameEntry.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = fileNameEntry.h; sourceTree = "<group>"; };
 		BFAD65412B5A717F00024242 /* dwarf_parser.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = dwarf_parser.h; sourceTree = "<group>"; };
@@ -208,7 +207,6 @@
 				BFB01C172B70E64E00AD0090 /* cache.c */,
 				BFABCB742B72421100790948 /* archive.h */,
 				BFABCB752B72421100790948 /* archive.c */,
-				BFAD6F5A2B7A175F0016D689 /* vector_string.h */,
 			);
 			path = macho;
 			sourceTree = "<group>";
@@ -286,6 +284,7 @@
 			children = (
 				BFAD631A2B5BD5B000EE8E14 /* dwarf */,
 				BF3031DF294C6C2300E8ADC5 /* macho */,
+				BFAD6F5A2B7A175F0016D689 /* vector_string.h */,
 				BF971B7D2A58827B006BFFBB /* binaryFile.h */,
 				BF971B7E2A58827B006BFFBB /* binaryFile.c */,
 				BFD2A0412A659F97007F4B81 /* vector_uint64.h */,
@@ -321,7 +320,6 @@
 				BFB7D8842BDBAC4700F62068 /* v5 */,
 				BFAD65412B5A717F00024242 /* dwarf_parser.h */,
 				BFAD65422B5A717F00024242 /* dwarf_parser.c */,
-				BFAD631B2B5BD67900EE8E14 /* vector_string.h */,
 				BFAD631C2B5BD74100EE8E14 /* vector_uint8.h */,
 				BFB227A12B5FD3930069E896 /* dwarf_lineInfo.h */,
 				BFF6F7522B60176B0064D068 /* vector_dwarf_lineInfo.h */,

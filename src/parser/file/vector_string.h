@@ -1,5 +1,5 @@
 /*
- * Callstack Library - Library creating human-readable call stacks.
+ * CallstackLibrary - Library creating human-readable call stacks.
  *
  * Copyright (C) 2024  mhahnFr
  *
@@ -19,20 +19,11 @@
  * CallstackLibrary, see the file LICENSE.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-#ifndef dwarf_v4_parser_h
-#define dwarf_v4_parser_h
+#ifndef vector_string_h
+#define vector_string_h
 
-#include "vector_fileNameEntry.h"
+#include <vector.h>
 
-#include "../../vector_string.h"
+typedef_vector_light_named(string, const char*);
 
-struct dwarf_parser;
-
-struct dwarf4_parser {
-    vector_string_t includeDirectories;
-    vector_dwarfFileEntry_t fileNames;
-};
-
-void dwarf4_parser_create(struct dwarf_parser* self);
-
-#endif /* dwarf_v4_parser_h */
+#endif /* vector_string_h */
