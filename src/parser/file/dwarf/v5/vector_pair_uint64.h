@@ -1,5 +1,5 @@
 /*
- * Callstack Library - Library creating human-readable call stacks.
+ * CallstackLibrary - Library creating human-readable call stacks.
  *
  * Copyright (C) 2024  mhahnFr
  *
@@ -22,9 +22,9 @@
 #ifndef vector_pair_uint64_h
 #define vector_pair_uint64_h
 
-#include "pair_uint64.h"
+#include <vector.h>
 
-#include "../../../../../DC4C/vector.h"
+#include "pair_uint64.h"
 
 typedef_vector_light_named(pair_uint64, pair_uint64_t);
 

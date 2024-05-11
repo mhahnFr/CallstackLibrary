@@ -1,5 +1,5 @@
 /*
- * Callstack Library - Library creating human-readable call stacks.
+ * CallstackLibrary - Library creating human-readable call stacks.
  *
  * Copyright (C) 2024  mhahnFr
  *
@@ -22,9 +22,9 @@
 #ifndef vector_fileNameEntry_h
 #define vector_fileNameEntry_h
 
-#include "fileNameEntry.h"
+#include <vector.h>
 
-#include "../../../../../DC4C/vector.h"
+#include "fileNameEntry.h"
 
 typedef_vector_light_named(dwarfFileEntry, struct dwarf_fileNameEntry);
 

@@ -1,5 +1,5 @@
 /*
- * Callstack Library - Library creating human-readable call stacks.
+ * CallstackLibrary - Library creating human-readable call stacks.
  *
  * Copyright (C) 2024  mhahnFr
  *
@@ -22,7 +22,9 @@
 #ifndef pair_uint64_h
 #define pair_uint64_h
 
-#include "../../../../../DC4C/pair.h"
+#include <stdint.h>
+
+#include <pair.h>
 
 typedef_pair_named(uint64, uint64_t, uint64_t);
 
