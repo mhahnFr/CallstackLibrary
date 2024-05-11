@@ -21,8 +21,8 @@
 
 #include "definitions.h"
 #include "parser.h"
+#include "vector_pair_uint64.h"
 
-#include "../vector_pair_uint64.h"
 #include "../dwarf_parser.h"
 
 static inline char* dwarf5_stringFromSection(uint64_t offset, uint64_t type, struct lcs_section debugLineStr, struct lcs_section debugStr) {

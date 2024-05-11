@@ -19,13 +19,11 @@
  * CallstackLibrary, see the file LICENSE.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-#ifndef vector_pair_uint64_h
-#define vector_pair_uint64_h
+#ifndef pair_uint64_h
+#define pair_uint64_h
 
-#include "pair_uint64.h"
+#include "../../../../../DC4C/pair.h"
 
-#include "../../../../DC4C/vector.h"
+typedef_pair_named(uint64, uint64_t, uint64_t);
 
-typedef_vector_light_named(pair_uint64, pair_uint64_t);
-
-#endif /* vector_pair_uint64_h */
+#endif /* pair_uint64_h */
