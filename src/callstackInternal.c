@@ -22,10 +22,12 @@
 #include <execinfo.h>
 #include <string.h>
 
+#include <callstack_defs.h>
+
 #include "callstackInternal.h"
 #include "lcs_builtins.h"
+
 #include "parser/callstack_parser.h"
-#include "../include/callstack_defs.h"
 
 void callstack_createWithBacktrace(struct callstack * self,
                                    void * trace[], size_t traceLength) {

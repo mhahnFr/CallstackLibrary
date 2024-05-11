@@ -19,12 +19,12 @@
  * CallstackLibrary, see the file LICENSE.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-#include "callstackInternal.h"
-#include "lcs_builtins.h"
-
 #include <execinfo.h>
 #include <stdlib.h>
 #include <string.h>
+
+#include "callstackInternal.h"
+#include "lcs_builtins.h"
 
 struct callstack* callstack_new(void) {
     return callstack_newWithAddress(lcs_returnAddress(0));

@@ -1,5 +1,5 @@
 /*
- * Callstack Library - Library creating human-readable call stacks.
+ * CallstackLibrary - Library creating human-readable call stacks.
  *
  * Copyright (C) 2023 - 2024  mhahnFr
  *
@@ -21,7 +21,7 @@
 
 #include <string.h>
 
-#include "../include/callstack_frame.h"
+#include <callstack_frame.h>
 
 struct callstack_frame * callstack_frame_copy(struct callstack_frame * self) {
     struct callstack_frame * toReturn = callstack_frame_new();
