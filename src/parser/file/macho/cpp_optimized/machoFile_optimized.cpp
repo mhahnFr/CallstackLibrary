@@ -1,20 +1,22 @@
 /*
- * Callstack Library - Library creating human-readable call stacks.
+ * CallstackLibrary - Library creating human-readable call stacks.
  *
  * Copyright (C) 2024  mhahnFr
  *
- * This file is part of the CallstackLibrary. This library is free software:
- * you can redistribute it and/or modify it under the terms of the
- * GNU General Public License as published by the Free Software Foundation,
- * either version 3 of the License, or (at your option) any later version.
+ * This file is part of the CallstackLibrary.
  *
- * This library is distributed in the hope that it will be useful,
+ * The CallstackLibrary is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation, either version 3 of the License, or
+ * (at your option) any later version.
+ *
+ * The CallstackLibrary is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
  * GNU General Public License for more details.
  *
- * You should have received a copy of the GNU General Public License along with
- * this library, see the file LICENSE.  If not, see <https://www.gnu.org/licenses/>.
+ * You should have received a copy of the GNU General Public License along with the
+ * CallstackLibrary, see the file LICENSE.  If not, see <https://www.gnu.org/licenses/>.
  */
 
 #include "../machoFile.h"
@@ -77,7 +79,7 @@ public:
      * @return the optionally deducted debug information
      */
     inline auto getDebugInfo(void* addr) -> optional_debugInfo_t {
-        const uint64_t address = (reinterpret_cast<uint64_t>(addr) - reinterpret_cast<uint64_t>(self._.startAddress)) 
+        const uint64_t address = (reinterpret_cast<uintptr_t>(addr) - reinterpret_cast<uintptr_t>(self._.startAddress))
                                + (self.inMemory ? self.text_vmaddr : self.addressOffset);
         auto it = functions.lower_bound(address);
         if (it == functions.end()) {
