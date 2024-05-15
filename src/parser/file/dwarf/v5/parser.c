@@ -98,14 +98,9 @@ static inline uint64_t dwarf5_readTimestamp(void* buffer, size_t* counter, uint6
             break;
 
         case DW_FORM_block: {
-//            const uint64_t length = getULEB128(buffer, counter);
-//            uint8_t buffer[length];
-//            for (uint64_t i = 0; i < length; ++i) {
-//                buffer[i] = buffer + *counter + i;
-//            }
-//            *counter += length;
-            abort();
-//            toReturn = <#buffer#>;
+            const uint64_t length = getULEB128(buffer, counter);
+            *counter += length;
+            toReturn = 0; // Propriatary timestamp format not supported -> skipped.  - mhahnFr
             break;
         }
 
@@ -177,8 +172,13 @@ static inline void dwarf5_consumeSome(void* buffer, size_t* counter, uint64_t ty
             break;
         }
 
+        case DW_FORM_flag:
+        case DW_FORM_strx1:
         case DW_FORM_data1:  ++(*counter);   break;
+        case DW_FORM_strx2:
         case DW_FORM_data2:  *counter += 2;  break;
+        case DW_FORM_strx3:  *counter += 3;  break;
+        case DW_FORM_strx4:
         case DW_FORM_data4:  *counter += 4;  break;
         case DW_FORM_data8:  *counter += 8;  break;
         case DW_FORM_data16: *counter += 16; break;
@@ -192,16 +192,13 @@ static inline void dwarf5_consumeSome(void* buffer, size_t* counter, uint64_t ty
             break;
 
         case DW_FORM_sdata: getLEB128(buffer, counter);  break;
+
+        case DW_FORM_strx:
         case DW_FORM_udata: getULEB128(buffer, counter); break;
 
-        case DW_FORM_sec_offset:
-        case DW_FORM_flag:
-        case DW_FORM_strx:
-        case DW_FORM_strx1:
-        case DW_FORM_strx2:
-        case DW_FORM_strx3:
-        case DW_FORM_strx4: abort();
+        case DW_FORM_sec_offset: *counter += bit64 ? 8 : 4; break;
 
+        default: abort();
     }
 }
 
