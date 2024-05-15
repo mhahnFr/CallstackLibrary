@@ -75,7 +75,7 @@ static inline struct lcs_section elfFile_sectionToLCSSection(void* buffer, Elf64
     };
 }
 
-static inline bool elfFile_parseFile64(struct elfFile* self, Elf64_Ehdr* buffer, dwarf_line_callback cb, void* args) {
+static inline bool elfFile_parseFile64(struct elfFile* self, Elf64_Ehdr* buffer) {
     if (buffer->e_shoff == 0) return false;
 
     char* sectStrBegin = elfFile_loadSectionStrtab64(buffer);
@@ -128,7 +128,7 @@ static inline bool elfFile_parseFile64(struct elfFile* self, Elf64_Ehdr* buffer,
     return elfFile_parseSymtab64(self, symtab, (void*) buffer + strtab->sh_offset, buffer);
 }
 
-static inline bool elfFile_parseFile32(struct elfFile* self, Elf32_Ehdr* buffer, dwarf_line_callback cb, void* args) {
+static inline bool elfFile_parseFile32(struct elfFile* self, Elf32_Ehdr* buffer) {
     // TODO: Implement
     return false;
 }
@@ -139,8 +139,8 @@ bool elfFile_parseFile(struct elfFile* self, void* buffer, dwarf_line_callback c
     bool success = false;
     unsigned char* e_ident = buffer;
     switch (e_ident[EI_CLASS]) {
-        case ELFCLASS32: success = elfFile_parseFile32(self, buffer, cb, args); break;
-        case ELFCLASS64: success = elfFile_parseFile64(self, buffer, cb, args); break;
+        case ELFCLASS32: success = elfFile_parseFile32(self, buffer); break;
+        case ELFCLASS64: success = elfFile_parseFile64(self, buffer); break;
     }
 
     if (success && self->debugLine.size > 0) {
