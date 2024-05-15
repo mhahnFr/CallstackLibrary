@@ -79,7 +79,7 @@ public:
 
         const uint64_t translated = reinterpret_cast<uint64_t>(address) - reinterpret_cast<uint64_t>(self._.startAddress);
         auto it = functions.lower_bound(translated);
-        if (it == functions.end()) {
+        if (it == functions.end() || it->first > translated || it->first + it->second.length < translated) {
             return info;
         }
         info.has_value = true;
