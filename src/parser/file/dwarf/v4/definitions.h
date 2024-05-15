@@ -19,24 +19,13 @@
  * CallstackLibrary, see the file LICENSE.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-#ifndef dwarf_v5_definitions_h
-#define dwarf_v5_definitions_h
+#ifndef dwarf_v4_definitions_h
+#define dwarf_v4_definitions_h
 
-#include "../v4/definitions.h"
+#include "../definitions.h"
 
-#define DW_FORM_strx      0x1a
-#define DW_FORM_strp_sup  0x1d
-#define DW_FORM_data16    0x1e
-#define DW_FORM_line_strp 0x1f
-#define DW_FORM_strx1     0x25
-#define DW_FORM_strx2     0x26
-#define DW_FORM_strx3     0x27
-#define DW_FORM_strx4     0x28
+#define DW_LNE_define_file 0x03
 
-#define DW_LNCT_path            0x1
-#define DW_LNCT_directory_index 0x2
-#define DW_LNCT_timestamp       0x3
-#define DW_LNCT_size            0x4
-#define DW_LNCT_MD5             0x5
+#define DW_FORM_sec_offset 0x17
 
-#endif /* dwarf_v5_definitions_h */
+#endif /* dwarf_v4_definitions_h */
