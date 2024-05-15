@@ -82,7 +82,8 @@ public:
         const uint64_t address = (reinterpret_cast<uintptr_t>(addr) - reinterpret_cast<uintptr_t>(self._.startAddress))
                                + (self.inMemory ? self.text_vmaddr : self.addressOffset);
         auto it = functions.lower_bound(address);
-        if (it == functions.end()) {
+        if (it == functions.end()
+            || (it->second.first.length != 0 && it->second.first.startAddress + it->second.first.length < address)) {
             return { .has_value = false };
         }
         optional_debugInfo_t info = { .has_value = false };

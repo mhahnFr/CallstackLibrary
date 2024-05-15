@@ -81,7 +81,8 @@ optional_debugInfo_t machoFile_getDebugInfo(struct machoFile* me, void* address)
         }
     })
     
-    if (closest == NULL) {
+    if (closest == NULL
+        || (closest->first.length != 0 && closest->first.startAddress + closest->first.length < searchAddress)) {
         return (optional_debugInfo_t) { .has_value = false };
     }
     optional_debugInfo_t info = { .has_value = false };
