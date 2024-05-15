@@ -77,7 +77,7 @@ public:
         optional_debugInfo_t info;
         info.has_value = false;
 
-        const uint64_t translated = reinterpret_cast<uint64_t>(address) - reinterpret_cast<uint64_t>(self._.startAddress);
+        const uint64_t translated = reinterpret_cast<uintptr_t>(address) - reinterpret_cast<uintptr_t>(self._.startAddress);
         auto it = functions.lower_bound(translated);
         if (it == functions.end() || it->first > translated || it->first + it->second.length < translated) {
             return info;

@@ -76,7 +76,7 @@ optional_debugInfo_t elfFile_getDebugInfo(struct elfFile* me, void* address) {
 
     optional_debugInfo_t toReturn = { .has_value = false };
 
-    const uint64_t translated = (uint64_t) address - (uint64_t) me->_.startAddress;
+    const uint64_t translated = (uintptr_t) address - (uintptr_t) me->_.startAddress;
     struct function* closest = NULL;
     vector_iterate(struct function, &self->functions, {
         if (closest == NULL && element->startAddress <= translated) {
