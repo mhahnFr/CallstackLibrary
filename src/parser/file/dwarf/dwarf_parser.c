@@ -19,6 +19,7 @@
  * CallstackLibrary, see the file LICENSE.  If not, see <https://www.gnu.org/licenses/>.
  */
 
+#include "definitions.h"
 #include "dwarf_parser.h"
 
 uint64_t getULEB128(void* begin, size_t* counter) {
@@ -83,7 +84,7 @@ static inline bool dwarf_parser_parse(struct dwarf_parser* self, size_t counter,
             const uint64_t length = getULEB128(self->debugLine.content, &counter);
             const uint8_t  actualOpCode = *((uint8_t*) (self->debugLine.content + counter++));
             switch (actualOpCode) {
-                case 1: {
+                case DW_LNE_end_sequence: {
                     endSequence = true;
                     self->cb((struct dwarf_lineInfo) {
                         address, line, column, isa, discriminator,
@@ -98,7 +99,7 @@ static inline bool dwarf_parser_parse(struct dwarf_parser* self, size_t counter,
                     break;
                 }
                     
-                case 2: {
+                case DW_LNE_set_address: {
                     const size_t newAddress = *((size_t*) (self->debugLine.content + counter));
                     counter += sizeof(size_t);
                     address = newAddress;
@@ -106,16 +107,16 @@ static inline bool dwarf_parser_parse(struct dwarf_parser* self, size_t counter,
                     break;
                 }
                     
-//                case 3: // TODO: Add another file
+//                case DW_LNE_define_file: // TODO: Add another file
 //                    break;
                     
-                case 4: discriminator = getULEB128(self->debugLine.content, &counter); break;
+                case DW_LNE_set_discriminator: discriminator = getULEB128(self->debugLine.content, &counter); break;
 
                 default: counter += length - 1; break;
             }
         } else if (opCode < self->opCodeBase) {
             switch (opCode) {
-                case 1: {
+                case DW_LNS_copy: {
                     self->cb((struct dwarf_lineInfo) {
                         address, line, column, isa, discriminator,
                         self->getFileName(self, file),
@@ -127,20 +128,20 @@ static inline bool dwarf_parser_parse(struct dwarf_parser* self, size_t counter,
                     break;
                 }
                     
-                case 2: {
+                case DW_LNS_advance_pc: {
                     const uint64_t operationAdvance = getULEB128(self->debugLine.content, &counter);
                     address += self->minimumInstructionLength * ((opIndex + operationAdvance) / self->maximumOperationsPerInstruction);
                     opIndex = (opIndex + operationAdvance) % self->maximumOperationsPerInstruction;
                     break;
                 }
                     
-                case 3: line += getLEB128(self->debugLine.content, &counter);   break;
-                case 4: file = getULEB128(self->debugLine.content, &counter);   break;
-                case 5: column = getULEB128(self->debugLine.content, &counter); break;
-                case 6: isStmt = !isStmt;                                       break;
-                case 7: basicBlock = true;                                      break;
+                case DW_LNS_advance_line:    line += getLEB128(self->debugLine.content, &counter);   break;
+                case DW_LNS_set_file:        file = getULEB128(self->debugLine.content, &counter);   break;
+                case DW_LNS_set_column:      column = getULEB128(self->debugLine.content, &counter); break;
+                case DW_LNS_negate_stmt:     isStmt = !isStmt;                                       break;
+                case DW_LNS_set_basic_block: basicBlock = true;                                      break;
 
-                case 8: {
+                case DW_LNS_const_add_pc: {
                     const uint8_t adjustedOpCode   = 255 - self->opCodeBase;
                     const uint8_t operationAdvance = adjustedOpCode / self->lineRange;
 
@@ -149,16 +150,16 @@ static inline bool dwarf_parser_parse(struct dwarf_parser* self, size_t counter,
                     break;
                 }
                     
-                case 9: {
+                case DW_LNS_fixed_advance_pc: {
                     opIndex = 0;
                     address += *((uint16_t*) (self->debugLine.content + counter));
                     counter += 2;
                     break;
                 }
                     
-                case 10: prologueEnd = true;                                  break;
-                case 11: epilogueBegin = true;                                break;
-                case 12: isa = getULEB128(self->debugLine.content, &counter); break;
+                case DW_LNS_set_prologue_end:   prologueEnd = true;                                  break;
+                case DW_LNS_set_epilogue_begin: epilogueBegin = true;                                break;
+                case DW_LNS_set_isa:            isa = getULEB128(self->debugLine.content, &counter); break;
 
                 default:
                     for (uint64_t i = 0; i < self->stdOpcodeLengths.content[opCode - 1]; ++i) {
