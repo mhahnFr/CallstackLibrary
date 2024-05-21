@@ -19,8 +19,8 @@
  * CallstackLibrary, see the file LICENSE.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-#include "definitions.h"
 #include "dwarf_parser.h"
+#include "v3/definitions.h"
 
 uint64_t getULEB128(void* begin, size_t* counter) {
     uint64_t result = 0,

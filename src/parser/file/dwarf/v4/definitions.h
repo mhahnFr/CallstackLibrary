@@ -1,5 +1,5 @@
 /*
- * Callstack Library - Library creating human-readable call stacks.
+ * CallstackLibrary - Library creating human-readable call stacks.
  *
  * Copyright (C) 2024  mhahnFr
  *
@@ -22,9 +22,7 @@
 #ifndef dwarf_v4_definitions_h
 #define dwarf_v4_definitions_h
 
-#include "../definitions.h"
-
-#define DW_LNE_define_file 0x03
+#include "../v3/definitions.h"
 
 #define DW_FORM_sec_offset 0x17
 
