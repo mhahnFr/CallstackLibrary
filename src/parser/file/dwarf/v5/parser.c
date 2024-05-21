@@ -254,13 +254,13 @@ static inline optional_vector_fileAttribute_t dwarf5_parseFileAttributes(struct 
                 }
 
                 case DW_LNCT_MD5:
-                    // TODO: Check
-                    attribute.md5 = dwarf5_readMD5(self->debugLine.content, counter); // Always DW_FROM_data16
+                    if (element->second != DW_FORM_data16) goto fail;
+                    attribute.md5 = dwarf5_readMD5(self->debugLine.content, counter);
                     break;
 
                 default:
                     if (!dwarf5_consumeSome(self->debugLine.content, counter, element->second, self->bit64)) goto fail;
-                    break; // Skip as defined by the paired value
+                    break;
             }
         })
         vector_fileAttribute_push_back(&attributes, attribute);
