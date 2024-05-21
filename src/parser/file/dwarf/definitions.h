@@ -35,7 +35,6 @@
 #define DW_LNE_end_sequence      0x01
 #define DW_LNE_set_address       0x02
 #define DW_LNE_define_file       0x03
-#define DW_LNE_set_discriminator 0x04
 
 #define DW_FORM_addr       0x01
 #define DW_FORM_block2     0x03

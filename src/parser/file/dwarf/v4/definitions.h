@@ -24,6 +24,8 @@
 
 #include "../v3/definitions.h"
 
+#define DW_LNE_set_discriminator 0x04
+
 #define DW_FORM_sec_offset 0x17
 
 #endif /* dwarf_v4_definitions_h */
