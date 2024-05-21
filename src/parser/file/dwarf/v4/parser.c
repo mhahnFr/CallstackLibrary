@@ -1,5 +1,5 @@
 /*
- * Callstack Library - Library creating human-readable call stacks.
+ * CallstackLibrary - Library creating human-readable call stacks.
  *
  * Copyright (C) 2024  mhahnFr
  *
@@ -35,7 +35,9 @@ static inline bool dwarf4_parseLineProgramHeader(struct dwarf_parser* self, size
     (void) headerLength;
 
     self->minimumInstructionLength        = *((uint8_t*) (self->debugLine.content + (*counter)++));
-    self->maximumOperationsPerInstruction = *((uint8_t*) (self->debugLine.content + (*counter)++));
+    if (self->version == 4) {
+        self->maximumOperationsPerInstruction = *((uint8_t*) (self->debugLine.content + (*counter)++));
+    }
     self->defaultIsStmt                   = *((uint8_t*) (self->debugLine.content + (*counter)++));
     self->lineBase                        = *((int8_t*)  (self->debugLine.content + (*counter)++));
     self->lineRange                       = *((uint8_t*) (self->debugLine.content + (*counter)++));

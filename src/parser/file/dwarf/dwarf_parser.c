@@ -1,5 +1,5 @@
 /*
- * Callstack Library - Library creating human-readable call stacks.
+ * CallstackLibrary - Library creating human-readable call stacks.
  *
  * Copyright (C) 2024  mhahnFr
  *
@@ -71,7 +71,7 @@ static inline bool dwarf_parser_parse(struct dwarf_parser* self, size_t counter,
              column        = 0,
              isa           = 0,
              discriminator = 0;
-    
+
     bool isStmt         = self->defaultIsStmt,
           basicBlock    = false,
           endSequence   = false,
@@ -110,7 +110,11 @@ static inline bool dwarf_parser_parse(struct dwarf_parser* self, size_t counter,
 //                case DW_LNE_define_file: // TODO: Add another file
 //                    break;
                     
-                case DW_LNE_set_discriminator: discriminator = getULEB128(self->debugLine.content, &counter); break;
+                case DW_LNE_set_discriminator:
+                    if (self->version > 3) {
+                        discriminator = getULEB128(self->debugLine.content, &counter);
+                        break;
+                    }
 
                 default: counter += length - 1; break;
             }
@@ -130,8 +134,12 @@ static inline bool dwarf_parser_parse(struct dwarf_parser* self, size_t counter,
                     
                 case DW_LNS_advance_pc: {
                     const uint64_t operationAdvance = getULEB128(self->debugLine.content, &counter);
-                    address += self->minimumInstructionLength * ((opIndex + operationAdvance) / self->maximumOperationsPerInstruction);
-                    opIndex = (opIndex + operationAdvance) % self->maximumOperationsPerInstruction;
+                    if (self->version > 3) {
+                        address += self->minimumInstructionLength * ((opIndex + operationAdvance) / self->maximumOperationsPerInstruction);
+                        opIndex = (opIndex + operationAdvance) % self->maximumOperationsPerInstruction;
+                    } else {
+                        address += self->minimumInstructionLength * operationAdvance;
+                    }
                     break;
                 }
                     
@@ -142,11 +150,15 @@ static inline bool dwarf_parser_parse(struct dwarf_parser* self, size_t counter,
                 case DW_LNS_set_basic_block: basicBlock = true;                                      break;
 
                 case DW_LNS_const_add_pc: {
-                    const uint8_t adjustedOpCode   = 255 - self->opCodeBase;
-                    const uint8_t operationAdvance = adjustedOpCode / self->lineRange;
+                    const uint8_t adjustedOpCode = 255 - self->opCodeBase;
+                    if (self->version > 3) {
+                        const uint8_t operationAdvance = adjustedOpCode / self->lineRange;
 
-                    address += self->minimumInstructionLength * ((opIndex + operationAdvance) / self->maximumOperationsPerInstruction);
-                    opIndex  = (opIndex + operationAdvance) % self->maximumOperationsPerInstruction;
+                        address += self->minimumInstructionLength * ((opIndex + operationAdvance) / self->maximumOperationsPerInstruction);
+                        opIndex  = (opIndex + operationAdvance) % self->maximumOperationsPerInstruction;
+                    } else {
+                        address += (adjustedOpCode / self->lineRange) * self->minimumInstructionLength;
+                    }
                     break;
                 }
                     
@@ -168,12 +180,16 @@ static inline bool dwarf_parser_parse(struct dwarf_parser* self, size_t counter,
                     break;
             }
         } else {
-            uint8_t adjustedOpCode   = opCode - self->opCodeBase;
-            uint8_t operationAdvance = adjustedOpCode / self->lineRange;
+            uint8_t adjustedOpCode = opCode - self->opCodeBase;
+            if (self->version > 3) {
+                uint8_t operationAdvance = adjustedOpCode / self->lineRange;
 
-            address += self->minimumInstructionLength * ((opIndex + operationAdvance) / self->maximumOperationsPerInstruction);
-            opIndex  = (opIndex + operationAdvance) % self->maximumOperationsPerInstruction;
-            line    += self->lineBase + (adjustedOpCode % self->lineRange);
+                address += self->minimumInstructionLength * ((opIndex + operationAdvance) / self->maximumOperationsPerInstruction);
+                opIndex  = (opIndex + operationAdvance) % self->maximumOperationsPerInstruction;
+            } else {
+                address += (adjustedOpCode / self->lineRange) * self->minimumInstructionLength;
+            }
+            line += self->lineBase + (adjustedOpCode % self->lineRange);
 
             self->cb((struct dwarf_lineInfo) {
                 address, line, column, isa, discriminator,
@@ -230,6 +246,7 @@ bool dwarf_parseLineProgram(struct lcs_section debugLine,
         .stdOpcodeLengths = vector_initializer
     };
     switch (version) {
+        case 3:
         case 4: dwarf4_parser_create(&parser); break;
         case 5: dwarf5_parser_create(&parser); break;
 
