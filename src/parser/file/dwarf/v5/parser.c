@@ -21,6 +21,7 @@
 
 #include "definitions.h"
 #include "optional_uint64_t.h"
+#include "optional_vector_fileAttribute.h"
 #include "parser.h"
 #include "vector_pair_uint64.h"
 
@@ -204,7 +205,7 @@ static inline bool dwarf5_consumeSome(void* buffer, size_t* counter, uint64_t ty
     return true;
 }
 
-static inline vector_fileAttribute_t dwarf5_parseFileAttributes(struct dwarf_parser* self, size_t* counter) {
+static inline optional_vector_fileAttribute_t dwarf5_parseFileAttributes(struct dwarf_parser* self, size_t* counter) {
     const uint8_t entryFormatCount = *((uint8_t*) (self->debugLine.content + (*counter)++));
     vector_pair_uint64_t entryFormats = vector_initializer;
     vector_pair_uint64_reserve(&entryFormats, entryFormatCount);
@@ -231,17 +232,26 @@ static inline vector_fileAttribute_t dwarf5_parseFileAttributes(struct dwarf_par
                     attribute.path = dwarf5_readString(self->debugLine.content, counter, element->second, self->bit64, self->debugLineStr, self->debugStr);
                     break;
 
-                case DW_LNCT_directory_index:
-                    attribute.index = dwarf5_readIndex(self->debugLine.content, counter, element->second).value;
+                case DW_LNCT_directory_index: {
+                    optional_uint64_t value = dwarf5_readIndex(self->debugLine.content, counter, element->second);
+                    if (!value.has_value) goto fail;
+                    attribute.index = value.value;
                     break;
+                }
 
-                case DW_LNCT_timestamp:
-                    attribute.timestamp = dwarf5_readTimestamp(self->debugLine.content, counter, element->second).value;
+                case DW_LNCT_timestamp: {
+                    optional_uint64_t value = dwarf5_readTimestamp(self->debugLine.content, counter, element->second);
+                    if (!value.has_value) goto fail;
+                    attribute.timestamp = value.value;
                     break;
+                }
 
-                case DW_LNCT_size:
-                    attribute.size = dwarf5_readSize(self->debugLine.content, counter, element->second).value;
+                case DW_LNCT_size: {
+                    optional_uint64_t value = dwarf5_readSize(self->debugLine.content, counter, element->second);
+                    if (!value.has_value) goto fail;
+                    attribute.size = value.value;
                     break;
+                }
 
                 case DW_LNCT_MD5:
                     // TODO: Check
@@ -249,7 +259,7 @@ static inline vector_fileAttribute_t dwarf5_parseFileAttributes(struct dwarf_par
                     break;
 
                 default:
-                    dwarf5_consumeSome(self->debugLine.content, counter, element->second, self->bit64);
+                    if (!dwarf5_consumeSome(self->debugLine.content, counter, element->second, self->bit64)) goto fail;
                     break; // Skip as defined by the paired value
             }
         })
@@ -257,7 +267,13 @@ static inline vector_fileAttribute_t dwarf5_parseFileAttributes(struct dwarf_par
     }
     vector_pair_uint64_destroy(&entryFormats);
 
-    return attributes;
+    return (optional_vector_fileAttribute_t) { true, attributes };
+
+fail:
+    vector_pair_uint64_destroy(&entryFormats);
+    vector_fileAttribute_destroy(&attributes);
+
+    return (optional_vector_fileAttribute_t) { .has_value = false };
 }
 
 static inline char* dwarf5_constructFileName(const struct fileAttribute* file, const vector_fileAttribute_t* directories) {
@@ -306,8 +322,17 @@ static inline bool dwarf5_parseLineProgramHeader(struct dwarf_parser* self, size
         vector_uint8_push_back(&self->stdOpcodeLengths, *((uint8_t*) (self->debugLine.content + (*counter)++)));
     }
 
-    self->specific.v5.directories = dwarf5_parseFileAttributes(self, counter);
-    self->specific.v5.files       = dwarf5_parseFileAttributes(self, counter);
+    optional_vector_fileAttribute_t maybeDirs = dwarf5_parseFileAttributes(self, counter);
+    if (!maybeDirs.has_value) {
+        return false;
+    }
+    self->specific.v5.directories = maybeDirs.value;
+
+    optional_vector_fileAttribute_t maybeFiles = dwarf5_parseFileAttributes(self, counter);
+    if (!maybeFiles.has_value) {
+        return false;
+    }
+    self->specific.v5.files = maybeFiles.value;
     return true;
 }
 
