@@ -144,6 +144,7 @@
 		BFB7D8852BDBAC5600F62068 /* definitions.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = definitions.h; sourceTree = "<group>"; };
 		BFB913412B65005500484DA2 /* lcs_stdio.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = lcs_stdio.h; sourceTree = "<group>"; };
 		BFBD33F92BFC8FCD000FED32 /* optional_uint64_t.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = optional_uint64_t.h; sourceTree = "<group>"; };
+		BFBD33FA2BFC952A000FED32 /* optional_vector_fileAttribute.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = optional_vector_fileAttribute.h; sourceTree = "<group>"; };
 		BFC2D1782AC30BFA00BD4C0B /* callstack_frame.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = callstack_frame.h; sourceTree = "<group>"; };
 		BFC2D1792AC31E1300BD4C0B /* callstack_frame.c */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.c; path = callstack_frame.c; sourceTree = "<group>"; };
 		BFC326812BF4D38C00EE358E /* definitions.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = definitions.h; sourceTree = "<group>"; };
@@ -354,6 +355,7 @@
 				BFB32CF12BDBEBEF008F5448 /* fileAttribute.h */,
 				BFB32CF22BDBEC66008F5448 /* vector_fileAttribute.h */,
 				BFBD33F92BFC8FCD000FED32 /* optional_uint64_t.h */,
+				BFBD33FA2BFC952A000FED32 /* optional_vector_fileAttribute.h */,
 			);
 			path = v5;
 			sourceTree = "<group>";
