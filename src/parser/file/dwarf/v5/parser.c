@@ -20,6 +20,7 @@
  */
 
 #include "definitions.h"
+#include "optional_uint64_t.h"
 #include "parser.h"
 #include "vector_pair_uint64.h"
 
@@ -59,7 +60,7 @@ static inline char* dwarf5_readString(void*    buffer,
     return dwarf5_stringFromSection(offset, type, debugLineStr, debugStr);
 }
 
-static inline uint64_t dwarf5_readIndex(void* buffer, size_t* counter, uint64_t type) {
+static inline optional_uint64_t dwarf5_readIndex(void* buffer, size_t* counter, uint64_t type) {
     uint64_t toReturn;
     switch (type) {
         case DW_FORM_data1:
@@ -75,12 +76,12 @@ static inline uint64_t dwarf5_readIndex(void* buffer, size_t* counter, uint64_t 
             toReturn = getULEB128(buffer, counter);
             break;
 
-        default: abort();
+        default: return (optional_uint64_t) { .has_value = false };
     }
-    return toReturn;
+    return (optional_uint64_t) { true, toReturn };
 }
 
-static inline uint64_t dwarf5_readTimestamp(void* buffer, size_t* counter, uint64_t type) {
+static inline optional_uint64_t dwarf5_readTimestamp(void* buffer, size_t* counter, uint64_t type) {
     uint64_t toReturn;
     switch (type) {
         case DW_FORM_udata:
@@ -104,12 +105,12 @@ static inline uint64_t dwarf5_readTimestamp(void* buffer, size_t* counter, uint6
             break;
         }
 
-        default: abort();
+        default: return (optional_uint64_t) { .has_value = false };
     }
-    return toReturn;
+    return (optional_uint64_t) { true, toReturn };
 }
 
-static inline uint64_t dwarf5_readSize(void* buffer, size_t* counter, uint64_t type) {
+static inline optional_uint64_t dwarf5_readSize(void* buffer, size_t* counter, uint64_t type) {
     uint64_t toReturn;
     switch (type) {
         case DW_FORM_udata:
@@ -135,9 +136,9 @@ static inline uint64_t dwarf5_readSize(void* buffer, size_t* counter, uint64_t t
             *counter += 8;
             break;
 
-        default: abort();
+        default: return (optional_uint64_t) { .has_value = false };
     }
-    return toReturn;
+    return (optional_uint64_t) { true, toReturn };
 }
 
 static inline uint8_t* dwarf5_readMD5(void* buffer, size_t* counter) {
@@ -146,7 +147,7 @@ static inline uint8_t* dwarf5_readMD5(void* buffer, size_t* counter) {
     return toReturn;
 }
 
-static inline void dwarf5_consumeSome(void* buffer, size_t* counter, uint64_t type, bool bit64) {
+static inline bool dwarf5_consumeSome(void* buffer, size_t* counter, uint64_t type, bool bit64) {
     switch (type) {
         case DW_FORM_block: {
             const uint64_t length = getULEB128(buffer, counter);
@@ -198,8 +199,9 @@ static inline void dwarf5_consumeSome(void* buffer, size_t* counter, uint64_t ty
 
         case DW_FORM_sec_offset: *counter += bit64 ? 8 : 4; break;
 
-        default: abort();
+        default: return false;
     }
+    return true;
 }
 
 static inline vector_fileAttribute_t dwarf5_parseFileAttributes(struct dwarf_parser* self, size_t* counter) {
@@ -230,15 +232,15 @@ static inline vector_fileAttribute_t dwarf5_parseFileAttributes(struct dwarf_par
                     break;
 
                 case DW_LNCT_directory_index:
-                    attribute.index = dwarf5_readIndex(self->debugLine.content, counter, element->second);
+                    attribute.index = dwarf5_readIndex(self->debugLine.content, counter, element->second).value;
                     break;
 
                 case DW_LNCT_timestamp:
-                    attribute.timestamp = dwarf5_readTimestamp(self->debugLine.content, counter, element->second);
+                    attribute.timestamp = dwarf5_readTimestamp(self->debugLine.content, counter, element->second).value;
                     break;
 
                 case DW_LNCT_size:
-                    attribute.size = dwarf5_readSize(self->debugLine.content, counter, element->second);
+                    attribute.size = dwarf5_readSize(self->debugLine.content, counter, element->second).value;
                     break;
 
                 case DW_LNCT_MD5:
