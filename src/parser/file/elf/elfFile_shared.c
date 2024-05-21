@@ -42,10 +42,15 @@ void elfFile_create(struct elfFile* self) {
 }
 
 static inline char* elfFile_loadSectionStrtab64(Elf64_Ehdr* header) {
-    // TODO: e_shstrndx special case
-    const uint16_t index = header->e_shstrndx;
+    uint16_t index = header->e_shstrndx;
     if (index == SHN_UNDEF) {
         return NULL;
+    }
+    if (index == SHN_XINDEX) {
+        if (header->e_shoff == 0) {
+            return NULL;
+        }
+        index = ((Elf64_Shdr*) ((void*) header + header->e_shoff))->sh_link;
     }
     Elf64_Shdr* sect = (void*) header + header->e_shoff + index * header->e_shentsize;
     return (void*) header + sect->sh_offset;
@@ -75,6 +80,18 @@ static inline struct lcs_section elfFile_sectionToLCSSection(void* buffer, Elf64
     };
 }
 
+static inline uint64_t elfFile_loadShnum64(Elf64_Ehdr* buffer) {
+    uint64_t shnum = buffer->e_shnum;
+
+    if (shnum == 0) {
+        if (buffer->e_shoff == 0) {
+            return shnum;
+        }
+        shnum = ((Elf64_Shdr*) ((void*) buffer + buffer->e_shoff))->sh_size;
+    }
+    return shnum;
+}
+
 static inline bool elfFile_parseFile64(struct elfFile* self, Elf64_Ehdr* buffer) {
     if (buffer->e_shoff == 0) return false;
 
@@ -82,12 +99,12 @@ static inline bool elfFile_parseFile64(struct elfFile* self, Elf64_Ehdr* buffer)
     if (sectStrBegin == NULL) return false;
 
     void* sectBegin = (void*) buffer + buffer->e_shoff;
-    // TODO: e_shnum special case
     Elf64_Shdr* strtab   = NULL,
               * symtab   = NULL,
               * dystrtab = NULL,
               * dysymtab = NULL;
-    for (uint16_t i = 0; i < buffer->e_shnum; ++i) {
+    uint16_t shnum = elfFile_loadShnum64(buffer);
+    for (uint16_t i = 0; i < shnum; ++i) {
         Elf64_Shdr* current = sectBegin + i * buffer->e_shentsize;
         if (strcmp(".debug_line", sectStrBegin + current->sh_name) == 0) {
             self->debugLine = elfFile_sectionToLCSSection(buffer, current);
