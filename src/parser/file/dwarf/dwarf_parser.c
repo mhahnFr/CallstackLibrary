@@ -77,7 +77,7 @@ static inline bool dwarf_parser_parse(struct dwarf_parser* self, size_t counter,
           endSequence   = false,
           prologueEnd   = false,
           epilogueBegin = false;
-    
+
     while (counter - (self->bit64 ? 12 : 4) < actualSize) {
         const uint8_t opCode = *((uint8_t*) (self->debugLine.content + counter++));
         if (opCode == 0) {
@@ -137,12 +137,12 @@ static inline bool dwarf_parser_parse(struct dwarf_parser* self, size_t counter,
                         self->getFileName(self, file),
                         isStmt, basicBlock, endSequence, prologueEnd, epilogueBegin
                     }, self->args);
-                    
+
                     discriminator = 0;
                     basicBlock = prologueEnd = epilogueBegin = false;
                     break;
                 }
-                    
+
                 case DW_LNS_advance_pc: {
                     const uint64_t operationAdvance = getULEB128(self->debugLine.content, &counter);
                     if (self->version > 3) {
@@ -153,7 +153,7 @@ static inline bool dwarf_parser_parse(struct dwarf_parser* self, size_t counter,
                     }
                     break;
                 }
-                    
+
                 case DW_LNS_advance_line:    line += getLEB128(self->debugLine.content, &counter);   break;
                 case DW_LNS_set_file:        file = getULEB128(self->debugLine.content, &counter);   break;
                 case DW_LNS_set_column:      column = getULEB128(self->debugLine.content, &counter); break;
@@ -172,17 +172,31 @@ static inline bool dwarf_parser_parse(struct dwarf_parser* self, size_t counter,
                     }
                     break;
                 }
-                    
+
                 case DW_LNS_fixed_advance_pc: {
                     opIndex = 0;
                     address += *((uint16_t*) (self->debugLine.content + counter));
                     counter += 2;
                     break;
                 }
-                    
-                case DW_LNS_set_prologue_end:   prologueEnd = true;                                  break;
-                case DW_LNS_set_epilogue_begin: epilogueBegin = true;                                break;
-                case DW_LNS_set_isa:            isa = getULEB128(self->debugLine.content, &counter); break;
+
+                case DW_LNS_set_prologue_end:
+                    if (self->version > 2) {
+                        prologueEnd = true;
+                        break;
+                    }
+
+                case DW_LNS_set_epilogue_begin:
+                    if (self->version > 2) {
+                        epilogueBegin = true;
+                        break;
+                    }
+
+                case DW_LNS_set_isa:
+                    if (self->version > 2) {
+                        isa = getULEB128(self->debugLine.content, &counter);
+                        break;
+                    }
 
                 default:
                     for (uint64_t i = 0; i < self->stdOpcodeLengths.content[opCode - 1]; ++i) {
@@ -257,6 +271,7 @@ bool dwarf_parseLineProgram(struct lcs_section debugLine,
         .stdOpcodeLengths = vector_initializer
     };
     switch (version) {
+        case 2:
         case 3:
         case 4: dwarf4_parser_create(&parser); break;
         case 5: dwarf5_parser_create(&parser); break;
