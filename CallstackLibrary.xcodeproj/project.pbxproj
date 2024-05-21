@@ -103,6 +103,7 @@
 		BF86E31E28F4564600F6D20E /* callstack.c */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.c; path = callstack.c; sourceTree = "<group>"; };
 		BF86E32028F45DE100F6D20E /* callstack_parser.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = callstack_parser.h; sourceTree = "<group>"; };
 		BF86E32128F45DE100F6D20E /* callstack_parser.c */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.c; path = callstack_parser.c; sourceTree = "<group>"; };
+		BF8CE30A2BFCFD7E00F71BF9 /* definitions.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = definitions.h; sourceTree = "<group>"; };
 		BF971B762A588077006BFFBB /* machoFile.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = machoFile.h; sourceTree = "<group>"; };
 		BF971B772A588077006BFFBB /* machoFile.c */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.c; path = machoFile.c; sourceTree = "<group>"; };
 		BF971B7D2A58827B006BFFBB /* binaryFile.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = binaryFile.h; sourceTree = "<group>"; };
@@ -283,6 +284,14 @@
 			path = include;
 			sourceTree = "<group>";
 		};
+		BF8CE3092BFCFD7200F71BF9 /* v3 */ = {
+			isa = PBXGroup;
+			children = (
+				BF8CE30A2BFCFD7E00F71BF9 /* definitions.h */,
+			);
+			path = v3;
+			sourceTree = "<group>";
+		};
 		BF971B7C2A58823E006BFFBB /* file */ = {
 			isa = PBXGroup;
 			children = (
@@ -320,6 +329,7 @@
 		BFAD631A2B5BD5B000EE8E14 /* dwarf */ = {
 			isa = PBXGroup;
 			children = (
+				BF8CE3092BFCFD7200F71BF9 /* v3 */,
 				BFB5C2B72BEA834F005D2EBA /* v4 */,
 				BFB7D8842BDBAC4700F62068 /* v5 */,
 				BFAD65412B5A717F00024242 /* dwarf_parser.h */,
