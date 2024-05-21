@@ -59,7 +59,7 @@ static inline void elfFile_lineProgramCallback(struct dwarf_lineInfo info, void*
     vector_dwarfLineInfo_push_back(&self->lineInfos, info);
 }
 
-static inline bool elfFile_loadFileImpl(struct elfFile_private* self, void* buffer) { // TODO: Error handling
+static inline bool elfFile_loadFileImpl(struct elfFile_private* self, void* buffer) {
     return elfFile_parseFile(&self->_, buffer, elfFile_lineProgramCallback, self);
 }
 
