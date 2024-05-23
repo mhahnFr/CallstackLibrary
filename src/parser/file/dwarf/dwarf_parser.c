@@ -126,6 +126,7 @@ static inline bool dwarf_parser_parse(struct dwarf_parser* self, size_t counter,
                         discriminator = getULEB128(self->debugLine.content, &counter);
                         break;
                     }
+                    // else fallthrough
 
                 default: counter += length - 1; break;
             }
@@ -185,18 +186,21 @@ static inline bool dwarf_parser_parse(struct dwarf_parser* self, size_t counter,
                         prologueEnd = true;
                         break;
                     }
+                    // else fallthrough
 
                 case DW_LNS_set_epilogue_begin:
                     if (self->version > 2) {
                         epilogueBegin = true;
                         break;
                     }
+                    // else fallthrough
 
                 case DW_LNS_set_isa:
                     if (self->version > 2) {
                         isa = getULEB128(self->debugLine.content, &counter);
                         break;
                     }
+                    // else fallthrough
 
                 default:
                     for (uint64_t i = 0; i < self->stdOpcodeLengths.content[opCode - 1]; ++i) {
