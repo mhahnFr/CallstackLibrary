@@ -129,7 +129,7 @@ public:
      * @param address the address
      * @return the optionally deducted debug information
      */
-    inline auto getDebugInfo(const function& function, uint64_t address) {
+    inline auto getDebugInfo(const function& function, uint64_t address) -> optional_debugInfo_t {
         optional_debugInfo_t toReturn = { .has_value = false };
         
         if (!self.parsed) {
@@ -154,19 +154,18 @@ public:
         if (closest == lineInfos.end()) {
             return toReturn;
         }
-        toReturn = {
+        return {
             true, {
                 function, {
                     true, {
                         closest->second.line,
                         closest->second.column,
                         closest->second.sourceFile.fileName == nullptr ? getName().c_str() : closest->second.sourceFile.fileName,
-                        false // FIXME: Gather from somewhere
+                        objectFile_isOutdated(closest->second.sourceFile)
                     }
                 }
             }
         };
-        return toReturn;
     }
     
     /**

@@ -189,7 +189,7 @@ optional_debugInfo_t objectFile_getDebugInfo(struct objectFile* me, uint64_t add
                     closest->line,
                     closest->column,
                     closest->sourceFile.fileName == NULL ? objectFile_getSourceFileName(self) : closest->sourceFile.fileName,
-                    false // FIXME: Gather this info from somewhere
+                    objectFile_isOutdated(closest->sourceFile)
                 }
             }
         }

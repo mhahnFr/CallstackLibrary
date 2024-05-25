@@ -165,6 +165,8 @@ uint8_t* objectFile_getUUID(struct objectFile* self);
  */
 optional_debugInfo_t objectFile_getDebugInfo(struct objectFile* self, uint64_t address, struct function function);
 
+bool objectFile_isOutdated(struct dwarf_sourceFile file);
+
 /**
  * Deinitializes the given object file structure.
  *
