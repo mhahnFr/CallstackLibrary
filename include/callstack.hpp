@@ -19,13 +19,13 @@
  * CallstackLibrary, see the file LICENSE.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-#ifndef callstack_h
+#ifndef __lcs_callstack_h
  #warning Wrong inclusion of "callstack.hpp" redirected to '#include "callstack.h"'!
  #include "callstack.h"
 
 #else
- #ifndef callstack_hpp
- #define callstack_hpp
+ #ifndef __lcs_callstack_hpp
+ #define __lcs_callstack_hpp
 
  #if __cplusplus >= 201103
   #include <system_error>
@@ -164,5 +164,5 @@ namespace lcs {
     };
 }
 
- #endif /* callstack_hpp */
-#endif /* callstack_h */
+ #endif /* __lcs_callstack_hpp */
+#endif /* __lcs_callstack_h */

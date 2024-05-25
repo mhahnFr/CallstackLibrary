@@ -19,8 +19,8 @@
  * CallstackLibrary, see the file LICENSE.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-#ifndef callstack_frame_h
-#define callstack_frame_h
+#ifndef __lcs_callstack_frame_h
+#define __lcs_callstack_frame_h
 
 #include "optional_Dl_info.h"
 #include "optional_ulong.h"
@@ -159,4 +159,4 @@ static inline void callstack_frame_delete(struct callstack_frame * self) {
 } // extern "C"
 #endif
 
-#endif /* callstack_frame_h */
+#endif /* __lcs_callstack_frame_h */
