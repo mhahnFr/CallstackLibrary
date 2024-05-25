@@ -1,5 +1,5 @@
 /*
- * Callstack Library - Library creating human-readable call stacks.
+ * CallstackLibrary - Library creating human-readable call stacks.
  *
  * Copyright (C) 2023 - 2024  mhahnFr
  *
@@ -160,7 +160,8 @@ public:
                     true, {
                         closest->second.line,
                         closest->second.column,
-                        closest->second.fileName == nullptr ? getName().c_str() : closest->second.fileName
+                        closest->second.sourceFile.fileName == nullptr ? getName().c_str() : closest->second.sourceFile.fileName,
+                        false // FIXME: Gather from somewhere
                     }
                 }
             }

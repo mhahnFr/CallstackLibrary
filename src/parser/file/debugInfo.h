@@ -39,6 +39,7 @@ struct sourceFileInfo {
     
     /** The deducted source file name. */
     const char* sourceFile;
+    bool outdated;
 };
 
 typedef_optional_named(sourceFileInfo, struct sourceFileInfo);

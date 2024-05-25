@@ -1,22 +1,22 @@
 /*
- * Callstack Library - Library creating human-readable call stacks.
+ * CallstackLibrary - Library creating human-readable call stacks.
  *
  * Copyright (C) 2023 - 2024  mhahnFr
  *
  * This file is part of the CallstackLibrary.
  *
- * The Callstack Library is free software: you can redistribute it and/or modify
+ * The CallstackLibrary is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
  * the Free Software Foundation, either version 3 of the License, or
  * (at your option) any later version.
  *
- * The Callstack Library is distributed in the hope that it will be useful,
+ * The CallstackLibrary is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
  * GNU General Public License for more details.
  *
  * You should have received a copy of the GNU General Public License along with the
- * Callstack Library, see the file LICENSE.  If not, see <https://www.gnu.org/licenses/>.
+ * CallstackLibrary, see the file LICENSE.  If not, see <https://www.gnu.org/licenses/>.
  */
 
 #include <stdlib.h>
@@ -188,7 +188,8 @@ optional_debugInfo_t objectFile_getDebugInfo(struct objectFile* me, uint64_t add
                 true, (struct sourceFileInfo) {
                     closest->line,
                     closest->column,
-                    closest->fileName == NULL ? objectFile_getSourceFileName(self) : closest->fileName
+                    closest->sourceFile.fileName == NULL ? objectFile_getSourceFileName(self) : closest->sourceFile.fileName,
+                    false // FIXME: Gather this info from somewhere
                 }
             }
         }

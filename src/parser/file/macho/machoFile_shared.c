@@ -1,20 +1,22 @@
 /*
- * Callstack Library - Library creating human-readable call stacks.
+ * CallstackLibrary - Library creating human-readable call stacks.
  *
  * Copyright (C) 2024  mhahnFr
  *
- * This file is part of the CallstackLibrary. This library is free software:
- * you can redistribute it and/or modify it under the terms of the
- * GNU General Public License as published by the Free Software Foundation,
- * either version 3 of the License, or (at your option) any later version.
+ * This file is part of the CallstackLibrary.
  *
- * This library is distributed in the hope that it will be useful,
+ * The CallstackLibrary is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation, either version 3 of the License, or
+ * (at your option) any later version.
+ *
+ * The CallstackLibrary is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
  * GNU General Public License for more details.
  *
- * You should have received a copy of the GNU General Public License along with
- * this library, see the file LICENSE.  If not, see <https://www.gnu.org/licenses/>.
+ * You should have received a copy of the GNU General Public License along with the
+ * CallstackLibrary, see the file LICENSE.  If not, see <https://www.gnu.org/licenses/>.
  */
 
 #include <mach-o/fat.h>
@@ -139,6 +141,7 @@ bool machoFile_addr2String(struct binaryFile* me, void* address, struct callstac
         if (result.value.sourceFileInfo.has_value) {
             frame->sourceFile = binaryFile_toAbsolutePath((char*) result.value.sourceFileInfo.value.sourceFile);
             frame->sourceFileRelative = binaryFile_toRelativePath((char*) result.value.sourceFileInfo.value.sourceFile);
+            frame->sourceFileOutdated = result.value.sourceFileInfo.value.outdated;
             frame->sourceLine = result.value.sourceFileInfo.value.line;
             if (result.value.sourceFileInfo.value.column > 0) {
                 frame->sourceLineColumn = (optional_ulong_t) { true, result.value.sourceFileInfo.value.column };
