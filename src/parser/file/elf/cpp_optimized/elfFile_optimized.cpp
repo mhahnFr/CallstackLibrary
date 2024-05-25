@@ -95,7 +95,7 @@ public:
                 lineIt->second.line,
                 lineIt->second.column,
                 lineIt->second.sourceFile.fileName,
-                elfFile_isOutdated(lineIt->second.sourceFile)
+                binaryFile_isOutdated(lineIt->second.sourceFile)
             }
         };
         return info;

@@ -217,7 +217,3 @@ bool elfFile_addr2String(struct binaryFile* me, void* address, struct callstack_
     }
     return false;
 }
-
-bool elfFile_isOutdated(struct dwarf_sourceFile file) {
-    return true;
-}

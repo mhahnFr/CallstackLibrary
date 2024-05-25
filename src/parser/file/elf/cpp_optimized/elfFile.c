@@ -118,7 +118,7 @@ optional_debugInfo_t elfFile_getDebugInfo(struct elfFile* me, void* address) {
             closestInfo->line,
             closestInfo->column,
             closestInfo->sourceFile.fileName,
-            elfFile_isOutdated(closestInfo->sourceFile)
+            binaryFile_isOutdated(closestInfo->sourceFile)
         }
     };
     return toReturn;

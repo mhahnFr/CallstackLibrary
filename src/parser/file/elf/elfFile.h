@@ -75,7 +75,6 @@ optional_debugInfo_t elfFile_getDebugInfo(struct elfFile* self, void* address);
 bool elfFile_loadFile(struct elfFile* self);
 bool elfFile_parseFile(struct elfFile* self, void* buffer, dwarf_line_callback cb, void* args);
 void elfFile_addFunction(struct elfFile* self, struct function f);
-bool elfFile_isOutdated(struct dwarf_sourceFile file);
 
 /* Heavily WIP. */
 bool elfFile_addr2String(struct binaryFile* self, void* address, struct callstack_frame* frame);
