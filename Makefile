@@ -114,12 +114,16 @@ ifeq ($(CXX_FUNCTIONS),true)
 endif
 
 ifeq ($(shell uname -s),Darwin)
-	LDFLAGS += -current_version 1.1 -compatibility_version 1 -install_name $(abspath $@)
+	LDFLAGS += -current_version 1.1 -compatibility_version 1
 	OBJS    += $(DARWIN_OBJS)
 	DEPS    += $(DARWIN_DEPS)
+
+	NAME = $(DYLIB_N)
 else ifeq ($(shell uname -s),Linux)
 	OBJS += $(LINUX_OBJS)
 	DEPS += $(LINUX_DEPS)
+
+	NAME = $(SHARED_N)
 else
 $(error Unsupported platform)
 endif
@@ -130,16 +134,16 @@ default: $(NAME)
 
 all: $(SHARED_N) $(STATIC_N) $(DYLIB_N)
 
-install: $(SHARED_N)
+install: $(NAME)
 	mkdir -p $(INSTALL_PATH)/lib
 	mkdir -p "$(INSTALL_PATH)/include/CallstackLibrary"
 	mkdir -p "$(INSTALL_PATH)/include/DC4C"
-	cp $(SHARED_N) $(INSTALL_PATH)/lib
+	cp $(NAME) $(INSTALL_PATH)/lib
 	find "include" \( -name \*.h -o -name \*.hpp \) -exec cp {} "$(INSTALL_PATH)/include/CallstackLibrary" \;
 	find "DC4C" \( -name \*.h -o -name \*.hpp \) -exec cp {} "$(INSTALL_PATH)/include/DC4C" \;
 
 uninstall:
-	- $(RM) $(INSTALL_PATH)/lib/$(SHARED_N)
+	- $(RM) $(INSTALL_PATH)/lib/$(NAME)
 	- $(RM) -r "$(INSTALL_PATH)/include/CallstackLibrary"
 	- $(RM) -r "$(INSTALL_PATH)/include/DC4C"
 
