@@ -201,6 +201,7 @@ bool elfFile_addr2String(struct binaryFile* me, void* address, struct callstack_
         if (result.value.sourceFileInfo.has_value) {
             frame->sourceFile = binaryFile_toAbsolutePath((char*) result.value.sourceFileInfo.value.sourceFile);
             frame->sourceFileRelative = binaryFile_toRelativePath((char*) result.value.sourceFileInfo.value.sourceFile);
+            frame->sourceFileOutdated = result.value.sourceFileInfo.value.outdated;
             frame->sourceLine = result.value.sourceFileInfo.value.line;
             if (result.value.sourceFileInfo.value.column > 0) {
                 frame->sourceLineColumn = (optional_ulong_t) { true, result.value.sourceFileInfo.value.column };
@@ -217,3 +218,6 @@ bool elfFile_addr2String(struct binaryFile* me, void* address, struct callstack_
     return false;
 }
 
+bool elfFile_isOutdated(struct dwarf_sourceFile file) {
+    return true;
+}

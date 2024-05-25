@@ -94,7 +94,8 @@ public:
             true, {
                 lineIt->second.line,
                 lineIt->second.column,
-                lineIt->second.fileName
+                lineIt->second.sourceFile.fileName,
+                elfFile_isOutdated(lineIt->second.sourceFile)
             }
         };
         return info;
