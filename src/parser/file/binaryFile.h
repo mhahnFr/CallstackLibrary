@@ -26,6 +26,8 @@
 
 #include <callstack_frame.h>
 
+#include "dwarf/dwarf_lineInfo.h"
+
 #ifdef __cplusplus
 extern "C" {
 #endif
@@ -143,6 +145,8 @@ struct binaryFile* binaryFile_findOrAddFile(const char* fileName, void* startAdd
  * Clears the caches created by the binary file implementations.
  */
 void binaryFile_clearCaches(void);
+
+bool binaryFile_isOutdated(struct dwarf_sourceFile file);
 
 #ifdef __cplusplus
 } // extern "C"
