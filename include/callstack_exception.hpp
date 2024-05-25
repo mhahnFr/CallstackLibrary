@@ -55,6 +55,8 @@ namespace lcs {
 /**
  * This exception class defines an exception capable to create and print
  * the callstack where it initially has been constructed - usually where it was thrown.
+ *
+ * @since v1.1
  */
 class exception: public std::exception {
     /** The optional message of this exception.                                  */

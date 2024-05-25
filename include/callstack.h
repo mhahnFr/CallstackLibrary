@@ -36,10 +36,18 @@ extern "C" {
 struct callstack {
     /** The type (status) of the translation to be human-readable. */
     enum callstack_type translationStatus;
-    
-    /** The amount of available frames.                            */
+
+    /**
+     * The amount of available frames.
+     *
+     * @since v1.1
+     */
     size_t frameCount;
-    /** An array of callstack frames.                              */
+    /**
+     * An array of callstack frames.
+     *
+     * @since v1.1
+     */
     struct callstack_frame * frames;
     /** The size of the backtrace.                                 */
     size_t  backtraceSize;
@@ -127,6 +135,7 @@ void callstack_copy(struct callstack * self, const struct callstack * other);
  * @brief Translates the given callstack and returns an array of the translated frames.
  *
  * Returns `NULL` if an error happens.
+ * Since version `1.1` a `callstack_frame` array is returned.
  *
  * @param self The callstack object.
  * @return An array of translated callstack frames.
@@ -143,6 +152,7 @@ struct callstack_frame * callstack_toArray(struct callstack * self);
  *
  * @param self The callstack object.
  * @return An array of translated callstack frames.
+ * @since v1.1
  */
 struct callstack_frame * callstack_getBinaries(struct callstack * self);
 

@@ -28,13 +28,19 @@
 extern "C" {
 #endif
 
-/** Indicates whether the caches should be cleared automatically. */
+/**
+ * Indicates whether the caches should be cleared automatically.
+ *
+ * @since v1.1
+ */
 extern bool callstack_autoClearCaches;
 
 /**
  * @brief Clears the caches of this library.
  *
  * Only needs to be called when `callstack_autoClearCaches` is `false`.
+ *
+ * @since v1.1
  */
 void callstack_clearCaches(void);
 

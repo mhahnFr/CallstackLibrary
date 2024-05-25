@@ -26,7 +26,11 @@
  * The type of the callstack.
  */
 enum callstack_type {
-    /** The callstack has been translated.    */
+    /**
+     * The callstack has been translated.
+     *
+     * @since v1.1
+     */
     TRANSLATED,
     /** An error happened during translation. */
     FAILED,
