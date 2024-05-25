@@ -26,6 +26,7 @@
 #include <vector>
 
 #include "../objectFile.h"
+#include "../../binaryFile.h"
 
 /**
  * This class acts as a C++ wrapper around the object file structure.
@@ -161,7 +162,7 @@ public:
                         closest->second.line,
                         closest->second.column,
                         closest->second.sourceFile.fileName == nullptr ? getName().c_str() : closest->second.sourceFile.fileName,
-                        objectFile_isOutdated(closest->second.sourceFile)
+                        binaryFile_isOutdated(closest->second.sourceFile)
                     }
                 }
             }

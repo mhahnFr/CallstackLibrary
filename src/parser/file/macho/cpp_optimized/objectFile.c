@@ -23,6 +23,7 @@
 
 #include "../objectFile.h"
 
+#include "../../binaryFile.h"
 #include "../../vector_function.h"
 
 #include "../../dwarf/vector_dwarf_lineInfo.h"
@@ -189,7 +190,7 @@ optional_debugInfo_t objectFile_getDebugInfo(struct objectFile* me, uint64_t add
                     closest->line,
                     closest->column,
                     closest->sourceFile.fileName == NULL ? objectFile_getSourceFileName(self) : closest->sourceFile.fileName,
-                    objectFile_isOutdated(closest->sourceFile)
+                    binaryFile_isOutdated(closest->sourceFile)
                 }
             }
         }

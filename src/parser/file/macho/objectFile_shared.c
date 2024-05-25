@@ -266,20 +266,3 @@ bool objectFile_parse(struct objectFile* self, dwarf_line_callback cb, void* arg
     free(buffer);
     return success;
 }
-
-bool objectFile_isOutdated(struct dwarf_sourceFile file) {
-    if (file.fileName == NULL || file.timestamp == 0) {
-        return false;
-    }
-    struct stat fileStats;
-    if (stat(file.fileName, &fileStats) != 0) {
-        return false;
-    }
-    if (fileStats.st_mtime != (time_t) file.timestamp) {
-        return true;
-    }
-    if (file.size != 0 && fileStats.st_size != (off_t) file.size) {
-        return true;
-    }
-    return false;
-}

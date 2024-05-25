@@ -1,5 +1,5 @@
 /*
- * Callstack Library - Library creating human-readable call stacks.
+ * CallstackLibrary - Library creating human-readable call stacks.
  *
  * Copyright (C) 2023 - 2024  mhahnFr
  *
@@ -164,8 +164,6 @@ uint8_t* objectFile_getUUID(struct objectFile* self);
  * @return the optionally deducted debug information
  */
 optional_debugInfo_t objectFile_getDebugInfo(struct objectFile* self, uint64_t address, struct function function);
-
-bool objectFile_isOutdated(struct dwarf_sourceFile file);
 
 /**
  * Deinitializes the given object file structure.
