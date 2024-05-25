@@ -34,6 +34,8 @@ extern "C" {
 
 /**
  * This structure represents a translated callstack frame.
+ *
+ * @since v1.1
  */
 struct callstack_frame {
     /** The dynamic loader info if available.                */
@@ -49,6 +51,12 @@ struct callstack_frame {
     char * sourceFile;
     /** The relative path of the name of the source file.    */
     char * sourceFileRelative;
+    /**
+     * Indicates whether the source file was detected to be changed after it has
+     * been used as source file for this callstack frame.
+     *
+     * @since v1.2
+     */
     bool sourceFileOutdated;
     /** The line number in the source file this frame is on. */
     unsigned long sourceLine;
@@ -60,6 +68,7 @@ struct callstack_frame {
  * Constructs the given callstack frame.
  *
  * @param self the callstack frame to be initialized
+ * @since v1.1
  */
 static inline void callstack_frame_create(struct callstack_frame * self) {
     self->binaryFile         = NULL;
@@ -79,6 +88,7 @@ static inline void callstack_frame_create(struct callstack_frame * self) {
  * Allocates a new and initialized callstack frame.
  *
  * @return the allocated callstack frame or `NULL` if unable to allocate
+ * @since v1.1
  */
 static inline struct callstack_frame * callstack_frame_new(void) {
     struct callstack_frame * toReturn = (struct callstack_frame *) malloc(sizeof(struct callstack_frame));
@@ -95,6 +105,7 @@ static inline struct callstack_frame * callstack_frame_new(void) {
  *
  * @param self the callstack frame to be copied
  * @return a copy of the given callstack frame or `NULL` if unable to allocate
+ * @since v1.1
  */
 struct callstack_frame * callstack_frame_copy(struct callstack_frame * self);
 
@@ -103,6 +114,7 @@ struct callstack_frame * callstack_frame_copy(struct callstack_frame * self);
  *
  * @param destination the callstack frame filled with the copy
  * @param source the callstack frame to be copied
+ * @since v1.1
  */
 void callstack_frame_copyHere(struct callstack_frame * destination, const struct callstack_frame * source);
 
@@ -111,9 +123,19 @@ void callstack_frame_copyHere(struct callstack_frame * destination, const struct
  *
  * @param self the callstack frame
  * @return the shortest name
+ * @since v1.1
  */
 char * callstack_frame_getShortestName(const struct callstack_frame * self);
 
+/**
+ * @brief Returns the shortest binary file name of the given callstack frame.
+ *
+ * If the given callstack frame does not have a binary file name the given fallback is returned.
+ *
+ * @param self the callstack frame
+ * @param fallback the fallback string to be returned
+ * @since v1.2
+ */
 static inline const char* callstack_frame_getShortestNameOr(const struct callstack_frame* self, const char* fallback) {
     const char* shortest = callstack_frame_getShortestName(self);
     return shortest == NULL ? fallback : shortest;
@@ -124,9 +146,19 @@ static inline const char* callstack_frame_getShortestNameOr(const struct callsta
  *
  * @param self the callstack frame
  * @return the shortest source file name
+ * @since v1.1
  */
 char * callstack_frame_getShortestSourceFile(const struct callstack_frame * self);
 
+/**
+ * @brief Returns the shortest source file name of the given callstack frame.
+ *
+ * If the given callstack frame does not have a source file name the given fallback is returned.
+ *
+ * @param self the callstack frame
+ * @param fallback the fallback string to be returned
+ * @since v1.2
+ */
 static inline const char* callstack_frame_getShortestSourceFileOr(const struct callstack_frame* self, const char* fallback) {
     const char* shortest = callstack_frame_getShortestSourceFile(self);
     return shortest == NULL ? fallback : shortest;
@@ -136,6 +168,7 @@ static inline const char* callstack_frame_getShortestSourceFileOr(const struct c
  * Destructs the given callstack frame.
  *
  * @param self the callstack frame to be destructed
+ * @since v1.1
  */
 static inline void callstack_frame_destroy(struct callstack_frame * self) {
     free(self->binaryFile);
@@ -149,6 +182,7 @@ static inline void callstack_frame_destroy(struct callstack_frame * self) {
  * Destroys and deallocates the given callstack frame.
  *
  * @param self the callstack frame to be deleted
+ * @since v1.1
  */
 static inline void callstack_frame_delete(struct callstack_frame * self) {
     callstack_frame_destroy(self);
