@@ -29,6 +29,7 @@
 extern "C" {
 #endif
 
+#include <stdbool.h>
 #include <stdlib.h>
 
 /**
@@ -48,6 +49,7 @@ struct callstack_frame {
     char * sourceFile;
     /** The relative path of the name of the source file.    */
     char * sourceFileRelative;
+    bool sourceFileOutdated;
     /** The line number in the source file this frame is on. */
     unsigned long sourceLine;
     /** The optional line column number in the source file.  */
@@ -66,7 +68,8 @@ static inline void callstack_frame_create(struct callstack_frame * self) {
     self->sourceFile         = NULL;
     self->sourceFileRelative = NULL;
     self->sourceLine         = 0;
-    
+    self->sourceFileOutdated = false;
+
     self->sourceLineColumn.has_value = false;
     
     self->info.has_value = false;
