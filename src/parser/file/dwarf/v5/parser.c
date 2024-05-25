@@ -1,5 +1,5 @@
 /*
- * Callstack Library - Library creating human-readable call stacks.
+ * CallstackLibrary - Library creating human-readable call stacks.
  *
  * Copyright (C) 2024  mhahnFr
  *
@@ -290,8 +290,13 @@ static inline char* dwarf5_constructFileName(const struct fileAttribute* file, c
     return toReturn;
 }
 
-static inline char* dwarf5_getFileName(struct dwarf_parser* self, uint64_t file) {
-    return dwarf5_constructFileName(&self->specific.v5.files.content[file], &self->specific.v5.directories);
+static inline struct dwarf_sourceFile dwarf5_getFileName(struct dwarf_parser* self, uint64_t file) {
+    struct fileAttribute* filePtr = &self->specific.v5.files.content[file];
+    return (struct dwarf_sourceFile) {
+        dwarf5_constructFileName(filePtr, &self->specific.v5.directories),
+        filePtr->timestamp,
+        filePtr->size
+    };
 }
 
 static inline bool dwarf5_parseLineProgramHeader(struct dwarf_parser* self, size_t* counter) {

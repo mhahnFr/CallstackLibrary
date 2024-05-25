@@ -87,9 +87,13 @@ static inline char* dwarf4_stringFrom(struct dwarf_fileNameEntry* file, struct v
     return toReturn;
 }
 
-static inline char* dwarf4_parser_getFileName(struct dwarf_parser* self, uint64_t file) {
-    return file == 0 ? NULL : dwarf4_stringFrom(&self->specific.v4.fileNames.content[file - 1],
-                                                &self->specific.v4.includeDirectories);
+static inline struct dwarf_sourceFile dwarf4_parser_getFileName(struct dwarf_parser* self, uint64_t file) {
+    struct dwarf_fileNameEntry* filePtr = file == 0 ? NULL : &self->specific.v4.fileNames.content[file - 1];
+    return (struct dwarf_sourceFile) {
+        filePtr == NULL ? NULL : dwarf4_stringFrom(filePtr, &self->specific.v4.includeDirectories),
+        filePtr->modTime,
+        filePtr->size
+    };
 }
 
 static inline void dwarf4_parser_destroy(struct dwarf_parser* self) {

@@ -1,11 +1,11 @@
 /*
- * Callstack Library - Library creating human-readable call stacks.
+ * CallstackLibrary - Library creating human-readable call stacks.
  *
  * Copyright (C) 2024  mhahnFr
  *
  * This file is part of the CallstackLibrary.
  *
- * This library is free software: you can redistribute it and/or modify
+ * The CallstackLibrary is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
  * the Free Software Foundation, either version 3 of the License, or
  * (at your option) any later version.
@@ -30,6 +30,12 @@
 extern "C" {
 #endif
 
+struct dwarf_sourceFile {
+    const char* fileName;
+    uint64_t timestamp;
+    uint64_t size;
+};
+
 /**
  * This structure represents a DWARF line program entry.
  */
@@ -44,14 +50,9 @@ struct dwarf_lineInfo {
     uint64_t isa;
     /** The discriminator. */
     uint64_t discriminator;
-    
-    /**
-     * @brief The allocated full file name.
-     *
-     * If it is `NULL` the main source file was referenced.
-     */
-    const char* fileName;
-    
+
+    struct dwarf_sourceFile sourceFile;
+
     /** Whether this position is a recommended breakpoint position. */
     bool isStmt;
     /** Whether this position is a basic block.                     */
@@ -65,7 +66,7 @@ struct dwarf_lineInfo {
 };
 
 static inline void dwarf_lineInfo_destroyValue(struct dwarf_lineInfo self) {
-    free((void*) self.fileName);
+    free((void*) self.sourceFile.fileName);
 }
 
 /**

@@ -1,5 +1,5 @@
 /*
- * Callstack Library - Library creating human-readable call stacks.
+ * CallstackLibrary - Library creating human-readable call stacks.
  *
  * Copyright (C) 2024  mhahnFr
  *
@@ -61,9 +61,9 @@ struct dwarf_parser {
     dwarf_line_callback cb;
     void* args;
 
-    void  (*destroy)    (struct dwarf_parser*);
-    bool  (*parseHeader)(struct dwarf_parser*, size_t*);
-    char* (*getFileName)(struct dwarf_parser*, uint64_t);
+    void                    (*destroy)    (struct dwarf_parser*);
+    bool                    (*parseHeader)(struct dwarf_parser*, size_t*);
+    struct dwarf_sourceFile (*getFileName)(struct dwarf_parser*, uint64_t);
 
     union {
         struct dwarf4_parser v4;
