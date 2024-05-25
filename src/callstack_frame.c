@@ -51,6 +51,7 @@ void callstack_frame_copyHere(struct callstack_frame * destination, const struct
         maybeStrdup(source->function),
         maybeStrdup(source->sourceFile),
         maybeStrdup(source->sourceFileRelative),
+        source->sourceFileOutdated,
         source->sourceLine,
         source->sourceLineColumn
     };
