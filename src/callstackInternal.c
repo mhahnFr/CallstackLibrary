@@ -75,7 +75,7 @@ enum callstack_type callstack_translateBinaries(struct callstack * self) {
         callstack_frame_create(&self->frames[i]);
         const bool success = self->frames[i].info.has_value
                            = dladdr(self->backtrace[i], &self->frames[i].info.value);
-        const char * absolutePath = self->frames[i].info.value.dli_fname;
+        const char* absolutePath = success ? self->frames[i].info.value.dli_fname : NULL;
         self->frames[i].binaryFile = success ? binaryFile_toAbsolutePath((char *) absolutePath) : NULL;
         self->frames[i].binaryFileRelative = success ? binaryFile_toRelativePath((char *) absolutePath) : NULL;
     }
