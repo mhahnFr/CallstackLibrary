@@ -43,6 +43,8 @@
 		BF971B822A58827B006BFFBB /* binaryFile.c in Sources */ = {isa = PBXBuildFile; fileRef = BF971B7E2A58827B006BFFBB /* binaryFile.c */; };
 		BF971B972A58C155006BFFBB /* callstack_internals.c in Sources */ = {isa = PBXBuildFile; fileRef = BF971B962A58C155006BFFBB /* callstack_internals.c */; };
 		BF971B982A58C155006BFFBB /* callstack_internals.c in Sources */ = {isa = PBXBuildFile; fileRef = BF971B962A58C155006BFFBB /* callstack_internals.c */; };
+		BFAB26162C0A21D00004E6AD /* dlMapper.c in Sources */ = {isa = PBXBuildFile; fileRef = BFAB26152C0A21D00004E6AD /* dlMapper.c */; };
+		BFAB26172C0A21D00004E6AD /* dlMapper.c in Sources */ = {isa = PBXBuildFile; fileRef = BFAB26152C0A21D00004E6AD /* dlMapper.c */; };
 		BFAB6B3B2A62EDC800726B52 /* objectFile.c in Sources */ = {isa = PBXBuildFile; fileRef = BFEC818B2A5EEA36002FA3B7 /* objectFile.c */; };
 		BFAB6B3C2A62EDD000726B52 /* objectFile.c in Sources */ = {isa = PBXBuildFile; fileRef = BFEC818B2A5EEA36002FA3B7 /* objectFile.c */; };
 		BFAB6B3E2A62F5EE00726B52 /* objectFile_optimized.cpp in Sources */ = {isa = PBXBuildFile; fileRef = BFAB6B382A62DC4600726B52 /* objectFile_optimized.cpp */; };
@@ -112,6 +114,10 @@
 		BF971B962A58C155006BFFBB /* callstack_internals.c */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.c; path = callstack_internals.c; sourceTree = "<group>"; };
 		BFA17E6E2AC496A200931B1E /* optional_Dl_info.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = optional_Dl_info.h; sourceTree = "<group>"; };
 		BFA7D7462B6CEA8300765686 /* vector_boolString.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = vector_boolString.h; sourceTree = "<group>"; };
+		BFAB26142C0A21590004E6AD /* dlMapper.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = dlMapper.h; sourceTree = "<group>"; };
+		BFAB26152C0A21D00004E6AD /* dlMapper.c */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.c; path = dlMapper.c; sourceTree = "<group>"; };
+		BFAB26182C0A22E10004E6AD /* loadedLibInfo.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = loadedLibInfo.h; sourceTree = "<group>"; };
+		BFAB26192C0A23250004E6AD /* vector_loadedLibInfo.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = vector_loadedLibInfo.h; sourceTree = "<group>"; };
 		BFAB6B382A62DC4600726B52 /* objectFile_optimized.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; path = objectFile_optimized.cpp; sourceTree = "<group>"; };
 		BFABCB742B72421100790948 /* archive.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = archive.h; sourceTree = "<group>"; };
 		BFABCB752B72421100790948 /* archive.c */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.c; path = archive.c; sourceTree = "<group>"; };
@@ -255,6 +261,7 @@
 		BF61E8FB28F1CFB40006346B /* src */ = {
 			isa = PBXGroup;
 			children = (
+				BFAB26112C0A20A20004E6AD /* dlMapper */,
 				BF3031E1294C6C4700E8ADC5 /* parser */,
 				BF5A745F28F1DCA00017591A /* callstackInternal.h */,
 				BFD7BAD02BD65E67005C2AC8 /* lcs_builtins.h */,
@@ -313,6 +320,33 @@
 				BFB32CF32BDBF81F008F5448 /* lcs_section.h */,
 			);
 			path = file;
+			sourceTree = "<group>";
+		};
+		BFAB26112C0A20A20004E6AD /* dlMapper */ = {
+			isa = PBXGroup;
+			children = (
+				BFAB26132C0A212F0004E6AD /* macho */,
+				BFAB26122C0A21290004E6AD /* elf */,
+				BFAB26142C0A21590004E6AD /* dlMapper.h */,
+				BFAB26152C0A21D00004E6AD /* dlMapper.c */,
+				BFAB26182C0A22E10004E6AD /* loadedLibInfo.h */,
+				BFAB26192C0A23250004E6AD /* vector_loadedLibInfo.h */,
+			);
+			path = dlMapper;
+			sourceTree = "<group>";
+		};
+		BFAB26122C0A21290004E6AD /* elf */ = {
+			isa = PBXGroup;
+			children = (
+			);
+			path = elf;
+			sourceTree = "<group>";
+		};
+		BFAB26132C0A212F0004E6AD /* macho */ = {
+			isa = PBXGroup;
+			children = (
+			);
+			path = macho;
 			sourceTree = "<group>";
 		};
 		BFAB6B3D2A62F5E100726B52 /* cpp_optimized */ = {
@@ -513,6 +547,7 @@
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				BFAB26172C0A21D00004E6AD /* dlMapper.c in Sources */,
 				BFACFBFA2B67DCE4009FAA27 /* machoFile_shared.c in Sources */,
 				BFEC81892A5EE937002FA3B7 /* function.c in Sources */,
 				BF3ACF5E2BB31B21005AEAF1 /* loader.c in Sources */,
@@ -558,6 +593,7 @@
 				BF3ACF5D2BB31B21005AEAF1 /* loader.c in Sources */,
 				BFAD42AD2B5927A700ADB6AF /* objectFile_shared.c in Sources */,
 				BFABCB782B72421100790948 /* archive.c in Sources */,
+				BFAB26162C0A21D00004E6AD /* dlMapper.c in Sources */,
 				BF971B7A2A588077006BFFBB /* machoFile.c in Sources */,
 				BFC2D17A2AC31E1300BD4C0B /* callstack_frame.c in Sources */,
 				BFE97A952AE82E92009E1DA4 /* fileHelper.cpp in Sources */,
