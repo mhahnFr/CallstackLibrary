@@ -25,6 +25,7 @@
 #include <stdbool.h>
 
 bool dlMapper_init(void);
+bool dlMapper_isInited(void);
 const char* dlMapper_fileNameForAddress(const void* address);
 void dlMapper_deinit(void);
 

@@ -24,16 +24,22 @@
 #include "vector_loadedLibInfo.h"
 
 static vector_loadedLibInfo_t loadedLibs = vector_initializer;
+static bool dlMapper_inited = false;
 
 bool dlMapper_init(void) {
+    if (dlMapper_inited) return true;
+
     const bool result = dlMapper_platform_loadLoadedLibraries(&loadedLibs);
     if (!result) {
         dlMapper_deinit();
     }
+    dlMapper_inited = result;
     return result;
 }
 
 const char* dlMapper_fileNameForAddress(const void* address) {
+    if (!dlMapper_inited) return NULL;
+
     vector_iterate(struct loadedLibInfo, &loadedLibs, {
         if (address >= element->begin && address < element->end) {
             return element->fileName;
@@ -45,4 +51,5 @@ const char* dlMapper_fileNameForAddress(const void* address) {
 void dlMapper_deinit(void) {
     vector_loadedLibInfo_destroyWithPtr(&loadedLibs, loadedLibInfo_destroy);
     vector_loadedLibInfo_create(&loadedLibs);
+    dlMapper_inited = false;
 }
