@@ -20,13 +20,17 @@
  */
 
 #include "dlMapper.h"
+#include "dlMapper_platform.h"
 #include "vector_loadedLibInfo.h"
 
 static vector_loadedLibInfo_t loadedLibs = vector_initializer;
 
 bool dlMapper_init(void) {
-    // TODO: Implement
-    return false;
+    const bool result = dlMapper_platform_loadLoadedLibraries(&loadedLibs);
+    if (!result) {
+        dlMapper_deinit();
+    }
+    return result;
 }
 
 const char* dlMapper_fileNameForAddress(const void* address) {

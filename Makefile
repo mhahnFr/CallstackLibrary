@@ -36,6 +36,9 @@ LD = $(CC)
 OPTIMIZED_PATH = cpp_optimized/
 LINUX_PATH     = ./src/parser/file/elf
 DARWIN_PATH    = ./src/parser/file/macho
+
+DL_MAPPER_LINUX_PATH  = ./src/dlMapper/elf
+DL_MAPPER_DARWIN_PATH = ./src/dlMapper/macho
 # -----
 
 # Assert submodules are available
@@ -46,7 +49,7 @@ endif
 # -------------------------------
 
 # Main sources
-SRCS = $(shell find ./src -type f -name \*.c \! -path $(LINUX_PATH)\* \! -path $(DARWIN_PATH)\* \! -path \*/$(OPTIMIZED_PATH)\*)
+SRCS = $(shell find ./src -type f -name \*.c \! -path $(LINUX_PATH)\* \! -path $(DARWIN_PATH)\* \! -path \*/$(OPTIMIZED_PATH)\* \! -path $(DL_MAPPER_LINUX_PATH)\* \! -path $(DL_MAPPER_DARWIN_PATH)\*)
 OBJS = $(patsubst %.c, %.o, $(SRCS))
 DEPS = $(patsubst %.c, %.d, $(SRCS))
 # ------------
@@ -58,9 +61,10 @@ CXX_DEPS = $(patsubst %.cpp, %.d, $(CXX_SRCS))
 # -----------
 
 # Linux specific sources
-LINUX_SRCS = $(shell find $(LINUX_PATH) -type f -name \*.c \! -path \*/$(OPTIMIZED_PATH)\*)
-LINUX_OBJS = $(patsubst %.c, %.o, $(LINUX_SRCS))
-LINUX_DEPS = $(patsubst %.c, %.d, $(LINUX_SRCS))
+LINUX_SRCS  = $(shell find $(LINUX_PATH) -type f -name \*.c \! -path \*/$(OPTIMIZED_PATH)\*)
+LINUX_SRCS += $(shell find $(DL_MAPPER_LINUX_PATH) -type f -name \*.c)
+LINUX_OBJS  = $(patsubst %.c, %.o, $(LINUX_SRCS))
+LINUX_DEPS  = $(patsubst %.c, %.d, $(LINUX_SRCS))
 ifeq ($(CXX_OPTIMIZED),true)
 	LD = $(CXX)
 	LINUX_OPT = $(shell find $(LINUX_PATH) -type f -name \*.cpp -path \*/$(OPTIMIZED_PATH)\*)
@@ -76,9 +80,10 @@ endif
 # ----------------------
 
 # Darwin specific sources
-DARWIN_SRCS = $(shell find $(DARWIN_PATH) -type f -name \*.c \! -path \*/$(OPTIMIZED_PATH)\*)
-DARWIN_OBJS = $(patsubst %.c, %.o, $(DARWIN_SRCS))
-DARWIN_DEPS = $(patsubst %.c, %.d, $(DARWIN_SRCS))
+DARWIN_SRCS  = $(shell find $(DARWIN_PATH) -type f -name \*.c \! -path \*/$(OPTIMIZED_PATH)\*)
+DARWIN_SRCS += $(shell find $(DL_MAPPER_DARWIN_PATH) -type f -name \*.c)
+DARWIN_OBJS  = $(patsubst %.c, %.o, $(DARWIN_SRCS))
+DARWIN_DEPS  = $(patsubst %.c, %.d, $(DARWIN_SRCS))
 ifeq ($(CXX_OPTIMIZED),true)
 	LD = $(CXX)
 	DARWIN_OPT = $(shell find $(DARWIN_PATH) -type f -name \*.cpp -path \*/$(OPTIMIZED_PATH)\*)

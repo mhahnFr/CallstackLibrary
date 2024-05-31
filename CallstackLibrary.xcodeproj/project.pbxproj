@@ -45,6 +45,8 @@
 		BF971B982A58C155006BFFBB /* callstack_internals.c in Sources */ = {isa = PBXBuildFile; fileRef = BF971B962A58C155006BFFBB /* callstack_internals.c */; };
 		BFAB26162C0A21D00004E6AD /* dlMapper.c in Sources */ = {isa = PBXBuildFile; fileRef = BFAB26152C0A21D00004E6AD /* dlMapper.c */; };
 		BFAB26172C0A21D00004E6AD /* dlMapper.c in Sources */ = {isa = PBXBuildFile; fileRef = BFAB26152C0A21D00004E6AD /* dlMapper.c */; };
+		BFAB261C2C0A29830004E6AD /* dlMapper.c in Sources */ = {isa = PBXBuildFile; fileRef = BFAB261B2C0A29830004E6AD /* dlMapper.c */; };
+		BFAB261D2C0A29830004E6AD /* dlMapper.c in Sources */ = {isa = PBXBuildFile; fileRef = BFAB261B2C0A29830004E6AD /* dlMapper.c */; };
 		BFAB6B3B2A62EDC800726B52 /* objectFile.c in Sources */ = {isa = PBXBuildFile; fileRef = BFEC818B2A5EEA36002FA3B7 /* objectFile.c */; };
 		BFAB6B3C2A62EDD000726B52 /* objectFile.c in Sources */ = {isa = PBXBuildFile; fileRef = BFEC818B2A5EEA36002FA3B7 /* objectFile.c */; };
 		BFAB6B3E2A62F5EE00726B52 /* objectFile_optimized.cpp in Sources */ = {isa = PBXBuildFile; fileRef = BFAB6B382A62DC4600726B52 /* objectFile_optimized.cpp */; };
@@ -118,6 +120,8 @@
 		BFAB26152C0A21D00004E6AD /* dlMapper.c */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.c; path = dlMapper.c; sourceTree = "<group>"; };
 		BFAB26182C0A22E10004E6AD /* loadedLibInfo.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = loadedLibInfo.h; sourceTree = "<group>"; };
 		BFAB26192C0A23250004E6AD /* vector_loadedLibInfo.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = vector_loadedLibInfo.h; sourceTree = "<group>"; };
+		BFAB261A2C0A27EA0004E6AD /* dlMapper_platform.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = dlMapper_platform.h; sourceTree = "<group>"; };
+		BFAB261B2C0A29830004E6AD /* dlMapper.c */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.c; path = dlMapper.c; sourceTree = "<group>"; };
 		BFAB6B382A62DC4600726B52 /* objectFile_optimized.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; path = objectFile_optimized.cpp; sourceTree = "<group>"; };
 		BFABCB742B72421100790948 /* archive.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = archive.h; sourceTree = "<group>"; };
 		BFABCB752B72421100790948 /* archive.c */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.c; path = archive.c; sourceTree = "<group>"; };
@@ -326,25 +330,19 @@
 			isa = PBXGroup;
 			children = (
 				BFAB26132C0A212F0004E6AD /* macho */,
-				BFAB26122C0A21290004E6AD /* elf */,
 				BFAB26142C0A21590004E6AD /* dlMapper.h */,
 				BFAB26152C0A21D00004E6AD /* dlMapper.c */,
 				BFAB26182C0A22E10004E6AD /* loadedLibInfo.h */,
 				BFAB26192C0A23250004E6AD /* vector_loadedLibInfo.h */,
+				BFAB261A2C0A27EA0004E6AD /* dlMapper_platform.h */,
 			);
 			path = dlMapper;
-			sourceTree = "<group>";
-		};
-		BFAB26122C0A21290004E6AD /* elf */ = {
-			isa = PBXGroup;
-			children = (
-			);
-			path = elf;
 			sourceTree = "<group>";
 		};
 		BFAB26132C0A212F0004E6AD /* macho */ = {
 			isa = PBXGroup;
 			children = (
+				BFAB261B2C0A29830004E6AD /* dlMapper.c */,
 			);
 			path = macho;
 			sourceTree = "<group>";
@@ -559,6 +557,7 @@
 				BFAD42AE2B5927A700ADB6AF /* objectFile_shared.c in Sources */,
 				BF378FCB2919542100A4DAA9 /* callstack.c in Sources */,
 				BFAB6B3F2A62F5EE00726B52 /* objectFile_optimized.cpp in Sources */,
+				BFAB261D2C0A29830004E6AD /* dlMapper.c in Sources */,
 				BFAB6B3B2A62EDC800726B52 /* objectFile.c in Sources */,
 				BF971B822A58827B006BFFBB /* binaryFile.c in Sources */,
 				BF378FCE2919542400A4DAA9 /* callstackInternal.c in Sources */,
@@ -574,6 +573,7 @@
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				BFAB261C2C0A29830004E6AD /* dlMapper.c in Sources */,
 				BF971B972A58C155006BFFBB /* callstack_internals.c in Sources */,
 				BF86E31F28F4564600F6D20E /* callstack.c in Sources */,
 				BFB5C2BA2BEA8CC8005D2EBA /* parser.c in Sources */,
