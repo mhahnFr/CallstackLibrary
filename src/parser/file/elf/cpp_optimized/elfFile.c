@@ -28,10 +28,16 @@
 
 #include "../../dwarf/vector_dwarf_lineInfo.h"
 
+/**
+ * This structure represents the private part of the ELF file structure.
+ */
 struct elfFile_private {
+    /** The super part of this structure.       */
     struct elfFile _;
 
+    /** The registered functions.               */
     vector_function_t functions;
+    /** The registered line information pieces. */
     vector_dwarfLineInfo_t lineInfos;
 };
 
@@ -53,12 +59,27 @@ void elfFile_addFunction(struct elfFile* me, struct function f) {
     vector_function_push_back(&self->functions, f);
 }
 
+/**
+ * @brief The callback for the DWARF parser.
+ *
+ * Stores the given DWARF line table row.
+ *
+ * @param info the deducted DWARF line table row
+ * @param args the payload, expected to be a private elf file structure object
+ */
 static inline void elfFile_lineProgramCallback(struct dwarf_lineInfo info, void* args) {
     struct elfFile_private* self = args;
 
     vector_dwarfLineInfo_push_back(&self->lineInfos, info);
 }
 
+/**
+ * Actually parses the given file buffer.
+ *
+ * @param self the private elf file structure object
+ * @param buffer the buffer to be parsed
+ * @return whether the parsing was successful
+ */
 static inline bool elfFile_loadFileImpl(struct elfFile_private* self, void* buffer) {
     return elfFile_parseFile(&self->_, buffer, elfFile_lineProgramCallback, self);
 }
