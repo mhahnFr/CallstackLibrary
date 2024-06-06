@@ -1,16 +1,16 @@
 /*
- * Callstack Library - Library creating human-readable call stacks.
+ * CallstackLibrary - Library creating human-readable call stacks.
  *
  * Copyright (C) 2024  mhahnFr
  *
  * This file is part of the CallstackLibrary.
  *
- * CallstackLibrary is free software: you can redistribute it and/or modify
+ * The CallstackLibrary is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
  * the Free Software Foundation, either version 3 of the License, or
  * (at your option) any later version.
  *
- * CallstackLibrary is distributed in the hope that it will be useful,
+ * The CallstackLibrary is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
  * GNU General Public License for more details.
@@ -24,11 +24,21 @@
 
 #include <stdint.h>
 
+/**
+ * This structure represents a section inside a binary file.
+ */
 struct lcs_section {
+    /** Pointer to the actual content. */
     void* content;
+    /** The size of the content.       */
     uint64_t size;
 };
 
+/**
+ * Initializes the given section structure.
+ *
+ * @param self the section structure object to be initialized
+ */
 static inline void lcs_section_create(struct lcs_section* self) {
     *self = (struct lcs_section) { NULL, 0 };
 }

@@ -30,9 +30,17 @@
 extern "C" {
 #endif
 
+/**
+ * @brief This structure represents a source file reference.
+ *
+ * Unavailable fields are set to `0` and `NULL`, respectively.
+ */
 struct dwarf_sourceFile {
+    /** The allocated source file name.         */
     const char* fileName;
+    /** The timestamp of the last modification. */
     uint64_t timestamp;
+    /** The size of the file.                   */
     uint64_t size;
 };
 
@@ -40,17 +48,18 @@ struct dwarf_sourceFile {
  * This structure represents a DWARF line program entry.
  */
 struct dwarf_lineInfo {
-    /** The address.       */
+    /** The address.                                                */
     uint64_t address;
-    /** The line number.   */
+    /** The line number.                                            */
     uint64_t line;
-    /** The column number. */
+    /** The column number.                                          */
     uint64_t column;
-    /** The isa value.     */
+    /** The isa value.                                              */
     uint64_t isa;
-    /** The discriminator. */
+    /** The discriminator.                                          */
     uint64_t discriminator;
 
+    /** The referred source file.                                   */
     struct dwarf_sourceFile sourceFile;
 
     /** Whether this position is a recommended breakpoint position. */
@@ -65,6 +74,11 @@ struct dwarf_lineInfo {
     bool epilogueBegin;
 };
 
+/**
+ * Destroys the given DWARF file info, passed by value.
+ *
+ * @param self the line info to be destroyed
+ */
 static inline void dwarf_lineInfo_destroyValue(struct dwarf_lineInfo self) {
     free((void*) self.sourceFile.fileName);
 }
