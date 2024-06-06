@@ -59,6 +59,16 @@ int64_t getLEB128(void* begin, size_t* counter) {
     return result;
 }
 
+/**
+ * @brief This function parses the actual DWARF line program.
+ *
+ * The registered callback function is called for each line number table row that is emitted.
+ *
+ * @param self the DWARF parser object
+ * @param counter the counter of already read bytes (offset)
+ * @param actualSize the size of the line number program including the header, as read from the header
+ * @return whether the parsing was successful
+ */
 static inline bool dwarf_parser_parse(struct dwarf_parser* self, size_t counter, size_t actualSize) {
     if (!self->parseHeader(self, &counter)) {
         return false;
