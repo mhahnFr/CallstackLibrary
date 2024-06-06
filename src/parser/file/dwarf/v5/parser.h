@@ -1,5 +1,5 @@
 /*
- * Callstack Library - Library creating human-readable call stacks.
+ * CallstackLibrary - Library creating human-readable call stacks.
  *
  * Copyright (C) 2024  mhahnFr
  *
@@ -26,10 +26,21 @@
 
 struct dwarf_parser;
 
+/**
+ * This structure represents the specific parser part for DWARF in version 5.
+ */
 struct dwarf5_parser {
-    vector_fileAttribute_t directories, files;
+    /** The file attributes of the include directories.                      */
+    vector_fileAttribute_t directories,
+    /** The file attributes of the files that contributed to the line table. */
+                           files;
 };
 
+/**
+ * Constructs the specific part of the given generified DWARF parser for version 5.
+ *
+ * @param self the generified parser object
+ */
 void dwarf5_parser_create(struct dwarf_parser* self);
 
 #endif /* dwarf_v5_parser_h */

@@ -27,7 +27,19 @@
 
 #include "../dwarf_parser.h"
 
-static inline char* dwarf5_stringFromSection(uint64_t offset, uint64_t type, struct lcs_section debugLineStr, struct lcs_section debugStr) {
+/**
+ * Calculates a string pointer into one of the given sections.
+ *
+ * @param offset the string offset
+ * @param type the type of string to load
+ * @param debugLineStr the section corresponding to the .debug_line_str section
+ * @param debugStr the section corresponding to the .debug_str section
+ * @return a pointer to the string in either section or `NULL` if the given type specifies neither section
+ */
+static inline char* dwarf5_stringFromSection(uint64_t offset,
+                                             uint64_t type,
+                                             struct lcs_section debugLineStr,
+                                             struct lcs_section debugStr) {
     char* toReturn = NULL;
     switch (type) {
         case DW_FORM_line_strp: toReturn = debugLineStr.content + offset; break;
@@ -36,6 +48,21 @@ static inline char* dwarf5_stringFromSection(uint64_t offset, uint64_t type, str
     return toReturn;
 }
 
+/**
+ * @brief Reads a string.
+ *
+ * The string may follow in the given data buffer or may come from one of the debug string sections.
+ * The returned string is not allocated.
+ *
+ * @param buffer the data buffer
+ * @param counter the reading index into the given data buffer
+ * @param type the type of string to load
+ * @param bit64 whether the 64 bit DWARF format is used
+ * @param debugLineStr the section corresponding to the .debug_line_str section
+ * @param debugStr the section corresponding to the .debug_str section
+ * @return a pointer to the string which points into either the given data buffer or into one of the given sections;
+ * `NULL` is returned if the given data type was not allowed
+ */
 static inline char* dwarf5_readString(void*    buffer,
                                       size_t*  counter,
                                       uint64_t type,
@@ -61,6 +88,14 @@ static inline char* dwarf5_readString(void*    buffer,
     return dwarf5_stringFromSection(offset, type, debugLineStr, debugStr);
 }
 
+/**
+ * Reads an index that follows in the given data buffer.
+ *
+ * @param buffer the data buffer
+ * @param counter the reading index
+ * @param type the requested data type
+ * @return the read index or an empty optional if the requested data type was not allowed
+ */
 static inline optional_uint64_t dwarf5_readIndex(void* buffer, size_t* counter, uint64_t type) {
     uint64_t toReturn;
     switch (type) {
@@ -82,6 +117,14 @@ static inline optional_uint64_t dwarf5_readIndex(void* buffer, size_t* counter, 
     return (optional_uint64_t) { true, toReturn };
 }
 
+/**
+ * Reads a timestamp information that follows in the data buffer.
+ *
+ * @param buffer the data buffer
+ * @param counter the reading index
+ * @param type the requested data type
+ * @return the read timestamp or an empty optional if the given data type was not allowed
+ */
 static inline optional_uint64_t dwarf5_readTimestamp(void* buffer, size_t* counter, uint64_t type) {
     uint64_t toReturn;
     switch (type) {
@@ -111,6 +154,14 @@ static inline optional_uint64_t dwarf5_readTimestamp(void* buffer, size_t* count
     return (optional_uint64_t) { true, toReturn };
 }
 
+/**
+ * Reads a size information that follows in the data buffer.
+ *
+ * @param buffer the data buffer
+ * @param counter the reading index
+ * @param type the requested data type
+ * @return the read size value or an empty optional if the given data type was not allowed
+ */
 static inline optional_uint64_t dwarf5_readSize(void* buffer, size_t* counter, uint64_t type) {
     uint64_t toReturn;
     switch (type) {
@@ -142,12 +193,29 @@ static inline optional_uint64_t dwarf5_readSize(void* buffer, size_t* counter, u
     return (optional_uint64_t) { true, toReturn };
 }
 
+/**
+ * Reads the MD5 hash that follows in the buffer.
+ *
+ * @param buffer the data buffer
+ * @param counter the reding index
+ * @return the read MD5 hash
+ */
 static inline uint8_t* dwarf5_readMD5(void* buffer, size_t* counter) {
     uint8_t* toReturn = buffer + *counter;
     *counter += 16;
     return toReturn;
 }
 
+/**
+ * Consumes the following data block of different possible types, according to the
+ * formats available for additional vendor specific data.
+ *
+ * @param buffer the data buffer
+ * @param counter the reading index
+ * @param type the expected data type
+ * @param bit64 whether to use the 64 bit format
+ * @return whether the data was allowed and skipped successfully
+ */
 static inline bool dwarf5_consumeSome(void* buffer, size_t* counter, uint64_t type, bool bit64) {
     switch (type) {
         case DW_FORM_block: {
@@ -205,6 +273,13 @@ static inline bool dwarf5_consumeSome(void* buffer, size_t* counter, uint64_t ty
     return true;
 }
 
+/**
+ * Parses the following file attributes in the line program header.
+ *
+ * @param self the generified parser object
+ * @param counter the reading index
+ * @return the parsed file attributes or an empty optional if the parsing failed
+ */
 static inline optional_vector_fileAttribute_t dwarf5_parseFileAttributes(struct dwarf_parser* self, size_t* counter) {
     const uint8_t entryFormatCount = *((uint8_t*) (self->debugLine.content + (*counter)++));
     vector_pair_uint64_t entryFormats = vector_initializer;
@@ -276,6 +351,13 @@ fail:
     return (optional_vector_fileAttribute_t) { .has_value = false };
 }
 
+/**
+ * Constructs the full file name for the given source file attribute using the given include directory attributes.
+ *
+ * @param file the source file attribute to construct the full file name for
+ * @param directories the inlcude directory file attributes
+ * @return the allocated full source file path or `NULL` if the allocation failed
+ */
 static inline char* dwarf5_constructFileName(const struct fileAttribute* file, const vector_fileAttribute_t* directories) {
     const char* dirPath = directories->content[file->index].path;
     const size_t size = strlen(dirPath) + strlen(file->path) + 2;
@@ -290,6 +372,13 @@ static inline char* dwarf5_constructFileName(const struct fileAttribute* file, c
     return toReturn;
 }
 
+/**
+ * Creates a source file reference for the given source file index.
+ *
+ * @param self the generified parser object
+ * @param file the file index
+ * @return the source file reference
+ */
 static inline struct dwarf_sourceFile dwarf5_getFileName(struct dwarf_parser* self, uint64_t file) {
     struct fileAttribute* filePtr = &self->specific.v5.files.content[file];
     return (struct dwarf_sourceFile) {
@@ -299,6 +388,13 @@ static inline struct dwarf_sourceFile dwarf5_getFileName(struct dwarf_parser* se
     };
 }
 
+/**
+ * Parses the DWARF line program header in version 5.
+ *
+ * @param self the generified parser object
+ * @param counter the reading index
+ * @return whether the parsing was successful
+ */
 static inline bool dwarf5_parseLineProgramHeader(struct dwarf_parser* self, size_t* counter) {
     const uint8_t addressSize = *((uint8_t*) (self->debugLine.content + (*counter)++));
     const uint8_t segmentSelectorSize = *((uint8_t*) (self->debugLine.content + (*counter)++));
@@ -341,6 +437,11 @@ static inline bool dwarf5_parseLineProgramHeader(struct dwarf_parser* self, size
     return true;
 }
 
+/**
+ * Destroys the DWARF 5 specific part of the given generified parser object.
+ *
+ * @param self the generified parser object
+ */
 static inline void dwarf5_parser_destroy(struct dwarf_parser* self) {
     vector_fileAttribute_destroy(&self->specific.v5.files);
     vector_fileAttribute_destroy(&self->specific.v5.directories);
