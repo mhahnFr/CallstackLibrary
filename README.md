@@ -11,9 +11,9 @@ stacktrace.
 
 1. Clone the repository: `git clone --recursive https://github.com/mhahnFr/CallstackLibrary.git`
 2. Build it: `cd CallstackLibrary && make`
-3. Link your code with `-L<path/to/library> -lcallstack -ldl`
+3. Link your code with `-L<path/to/library> -lcallstack`
 
-Now, you can use the headers [``callstack.h``][2] and [``callstack_exception.hpp``][5], respectively.
+Now, you can use the headers [`callstack.h`][2] and [`callstack_exception.hpp`][5], respectively.
 
 More explanation can be found in the [wiki][3]; the detailed explanation follows below.
 
@@ -24,11 +24,6 @@ Alternatively you can also build it from source:
 1. Clone the repository: `git clone --recursive https://github.com/mhahnFr/CallstackLibrary.git`
 2. go into the cloned repository: `cd CallstackLibrary`
 3. and build the library: `make`
-
-> [!NOTE]
-> On some systems, you might need to install the `libexecinfo-dev` to compile the library successfully.
-> 
-> If this is the case, add `-lexecinfo` to your linking flags: `-L<path/to/library> -lcallstack -ldl -lexecinfo`
 
 Or in one step:
 ```shell
@@ -65,19 +60,16 @@ make INSTALL_PATH=/usr/local uninstall
 ```
 
 ### How to use
-In order to use this library, simply include the header [``callstack.h``][2].
+In order to use this library, simply include the header [`callstack.h`][2] and [`callstack_exception.hpp`][5].
 
 #### Linking
-- Add `-L<path/to/library>` if the CallstackLibrary has not been installed in one of the default directories.
-- On Linux and FreeBSD add `-rdynamic` to the linking flags.
+> [!NOTE]
+> Add `-L<path/to/library>` if the CallstackLibrary has not been installed in one of the default directories.
 
 Link with `-lcallstack`
 
 > [!TIP]
-> Examples:
-> - **macOS**: `-L<path/to/library> -lcallstack`
-> - **Linux**: `-rdynamic -L<path/to/library> -lcallstack -ldl`
-> - **FreeBSD**: `-rdynamic -L<path/to/library> -lcallstack -ldl -lexecinfo`
+> Example: `-L<path/to/library> -lcallstack`
 
 ### Callstacks
 ```C
@@ -94,8 +86,8 @@ void printCallstack(void) {
     printf("The current callstack:\n");
     for (size_t i = 0; i < callstack_getFrameCount(callstack); ++i) {
         printf("In: (%s) %s (%s:%ld)\n", callstack_frame_getShortestName(&frames[i]), 
-                                         frames[i].function,
-                                         frames[i].sourceFile == NULL ? "???" : callstack_frame_getShortestSourceFile(&frames[i]),
+                                         (frames[i].function == NULL ? "???" : frames[i].function),
+                                         callstack_frame_getShortestSourceFileOr(&frames[i], "???"),
                                          frames[i].sourceLine);
     }
     callstack_delete(callstack);
@@ -139,8 +131,8 @@ void printCallstack() {
     std::cout << "The current callstack:" << std::endl;
     for (size_t i = 0; i < callstack_getFrameCount(callstack); ++i) {
         std::cout << "In: (" << callstack_frame_getShortestName(&frames[i])
-                  << ") "    << frames[i].function
-                  << " ("    << (frames[i].sourceFile == NULL ? "???" : callstack_frame_getShortestSourceFile(&frames[i]))
+                  << ") "    << (frames[i].function == NULL ? "???" : frames[i].function)
+                  << " ("    << callstack_frame_getShortestSourceFileOr(&frames[i], "???")
                   << ":"     << frames[i].sourceLine
                   << ")"     << std::endl;
     }   
@@ -156,18 +148,20 @@ int main() {
     foo2();
 }
 ```
-Compiled and linked on macOS with `c++ -g main.cpp -I<path/to/library>/include -L<path/to/library> -lcallstack` and
+Compiled and linked on Debian with `g++ -g main.cpp -I<path/to/library>/include -L<path/to/library> -lcallstack` and
 after [enabling **C++** functions][6] of the library:
 ```
 The current callstack:
-In: (a.out) lcs::callstack::callstack(bool) (include/callstack.hpp:77)
+In: (a.out) lcs::callstack::callstack(bool) (include/callstack.hpp:81)
 In: (a.out) printCallstack() (main.cpp:8)
 In: (a.out) bar() (main.cpp:21)
 In: (a.out) foo() (main.cpp:23)
 In: (a.out) bar2() (main.cpp:24)
 In: (a.out) foo2() (main.cpp:25)
 In: (a.out) main (main.cpp:28)
-In: (/usr/lib/dyld) start + 1903 (???:0)
+In: (/usr/lib/x86_64-linux-gnu/libc.so.6) ??? (???:0)
+In: (/usr/lib/x86_64-linux-gnu/libc.so.6) __libc_start_main + 133 (???:0)
+In: (a.out) _start + 33 (???:0)
 ```
 
 > [!TIP]
@@ -206,7 +200,10 @@ Compiled and linked on macOS using `c++ -g main.cpp -I<path/to/library>/include 
 after [enabling **C++** functions][6] of the library creates the following output:
 ```
 lcs::exception: "Callstack exception with a message", stacktrace:
-At: (a.out) lcs::exception::exception(char const*, bool) (include/callstack_exception.hpp:123)
+At: (a.out) lcs::callstack::callstack(bool) (include/callstack.hpp:81)
+in: (a.out) lcs::callstack::callstack(bool) (include/callstack.hpp:79)
+in: (a.out) lcs::exception::exception(char const*, bool) (include/callstack_exception.hpp:126)
+in: (a.out) lcs::exception::exception(char const*, bool) (include/callstack_exception.hpp:127)
 in: (a.out) printCallstack() (main.cpp:8)
 in: (a.out) bar2() (main.cpp:11)
 in: (a.out) foo2() (main.cpp:12)
@@ -245,11 +242,12 @@ int main() {
     }
 }
 ```
-Compiled and linked on macOS using `c++ -g main.cpp -I<path/to/library>/include -L<path/to/library> -lcallstack` and
+Compiled and linked on Debian using `g++ -g main.cpp -I<path/to/library>/include -L<path/to/library> -lcallstack` and
 after [enabling **C++** functions][6] of the library creates the following output:
 ```
 CustomStacktraceException, stacktrace:
-At: (a.out) CustomStacktraceException::CustomStacktraceException() (main.cpp:7)
+At: (a.out) lcs::callstack::callstack(bool) (include/callstack.hpp:81)
+in: (a.out) lcs::exception::exception(bool) (include/callstack_exception.hpp:116)
 in: (a.out) CustomStacktraceException::CustomStacktraceException() (main.cpp:7)
 in: (a.out) printCallstack() (main.cpp:10)
 in: (a.out) bar2() (main.cpp:13)
@@ -257,7 +255,9 @@ in: (a.out) foo2() (main.cpp:14)
 in: (a.out) bar() (main.cpp:16)
 in: (a.out) foo() (main.cpp:17)
 in: (a.out) main (main.cpp:21)
-in: (/usr/lib/dyld) start + 1903
+in: (/usr/lib/x86_64-linux-gnu/libc.so.6) << Unknown >>
+in: (/usr/lib/x86_64-linux-gnu/libc.so.6) __libc_start_main + 133
+in: (a.out) _start + 33
 ```
 
 ## Symbolization
