@@ -19,6 +19,7 @@
  * CallstackLibrary, see the file LICENSE.  If not, see <https://www.gnu.org/licenses/>.
  */
 
+#include <endian.h>
 #include <elf.h>
 #include <string.h>
 
@@ -26,6 +27,8 @@
 
 #include "../../callstack_parser.h"
 #include "../../lcs_stdio.h"
+
+#define ELF_TO_HOST(bits, number, littleEndian) (littleEndian ? le##bits##toh(number) : be##bits##toh(number))
 
 void elfFile_create(struct elfFile* self) {
     binaryFile_create(&self->_);
@@ -41,138 +44,151 @@ void elfFile_create(struct elfFile* self) {
     lcs_section_create(&self->debugStr);
 }
 
-#define elfFile_loadSectionStrtab(bits)                                                      \
-static inline char* elfFile_loadSectionStrtab##bits(Elf##bits##_Ehdr* header) {              \
-    uint16_t index = header->e_shstrndx;                                                     \
-    if (index == SHN_UNDEF) {                                                                \
-        return NULL;                                                                         \
-    }                                                                                        \
-    if (index == SHN_XINDEX) {                                                               \
-        if (header->e_shoff == 0) {                                                          \
-            return NULL;                                                                     \
-        }                                                                                    \
-        index = ((Elf##bits##_Shdr*) ((void*) header + header->e_shoff))->sh_link;           \
-    }                                                                                        \
-    Elf##bits##_Shdr* sect = (void*) header + header->e_shoff + index * header->e_shentsize; \
-    return (void*) header + sect->sh_offset;                                                 \
+#define elfFile_loadSectionStrtab(bits)                                                                                         \
+static inline char* elfFile_loadSectionStrtab##bits(Elf##bits##_Ehdr* header, bool littleEndian) {                              \
+    uint16_t index = ELF_TO_HOST(16, header->e_shstrndx, littleEndian);                                                         \
+    if (index == SHN_UNDEF) {                                                                                                   \
+        return NULL;                                                                                                            \
+    }                                                                                                                           \
+    if (index == SHN_XINDEX) {                                                                                                  \
+        if (ELF_TO_HOST(bits, header->e_shoff, littleEndian) == 0) {                                                            \
+            return NULL;                                                                                                        \
+        }                                                                                                                       \
+        index = ELF_TO_HOST(32,                                                                                                 \
+                            ((Elf##bits##_Shdr*) ((void*) header + ELF_TO_HOST(bits, header->e_shoff, littleEndian)))->sh_link, \
+                            littleEndian);                                                                                      \
+    }                                                                                                                           \
+    Elf##bits##_Shdr* sect = (void*) header + ELF_TO_HOST(bits, header->e_shoff, littleEndian)                                  \
+                             + index * ELF_TO_HOST(16, header->e_shentsize, littleEndian);                                      \
+    return (void*) header + ELF_TO_HOST(bits, sect->sh_offset, littleEndian);                                                   \
 }
 
 elfFile_loadSectionStrtab(32)
 elfFile_loadSectionStrtab(64)
 
-#define elfFile_parseSymtab(bits)                                                                                           \
-static inline bool elfFile_parseSymtab##bits(struct elfFile* self, Elf##bits##_Shdr* symtab, char* strBegin, void* begin) { \
-    void* symtabBegin = begin + symtab->sh_offset;                                                                          \
-    uint64_t count = symtab->sh_size / sizeof(Elf##bits##_Sym);                                                             \
-    Elf##bits##_Sym* entry = symtabBegin;                                                                                   \
-    for (uint64_t i = 0; i < count; ++i, ++entry) {                                                                         \
-        if (ELF##bits##_ST_TYPE(entry->st_info) == STT_FUNC && entry->st_value != 0) {                                      \
-            struct function f = {                                                                                           \
-                .startAddress = entry->st_value,                                                                            \
-                .linkedName   = strdup(strBegin + entry->st_name),                                                          \
-                .length       = entry->st_size                                                                              \
-            };                                                                                                              \
-            elfFile_addFunction(self, f);                                                                                   \
-        }                                                                                                                   \
-    }                                                                                                                       \
-    return true;                                                                                                            \
+#define elfFile_parseSymtab(bits)                                                                                       \
+static inline bool elfFile_parseSymtab##bits(struct elfFile*   self,                                                    \
+                                             Elf##bits##_Shdr* symtab,                                                  \
+                                             char*             strBegin,                                                \
+                                             void*             begin,                                                   \
+                                             bool              littleEndian) {                                          \
+    void* symtabBegin = begin + ELF_TO_HOST(bits, symtab->sh_offset, littleEndian);                                     \
+    uint64_t count = ELF_TO_HOST(bits, symtab->sh_size, littleEndian) / sizeof(Elf##bits##_Sym);                        \
+    Elf##bits##_Sym* entry = symtabBegin;                                                                               \
+    for (uint64_t i = 0; i < count; ++i, ++entry) {                                                                     \
+        if (ELF##bits##_ST_TYPE(entry->st_info) == STT_FUNC && ELF_TO_HOST(bits, entry->st_value, littleEndian) != 0) { \
+            struct function f = {                                                                                       \
+                .startAddress = ELF_TO_HOST(bits, entry->st_value, littleEndian),                                       \
+                .linkedName   = strdup(strBegin + ELF_TO_HOST(32, entry->st_name, littleEndian)),                       \
+                .length       = ELF_TO_HOST(bits, entry->st_size, littleEndian)                                         \
+            };                                                                                                          \
+            elfFile_addFunction(self, f);                                                                               \
+        }                                                                                                               \
+    }                                                                                                                   \
+    return true;                                                                                                        \
 }
 
 elfFile_parseSymtab(32)
 elfFile_parseSymtab(64)
 
-#define elfFile_sectionToLCSSection(bits)                                                                     \
-static inline struct lcs_section elfFile_sectionToLCSSection##bits(void* buffer, Elf##bits##_Shdr* section) { \
-    return (struct lcs_section) {                                                                             \
-        .content = buffer + section->sh_offset,                                                               \
-        .size = section->sh_size                                                                              \
-    };                                                                                                        \
+#define elfFile_sectionToLCSSection(bits)                                                            \
+static inline struct lcs_section elfFile_sectionToLCSSection##bits(void*             buffer,         \
+                                                                   Elf##bits##_Shdr* section,        \
+                                                                   bool              littleEndian) { \
+    return (struct lcs_section) {                                                                    \
+        .content = buffer + ELF_TO_HOST(bits, section->sh_offset, littleEndian),                     \
+        .size = ELF_TO_HOST(bits, section->sh_size, littleEndian)                                    \
+    };                                                                                               \
 }
 
 elfFile_sectionToLCSSection(32)
 elfFile_sectionToLCSSection(64)
 
 #define elfFile_loadShnum(bits) \
-static inline uint64_t elfFile_loadShnum##bits(Elf##bits##_Ehdr* buffer) {         \
-    uint64_t shnum = buffer->e_shnum;                                              \
-                                                                                   \
-    if (shnum == 0) {                                                              \
-        if (buffer->e_shoff == 0) {                                                \
-            return shnum;                                                          \
-        }                                                                          \
-        shnum = ((Elf##bits##_Shdr*) ((void*) buffer + buffer->e_shoff))->sh_size; \
-    }                                                                              \
-    return shnum;                                                                  \
+static inline uint64_t elfFile_loadShnum##bits(Elf##bits##_Ehdr* buffer, bool littleEndian) {                                   \
+    uint64_t shnum = ELF_TO_HOST(16, buffer->e_shnum, littleEndian);                                                            \
+                                                                                                                                \
+    if (shnum == 0) {                                                                                                           \
+        if (ELF_TO_HOST(bits, buffer->e_shoff, littleEndian) == 0) {                                                            \
+            return shnum;                                                                                                       \
+        }                                                                                                                       \
+        shnum = ELF_TO_HOST(bits,                                                                                               \
+                            ((Elf##bits##_Shdr*) ((void*) buffer + ELF_TO_HOST(bits, buffer->e_shoff, littleEndian)))->sh_size, \
+                            littleEndian);                                                                                      \
+    }                                                                                                                           \
+    return shnum;                                                                                                               \
 }
 
 elfFile_loadShnum(32)
 elfFile_loadShnum(64)
 
-#define elfFile_parseFileImpl(bits)                                                             \
-static inline bool elfFile_parseFile##bits (struct elfFile* self, Elf##bits##_Ehdr* buffer) {   \
-    if (buffer->e_shoff == 0) return false;                                                     \
-                                                                                                \
-    char* sectStrBegin = elfFile_loadSectionStrtab##bits(buffer);                               \
-    if (sectStrBegin == NULL) return false;                                                     \
-                                                                                                \
-    void* sectBegin = (void*) buffer + buffer->e_shoff;                                         \
-    Elf##bits##_Shdr* strtab   = NULL,                                                          \
-                    * symtab   = NULL,                                                          \
-                    * dystrtab = NULL,                                                          \
-                    * dysymtab = NULL;                                                          \
-    uint16_t shnum = elfFile_loadShnum##bits(buffer);                                           \
-    for (uint16_t i = 0; i < shnum; ++i) {                                                      \
-        Elf##bits##_Shdr* current = sectBegin + i * buffer->e_shentsize;                        \
-        if (strcmp(".debug_line", sectStrBegin + current->sh_name) == 0) {                      \
-            self->debugLine = elfFile_sectionToLCSSection##bits(buffer, current);               \
-            continue;                                                                           \
-        } else if (strcmp(".debug_str", sectStrBegin + current->sh_name) == 0) {                \
-            self->debugStr = elfFile_sectionToLCSSection##bits(buffer, current);                \
-            continue;                                                                           \
-        } else if (strcmp(".debug_line_str", sectStrBegin + current->sh_name) == 0) {           \
-            self->debugLineStr = elfFile_sectionToLCSSection##bits(buffer, current);            \
-            continue;                                                                           \
-        }                                                                                       \
-        switch (current->sh_type) {                                                             \
-            case SHT_SYMTAB:                                                                    \
-                symtab = current;                                                               \
-                break;                                                                          \
-                                                                                                \
-            case SHT_DYNSYM:                                                                    \
-                dysymtab = current;                                                             \
-                break;                                                                          \
-                                                                                                \
-            case SHT_STRTAB:                                                                    \
-                if (strcmp(".strtab", sectStrBegin + current->sh_name) == 0) {                  \
-                    strtab = current;                                                           \
-                } else if (strcmp(".dynstr", sectStrBegin + current->sh_name) == 0) {           \
-                    dystrtab = current;                                                         \
-                }                                                                               \
-                break;                                                                          \
-        }                                                                                       \
-    }                                                                                           \
-    if (symtab == NULL || strtab == NULL) {                                                     \
-        if (dystrtab == NULL || dysymtab == NULL) {                                             \
-            return false;                                                                       \
-        }                                                                                       \
-        symtab = dysymtab;                                                                      \
-        strtab = dystrtab;                                                                      \
-    }                                                                                           \
-                                                                                                \
-    return elfFile_parseSymtab##bits(self, symtab, (void*) buffer + strtab->sh_offset, buffer); \
+#define elfFile_parseFileImpl(bits)                                                                                  \
+static inline bool elfFile_parseFile##bits (struct elfFile* self, Elf##bits##_Ehdr* buffer, bool littleEndian) {     \
+    if (ELF_TO_HOST(bits, buffer->e_shoff, littleEndian) == 0) return false;                                         \
+                                                                                                                     \
+    char* sectStrBegin = elfFile_loadSectionStrtab##bits(buffer, littleEndian);                                      \
+    if (sectStrBegin == NULL) return false;                                                                          \
+                                                                                                                     \
+    void* sectBegin = (void*) buffer + ELF_TO_HOST(bits, buffer->e_shoff, littleEndian);                             \
+    Elf##bits##_Shdr* strtab   = NULL,                                                                               \
+                    * symtab   = NULL,                                                                               \
+                    * dystrtab = NULL,                                                                               \
+                    * dysymtab = NULL;                                                                               \
+    uint16_t shnum = elfFile_loadShnum##bits(buffer, littleEndian);                                                  \
+    for (uint16_t i = 0; i < shnum; ++i) {                                                                           \
+        Elf##bits##_Shdr* current = sectBegin + i * ELF_TO_HOST(16, buffer->e_shentsize, littleEndian);              \
+        if (strcmp(".debug_line", sectStrBegin + ELF_TO_HOST(32, current->sh_name, littleEndian)) == 0) {            \
+            self->debugLine = elfFile_sectionToLCSSection##bits(buffer, current, littleEndian);                      \
+            continue;                                                                                                \
+        } else if (strcmp(".debug_str", sectStrBegin + ELF_TO_HOST(32, current->sh_name, littleEndian)) == 0) {      \
+            self->debugStr = elfFile_sectionToLCSSection##bits(buffer, current, littleEndian);                       \
+            continue;                                                                                                \
+        } else if (strcmp(".debug_line_str", sectStrBegin + ELF_TO_HOST(32, current->sh_name, littleEndian)) == 0) { \
+            self->debugLineStr = elfFile_sectionToLCSSection##bits(buffer, current, littleEndian);                   \
+            continue;                                                                                                \
+        }                                                                                                            \
+        switch (ELF_TO_HOST(32, current->sh_type, littleEndian)) {                                                   \
+            case SHT_SYMTAB:                                                                                         \
+                symtab = current;                                                                                    \
+                break;                                                                                               \
+                                                                                                                     \
+            case SHT_DYNSYM:                                                                                         \
+                dysymtab = current;                                                                                  \
+                break;                                                                                               \
+                                                                                                                     \
+            case SHT_STRTAB:                                                                                         \
+                if (strcmp(".strtab", sectStrBegin + ELF_TO_HOST(32, current->sh_name, littleEndian)) == 0) {        \
+                    strtab = current;                                                                                \
+                } else if (strcmp(".dynstr", sectStrBegin + ELF_TO_HOST(32, current->sh_name, littleEndian)) == 0) { \
+                    dystrtab = current;                                                                              \
+                }                                                                                                    \
+                break;                                                                                               \
+        }                                                                                                            \
+    }                                                                                                                \
+    if (symtab == NULL || strtab == NULL) {                                                                          \
+        if (dystrtab == NULL || dysymtab == NULL) {                                                                  \
+            return false;                                                                                            \
+        }                                                                                                            \
+        symtab = dysymtab;                                                                                           \
+        strtab = dystrtab;                                                                                           \
+    }                                                                                                                \
+                                                                                                                     \
+    return elfFile_parseSymtab##bits(self,                                                                           \
+                                     symtab,                                                                         \
+                                     (void*) buffer + ELF_TO_HOST(bits, strtab->sh_offset, littleEndian),            \
+                                     buffer,                                                                         \
+                                     littleEndian);                                                                  \
 }
 
 elfFile_parseFileImpl(32)
 elfFile_parseFileImpl(64)
 
 bool elfFile_parseFile(struct elfFile* self, void* buffer, dwarf_line_callback cb, void* args) {
-    // TODO: Care about EI_DATA
-
     bool success = false;
     unsigned char* e_ident = buffer;
     switch (e_ident[EI_CLASS]) {
-        case ELFCLASS32: success = elfFile_parseFile32(self, buffer); break;
-        case ELFCLASS64: success = elfFile_parseFile64(self, buffer); break;
+        case ELFCLASS32: success = elfFile_parseFile32(self, buffer, e_ident[EI_DATA] == ELFDATA2LSB); break;
+        case ELFCLASS64: success = elfFile_parseFile64(self, buffer, e_ident[EI_DATA] == ELFDATA2LSB); break;
     }
 
     if (success && self->debugLine.size > 0) {
