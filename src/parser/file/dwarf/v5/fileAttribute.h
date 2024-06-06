@@ -24,11 +24,21 @@
 
 #include <stdint.h>
 
+/**
+ * @brief This structure represents a DWARF 5 file attribute.
+ *
+ * Unavailable fields are set to `0` and `NULL`, respectively.
+ */
 struct fileAttribute {
+    /** The path name.                          */
     char*    path;
+    /** The directory index.                    */
     uint64_t index;
+    /** The timestamp of the last modification. */
     uint64_t timestamp;
+    /** The size of the file entity.            */
     uint64_t size;
+    /** The MD5 hash of the file entity.        */
     uint8_t* md5;
 };
 

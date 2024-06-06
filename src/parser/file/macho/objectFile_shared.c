@@ -30,6 +30,14 @@
 #include "macho_parser.h"
 #include "macho_utils.h"
 
+/**
+ * Handles the given section.
+ *
+ * @param self the object file object
+ * @param section the translated section to handle
+ * @param segname the segment name the section is found in
+ * @param sectname the section's name
+ */
 static inline void objectFile_handleSection(struct objectFile* self,
                                             struct lcs_section section,
                                             const char*        segname,
