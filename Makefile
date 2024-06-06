@@ -119,7 +119,7 @@ ifeq ($(CXX_FUNCTIONS),true)
 endif
 
 ifeq ($(shell uname -s),Darwin)
-	LDFLAGS += -current_version 1.1 -compatibility_version 1
+	LDFLAGS += -current_version 1.2 -compatibility_version 1
 	OBJS    += $(DARWIN_OBJS)
 	DEPS    += $(DARWIN_DEPS)
 
