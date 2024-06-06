@@ -32,13 +32,14 @@
  * Represents the deducted information about the source file.
  */
 struct sourceFileInfo {
-    /** The line number.               */
+    /** The line number.                     */
     uint64_t line;
-    /** The column number.             */
+    /** The column number.                   */
     uint64_t column;
     
-    /** The deducted source file name. */
+    /** The deducted source file name.       */
     const char* sourceFile;
+    /** Whether the source file is outdated. */
     bool outdated;
 };
 

@@ -55,8 +55,11 @@ struct objectFile {
     /** The UUID of the represented Mach-O object file.         */
     uint8_t uuid[16];
     
+    /** The __debug_line section of the object file.            */
     struct lcs_section debugLine;
+    /** The __debug_line_str section of the object file.        */
     struct lcs_section debugLineStr;
+    /** The __debug_str section of the object file.             */
     struct lcs_section debugStr;
 
     /** Whether the file was successfully parsed.               */

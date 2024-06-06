@@ -146,6 +146,12 @@ struct binaryFile* binaryFile_findOrAddFile(const char* fileName, void* startAdd
  */
 void binaryFile_clearCaches(void);
 
+/**
+ * Returns whether the given source file is outdated, that is, whether it has been edited since being referred.
+ *
+ * @param file the file information to be checked
+ * @return whether the file is outdated
+ */
 bool binaryFile_isOutdated(struct dwarf_sourceFile file);
 
 #ifdef __cplusplus
