@@ -25,10 +25,16 @@
 
 #include "../../loader.h"
 
+/**
+ * This class represents an ELF file.
+ */
 class ElfFile {
+    /** The shared part of the ELF file abstraction.             */
     elfFile self;
 
+    /** Mapping the address to its appropriate line table entry. */
     std::map<uint64_t, dwarf_lineInfo, std::greater<uint64_t>> lineInfos;
+    /** Mapping the address to its appropriate function.         */
     std::map<uint64_t, function, std::greater<uint64_t>> functions;
 
 public:
@@ -47,6 +53,14 @@ public:
         }
     }
 
+    /**
+     * @brief Adds the given function object.
+     *
+     * If a function object with the same address exists, the given function is
+     * discarded.
+     *
+     * @param f the function object to be added
+     */
     inline void addFunction(const function& f) {
         if (functions.find(f.startAddress) == functions.end()) {
             functions.emplace(std::make_pair(f.startAddress, f));
@@ -55,6 +69,11 @@ public:
         }
     }
 
+    /**
+     * Loads and parses the represented binary file.
+     *
+     * @return whether the loading and parsing was successful
+     */
     inline auto loadFile() -> bool {
         return loader_loadFileAndExecute(self._.fileName, {
             .parseFunc = [](auto arg, auto buffer) {
@@ -73,6 +92,12 @@ public:
         }, false, this);
     }
 
+    /**
+     * Retrieves the debug information available for the given address.
+     *
+     * @param address the address to find debug information for
+     * @return the optionally found debug information
+     */
     inline auto getDebugInfo(void* address) -> optional_debugInfo_t {
         optional_debugInfo_t info;
         info.has_value = false;
