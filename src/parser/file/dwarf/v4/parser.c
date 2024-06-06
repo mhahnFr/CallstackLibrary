@@ -23,6 +23,13 @@
 
 #include "../dwarf_parser.h"
 
+/**
+ * Parses the line number program header in version 2, 3 or 4.
+ *
+ * @param self the generified parser object
+ * @param counter the byte index
+ * @return whether the parsing was successful
+ */
 static inline bool dwarf4_parseLineProgramHeader(struct dwarf_parser* self, size_t* counter) {
     uint64_t headerLength;
     if (self->bit64) {
@@ -70,6 +77,13 @@ static inline bool dwarf4_parseLineProgramHeader(struct dwarf_parser* self, size
     return true;
 }
 
+/**
+ * Constructs the full file name for the given file name entry using the given include directories.
+ *
+ * @param file the file name entry whose full path to construct
+ * @param directories the included directories
+ * @return an allocated full path string of the given file or `NULL` if the allocation failed or the main source file was referred
+ */
 static inline char* dwarf4_stringFrom(struct dwarf_fileNameEntry* file, struct vector_string* directories) {
     if (file->dirIndex == 0) {
         return file->name == NULL ? NULL : strdup(file->name);
@@ -87,6 +101,13 @@ static inline char* dwarf4_stringFrom(struct dwarf_fileNameEntry* file, struct v
     return toReturn;
 }
 
+/**
+ * Constructs a file reference for the given file index.
+ *
+ * @param self the generified parser object, the specific part for version 4 and earlier is used
+ * @param file the index of the desired file
+ * @return the source file reference
+ */
 static inline struct dwarf_sourceFile dwarf4_parser_getFileName(struct dwarf_parser* self, uint64_t file) {
     struct dwarf_fileNameEntry* filePtr = file == 0 ? NULL : &self->specific.v4.fileNames.content[file - 1];
     return (struct dwarf_sourceFile) {
@@ -96,6 +117,11 @@ static inline struct dwarf_sourceFile dwarf4_parser_getFileName(struct dwarf_par
     };
 }
 
+/**
+ * Destroys the version 4 and earlier specific part of the given DWARF parser.
+ *
+ * @param self the generified parser object
+ */
 static inline void dwarf4_parser_destroy(struct dwarf_parser* self) {
     vector_string_destroy(&self->specific.v4.includeDirectories);
     vector_dwarfFileEntry_destroy(&self->specific.v4.fileNames);
