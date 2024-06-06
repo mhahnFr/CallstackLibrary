@@ -264,25 +264,21 @@ in: (a.out) _start + 33
 The generated callstacks are generally symbolized using the information obtained by the dynamic loader (hence the
 dependency of the `libdl`).
 
+The DWARF parser supports **DWARF** in version **2**, **3**, **4** and **5**.
+
+> [!TIP]
+> Usually the appropriate compilation flag for debug symbols is `-g`.
+
 ### macOS
 On macOS the debug information available in the Mach-O binaries is used. The following kinds of debug symbols are supported:
 - `.dSYM` bundles
 - `Mach-O` debug symbol maps (DWARF inside the object files)
 
-> [!NOTE]
-> The parser currently supports DWARF in version 4.
-
-> [!TIP]
-> Usually the appropriate compilation flag for debug symbols is `-g`.
-
-### Linux and FreeBSD
-Currently only the information obtained by the dynamic loader is available on Linux and FreeBSD.
-
-> [!TIP]
-> For the best results, link your code with the flag `-rdynamic`.
+### Linux
+On Linux the debug information available in the ELF binaries is used.
 
 ## Final notes
-This library is licensed under the terms of the GPL 3.0.
+This library is licensed under the terms of the GNU GPL in version 3 or later.
 
 © Copyright 2022 - 2024 [mhahnFr][4]
 
