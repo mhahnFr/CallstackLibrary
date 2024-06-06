@@ -174,7 +174,7 @@ public:
         const callstack_frame * frames = callstack_toArray(cs);
         for (std::size_t i = 0; i < callstack_getFrameCount(cs); ++i) {
             out << (i == 0 ? "At" : "in") << ": "
-                << "(" << callstack_frame_getShortestName(&frames[i]) << ") "
+                << "(" << callstack_frame_getShortestNameOr(&frames[i], "<< Unknown >>") << ") "
                 << (frames[i].function == LCS_NULL ? "<< Unknown >>" : frames[i].function)
                 << (frames[i].sourceFile == LCS_NULL ? ""
                     : (" (" + std::string(callstack_frame_getShortestSourceFile(&frames[i])) + ":" + toString(frames[i].sourceLine) + ")"))
