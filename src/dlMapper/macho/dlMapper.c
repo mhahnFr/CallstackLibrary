@@ -84,7 +84,6 @@ static inline pair_address_t dlMapper_platform_loadMachO(const struct mach_heade
 bool dlMapper_platform_loadLoadedLibraries(vector_loadedLibInfo_t* libs) {
     const uint32_t count = _dyld_image_count();
     for (uint32_t i = 0; i < count; ++i) {
-        const intptr_t vmaddr = _dyld_get_image_vmaddr_slide(i);
         const pair_address_t addresses = dlMapper_platform_loadMachO(_dyld_get_image_header(i));
         vector_loadedLibInfo_push_back(libs, (struct loadedLibInfo) {
             addresses.first,
