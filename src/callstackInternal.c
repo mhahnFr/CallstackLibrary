@@ -28,6 +28,7 @@
 #include "lcs_builtins.h"
 
 #include "parser/callstack_parser.h"
+#include "dlMapper/dlMapper.h"
 
 void callstack_createWithBacktrace(struct callstack * self,
                                    void * trace[], size_t traceLength) {
@@ -70,14 +71,16 @@ enum callstack_type callstack_translateBinaries(struct callstack * self) {
         return FAILED;
     }
     self->frameCount = self->backtraceSize;
-    
+
+    dlMapper_init();
     for (size_t i = 0; i < self->backtraceSize; ++i) {
-        callstack_frame_create(&self->frames[i]);
-        const bool success = self->frames[i].info.has_value
-                           = dladdr(self->backtrace[i], &self->frames[i].info.value);
-        const char* absolutePath = success ? self->frames[i].info.value.dli_fname : NULL;
-        self->frames[i].binaryFile = success ? binaryFile_toAbsolutePath((char *) absolutePath) : NULL;
-        self->frames[i].binaryFileRelative = success ? binaryFile_toRelativePath((char *) absolutePath) : NULL;
+        struct callstack_frame* element = &self->frames[i];
+
+        callstack_frame_create(element);
+
+        element->info = dlMapper_libInfoForAddress(self->backtrace[i]);
+        element->binaryFile = element->info.has_value ? binaryFile_toAbsolutePath(element->info.value.fileName) : NULL;
+        element->binaryFileRelative = element->info.has_value ? binaryFile_toRelativePath(element->info.value.fileName) : NULL;
     }
     return TRANSLATED;
 }
