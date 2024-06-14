@@ -22,8 +22,8 @@
 #ifndef __lcs_callstack_frame_h
 #define __lcs_callstack_frame_h
 
-#include "optional_Dl_info.h"
 #include "optional_ulong.h"
+#include "optional_loadedLibInfo.h"
 
 #ifdef __cplusplus
 extern "C" {
@@ -38,9 +38,8 @@ extern "C" {
  * @since v1.1
  */
 struct callstack_frame {
-    /** The dynamic loader info if available.                */
-    optional_Dl_info_t info;
-    
+    optional_loadedLibInfo_t info;
+
     /** The name of the binary file this frame is in.        */
     char * binaryFile;
     /** The relative path of the name of the binary file.    */
@@ -80,7 +79,7 @@ static inline void callstack_frame_create(struct callstack_frame * self) {
     self->sourceFileOutdated = false;
 
     self->sourceLineColumn.has_value = false;
-    
+
     self->info.has_value = false;
 }
 

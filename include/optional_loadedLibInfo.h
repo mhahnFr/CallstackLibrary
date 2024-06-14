@@ -22,9 +22,9 @@
 #ifndef optional_loadedLibInfo_h
 #define optional_loadedLibInfo_h
 
-#include <optional.h>
-
 #include "loadedLibInfo.h"
+
+#include "../DC4C/optional.h"
 
 typedef_optional_named(loadedLibInfo, struct loadedLibInfo);
 
