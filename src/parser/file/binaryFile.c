@@ -38,7 +38,7 @@
 /** A list of the already parsed files. */
 static struct binaryFile* parsedFiles = NULL;
 
-struct binaryFile * binaryFile_new(const char * fileName, void* startAddress) {
+struct binaryFile* binaryFile_new(const char* fileName, const void* startAddress) {
     struct binaryFile * toReturn;
     
 #ifdef LCS_MACHO
@@ -126,7 +126,7 @@ char * binaryFile_toAbsolutePathFree(char * path) {
     return binaryFile_toAbsolutePathIntern(path, true);
 }
 
-struct binaryFile* binaryFile_findOrAddFile(const char* fileName, void* startAddress) {
+struct binaryFile* binaryFile_findOrAddFile(const char* fileName, const void* startAddress) {
     struct binaryFile* it;
     for (it = parsedFiles; it != NULL && strcmp(it->fileName, fileName) != 0; it = it->next);
     

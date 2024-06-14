@@ -58,8 +58,8 @@ struct binaryFile {
     const char * fileName;
     
     /** The start address in memory of the represented binary file. */
-    void* startAddress;
-    
+    const void* startAddress;
+
     /** A pointer to the next binary file structure.                */
     struct binaryFile * next;
     
@@ -84,7 +84,7 @@ struct binaryFile {
  * @param fileName the name of the represented binary file
  * @param startAddress the start address of the represented binary file
  */
-struct binaryFile* binaryFile_new(const char* fileName, void* startAddress);
+struct binaryFile* binaryFile_new(const char* fileName, const void* startAddress);
 
 /**
  * Initializes the given binary file structure.
@@ -139,7 +139,7 @@ char * binaryFile_toAbsolutePathFree(char * path);
  * @param startAddress the start address
  * @return the binary file object or `NULL` if unable to allocate
  */
-struct binaryFile* binaryFile_findOrAddFile(const char* fileName, void* startAddress);
+struct binaryFile* binaryFile_findOrAddFile(const char* fileName, const void* startAddress);
 
 /**
  * Clears the caches created by the binary file implementations.
