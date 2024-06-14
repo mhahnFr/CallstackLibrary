@@ -19,6 +19,8 @@
  * CallstackLibrary, see the file LICENSE.  If not, see <https://www.gnu.org/licenses/>.
  */
 
+#include <dlfcn.h>
+#include <stdio.h>
 #include <string.h>
 #include <mach-o/dyld.h>
 
@@ -81,8 +83,25 @@ static inline pair_address_t dlMapper_platform_loadMachO(const struct mach_heade
     return (struct pair_address) { header, end };
 }
 
+static inline void* dlMapper_platform_getFileAddress(void* handle, const char* fileName, const char* symbolName) {
+    void* symbol = dlsym(handle, symbolName);
+    if (symbol == NULL) {
+        return NULL;
+    }
+    Dl_info info;
+    int success = dladdr(symbol, &info);
+    if (success == 0) {
+        return NULL;
+    }
+    if (strcmp(info.dli_fname, fileName) != 0) {
+        return NULL;
+    }
+    return info.dli_fbase;
+}
+
 bool dlMapper_platform_loadLoadedLibraries(vector_loadedLibInfo_t* libs) {
     const uint32_t count = _dyld_image_count();
+    vector_loadedLibInfo_reserve(libs, count + 1);
     for (uint32_t i = 0; i < count; ++i) {
         const pair_address_t addresses = dlMapper_platform_loadMachO(_dyld_get_image_header(i));
         vector_loadedLibInfo_push_back(libs, (struct loadedLibInfo) {
@@ -91,5 +110,44 @@ bool dlMapper_platform_loadLoadedLibraries(vector_loadedLibInfo_t* libs) {
             strdup(_dyld_get_image_name(i))
         });
     }
+
+    /*
+     * The following handling loads the dyld of macOS. It is not officially
+     * loaded, though it is persistently in memory (the dyld loaded us and will
+     * unload us later on) and cannot be unloaded.
+     *
+     * We try to look up some commonly exported functions. If this succeeds,
+     * the dyld will tell us its base address.
+     *                                                          - mhahnFr
+     */
+    const char* dyldName = "/usr/lib/dyld";
+    void* handle = dlopen(dyldName, RTLD_LAZY | RTLD_LOCAL | RTLD_FIRST);
+
+    const void* dyldStart = NULL;
+    const char* guesses[] = {
+        "lldb_image_notifier",
+        "_dyld_start",
+        "_dyld_debugger_notification",
+        "gdb_image_notifier",
+        NULL
+    };
+    for (const char** it = guesses; it != NULL; ++it) {
+        dyldStart = dlMapper_platform_getFileAddress(handle, dyldName, *it);
+        if (dyldStart != NULL) break;
+    }
+
+    if (dyldStart == NULL) {
+        // TODO: Load from file, try it with symbols from the dysymtab
+        printf("LCS: Warning: Could not find /usr/lib/dyld in memory.");
+    } else {
+        const pair_address_t addresses = dlMapper_platform_loadMachO(dyldStart);
+        vector_loadedLibInfo_push_back(libs, (struct loadedLibInfo) {
+            addresses.first,
+            addresses.second,
+            strdup(dyldName)
+        });
+    }
+
+    dlclose(handle);
     return true;
 }
