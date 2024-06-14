@@ -23,6 +23,8 @@ CXX_FUNCTIONS = false
 CXX_OPTIMIZED = false
 USE_BUILTINS  = true
 
+FORCE_DYNAMIC_FLAG = false
+
 # Library names
 CORE_NAME = libcallstack
 DYLIB_N   = $(CORE_NAME).dylib
@@ -158,6 +160,10 @@ $(DYLIB_N): $(OBJS)
 
 $(SHARED_N): $(OBJS)
 	$(LD) -shared -fPIC $(LDFLAGS) -o $(SHARED_N) $(OBJS)
+
+ifeq ($(FORCE_DYNAMIC_FLAG),true)
+$(STATIC_N): COM_FLAGS += -DLCS_BUILD_DYLIB
+endif
 
 $(STATIC_N): $(OBJS)
 	$(AR) -crs $(STATIC_N) $(OBJS)
