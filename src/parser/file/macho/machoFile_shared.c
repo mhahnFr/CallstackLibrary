@@ -66,7 +66,7 @@ void machoFile_create(struct machoFile* self, const char* fileName) {
     self->text_vmaddr      = 0;
     self->linkedit_vmaddr  = 0;
     self->priv             = NULL;
-    self->inMemory         = macho_cache_isLoaded(self);
+    self->inMemory         = macho_cache_isLoaded(self); // TODO: We have this info already!
     
     self->dSYMFile.triedParsing = false;
     self->dSYMFile.file         = NULL;
@@ -229,9 +229,9 @@ static inline void machoFile_addFunctionImpl(struct pair_funcFile function, va_l
  * @return whether the parsing was successfull
  */
 static inline bool machoFile_parseFileImpl(struct machoFile * self,
-                                           void *             baseAddress,
+                                           const void*        baseAddress,
                                            bool               bitsReversed) {
-    struct mach_header *  header = baseAddress;
+    const struct mach_header* header = baseAddress;
     struct load_command * lc     = (void *) header + sizeof(struct mach_header);
     const  uint32_t       ncmds  = macho_maybeSwap(32, bitsReversed, header->ncmds);
     
@@ -270,9 +270,9 @@ static inline bool machoFile_parseFileImpl(struct machoFile * self,
  * @return whether the parsing was successfull
  */
 static inline bool machoFile_parseFileImpl64(struct machoFile * self,
-                                             void *             baseAddress,
+                                             const void*        baseAddress,
                                              bool               bitsReversed) {
-    struct mach_header_64 * header = baseAddress;
+    const struct mach_header_64* header = baseAddress;
     struct load_command *   lc     = (void *) header + sizeof(struct mach_header_64);
     const  uint32_t         ncmds  = macho_maybeSwap(32, bitsReversed, header->ncmds);
     
@@ -302,10 +302,10 @@ static inline bool machoFile_parseFileImpl64(struct machoFile * self,
     return true;
 }
 
-bool machoFile_parseFile(struct machoFile * self, void * baseAddress) {
+bool machoFile_parseFile(struct machoFile* self, const void* baseAddress) {
     if (baseAddress == NULL) return false;
     
-    struct mach_header * header = baseAddress;
+    const struct mach_header* header = baseAddress;
     switch (header->magic) {
         case MH_MAGIC:    return machoFile_parseFileImpl(self, baseAddress, false);
         case MH_CIGAM:    return machoFile_parseFileImpl(self, baseAddress, true);
