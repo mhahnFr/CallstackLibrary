@@ -152,6 +152,7 @@ uninstall:
 	- $(RM) -r "$(INSTALL_PATH)/include/CallstackLibrary"
 	- $(RM) -r "$(INSTALL_PATH)/include/DC4C"
 
+$(DYLIB_N): COM_FLAGS += -DLCS_BUILD_DYLIB
 $(DYLIB_N): $(OBJS)
 	$(LD) -dynamiclib $(LDFLAGS) -o $(DYLIB_N) $(OBJS)
 

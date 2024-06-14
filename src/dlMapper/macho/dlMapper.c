@@ -23,6 +23,7 @@
 #include <stdio.h>
 #include <string.h>
 #include <mach-o/dyld.h>
+#include <mach-o/ldsyms.h>
 
 #include "pair_address.h"
 
@@ -100,6 +101,14 @@ static inline void* dlMapper_platform_getFileAddress(void* handle, const char* f
 }
 
 bool dlMapper_platform_loadLoadedLibraries(vector_loadedLibInfo_t* libs) {
+    const void* ourStart;
+
+#ifdef LCS_BUILD_DYLIB
+    ourStart = &_mh_dylib_header;
+#else
+    ourStart = NULL;
+#endif
+
     const uint32_t count = _dyld_image_count();
     vector_loadedLibInfo_reserve(libs, count + 1);
     for (uint32_t i = 0; i < count; ++i) {
@@ -107,7 +116,8 @@ bool dlMapper_platform_loadLoadedLibraries(vector_loadedLibInfo_t* libs) {
         vector_loadedLibInfo_push_back(libs, (struct loadedLibInfo) {
             addresses.first,
             addresses.second,
-            strdup(_dyld_get_image_name(i))
+            strdup(_dyld_get_image_name(i)),
+            addresses.first == ourStart
         });
     }
 
@@ -144,7 +154,8 @@ bool dlMapper_platform_loadLoadedLibraries(vector_loadedLibInfo_t* libs) {
         vector_loadedLibInfo_push_back(libs, (struct loadedLibInfo) {
             addresses.first,
             addresses.second,
-            strdup(dyldName)
+            strdup(dyldName),
+            false
         });
     }
 
