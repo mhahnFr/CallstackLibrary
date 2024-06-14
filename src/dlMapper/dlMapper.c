@@ -37,15 +37,19 @@ bool dlMapper_init(void) {
     return result;
 }
 
-const char* dlMapper_fileNameForAddress(const void* address) {
-    if (!dlMapper_inited) return NULL;
+optional_loadedLibInfo_t dlMapper_libInfoForAddress(const void* address) {
+    if (!dlMapper_inited) return (optional_loadedLibInfo_t) { .has_value = false };
 
-    vector_iterate(struct loadedLibInfo, &loadedLibs, {
+    for (size_t i = 0; i < loadedLibs.count; ++i) {
+        struct loadedLibInfo* element = &loadedLibs.content[i];
+
         if (address >= element->begin && address < element->end) {
-            return element->fileName;
+            return (optional_loadedLibInfo_t) {
+                true, *element
+            };
         }
-    })
-    return NULL;
+    }
+    return (optional_loadedLibInfo_t) { .has_value = false };
 }
 
 void dlMapper_deinit(void) {
