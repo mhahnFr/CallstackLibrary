@@ -101,7 +101,7 @@ void binaryFile_create(struct binaryFile * self);
  * @param path the path to create a relative one from
  * @return a newly allocated relative path
  */
-char * binaryFile_toRelativePath(char * path);
+char* binaryFile_toRelativePath(const char* path);
 /**
  * @brief Converts the given path to a relative path and frees the given path.
  *
@@ -110,7 +110,7 @@ char * binaryFile_toRelativePath(char * path);
  * @param path the path to create a relative one from
  * @return a newly allocated relative path
  */
-char * binaryFile_toRelativePathFree(char * path);
+char* binaryFile_toRelativePathFree(char* path);
 /**
  * @brief Converts the given path to an absolute path.
  *
@@ -119,7 +119,7 @@ char * binaryFile_toRelativePathFree(char * path);
  * @param path the path to create an absolute one from
  * @return a newly allocated absolute path
  */
-char * binaryFile_toAbsolutePath(char * path);
+char* binaryFile_toAbsolutePath(const char* path);
 /**
  * @brief Converts the given path to an absolute path and frees the given path.
  *
@@ -128,7 +128,7 @@ char * binaryFile_toAbsolutePath(char * path);
  * @param path the path to create an absolute one from
  * @return a newly allocated absolute path
  */
-char * binaryFile_toAbsolutePathFree(char * path);
+char* binaryFile_toAbsolutePathFree(char* path);
 
 /**
  * @brief Finds the appropriate binary file object in the cache.

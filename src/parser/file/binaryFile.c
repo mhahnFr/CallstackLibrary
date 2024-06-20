@@ -87,8 +87,8 @@ static inline char * binaryFile_toRelativePathIntern(char * path, bool f) {
     return toReturn;
 }
 
-char * binaryFile_toRelativePath(char * path) {
-    return binaryFile_toRelativePathIntern(path, false);
+char* binaryFile_toRelativePath(const char* path) {
+    return binaryFile_toRelativePathIntern((char*) path, false);
 }
 
 char * binaryFile_toRelativePathFree(char * path) {
@@ -118,8 +118,8 @@ static inline char * binaryFile_toAbsolutePathIntern(char * path, bool f) {
     return toReturn;
 }
 
-char * binaryFile_toAbsolutePath(char * path) {
-    return binaryFile_toAbsolutePathIntern(path, false);
+char* binaryFile_toAbsolutePath(const char* path) {
+    return binaryFile_toAbsolutePathIntern((char*) path, false);
 }
 
 char * binaryFile_toAbsolutePathFree(char * path) {
