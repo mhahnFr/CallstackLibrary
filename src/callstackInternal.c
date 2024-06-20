@@ -79,8 +79,8 @@ enum callstack_type callstack_translateBinaries(struct callstack * self) {
         callstack_frame_create(element);
 
         element->info = dlMapper_libInfoForAddress(self->backtrace[i]);
-        element->binaryFile = element->info.has_value ? binaryFile_toAbsolutePath(element->info.value.fileName) : NULL;
-        element->binaryFileRelative = element->info.has_value ? binaryFile_toRelativePath(element->info.value.fileName) : NULL;
+        element->binaryFile = element->info.has_value ? strdup(element->info.value.absoluteFileName) : NULL;
+        element->binaryFileRelative = element->info.has_value ? strdup(element->info.value.relativeFileName) : NULL;
     }
     return TRANSLATED;
 }

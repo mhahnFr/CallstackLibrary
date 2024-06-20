@@ -29,6 +29,7 @@
 
 #include "../dlMapper_platform.h"
 
+#include "../../parser/file/binaryFile.h"
 #include "../../parser/file/macho/macho_utils.h"
 
 static inline const void* dlMapper_platform_loadMachO64(const struct mach_header_64* header, const bool bytesSwapped) {
@@ -113,18 +114,21 @@ bool dlMapper_platform_loadLoadedLibraries(vector_loadedLibInfo_t* libs) {
     vector_loadedLibInfo_reserve(libs, count + 1);
     for (uint32_t i = 0; i < count; ++i) {
         const pair_address_t addresses = dlMapper_platform_loadMachO(_dyld_get_image_header(i));
+        const char* const fileName = _dyld_get_image_name(i);
         vector_loadedLibInfo_push_back(libs, (struct loadedLibInfo) {
             addresses.first,
             addresses.second,
-            strdup(_dyld_get_image_name(i)),
+            strdup(fileName),
+            binaryFile_toAbsolutePath(fileName),
+            binaryFile_toRelativePath(fileName),
             addresses.first == ourStart
         });
     }
 
     /*
      * The following handling loads the dyld of macOS. It is not officially
-     * loaded, though it is persistently in memory (the dyld loaded us and will
-     * unload us later on) and cannot be unloaded.
+     * loaded, though it is persistently in memory (the dyld loaded us and
+     * will unload us later on) and cannot be unloaded.
      *
      * We try to look up some commonly exported functions. If this succeeds,
      * the dyld will tell us its base address.
@@ -155,6 +159,8 @@ bool dlMapper_platform_loadLoadedLibraries(vector_loadedLibInfo_t* libs) {
             addresses.first,
             addresses.second,
             strdup(dyldName),
+            binaryFile_toAbsolutePath(dyldName),
+            binaryFile_toRelativePath(dyldName),
             false
         });
     }

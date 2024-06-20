@@ -28,14 +28,18 @@ struct loadedLibInfo {
     const void* begin, *end;
 
     char* fileName;
+    char* absoluteFileName;
+    char* relativeFileName;
 
     bool isSelf;
 };
 
-#define loadedLibInfo_initializer ((struct loadedLibInfo) { NULL, NULL, NULL, false })
+#define loadedLibInfo_initializer ((struct loadedLibInfo) { NULL, NULL, NULL, NULL, NULL, false })
 
 static inline void loadedLibInfo_destroy(struct loadedLibInfo* self) {
     free(self->fileName);
+    free(self->absoluteFileName);
+    free(self->relativeFileName);
 }
 
 #endif /* loadedLibInfo_h */
