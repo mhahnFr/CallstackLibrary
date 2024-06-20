@@ -57,7 +57,7 @@ DEPS = $(patsubst %.c, %.d, $(SRCS))
 # ------------
 
 # C++ sources
-CXX_SRCS = $(shell find . -type f -name \*.cpp \! -path \*/$(OPTIMIZED_PATH)\*)
+CXX_SRCS = $(shell find ./src -type f -name \*.cpp \! -path \*/$(OPTIMIZED_PATH)\*)
 CXX_OBJS = $(patsubst %.cpp, %.o, $(CXX_SRCS))
 CXX_DEPS = $(patsubst %.cpp, %.d, $(CXX_SRCS))
 # -----------
