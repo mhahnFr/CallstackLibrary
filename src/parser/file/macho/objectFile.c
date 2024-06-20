@@ -21,13 +21,13 @@
 
 #include <stdlib.h>
 
-#include "../objectFile.h"
+#include "objectFile.h"
 
-#include "../../binaryFile.h"
-#include "../../bounds.h"
-#include "../../vector_function.h"
+#include "../binaryFile.h"
+#include "../bounds.h"
+#include "../vector_function.h"
 
-#include "../../dwarf/vector_dwarf_lineInfo.h"
+#include "../dwarf/vector_dwarf_lineInfo.h"
 
 /**
  * This structure acts as a wrapper around the object file structure.
