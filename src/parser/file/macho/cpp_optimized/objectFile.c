@@ -24,6 +24,7 @@
 #include "../objectFile.h"
 
 #include "../../binaryFile.h"
+#include "../../bounds.h"
 #include "../../vector_function.h"
 
 #include "../../dwarf/vector_dwarf_lineInfo.h"
@@ -75,6 +76,23 @@ static inline void objectFile_dwarfLineCallback(struct dwarf_lineInfo info, void
     vector_dwarfLineInfo_push_back(&self->lineInfos, info);
 }
 
+static inline int objectFile_dwarfLineInfoSortCompare(const void* lhs, const void* rhs) {
+    const struct dwarf_lineInfo* a = lhs;
+    const struct dwarf_lineInfo* b = rhs;
+
+    if (a->address < b->address) return +1;
+    if (a->address > b->address) return -1;
+
+    return 0;
+}
+
+static inline int objectFile_functionCompare(const void* lhs, const void* rhs) {
+    const struct function* a = lhs;
+    const struct function* b = rhs;
+
+    return strcmp(a->linkedName, b->linkedName);
+}
+
 /**
  * @brief Parses the represented object file.
  *
@@ -90,6 +108,9 @@ static inline bool objectFile_parseIntern(struct objectFile_private* self) {
             function_destroy(&self->ownFunctions.content[i]);
         }
         vector_function_clear(&self->ownFunctions);
+    } else {
+        qsort(self->lineInfos.content, self->lineInfos.count, sizeof(struct dwarf_lineInfo), objectFile_dwarfLineInfoSortCompare);
+        qsort(self->ownFunctions.content, self->ownFunctions.count, sizeof(struct function), objectFile_functionCompare);
     }
     return result;
 }
@@ -104,11 +125,10 @@ static inline bool objectFile_parseIntern(struct objectFile_private* self) {
 static inline optional_function_t objectFile_findOwnFunction(struct objectFile_private* self, const char* name) {
     optional_function_t toReturn = { .has_value = false };
     
-    for (size_t i = 0; i < self->ownFunctions.count; ++i) {
-        if (strcmp(name, self->ownFunctions.content[i].linkedName) == 0) {
-            toReturn = (struct optional_function) { true, self->ownFunctions.content[i] };
-            break;
-        }
+    struct function searched = (struct function) { .linkedName = (char*) name };
+    struct function* it = bsearch(&searched, self->ownFunctions.content, self->ownFunctions.count, sizeof(struct function), objectFile_functionCompare);
+    if (it != NULL) {
+        toReturn = (struct optional_function) { true, *it };
     }
     
     return toReturn;
@@ -169,17 +189,13 @@ optional_debugInfo_t objectFile_getDebugInfo(struct objectFile* me, uint64_t add
         }
         lineAddress = ownFunction.value.startAddress + address - function.startAddress;
     }
-    
-    struct dwarf_lineInfo* closest = NULL;
-    for (size_t i = 0; i < self->lineInfos.count; ++i) {
-        struct dwarf_lineInfo* elem = &self->lineInfos.content[i];
-        
-        if (closest == NULL && elem->address < lineAddress) {
-            closest = elem;
-        } else if (closest != NULL && elem->address < lineAddress && lineAddress - elem->address < lineAddress - closest->address) {
-            closest = elem;
-        }
-    }
+
+    struct dwarf_lineInfo tmp = (struct dwarf_lineInfo) { .address = lineAddress };
+    const struct dwarf_lineInfo* closest = upper_bound(&tmp, 
+                                                       self->lineInfos.content,
+                                                       self->lineInfos.count,
+                                                       sizeof(struct dwarf_lineInfo),
+                                                       objectFile_dwarfLineInfoSortCompare);
     if (closest == NULL) {
         return toReturn;
     }
