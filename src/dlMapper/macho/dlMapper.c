@@ -164,7 +164,7 @@ bool dlMapper_platform_loadLoadedLibraries(vector_loadedLibInfo_t* libs) {
             false
         });
     }
-
     dlclose(handle);
+
     return true;
 }

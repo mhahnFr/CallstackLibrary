@@ -19,6 +19,8 @@
  * CallstackLibrary, see the file LICENSE.  If not, see <https://www.gnu.org/licenses/>.
  */
 
+#include <stdlib.h>
+
 #include "dlMapper.h"
 #include "dlMapper_platform.h"
 #include "vector_loadedLibInfo.h"
@@ -26,28 +28,47 @@
 static vector_loadedLibInfo_t loadedLibs = vector_initializer;
 static bool dlMapper_inited = false;
 
+static inline int dlMapper_sortCompare(const void* lhs, const void* rhs) {
+    struct loadedLibInfo* a = (struct loadedLibInfo*) lhs;
+    struct loadedLibInfo* b = (struct loadedLibInfo*) rhs;
+
+    if (a->begin < b->begin) return -1;
+    if (a->begin > b->begin) return +1;
+
+    return 0;
+}
+
 bool dlMapper_init(void) {
     if (dlMapper_inited) return true;
 
     const bool result = dlMapper_platform_loadLoadedLibraries(&loadedLibs);
     if (!result) {
         dlMapper_deinit();
+    } else {
+        qsort(loadedLibs.content, loadedLibs.count, sizeof(struct loadedLibInfo), dlMapper_sortCompare);
     }
     dlMapper_inited = result;
     return result;
 }
 
+static inline int dlMapper_searchCompare(const void* key, const void* element) {
+    // IMPORTANT: key is the searched address, element the array element
+
+    struct loadedLibInfo* e = (struct loadedLibInfo*) element;
+    if (key >= e->begin && key < e->end) {
+        return 0;
+    }
+    return key > e->begin ? +1 : -1;
+}
+
 optional_loadedLibInfo_t dlMapper_libInfoForAddress(const void* address) {
     if (!dlMapper_inited) return (optional_loadedLibInfo_t) { .has_value = false };
 
-    for (size_t i = 0; i < loadedLibs.count; ++i) {
-        struct loadedLibInfo* element = &loadedLibs.content[i];
-
-        if (address >= element->begin && address < element->end) {
-            return (optional_loadedLibInfo_t) {
-                true, *element
-            };
-        }
+    struct loadedLibInfo* it = bsearch(address, loadedLibs.content, loadedLibs.count, sizeof(struct loadedLibInfo), dlMapper_searchCompare);
+    if (it != NULL) {
+        return (optional_loadedLibInfo_t) {
+            true, *it
+        };
     }
     return (optional_loadedLibInfo_t) { .has_value = false };
 }
