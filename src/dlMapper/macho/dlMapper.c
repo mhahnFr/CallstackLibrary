@@ -135,6 +135,7 @@ bool dlMapper_platform_loadLoadedLibraries(vector_loadedLibInfo_t* libs) {
      *                                                          - mhahnFr
      */
     const char* dyldName = "/usr/lib/dyld";
+    // FIXME: Could not load /usr/lib/dyld: tried (...) /usr/lib/dyld: unloadable mach-o file type 7
     void* handle = dlopen(dyldName, RTLD_LAZY | RTLD_LOCAL | RTLD_FIRST);
 
     const void* dyldStart = NULL;
@@ -146,7 +147,7 @@ bool dlMapper_platform_loadLoadedLibraries(vector_loadedLibInfo_t* libs) {
         NULL
     };
     for (const char** it = guesses; *it != NULL; ++it) {
-        dyldStart = dlMapper_platform_getFileAddress(handle, dyldName, *it);
+        dyldStart = dlMapper_platform_getFileAddress(handle == NULL ? RTLD_DEFAULT : handle, dyldName, *it);
         if (dyldStart != NULL) break;
     }
 
@@ -164,7 +165,9 @@ bool dlMapper_platform_loadLoadedLibraries(vector_loadedLibInfo_t* libs) {
             false
         });
     }
-    dlclose(handle);
+    if (handle != NULL) {
+        dlclose(handle);
+    }
 
     return true;
 }
