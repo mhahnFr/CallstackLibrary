@@ -19,10 +19,11 @@
  * CallstackLibrary, see the file LICENSE.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-#include <dlfcn.h>
 #include <stdio.h>
 #include <string.h>
+
 #include <mach-o/dyld.h>
+#include <mach-o/dyld_images.h>
 #include <mach-o/ldsyms.h>
 
 #include "pair_address.h"
@@ -85,20 +86,19 @@ static inline pair_address_t dlMapper_platform_loadMachO(const struct mach_heade
     return (struct pair_address) { header, end };
 }
 
-static inline void* dlMapper_platform_getFileAddress(void* handle, const char* fileName, const char* symbolName) {
-    void* symbol = dlsym(handle, symbolName);
-    if (symbol == NULL) {
-        return NULL;
-    }
-    Dl_info info;
-    int success = dladdr(symbol, &info);
-    if (success == 0) {
-        return NULL;
-    }
-    if (strcmp(info.dli_fname, fileName) != 0) {
-        return NULL;
-    }
-    return info.dli_fbase;
+static inline void dlMapper_platform_pushLoadedLib(vector_loadedLibInfo_t*   libs,
+                                                   const char*               fileName,
+                                                   const struct mach_header* header,
+                                                   const void*               ourStart) {
+    const pair_address_t addresses = dlMapper_platform_loadMachO(header);
+    vector_loadedLibInfo_push_back(libs, (struct loadedLibInfo) {
+        addresses.first,
+        addresses.second,
+        strdup(fileName),
+        binaryFile_toAbsolutePath(fileName),
+        binaryFile_toRelativePath(fileName),
+        addresses.first == ourStart
+    });
 }
 
 bool dlMapper_platform_loadLoadedLibraries(vector_loadedLibInfo_t* libs) {
@@ -113,60 +113,16 @@ bool dlMapper_platform_loadLoadedLibraries(vector_loadedLibInfo_t* libs) {
     const uint32_t count = _dyld_image_count();
     vector_loadedLibInfo_reserve(libs, count + 1);
     for (uint32_t i = 0; i < count; ++i) {
-        const pair_address_t addresses = dlMapper_platform_loadMachO(_dyld_get_image_header(i));
-        const char* const fileName = _dyld_get_image_name(i);
-        vector_loadedLibInfo_push_back(libs, (struct loadedLibInfo) {
-            addresses.first,
-            addresses.second,
-            strdup(fileName),
-            binaryFile_toAbsolutePath(fileName),
-            binaryFile_toRelativePath(fileName),
-            addresses.first == ourStart
-        });
+        dlMapper_platform_pushLoadedLib(libs, _dyld_get_image_name(i), _dyld_get_image_header(i), ourStart);
     }
 
-    /*
-     * The following handling loads the dyld of macOS. It is not officially
-     * loaded, though it is persistently in memory (the dyld loaded us and
-     * will unload us later on) and cannot be unloaded.
-     *
-     * We try to look up some commonly exported functions. If this succeeds,
-     * the dyld will tell us its base address.
-     *                                                          - mhahnFr
-     */
-    const char* dyldName = "/usr/lib/dyld";
-    // FIXME: Could not load /usr/lib/dyld: tried (...) /usr/lib/dyld: unloadable mach-o file type 7
-    void* handle = dlopen(dyldName, RTLD_LAZY | RTLD_LOCAL | RTLD_FIRST);
-
-    const void* dyldStart = NULL;
-    const char* guesses[] = {
-        "lldb_image_notifier",
-        "_dyld_start",
-        "_dyld_debugger_notification",
-        "gdb_image_notifier",
-        NULL
-    };
-    for (const char** it = guesses; *it != NULL; ++it) {
-        dyldStart = dlMapper_platform_getFileAddress(handle == NULL ? RTLD_DEFAULT : handle, dyldName, *it);
-        if (dyldStart != NULL) break;
-    }
-
-    if (dyldStart == NULL) {
-        // TODO: Load from file, try it with symbols from the dysymtab
-        printf("LCS: Warning: Could not find /usr/lib/dyld in memory.");
+    struct task_dyld_info dyldInfo;
+    mach_msg_type_number_t infoCount = TASK_DYLD_INFO_COUNT;
+    if (task_info(mach_task_self_, TASK_DYLD_INFO, (task_info_t) &dyldInfo, &infoCount) == KERN_SUCCESS) {
+        struct dyld_all_image_infos* infos = (void*) dyldInfo.all_image_info_addr;
+        dlMapper_platform_pushLoadedLib(libs, infos->dyldPath, infos->dyldImageLoadAddress, ourStart);
     } else {
-        const pair_address_t addresses = dlMapper_platform_loadMachO(dyldStart);
-        vector_loadedLibInfo_push_back(libs, (struct loadedLibInfo) {
-            addresses.first,
-            addresses.second,
-            strdup(dyldName),
-            binaryFile_toAbsolutePath(dyldName),
-            binaryFile_toRelativePath(dyldName),
-            false
-        });
-    }
-    if (handle != NULL) {
-        dlclose(handle);
+        printf("LCS: Warning: Failed to load the dynamic loader. Callstacks might be truncated.");
     }
 
     return true;
