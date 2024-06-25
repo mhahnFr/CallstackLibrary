@@ -1,7 +1,7 @@
 /*
  * CallstackLibrary - Library creating human-readable call stacks.
  *
- * Copyright (C) 2023 - 2024  mhahnFr
+ * Copyright (C) 2024  mhahnFr
  *
  * This file is part of the CallstackLibrary.
  *
