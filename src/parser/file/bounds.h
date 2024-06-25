@@ -24,7 +24,16 @@
 
 #include <stddef.h>
 
-const void* upper_bound(const void* key, const void* begin, size_t count, size_t size, int (*compare)(const void*, const void*));
-const void* lower_bound(const void* key, const void* begin, size_t count, size_t size, int (*compare)(const void*, const void*)); // TODO: Implement
+const void* upper_bound(const void* key,
+                        const void* begin,
+                        size_t      count,
+                        size_t      size,
+                        int (*compare)(const void*, const void*));
+
+const void* lower_bound(const void* key,
+                        const void* begin,
+                        size_t      count,
+                        size_t      size,
+                        int (*compare)(const void*, const void*));
 
 #endif /* bounds_h */

@@ -21,7 +21,11 @@
 
 #include "bounds.h"
 
-const void* upper_bound(const void* const key, const void* const begin, const size_t count, const size_t size, int (*compare)(const void*, const void*)) {
+const void* upper_bound(const void* const key,
+                        const void* const begin,
+                        const size_t      count,
+                        const size_t      size,
+                        int (*compare)(const void*, const void*)) {
     const void* it,
               * first = begin;
     size_t step,
@@ -33,6 +37,37 @@ const void* upper_bound(const void* const key, const void* const begin, const si
         it += step * size;
 
         if (compare(key, it) >= 0) {
+            it += size;
+            first = it;
+            amount -= step + 1;
+        } else {
+            amount = step;
+        }
+    }
+
+    if (first < begin || first >= begin + size * count) {
+        return NULL;
+    }
+
+    return first;
+}
+
+const void* lower_bound(const void* const key,
+                        const void* const begin,
+                        const size_t      count,
+                        const size_t      size,
+                        int (*compare)(const void*, const void*)) {
+    const void* it,
+              * first = begin;
+    size_t step,
+           amount = count;
+
+    while (amount > 0) {
+        it = first;
+        step = amount / 2;
+        it += step * size;
+
+        if (compare(it, key) < 0) {
             it += size;
             first = it;
             amount -= step + 1;
