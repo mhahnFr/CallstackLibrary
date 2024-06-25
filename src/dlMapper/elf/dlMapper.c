@@ -58,12 +58,21 @@ static inline char* dlMapper_platform_loadExecutableName(void) {
     return buffer;
 }
 
+static inline uint64_t dlMapper_platform_loadEPHNum64(const Elf64_Ehdr* header, bool littleEndian) {
+    if (header->e_phnum != PN_XNUM) {
+        return header->e_phnum;
+    }
+
+    Elf64_Shdr* sect = ((void*) header) + header->e_shoff;
+    return sect->sh_info;
+}
+
 static inline pair_address_t dlMapper_platform_loadELF64(const void* base, bool littleEndian) {
     const Elf64_Ehdr* header = base;
 
-    // TODO: e_phnum special case
     const void* biggest = NULL;
-    for (uint16_t i = 0; i < header->e_phnum; ++i) {
+    const uint64_t e_phnum = dlMapper_platform_loadEPHNum64(header, littleEndian);
+    for (uint16_t i = 0; i < e_phnum; ++i) {
         Elf64_Phdr* seg = ((void*) header) + header->e_phoff + i * header->e_phentsize;
         const void* address = base + seg->p_offset + seg->p_memsz;
         if (biggest == NULL || biggest < address) {
