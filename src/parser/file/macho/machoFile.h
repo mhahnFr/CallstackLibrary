@@ -22,14 +22,14 @@
 #ifndef machoFile_h
 #define machoFile_h
 
+#include <stdbool.h>
 #include <stddef.h>
 
 #include "objectFile.h"
-#include "optional_pair_funcFile.h"
+#include "vector_pair_funcFile.h"
 
 #include "../binaryFile.h"
 #include "../debugInfo.h"
-#include "../vector_uint64.h"
 #include "../vector_function.h"
 
 #ifdef __cplusplus
@@ -63,8 +63,7 @@ struct machoFile {
     /** The UUID of the represented Mach-O file.                                */
     uint8_t uuid[16];
     
-    /** Pointer to the private part of this object.                             */
-    void* priv;
+    vector_pairFuncFile_t functions;
 };
 
 /**
@@ -76,6 +75,13 @@ struct machoFile {
 struct machoFile * machoFile_new(const char* fileName);
 
 /**
+ * Initializes the given Mach-O file structure.
+ *
+ * @param self the Mach-O file structure to be initialized
+ */
+void machoFile_create(struct machoFile* self, const char* fileName);
+
+/**
  * Returns the represented Mach-O file structure from the given binary
  * file structure or `NULL` if it does not represent a Mach-O file structure.
  *
@@ -83,7 +89,7 @@ struct machoFile * machoFile_new(const char* fileName);
  * @return the represented Mach-O file structure or `NULL`
  */
 static inline struct machoFile* machoFileOrNull(struct binaryFile * self) {
-    return (struct machoFile*) (self->type == MACHO_FILE ? self->concrete : NULL);
+    return self->type == MACHO_FILE ? self->concrete : NULL;
 }
 
 /**
@@ -96,43 +102,6 @@ static inline struct machoFile* machoFileOrNull(struct binaryFile * self) {
  * @return whether it was possible to deduct some debug information
  */
 bool machoFile_addr2String(struct binaryFile* self, void* address, struct callstack_frame* frame);
-
-/**
- * Parses the Mach-O file represented by the given structure using the
- * given base address.
- *
- * @param self the Mach-O file structure representing the file to be parsed
- * @param baseAddress the base address of the Mach-O file to parse
- * @return whether the parsing was successful
- */
-bool machoFile_parseFile(struct machoFile* self, const void* baseAddress);
-
-/**
- * Adds the given function / object file pair to the given Mach-O file structure.
- *
- * @param self the Mach-O file structure
- * @param function the function / object file pair to be added
- */
-void machoFile_addFunction(struct machoFile* self, pair_funcFile_t function);
-
-/**
- * Creates a debug info for the given address if possible.
- *
- * @param self the Mach-O file structure
- * @param address the address whose debug info to deduct
- * @return the optionally deducted debug information
- */
-optional_debugInfo_t machoFile_getDebugInfo(struct machoFile* self,
-                                            void*             address);
-
-/**
- * Returns the object file object representing the dSYM bundle debug
- * information file for the given Mach-O file.
- *
- * @param self the Mach-O file abstraction structure
- * @return the object file object representing the dSYM bundle debug file or `NULL` if none was found or the allocation failed
- */
-struct objectFile* machoFile_getDSYMBundle(struct machoFile* self);
 
 /**
  * Deinitializes the given binary file structure if it is a Mach-O file structure.
@@ -148,13 +117,6 @@ void machoFile_destroy(struct binaryFile * self);
  * @param self the binary file structure to be deleted
  */
 void machoFile_delete(struct binaryFile * self);
-
-/**
- * Initializes the given Mach-O file structure.
- *
- * @param self the Mach-O file structure to be initialized
- */
-void machoFile_create(struct machoFile* self, const char* fileName);
 
 /**
  * Clears the caches created by the Mach-O binary file implementation.
