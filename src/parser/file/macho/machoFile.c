@@ -31,6 +31,7 @@
 #include "macho_parser.h"
 #include "macho_utils.h"
 
+#include "../bounds.h"
 #include "../loader.h"
 
 #include "../../callstack_parser.h"
@@ -108,21 +109,27 @@ static inline struct objectFile* machoFile_getDSYMBundle(struct machoFile* self)
     return self->dSYMFile.file;
 }
 
+static inline int machoFile_functionSortCompare(const void* lhs, const void* rhs) {
+    const pair_funcFile_t* a = lhs;
+    const pair_funcFile_t* b = rhs;
+
+    if (a->first.startAddress < b->first.startAddress) return +1;
+    if (a->first.startAddress > b->first.startAddress) return -1;
+
+    return 0;
+}
+
 static inline optional_debugInfo_t machoFile_getDebugInfo(struct machoFile* self, void* address) {
     const uint64_t searchAddress = (uintptr_t) (address - self->_.startAddress)
                                  + (self->inMemory ? self->text_vmaddr : self->addressOffset);
-
-    pair_funcFile_t* closest = NULL;
-    vector_iterate(pair_funcFile_t, &self->functions, {
-        if (closest == NULL && element->first.startAddress <= searchAddress) {
-            closest = element;
-        } else if (closest != NULL
-                   && element->first.startAddress <= searchAddress
-                   && searchAddress - element->first.startAddress < searchAddress - closest->first.startAddress) {
-            closest = element;
-        }
-    })
     
+    const pair_funcFile_t tmp = (pair_funcFile_t) { .first.startAddress = searchAddress };
+    const pair_funcFile_t* closest = lower_bound(&tmp,
+                                                 self->functions.content,
+                                                 self->functions.count,
+                                                 sizeof(pair_funcFile_t),
+                                                 machoFile_functionSortCompare);
+
     if (closest == NULL
         || (closest->first.length != 0 && closest->first.startAddress + closest->first.length < searchAddress)) {
         return (optional_debugInfo_t) { .has_value = false };
@@ -207,7 +214,6 @@ static inline bool machoFile_handleSegment64(struct machoFile *          self,
  * @param args the argument list
  */
 static inline void machoFile_addFunction(struct pair_funcFile function, va_list args) {
-    // TODO: Make more efficient
     struct machoFile* self = va_arg(args, void*);
 
     size_t i;
@@ -333,11 +339,19 @@ static inline bool machoFile_parseFile(struct machoFile* self, const void* baseA
  * @return whether the file was parsed successfully
  */
 static inline bool machoFile_loadFile(struct machoFile* self) {
-    return self->inMemory ? machoFile_parseFile(self, self->_.startAddress)
-                          : loader_loadFileAndExecute(self->_.fileName,
-                                                      (union loader_parserFunction) { (loader_parser) machoFile_parseFile },
-                                                      false,
-                                                      self);
+    const bool success = self->inMemory ? machoFile_parseFile(self, self->_.startAddress)
+                                        : loader_loadFileAndExecute(self->_.fileName,
+                                                                    (union loader_parserFunction) { (loader_parser) machoFile_parseFile },
+                                                                    false,
+                                                                    self);
+    if (success) {
+        qsort(self->functions.content, self->functions.count, sizeof(pair_funcFile_t), machoFile_functionSortCompare);
+    } else {
+        vector_iterate(pair_funcFile_t, &self->functions, function_destroy(&element->first);)
+        vector_pairFuncFile_clear(&self->functions);
+    }
+
+    return success;
 }
 
 bool machoFile_addr2String(struct binaryFile* me, void* address, struct callstack_frame* frame) {
