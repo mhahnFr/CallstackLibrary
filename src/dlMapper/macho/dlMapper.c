@@ -26,8 +26,7 @@
 #include <mach-o/dyld_images.h>
 #include <mach-o/ldsyms.h>
 
-#include "pair_address.h"
-
+#include "../pair_address.h"
 #include "../dlMapper_platform.h"
 
 #include "../../parser/file/binaryFile.h"
