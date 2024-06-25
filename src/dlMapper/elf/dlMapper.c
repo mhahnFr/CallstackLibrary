@@ -19,6 +19,7 @@
  * CallstackLibrary, see the file LICENSE.  If not, see <https://www.gnu.org/licenses/>.
  */
 
+#include <elf.h>
 #include <limits.h>
 #include <string.h>
 #include <unistd.h>
@@ -57,8 +58,28 @@ static inline char* dlMapper_platform_loadExecutableName(void) {
     return buffer;
 }
 
-static inline pair_address_t dlMapper_platform_loadELF() {
-    // TODO: Implement
+static inline pair_address_t dlMapper_platform_loadELF64(const void* base, bool littleEndian) {
+    const Elf64_Ehdr* header = base;
+
+    // TODO: e_phnum special case
+    const void* biggest = NULL;
+    for (uint16_t i = 0; i < header->e_phnum; ++i) {
+        Elf64_Phdr* seg = ((void*) header) + header->e_phoff + i * header->e_phentsize;
+        const void* address = base + seg->p_offset + seg->p_memsz;
+        if (biggest == NULL || biggest < address) {
+            biggest = address;
+        }
+    }
+    return (pair_address_t) { base, biggest };
+}
+
+static inline pair_address_t dlMapper_platform_loadELF(const void* baseAddress) {
+    const Elf32_Ehdr* header = baseAddress;
+    switch (header->e_ident[EI_CLASS]) {
+//        case ELFCLASS32: return dlMapper_platform_loadELF32(baseAddress, header->e_ident[EI_DATA] == ELFDATA2LSB);
+        case ELFCLASS64: return dlMapper_platform_loadELF64(baseAddress, header->e_ident[EI_DATA] == ELFDATA2LSB);
+    }
+
     return (pair_address_t) { NULL, NULL };
 }
 
@@ -75,7 +96,7 @@ static inline int dlMapper_platform_iterateCallback(struct dl_phdr_info* info, s
             empty = false;
         }
     }
-    pair_address_t addresses = dlMapper_platform_loadELF();
+    pair_address_t addresses = dlMapper_platform_loadELF((void*) info->dlpi_addr);
     vector_loadedLibInfo_push_back(data->libs, (struct loadedLibInfo) {
         addresses.first,
         addresses.second,
