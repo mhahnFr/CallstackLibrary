@@ -28,11 +28,11 @@
 #include <time.h>
 
 #include "../debugInfo.h"
-#include "../function.h"
 #include "../lcs_section.h"
 #include "../optional_function.h"
+#include "../vector_function.h"
 
-#include "../dwarf/dwarf_parser.h"
+#include "../dwarf/vector_dwarf_lineInfo.h"
 
 #ifdef __cplusplus
 extern "C" {
@@ -67,8 +67,10 @@ struct objectFile {
     /** Whether the represented file is part of a .dSYM bundle. */
     bool isDsymBundle;
     
-    /** A pointer to the underlying object.                     */
-    void * priv;
+    vector_function_t ownFunctions;
+    vector_dwarfLineInfo_t lineInfos;
+    const char* mainSourceFileCache;
+
     /** Pointer to the next element in a list.                  */
     struct objectFile * next;
 };
@@ -86,29 +88,26 @@ struct objectFile * objectFile_new(void);
  * @param self the object file structure to be initialized
  */
 static inline void objectFile_create(struct objectFile * self) {
-    self->sourceFile   = NULL;
-    self->directory    = NULL;
-    self->name         = NULL;
-    self->priv         = NULL;
-    self->next         = NULL;
-    self->lastModified = 0;
-    self->parsed       = false;
-    self->isDsymBundle = false;
-    
+    *self = (struct objectFile) {
+        .sourceFile          = NULL,
+        .directory           = NULL,
+        .name                = NULL,
+        .next                = NULL,
+        .lastModified        = 0,
+        .parsed              = false,
+        .isDsymBundle        = false,
+        .mainSourceFileCache = NULL
+    };
+
     memset(self->uuid, 0, 16);
 
     lcs_section_create(&self->debugLine);
     lcs_section_create(&self->debugLineStr);
     lcs_section_create(&self->debugStr);
-}
 
-/**
- * Adds the given function to the given object file.
- *
- * @param self the object file object
- * @param function the function to be added
- */
-void objectFile_addOwnFunction(struct objectFile* self, struct function function);
+    vector_function_create(&self->ownFunctions);
+    vector_dwarfLineInfo_create(&self->lineInfos);
+}
 
 /**
  * Parses the given buffer into the given object file object.
@@ -126,23 +125,9 @@ bool objectFile_parseBuffer(struct objectFile* self, void* buffer);
  * callback is called with the additionally given arguments.
  *
  * @param self the object file object to be parsed
- * @param cb the callback to be called for every DWARF line entry
  * @return whether the parsing was successful
  */
-bool objectFile_parse(struct objectFile* self, dwarf_line_callback cb, void* args);
-
-/**
- * @brief Parses the given buffer into the given object file object.
- *
- * The DWARF line information is extracted and for every line entry the given
- * callback is called with the additionally given arguments.
- *
- * @param self the object file object
- * @param buffer the Mach-O buffer
- * @param cb the callback to be called for DWARF line entries
- * @return whether the buffer was parsed successfully
- */
-bool objectFile_parseWithBuffer(struct objectFile* self, void* buffer, dwarf_line_callback cb, void* args);
+bool objectFile_parse(struct objectFile* self);
 
 /**
  * @brief Returns the UUID of the given object file object.
