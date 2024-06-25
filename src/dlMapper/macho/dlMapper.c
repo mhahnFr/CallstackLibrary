@@ -145,7 +145,7 @@ bool dlMapper_platform_loadLoadedLibraries(vector_loadedLibInfo_t* libs) {
         "gdb_image_notifier",
         NULL
     };
-    for (const char** it = guesses; it != NULL; ++it) {
+    for (const char** it = guesses; *it != NULL; ++it) {
         dyldStart = dlMapper_platform_getFileAddress(handle, dyldName, *it);
         if (dyldStart != NULL) break;
     }
