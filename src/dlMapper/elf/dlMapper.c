@@ -24,14 +24,17 @@
 #include <unistd.h>
 
 #define _GNU_SOURCE
-#define __USE_GNU
-#include <link.h>
-#undef __USE_GNU
+# define __USE_GNU
+#  include <link.h>
+# undef __USE_GNU
 #undef _GNU_SOURCE
 
-#include "../dlMapper_platform.h"
+#ifdef LCS_BUILD_DYLIB
+# include <callstack.h>
+#endif
 
-#include "../macho/pair_address.h"
+#include "../dlMapper_platform.h"
+#include "../pair_address.h"
 
 #include "../../parser/file/binaryFile.h"
 
@@ -54,6 +57,11 @@ static inline char* dlMapper_platform_loadExecutableName(void) {
     return buffer;
 }
 
+static inline pair_address_t dlMapper_platform_loadELF() {
+    // TODO: Implement
+    return (pair_address_t) { NULL, NULL };
+}
+
 static inline int dlMapper_platform_iterateCallback(struct dl_phdr_info* info, size_t size, void* d) {
     struct dlMapper_platform_data* data = d;
 
@@ -67,22 +75,30 @@ static inline int dlMapper_platform_iterateCallback(struct dl_phdr_info* info, s
             empty = false;
         }
     }
-  //  pair_address_t addresses = dlMapper_platform_loadELF(...);
+    pair_address_t addresses = dlMapper_platform_loadELF();
     vector_loadedLibInfo_push_back(data->libs, (struct loadedLibInfo) {
-        NULL,//begin,
-        NULL,//end,
+        addresses.first,
+        addresses.second,
         empty ? (char*) fileName : strdup(fileName),
         binaryFile_toAbsolutePath(fileName),
         binaryFile_toRelativePath(fileName),
-        NULL == data->start
+        addresses.first == data->start
     });
-    __builtin_printf("%s\n", fileName);
     return 0;
 }
 
 static inline void* dlMapper_platform_loadLCSAddress(void) {
-    // TODO: Implement
-    return NULL;
+    void* ourStart = NULL;
+
+#ifdef LCS_BUILD_DYLIB
+    Dl_info info;
+    if (dladdr(&callstack_new, &info) == 0) {
+        return ourStart;
+    }
+    ourStart = info.dli_fbase;
+#endif
+
+    return ourStart;
 }
 
 bool dlMapper_platform_loadLoadedLibraries(vector_loadedLibInfo_t* libs) {

@@ -158,6 +158,7 @@ $(DYLIB_N): COM_FLAGS += -DLCS_BUILD_DYLIB
 $(DYLIB_N): $(OBJS)
 	$(LD) -dynamiclib $(LDFLAGS) -o $(DYLIB_N) $(OBJS)
 
+$(SHARED_N): COM_FLAGS += -DLCS_BUILD_DYLIB
 $(SHARED_N): $(OBJS)
 	$(LD) -shared -fPIC $(LDFLAGS) -o $(SHARED_N) $(OBJS)
 
