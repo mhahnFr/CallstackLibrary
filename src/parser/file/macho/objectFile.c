@@ -25,9 +25,10 @@
 
 #include <mach-o/loader.h>
 
+#include <macho/macho_utils.h>
+
 #include "objectFile.h"
 #include "macho_parser.h"
-#include "macho_utils.h"
 
 #include "../binaryFile.h"
 #include "../bounds.h"

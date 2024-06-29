@@ -26,11 +26,11 @@
 #include <mach-o/dyld_images.h>
 #include <mach-o/ldsyms.h>
 
+#include <file/pathUtils.h>
+#include <macho/macho_utils.h>
+
 #include "../pair_address.h"
 #include "../dlMapper_platform.h"
-
-#include "../../parser/file/binaryFile.h"
-#include "../../parser/file/macho/macho_utils.h"
 
 static inline const void* dlMapper_platform_loadMachO64(const struct mach_header_64* header, const bool bytesSwapped) {
     uint64_t vmsize = 0;
@@ -94,8 +94,8 @@ static inline void dlMapper_platform_pushLoadedLib(vector_loadedLibInfo_t*   lib
         addresses.first,
         addresses.second,
         strdup(fileName),
-        binaryFile_toAbsolutePath(fileName),
-        binaryFile_toRelativePath(fileName),
+        path_toAbsolutePath(fileName),
+        path_toRelativePath(fileName),
         addresses.first == ourStart
     });
 }

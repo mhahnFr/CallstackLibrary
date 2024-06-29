@@ -27,7 +27,7 @@
 
 #include <mach-o/nlist.h>
 
-#include "macho_utils.h"
+#include <macho/macho_utils.h>
 
 /**
  * Represents a unified version of the `nlist` structure.

@@ -26,10 +26,12 @@
 
 #include <mach-o/loader.h>
 
+#include <file/pathUtils.h>
+#include <macho/macho_utils.h>
+
 #include "cache.h"
 #include "machoFile.h"
 #include "macho_parser.h"
-#include "macho_utils.h"
 
 #include "../bounds.h"
 #include "../loader.h"
@@ -376,8 +378,8 @@ bool machoFile_addr2String(struct binaryFile* me, void* address, struct callstac
         }
         name = callstack_parser_demangle(name);
         if (result.value.sourceFileInfo.has_value) {
-            frame->sourceFile = binaryFile_toAbsolutePath((char*) result.value.sourceFileInfo.value.sourceFile);
-            frame->sourceFileRelative = binaryFile_toRelativePath((char*) result.value.sourceFileInfo.value.sourceFile);
+            frame->sourceFile = path_toAbsolutePath((char*) result.value.sourceFileInfo.value.sourceFile);
+            frame->sourceFileRelative = path_toRelativePath((char*) result.value.sourceFileInfo.value.sourceFile);
             frame->sourceFileOutdated = result.value.sourceFileInfo.value.outdated;
             frame->sourceLine = result.value.sourceFileInfo.value.line;
             if (result.value.sourceFileInfo.value.column > 0) {
