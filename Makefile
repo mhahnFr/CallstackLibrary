@@ -20,7 +20,6 @@
 #
 
 CXX_FUNCTIONS = false
-CXX_OPTIMIZED = false
 USE_BUILTINS  = true
 
 FORCE_DYNAMIC_FLAG = false
@@ -35,7 +34,6 @@ STATIC_N  = $(CORE_NAME).a
 LD = $(CC)
 
 # Paths
-OPTIMIZED_PATH = cpp_optimized/
 LINUX_PATH     = ./src/parser/file/elf
 DARWIN_PATH    = ./src/parser/file/macho
 
@@ -51,53 +49,29 @@ endif
 # -------------------------------
 
 # Main sources
-SRCS = $(shell find ./src -type f -name \*.c \! -path $(LINUX_PATH)\* \! -path $(DARWIN_PATH)\* \! -path \*/$(OPTIMIZED_PATH)\* \! -path $(DL_MAPPER_LINUX_PATH)\* \! -path $(DL_MAPPER_DARWIN_PATH)\*)
+SRCS = $(shell find ./src -type f -name \*.c \! -path $(LINUX_PATH)\* \! -path $(DARWIN_PATH)\* \! -path $(DL_MAPPER_LINUX_PATH)\* \! -path $(DL_MAPPER_DARWIN_PATH)\*)
 OBJS = $(patsubst %.c, %.o, $(SRCS))
 DEPS = $(patsubst %.c, %.d, $(SRCS))
 # ------------
 
 # C++ sources
-CXX_SRCS = $(shell find ./src -type f -name \*.cpp \! -path \*/$(OPTIMIZED_PATH)\*)
+CXX_SRCS = $(shell find ./src -type f -name \*.cpp)
 CXX_OBJS = $(patsubst %.cpp, %.o, $(CXX_SRCS))
 CXX_DEPS = $(patsubst %.cpp, %.d, $(CXX_SRCS))
 # -----------
 
 # Linux specific sources
-LINUX_SRCS  = $(shell find $(LINUX_PATH) -type f -name \*.c \! -path \*/$(OPTIMIZED_PATH)\*)
+LINUX_SRCS  = $(shell find $(LINUX_PATH) -type f -name \*.c)
 LINUX_SRCS += $(shell find $(DL_MAPPER_LINUX_PATH) -type f -name \*.c)
 LINUX_OBJS  = $(patsubst %.c, %.o, $(LINUX_SRCS))
 LINUX_DEPS  = $(patsubst %.c, %.d, $(LINUX_SRCS))
-ifeq ($(CXX_OPTIMIZED),true)
-	LD = $(CXX)
-	LINUX_OPT = $(shell find $(LINUX_PATH) -type f -name \*.cpp -path \*/$(OPTIMIZED_PATH)\*)
-	
-	LINUX_OBJS += $(patsubst %.cpp, %.o, $(LINUX_OPT))
-	LINUX_DEPS += $(patsubst %.cpp, %.d, $(LINUX_OPT))
-else
-	LINUX_OPT = $(shell find $(LINUX_PATH) -type f -name \*.c -path \*/$(OPTIMIZED_PATH)\*)
-	
-	LINUX_OBJS += $(patsubst %.c, %.o, $(LINUX_OPT))
-	LINUX_DEPS += $(patsubst %.c, %.d, $(LINUX_OPT))
-endif
 # ----------------------
 
 # Darwin specific sources
-DARWIN_SRCS  = $(shell find $(DARWIN_PATH) -type f -name \*.c \! -path \*/$(OPTIMIZED_PATH)\*)
+DARWIN_SRCS  = $(shell find $(DARWIN_PATH) -type f -name \*.c)
 DARWIN_SRCS += $(shell find $(DL_MAPPER_DARWIN_PATH) -type f -name \*.c)
 DARWIN_OBJS  = $(patsubst %.c, %.o, $(DARWIN_SRCS))
 DARWIN_DEPS  = $(patsubst %.c, %.d, $(DARWIN_SRCS))
-ifeq ($(CXX_OPTIMIZED),true)
-	LD = $(CXX)
-	DARWIN_OPT = $(shell find $(DARWIN_PATH) -type f -name \*.cpp -path \*/$(OPTIMIZED_PATH)\*)
-
-	DARWIN_OBJS += $(patsubst %.cpp, %.o, $(DARWIN_OPT))
-	DARWIN_DEPS += $(patsubst %.cpp, %.d, $(DARWIN_OPT))
-else
-	DARWIN_OPT = $(shell find $(DARWIN_PATH) -type f -name \*.c -path \*/$(OPTIMIZED_PATH)\*)
-
-	DARWIN_OBJS += $(patsubst %.c, %.o, $(DARWIN_OPT))
-	DARWIN_DEPS += $(patsubst %.c, %.d, $(DARWIN_OPT))
-endif
 # -----------------------
 
 # Compile and link flags
@@ -144,15 +118,12 @@ all: $(SHARED_N) $(STATIC_N) $(DYLIB_N)
 install: $(NAME)
 	mkdir -p $(INSTALL_PATH)/lib
 	mkdir -p "$(INSTALL_PATH)/include/CallstackLibrary"
-	mkdir -p "$(INSTALL_PATH)/include/DC4C"
 	cp $(NAME) $(INSTALL_PATH)/lib
 	find "include" \( -name \*.h -o -name \*.hpp \) -exec cp {} "$(INSTALL_PATH)/include/CallstackLibrary" \;
-	find "DC4C" \( -name \*.h -o -name \*.hpp \) -exec cp {} "$(INSTALL_PATH)/include/DC4C" \;
 
 uninstall:
 	- $(RM) $(INSTALL_PATH)/lib/$(NAME)
 	- $(RM) -r "$(INSTALL_PATH)/include/CallstackLibrary"
-	- $(RM) -r "$(INSTALL_PATH)/include/DC4C"
 
 $(DYLIB_N): COM_FLAGS += -DLCS_BUILD_DYLIB
 $(DYLIB_N): $(OBJS)
