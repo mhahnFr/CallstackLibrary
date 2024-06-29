@@ -60,35 +60,45 @@ static inline char* dlMapper_platform_loadExecutableName(void) {
     return buffer;
 }
 
-static inline uint32_t dlMapper_platform_loadEPHNum64(const Elf64_Ehdr* header, bool littleEndian) {
-    const uint16_t e_phnum = ELF_TO_HOST(16, header->e_phnum, littleEndian);
-    if (e_phnum != PN_XNUM) {
-        return e_phnum;
-    }
-
-    Elf64_Shdr* sect = ((void*) header) + ELF_TO_HOST(64, header->e_shoff, littleEndian);
-    return ELF_TO_HOST(32, sect->sh_info, littleEndian);
+#define dlMapper_platform_loadEPHNum(bits)                                                                     \
+static inline uint32_t dlMapper_platform_loadEPHNum##bits(const Elf##bits##_Ehdr* header, bool littleEndian) { \
+    const uint16_t e_phnum = ELF_TO_HOST(16, header->e_phnum, littleEndian);                                   \
+    if (e_phnum != PN_XNUM) {                                                                                  \
+        return e_phnum;                                                                                        \
+    }                                                                                                          \
+                                                                                                               \
+    Elf##bits##_Shdr* sect = ((void*) header) + ELF_TO_HOST(bits, header->e_shoff, littleEndian);              \
+    return ELF_TO_HOST(32, sect->sh_info, littleEndian);                                                       \
 }
 
-static inline pair_address_t dlMapper_platform_loadELF64(const void* base, bool littleEndian) {
-    const Elf64_Ehdr* header = base;
+dlMapper_platform_loadEPHNum(32)
+dlMapper_platform_loadEPHNum(64)
 
-    const void* biggest = NULL;
-    const uint32_t e_phnum = dlMapper_platform_loadEPHNum64(header, littleEndian);
-    for (uint32_t i = 0; i < e_phnum; ++i) {
-        Elf64_Phdr* seg = ((void*) header) + ELF_TO_HOST(64, header->e_phoff, littleEndian) + i * ELF_TO_HOST(16, header->e_phentsize, littleEndian);
-        const void* address = base + ELF_TO_HOST(64, seg->p_offset, littleEndian) + ELF_TO_HOST(64, seg->p_memsz, littleEndian);
-        if (biggest == NULL || biggest < address) {
-            biggest = address;
-        }
-    }
-    return (pair_address_t) { base, biggest };
+#define dlMapper_platform_loadELF_impl(bits)                                                        \
+static inline pair_address_t dlMapper_platform_loadELF##bits(const void* base, bool littleEndian) { \
+    const Elf##bits##_Ehdr* header = base;                                                          \
+                                                                                                    \
+    const void* biggest = NULL;                                                                     \
+    const uint32_t e_phnum = dlMapper_platform_loadEPHNum##bits(header, littleEndian);              \
+    for (uint32_t i = 0; i < e_phnum; ++i) {                                                        \
+        Elf##bits##_Phdr* seg = ((void*) header) + ELF_TO_HOST(bits, header->e_phoff, littleEndian) \
+                                + i * ELF_TO_HOST(16, header->e_phentsize, littleEndian);           \
+        const void* address = base + ELF_TO_HOST(bits, seg->p_offset, littleEndian)                 \
+                             + ELF_TO_HOST(bits, seg->p_memsz, littleEndian);                       \
+        if (biggest == NULL || biggest < address) {                                                 \
+            biggest = address;                                                                      \
+        }                                                                                           \
+    }                                                                                               \
+    return (pair_address_t) { base, biggest };                                                      \
 }
+
+dlMapper_platform_loadELF_impl(32)
+dlMapper_platform_loadELF_impl(64)
 
 static inline pair_address_t dlMapper_platform_loadELF(const void* baseAddress) {
     const Elf32_Ehdr* header = baseAddress;
     switch (header->e_ident[EI_CLASS]) {
-//        case ELFCLASS32: return dlMapper_platform_loadELF32(baseAddress, header->e_ident[EI_DATA] == ELFDATA2LSB);
+        case ELFCLASS32: return dlMapper_platform_loadELF32(baseAddress, header->e_ident[EI_DATA] == ELFDATA2LSB);
         case ELFCLASS64: return dlMapper_platform_loadELF64(baseAddress, header->e_ident[EI_DATA] == ELFDATA2LSB);
     }
 
