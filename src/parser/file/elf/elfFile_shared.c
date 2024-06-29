@@ -23,6 +23,7 @@
 #include <string.h>
 
 #include <elf/elfUtils.h>
+#include <file/pathUtils.h>
 
 #include "elfFile.h"
 
@@ -214,8 +215,8 @@ bool elfFile_addr2String(struct binaryFile* me, void* address, struct callstack_
         char* name = (char*) result.value.function.linkedName;
         name = callstack_parser_demangle(name);
         if (result.value.sourceFileInfo.has_value) {
-            frame->sourceFile = binaryFile_toAbsolutePath((char*) result.value.sourceFileInfo.value.sourceFile);
-            frame->sourceFileRelative = binaryFile_toRelativePath((char*) result.value.sourceFileInfo.value.sourceFile);
+            frame->sourceFile = path_toAbsolutePath((char*) result.value.sourceFileInfo.value.sourceFile);
+            frame->sourceFileRelative = path_toRelativePath((char*) result.value.sourceFileInfo.value.sourceFile);
             frame->sourceFileOutdated = result.value.sourceFileInfo.value.outdated;
             frame->sourceLine = result.value.sourceFileInfo.value.line;
             if (result.value.sourceFileInfo.value.column > 0) {

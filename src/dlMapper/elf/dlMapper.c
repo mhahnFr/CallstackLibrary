@@ -35,11 +35,10 @@
 #endif
 
 #include <elf/elfUtils.h>
+#include <file/pathUtils.h>
 
 #include "../dlMapper_platform.h"
 #include "../pair_address.h"
-
-#include "../../parser/file/binaryFile.h"
 
 struct dlMapper_platform_data {
     const void* start;
@@ -123,8 +122,8 @@ static inline int dlMapper_platform_iterateCallback(struct dl_phdr_info* info, s
         addresses.first,
         addresses.second,
         empty ? (char*) fileName : strdup(fileName),
-        binaryFile_toAbsolutePath(fileName),
-        binaryFile_toRelativePath(fileName),
+        path_toAbsolutePath(fileName),
+        path_toRelativePath(fileName),
         addresses.first == data->start
     });
     return 0;

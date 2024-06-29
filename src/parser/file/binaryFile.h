@@ -94,43 +94,6 @@ struct binaryFile* binaryFile_new(const char* fileName, const void* startAddress
 void binaryFile_create(struct binaryFile * self);
 
 /**
- * @brief Converts the given path to a relative path.
- *
- * If `CXX_FUNCTIONS` is not defined, the given path is only duplicated.
- *
- * @param path the path to create a relative one from
- * @return a newly allocated relative path
- */
-char* binaryFile_toRelativePath(const char* path);
-/**
- * @brief Converts the given path to a relative path and frees the given path.
- *
- * If `CXX_FUNCTIONS` is not defined, the given path is only duplicated.
- *
- * @param path the path to create a relative one from
- * @return a newly allocated relative path
- */
-char* binaryFile_toRelativePathFree(char* path);
-/**
- * @brief Converts the given path to an absolute path.
- *
- * If `CXX_FUNCTIONS` is not defined, the given path is only duplicated.
- *
- * @param path the path to create an absolute one from
- * @return a newly allocated absolute path
- */
-char* binaryFile_toAbsolutePath(const char* path);
-/**
- * @brief Converts the given path to an absolute path and frees the given path.
- *
- * If `CXX_FUNCTIONS` is not defined, the given path is only duplicated.
- *
- * @param path the path to create an absolute one from
- * @return a newly allocated absolute path
- */
-char* binaryFile_toAbsolutePathFree(char* path);
-
-/**
  * @brief Finds the appropriate binary file object in the cache.
  *
  * If no object was found, it is created and added to the cache.

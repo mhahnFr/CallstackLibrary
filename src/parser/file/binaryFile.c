@@ -20,12 +20,9 @@
  */
 
 #include <stddef.h>
-#include <string.h>
 #include <sys/stat.h>
 
 #include "binaryFile.h"
-
-#include "fileHelper.h"
 
 #ifdef __APPLE__
  #include "macho/machoFile.h"
@@ -62,68 +59,6 @@ void binaryFile_create(struct binaryFile * self) {
     self->fileName = NULL;
     self->next     = NULL;
     self->parsed   = false;
-}
-
-/**
- * @brief Returns an allocated copy of the given path.
- *
- * If the C++ functionality of this library is enabled, the returned path is
- * made relative to the current working directory.
- *
- * @param path the path to be copied
- * @param f whether to free the given path after copying
- * @return the allocated copy
- */
-static inline char * binaryFile_toRelativePathIntern(char * path, bool f) {
-    char * toReturn;
-#ifdef CXX_FUNCTIONS
-    toReturn = lcs_toRelativePath(path);
-#else
-    toReturn = strdup(path);
-#endif
-    if (f) {
-        free(path);
-    }
-    return toReturn;
-}
-
-char* binaryFile_toRelativePath(const char* path) {
-    return binaryFile_toRelativePathIntern((char*) path, false);
-}
-
-char * binaryFile_toRelativePathFree(char * path) {
-    return binaryFile_toRelativePathIntern(path, true);
-}
-
-/**
- * @brief Returns an allocated copy of the given path.
- *
- * If the C++ functionality of this library is enabled, the copy is converted
- * to an absolute path.
- *
- * @param path the path to be copied
- * @param f whether to free the given path after copying
- * @return the allocated copy
- */
-static inline char * binaryFile_toAbsolutePathIntern(char * path, bool f) {
-    char * toReturn;
-#ifdef CXX_FUNCTIONS
-    toReturn = lcs_toCanonicalPath(path);
-#else
-    toReturn = strdup(path);
-#endif
-    if (f) {
-        free(path);
-    }
-    return toReturn;
-}
-
-char* binaryFile_toAbsolutePath(const char* path) {
-    return binaryFile_toAbsolutePathIntern((char*) path, false);
-}
-
-char * binaryFile_toAbsolutePathFree(char * path) {
-    return binaryFile_toAbsolutePathIntern(path, true);
 }
 
 struct binaryFile* binaryFile_findOrAddFile(const char* fileName, const void* startAddress) {
