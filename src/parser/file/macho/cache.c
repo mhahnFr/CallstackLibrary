@@ -22,11 +22,8 @@
 #include <stdbool.h>
 #include <string.h>
 
-#include <mach-o/dyld.h>
-
 #include "archive.h"
 #include "cache.h"
-#include "vector_boolString.h"
 
 #include "../vector_string.h"
 
@@ -36,12 +33,10 @@
 static struct macho_cache {
     /** The already loaded object files.                */
     struct objectFile*       objectFiles;
-    /** The Mach-O files loaded by the dynamic loader.  */
-    struct vector_boolString loadedFiles;
     /** The already loaded archives (static libraries). */
     struct vector_string     loadedArchives;
 } cache = {
-    NULL, vector_initializer, vector_initializer
+    NULL, vector_initializer
 };
 
 /**
@@ -109,17 +104,6 @@ static inline bool macho_cache_loadArchive(const char* archiveName) {
 }
 
 /**
- * Queries and adds to the cache the Mach-O files currently loaded by the dynamic loader.
- */
-static inline void macho_cache_loadLoadedFiles(void) {
-    const uint32_t size = _dyld_image_count();
-    
-    for (uint32_t i = 0; i < size; ++i) {
-        vector_boolString_push_back(&cache.loadedFiles, (pair_boolString_t) { true, _dyld_get_image_name(i) });
-    }
-}
-
-/**
  * Returns whether the given archive was already loaded.
  *
  * @param archiveName the file name of the archive
@@ -161,19 +145,6 @@ struct objectFile* macho_cache_findOrAdd(const char* fileName, uint64_t lastModi
     return it;
 }
 
-bool macho_cache_isLoaded(struct machoFile* file) {
-    if (cache.loadedFiles.count == 0) {
-        macho_cache_loadLoadedFiles();
-    }
-    
-    vector_iterate(pair_boolString_t, &cache.loadedFiles, {
-        if (strcmp(element->second, file->_.fileName) == 0) {
-            return element->first;
-        }
-    })
-    return false;
-}
-
 void macho_cache_delete(struct objectFile* file) {
     if (cache.objectFiles == file) {
         cache.objectFiles = cache.objectFiles->next;
@@ -195,8 +166,6 @@ void macho_cache_destroy(void) {
         objectFile_delete(it);
     }
     cache.objectFiles = NULL;
-    vector_boolString_destroy(&cache.loadedFiles);
-    vector_boolString_create(&cache.loadedFiles);
     vector_string_destroyWith(&cache.loadedArchives, (void (*)(const char*)) free);
     vector_string_create(&cache.loadedArchives);
 }
