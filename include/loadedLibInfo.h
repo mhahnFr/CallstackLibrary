@@ -22,7 +22,8 @@
 #ifndef loadedLibInfo_h
 #define loadedLibInfo_h
 
-#include <stdlib.h>
+#include <stdbool.h>
+#include <stddef.h>
 
 struct loadedLibInfo {
     const void* begin, *end;
@@ -32,14 +33,12 @@ struct loadedLibInfo {
     char* relativeFileName;
 
     bool isSelf;
+
+    void* reserved;
 };
 
-#define loadedLibInfo_initializer ((struct loadedLibInfo) { NULL, NULL, NULL, NULL, NULL, false })
+#define loadedLibInfo_initializer ((struct loadedLibInfo) { NULL, NULL, NULL, NULL, NULL, false, NULL })
 
-static inline void loadedLibInfo_destroy(struct loadedLibInfo* self) {
-    free(self->fileName);
-    free(self->absoluteFileName);
-    free(self->relativeFileName);
-}
+void loadedLibInfo_destroy(struct loadedLibInfo* self);
 
 #endif /* loadedLibInfo_h */

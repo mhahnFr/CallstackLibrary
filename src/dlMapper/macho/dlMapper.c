@@ -96,7 +96,8 @@ static inline void dlMapper_platform_pushLoadedLib(vector_loadedLibInfo_t*   lib
         strdup(fileName),
         path_toAbsolutePath(fileName),
         path_toRelativePath(fileName),
-        addresses.first == ourStart
+        addresses.first == ourStart,
+        NULL
     });
 }
 

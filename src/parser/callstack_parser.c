@@ -38,13 +38,15 @@ static inline bool callstack_parser_parseImpl(struct callstack_parser* self,
     (void) self;
     
     for (size_t i = 0; i < callstack->backtraceSize; ++i) {
-        optional_loadedLibInfo_t* info = &callstack->frames[i].info;
-        struct callstack_frame*  frame = &callstack->frames[i];
+        struct loadedLibInfo*    info = callstack->frames[i].info;
+        struct callstack_frame* frame = &callstack->frames[i];
 
-        if (!info->has_value) continue;
-        
-        struct binaryFile* file = binaryFile_findOrAddFile(info->value.fileName,
-                                                           info->value.begin);
+        if (info == NULL) continue;
+
+        if (info->reserved == NULL) {
+            info->reserved = binaryFile_new(info->fileName, info->begin);
+        }
+        struct binaryFile* file = info->reserved;
         if (file == NULL) continue;
 
         file->addr2String(file, callstack->backtrace[i], frame);
