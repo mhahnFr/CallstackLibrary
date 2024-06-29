@@ -62,7 +62,6 @@ void machoFile_create(struct machoFile* self, const char* fileName) {
     self->linkedit_fileoff = 0;
     self->text_vmaddr      = 0;
     self->linkedit_vmaddr  = 0;
-    self->inMemory         = macho_cache_isLoaded(self); // TODO: We have this info already!
 
     self->dSYMFile.triedParsing = false;
     self->dSYMFile.file         = NULL;
@@ -123,8 +122,8 @@ static inline int machoFile_functionSortCompare(const void* lhs, const void* rhs
 
 static inline optional_debugInfo_t machoFile_getDebugInfo(struct machoFile* self, void* address) {
     const uint64_t searchAddress = (uintptr_t) (address - self->_.startAddress)
-                                 + (self->inMemory ? self->text_vmaddr : self->addressOffset);
-    
+                                 + (self->_.inMemory ? self->text_vmaddr : self->addressOffset);
+
     const pair_funcFile_t tmp = (pair_funcFile_t) { .first.startAddress = searchAddress };
     const pair_funcFile_t* closest = lower_bound(&tmp,
                                                  self->functions.content,
@@ -257,7 +256,7 @@ static inline bool machoFile_parseFileImpl(struct machoFile * self,
 
             case LC_SYMTAB:
                 result = macho_parseSymtab((void*) lc, baseAddress,
-                                           self->inMemory ? (self->linkedit_vmaddr - self->text_vmaddr) - self->linkedit_fileoff : 0,
+                                           self->_.inMemory ? (self->linkedit_vmaddr - self->text_vmaddr) - self->linkedit_fileoff : 0,
                                            bitsReversed, false, NULL, machoFile_addFunction, self);
                 break;
 
@@ -298,7 +297,7 @@ static inline bool machoFile_parseFileImpl64(struct machoFile * self,
 
             case LC_SYMTAB:
                 result = macho_parseSymtab((void*) lc, baseAddress,
-                                           self->inMemory ? (self->linkedit_vmaddr - self->text_vmaddr) - self->linkedit_fileoff : 0,
+                                           self->_.inMemory ? (self->linkedit_vmaddr - self->text_vmaddr) - self->linkedit_fileoff : 0,
                                            bitsReversed, true, NULL, machoFile_addFunction, self);
                 break;
 
@@ -341,7 +340,7 @@ static inline bool machoFile_parseFile(struct machoFile* self, const void* baseA
  * @return whether the file was parsed successfully
  */
 static inline bool machoFile_loadFile(struct machoFile* self) {
-    const bool success = self->inMemory ? machoFile_parseFile(self, self->_.startAddress)
+    const bool success = self->_.inMemory ? machoFile_parseFile(self, self->_.startAddress)
                                         : loader_loadFileAndExecute(self->_.fileName,
                                                                     (union loader_parserFunction) { (loader_parser) machoFile_parseFile },
                                                                     false,
@@ -391,7 +390,7 @@ bool machoFile_addr2String(struct binaryFile* me, void* address, struct callstac
             asprintf(&toReturn, "%s + %td",
                      name,
                      (ptrdiff_t) (address - self->_.startAddress
-                                  + (self->inMemory ? self->text_vmaddr : self->addressOffset)
+                                  + (self->_.inMemory ? self->text_vmaddr : self->addressOffset)
                                   - result.value.function.startAddress));
             free(name);
             frame->function = toReturn;

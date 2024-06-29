@@ -49,7 +49,8 @@ struct binaryFile {
     
     /** Indicates whether this file has already been parsed.        */
     bool parsed;
-    
+    bool inMemory;
+
     /** The name of the represented binary file.                    */
     const char * fileName;
     
@@ -87,6 +88,7 @@ struct binaryFile* binaryFile_new(const char* fileName, const void* startAddress
 static inline void binaryFile_create(struct binaryFile* self) {
     self->fileName = NULL;
     self->parsed   = false;
+    self->inMemory = false;
 }
 
 /**

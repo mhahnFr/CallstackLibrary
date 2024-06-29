@@ -45,8 +45,6 @@ struct machoFile {
     
     /** The address offset between Mach-O file and loaded executable.           */
     uint64_t addressOffset;
-    /** Whether the represented file is currently loaded by the dynamic loader. */
-    bool inMemory;
     /** The VM address of the linkedit segment.                                 */
     uint64_t linkedit_vmaddr;
     /** The file offset of the linkedit segment.                                */

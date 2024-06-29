@@ -50,6 +50,8 @@ static inline bool callstack_parser_parseImpl(struct callstack_parser* self,
         struct binaryFile* file = info->associated;
         if (file == NULL) continue;
 
+        file->inMemory = true;
+
         file->addr2String(file, callstack->backtrace[i], frame);
     }
     return true;
