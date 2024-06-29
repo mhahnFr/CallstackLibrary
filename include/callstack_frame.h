@@ -22,8 +22,6 @@
 #ifndef __lcs_callstack_frame_h
 #define __lcs_callstack_frame_h
 
-#include "optional_ulong.h"
-
 #ifdef __cplusplus
 extern "C" {
 #endif
@@ -59,8 +57,8 @@ struct callstack_frame {
     bool binaryFileIsSelf;
     /** The line number in the source file this frame is on. */
     unsigned long sourceLine;
-    /** The optional line column number in the source file.  */
-    optional_ulong_t sourceLineColumn;
+    /** The line column number in the source file.  */
+    unsigned long sourceLineColumn;
 };
 
 /**
@@ -77,11 +75,9 @@ static inline void callstack_frame_create(struct callstack_frame * self) {
     self->sourceFileRelative = NULL;
     self->reserved           = NULL;
     self->sourceLine         = 0;
+    self->sourceLineColumn   = 0;
     self->sourceFileOutdated = false;
     self->binaryFileIsSelf   = false;
-
-    self->sourceLineColumn.has_value = false;
-
 }
 
 /**
