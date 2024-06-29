@@ -19,16 +19,15 @@
  * CallstackLibrary, see the file LICENSE.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-#include <endian.h>
 #include <elf.h>
 #include <string.h>
+
+#include <elf/elfUtils.h>
 
 #include "elfFile.h"
 
 #include "../../callstack_parser.h"
 #include "../../lcs_stdio.h"
-
-#define ELF_TO_HOST(bits, number, littleEndian) (littleEndian ? le##bits##toh(number) : be##bits##toh(number))
 
 void elfFile_create(struct elfFile* self) {
     binaryFile_create(&self->_);

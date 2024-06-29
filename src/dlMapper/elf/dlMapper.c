@@ -34,6 +34,8 @@
 # include <callstack.h>
 #endif
 
+#include <elf/elfUtils.h>
+
 #include "../dlMapper_platform.h"
 #include "../pair_address.h"
 
@@ -58,13 +60,14 @@ static inline char* dlMapper_platform_loadExecutableName(void) {
     return buffer;
 }
 
-static inline uint64_t dlMapper_platform_loadEPHNum64(const Elf64_Ehdr* header, bool littleEndian) {
-    if (header->e_phnum != PN_XNUM) {
-        return header->e_phnum;
+static inline uint32_t dlMapper_platform_loadEPHNum64(const Elf64_Ehdr* header, bool littleEndian) {
+    const uint16_t e_phnum = ELF_TO_HOST(16, header->e_phnum, littleEndian);
+    if (e_phnum != PN_XNUM) {
+        return e_phnum;
     }
 
-    Elf64_Shdr* sect = ((void*) header) + header->e_shoff;
-    return sect->sh_info;
+    Elf64_Shdr* sect = ((void*) header) + ELF_TO_HOST(64, header->e_shoff, littleEndian);
+    return ELF_TO_HOST(32, sect->sh_info, littleEndian);
 }
 
 static inline pair_address_t dlMapper_platform_loadELF64(const void* base, bool littleEndian) {
@@ -73,8 +76,8 @@ static inline pair_address_t dlMapper_platform_loadELF64(const void* base, bool 
     const void* biggest = NULL;
     const uint64_t e_phnum = dlMapper_platform_loadEPHNum64(header, littleEndian);
     for (uint16_t i = 0; i < e_phnum; ++i) {
-        Elf64_Phdr* seg = ((void*) header) + header->e_phoff + i * header->e_phentsize;
-        const void* address = base + seg->p_offset + seg->p_memsz;
+        Elf64_Phdr* seg = ((void*) header) + ELF_TO_HOST(64, header->e_phoff, littleEndian) + i * ELF_TO_HOST(16, header->e_phentsize, littleEndian);
+        const void* address = base + ELF_TO_HOST(64, seg->p_offset, littleEndian) + ELF_TO_HOST(64, seg->p_memsz, littleEndian);
         if (biggest == NULL || biggest < address) {
             biggest = address;
         }
