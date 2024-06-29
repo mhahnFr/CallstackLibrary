@@ -1,7 +1,7 @@
 /*
  * CallstackLibrary - Library creating human-readable call stacks.
  *
- * Copyright (C) 2024  mhahnFr
+ * Copyright (C) 2023 - 2024  mhahnFr
  *
  * This file is part of the CallstackLibrary.
  *
@@ -20,15 +20,27 @@
  */
 
 #include <elf.h>
-#include <string.h>
+#include <stdlib.h>
 
 #include <elf/elfUtils.h>
 #include <file/pathUtils.h>
 
 #include "elfFile.h"
 
-#include "../../callstack_parser.h"
+#include "../loader.h"
+#include "../dwarf/dwarf_parser.h"
+
 #include "../../lcs_stdio.h"
+#include "../../callstack_parser.h"
+
+struct elfFile* elfFile_new(void) {
+    struct elfFile* toReturn = malloc(sizeof(struct elfFile));
+    
+    if (toReturn != NULL) {
+        elfFile_create(toReturn);
+    }
+    return toReturn;
+}
 
 void elfFile_create(struct elfFile* self) {
     binaryFile_create(&self->_);
@@ -42,6 +54,22 @@ void elfFile_create(struct elfFile* self) {
     lcs_section_create(&self->debugLine);
     lcs_section_create(&self->debugLineStr);
     lcs_section_create(&self->debugStr);
+    vector_dwarfLineInfo_create(&self->lineInfos);
+    vector_function_create(&self->functions);
+}
+
+/**
+ * @brief The callback for the DWARF parser.
+ *
+ * Stores the given DWARF line table row.
+ *
+ * @param info the deducted DWARF line table row
+ * @param args the payload, expected to be a private elf file structure object
+ */
+static inline void elfFile_lineProgramCallback(struct dwarf_lineInfo info, void* args) {
+    struct elfFile* self = args;
+
+    vector_dwarfLineInfo_push_back(&self->lineInfos, info);
 }
 
 #define elfFile_loadSectionStrtab(bits)                                                                                         \
@@ -82,7 +110,7 @@ static inline bool elfFile_parseSymtab##bits(struct elfFile*   self,            
                 .linkedName   = strdup(strBegin + ELF_TO_HOST(32, entry->st_name, littleEndian)),                       \
                 .length       = ELF_TO_HOST(bits, entry->st_size, littleEndian)                                         \
             };                                                                                                          \
-            elfFile_addFunction(self, f);                                                                               \
+            vector_function_push_back(&self->functions, f);                                                             \
         }                                                                                                               \
     }                                                                                                                   \
     return true;                                                                                                        \
@@ -183,7 +211,7 @@ static inline bool elfFile_parseFile##bits (struct elfFile* self, Elf##bits##_Eh
 elfFile_parseFileImpl(32)
 elfFile_parseFileImpl(64)
 
-bool elfFile_parseFile(struct elfFile* self, void* buffer, dwarf_line_callback cb, void* args) {
+static inline bool elfFile_parseFile(struct elfFile* self, void* buffer) {
     bool success = false;
     unsigned char* e_ident = buffer;
     switch (e_ident[EI_CLASS]) {
@@ -192,10 +220,67 @@ bool elfFile_parseFile(struct elfFile* self, void* buffer, dwarf_line_callback c
     }
 
     if (success && self->debugLine.size > 0) {
-        dwarf_parseLineProgram(self->debugLine, self->debugLineStr, self->debugStr, cb, args);
+        dwarf_parseLineProgram(self->debugLine, self->debugLineStr, self->debugStr, elfFile_lineProgramCallback, self);
     }
 
     return success;
+}
+
+static inline bool elfFile_loadFile(struct elfFile* self) {
+    return loader_loadFileAndExecute(self->_.fileName, (union loader_parserFunction) {
+        .parseFunc = (loader_parser) elfFile_parseFile
+    }, false, self);
+}
+
+static inline optional_debugInfo_t elfFile_getDebugInfo(struct elfFile* self, void* address) {
+    optional_debugInfo_t toReturn = { .has_value = false };
+
+    const uint64_t translated = (uintptr_t) address - (uintptr_t) self->_.startAddress;
+    struct function* closest = NULL;
+    vector_iterate(struct function, &self->functions, {
+        if (closest == NULL && element->startAddress <= translated) {
+            closest = element;
+        } else if (closest != NULL && element->startAddress <= translated && translated - element->startAddress < translated - closest->startAddress) {
+            closest = element;
+        }
+    })
+    
+    if (closest == NULL
+        || closest->startAddress > translated
+        || closest->startAddress + closest->length < translated) {
+        return toReturn;
+    }
+    toReturn = (optional_debugInfo_t) {
+        .has_value = true,
+        .value = (struct debugInfo) {
+            .function = *closest,
+            .sourceFileInfo = { .has_value = false }
+        }
+    };
+    
+    struct dwarf_lineInfo* closestInfo = NULL;
+    vector_iterate(struct dwarf_lineInfo, &self->lineInfos, {
+        if (closestInfo == NULL && element->address < translated) {
+            closestInfo = element;
+        } else if (closestInfo != NULL && element->address < translated && translated - element->address < translated - closestInfo->address) {
+            closestInfo = element;
+        }
+    })
+    if (closestInfo == NULL
+        || closest->startAddress >= closestInfo->address
+        || closest->startAddress + closest->length < closestInfo->address) {
+        return toReturn;
+    }
+    toReturn.value.sourceFileInfo = (optional_sourceFileInfo_t) {
+        .has_value = true,
+        .value = {
+            closestInfo->line,
+            closestInfo->column,
+            closestInfo->sourceFile.fileName,
+            binaryFile_isOutdated(closestInfo->sourceFile)
+        }
+    };
+    return toReturn;
 }
 
 bool elfFile_addr2String(struct binaryFile* me, void* address, struct callstack_frame* frame) {
@@ -232,4 +317,19 @@ bool elfFile_addr2String(struct binaryFile* me, void* address, struct callstack_
         return true;
     }
     return false;
+}
+
+void elfFile_destroy(struct binaryFile* me) {
+    struct elfFile* self = elfFileOrNull(me);
+    if (self == NULL) return;
+
+    vector_iterate(struct function, &self->functions, function_destroy(element);)
+    vector_function_destroy(&self->functions);
+    vector_dwarfLineInfo_destroyWith(&self->lineInfos, dwarf_lineInfo_destroyValue);
+}
+
+void elfFile_delete(struct binaryFile* self) {
+    self->destroy(self);
+    struct elfFile* me = elfFileOrNull(self);
+    free(me);
 }
