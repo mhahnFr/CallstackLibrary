@@ -101,7 +101,7 @@ endif
 # -----------------------
 
 # Compile and link flags
-COM_FLAGS = -Wall -Wextra -fPIC -Ofast -I DC4C -I 'include'
+COM_FLAGS = -Wall -Wextra -fPIC -Ofast -I DC4C -I 'include' -I src/utils
 ifeq ($(USE_BUILTINS),true)
 	COM_FLAGS += -DLCS_USE_BUILTINS
 endif
