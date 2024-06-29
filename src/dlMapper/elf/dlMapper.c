@@ -74,8 +74,8 @@ static inline pair_address_t dlMapper_platform_loadELF64(const void* base, bool 
     const Elf64_Ehdr* header = base;
 
     const void* biggest = NULL;
-    const uint64_t e_phnum = dlMapper_platform_loadEPHNum64(header, littleEndian);
-    for (uint16_t i = 0; i < e_phnum; ++i) {
+    const uint32_t e_phnum = dlMapper_platform_loadEPHNum64(header, littleEndian);
+    for (uint32_t i = 0; i < e_phnum; ++i) {
         Elf64_Phdr* seg = ((void*) header) + ELF_TO_HOST(64, header->e_phoff, littleEndian) + i * ELF_TO_HOST(16, header->e_phentsize, littleEndian);
         const void* address = base + ELF_TO_HOST(64, seg->p_offset, littleEndian) + ELF_TO_HOST(64, seg->p_memsz, littleEndian);
         if (biggest == NULL || biggest < address) {
