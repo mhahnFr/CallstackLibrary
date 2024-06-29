@@ -32,9 +32,6 @@
  #define LCS_ELF
 #endif
 
-/** A list of the already parsed files. */
-static struct binaryFile* parsedFiles = NULL;
-
 struct binaryFile* binaryFile_new(const char* fileName, const void* startAddress) {
     struct binaryFile * toReturn;
     
@@ -55,39 +52,10 @@ struct binaryFile* binaryFile_new(const char* fileName, const void* startAddress
     return toReturn;
 }
 
-void binaryFile_create(struct binaryFile * self) {
-    self->fileName = NULL;
-    self->next     = NULL;
-    self->parsed   = false;
-}
-
-struct binaryFile* binaryFile_findOrAddFile(const char* fileName, const void* startAddress) {
-    struct binaryFile* it;
-    for (it = parsedFiles; it != NULL && strcmp(it->fileName, fileName) != 0; it = it->next);
-    
-    if (it == NULL) {
-        it = binaryFile_new(fileName, startAddress);
-        if (it == NULL) {
-            return NULL;
-        }
-        it->next    = parsedFiles;
-        parsedFiles = it;
-    }
-    return it;
-}
-
 void binaryFile_clearCaches(void) {
 #ifdef LCS_MACHO
     machoFile_clearCaches();
 #endif
-    
-    struct binaryFile* tmp;
-    
-    for (struct binaryFile* it = parsedFiles; it != NULL; it = tmp) {
-        tmp = it->next;
-        it->deleter(it);
-    }
-    parsedFiles = NULL;
 }
 
 bool binaryFile_isOutdated(struct dwarf_sourceFile file) {

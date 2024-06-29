@@ -28,10 +28,6 @@
 
 #include "dwarf/dwarf_lineInfo.h"
 
-#ifdef __cplusplus
-extern "C" {
-#endif
-
 /**
  * This enumeration contains the supported types of executable files.
  */
@@ -59,9 +55,6 @@ struct binaryFile {
     
     /** The start address in memory of the represented binary file. */
     const void* startAddress;
-
-    /** A pointer to the next binary file structure.                */
-    struct binaryFile * next;
     
     /**
      * @brief The translating method.
@@ -91,18 +84,10 @@ struct binaryFile* binaryFile_new(const char* fileName, const void* startAddress
  *
  * @param self the binary file structure to be initialized
  */
-void binaryFile_create(struct binaryFile * self);
-
-/**
- * @brief Finds the appropriate binary file object in the cache.
- *
- * If no object was found, it is created and added to the cache.
- *
- * @param fileName the name of the file
- * @param startAddress the start address
- * @return the binary file object or `NULL` if unable to allocate
- */
-struct binaryFile* binaryFile_findOrAddFile(const char* fileName, const void* startAddress);
+static inline void binaryFile_create(struct binaryFile* self) {
+    self->fileName = NULL;
+    self->parsed   = false;
+}
 
 /**
  * Clears the caches created by the binary file implementations.
@@ -116,9 +101,5 @@ void binaryFile_clearCaches(void);
  * @return whether the file is outdated
  */
 bool binaryFile_isOutdated(struct dwarf_sourceFile file);
-
-#ifdef __cplusplus
-} // extern "C"
-#endif
 
 #endif /* binaryFile_h */
