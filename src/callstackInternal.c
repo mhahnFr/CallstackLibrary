@@ -54,7 +54,7 @@ int callstack_backtrace(void* buffer[], int bufferSize, void* address) {
 }
 
 enum callstack_type callstack_translate(struct callstack * self) {
-    if (self->frames == NULL && callstack_translateBinaries(self) == FAILED) {
+    if (self->frames == NULL && callstack_translateBinaries(self, false) == FAILED) {
         return FAILED;
     }
     
@@ -65,7 +65,7 @@ enum callstack_type callstack_translate(struct callstack * self) {
     return self->translationStatus;
 }
 
-enum callstack_type callstack_translateBinaries(struct callstack * self) {
+enum callstack_type callstack_translateBinaries(struct callstack* self, bool useCache) {
     self->frames = malloc(sizeof(struct callstack_frame) * self->backtraceSize);
     if (self->frames == NULL) {
         return FAILED;
@@ -79,8 +79,8 @@ enum callstack_type callstack_translateBinaries(struct callstack * self) {
         callstack_frame_create(element);
 
         struct loadedLibInfo* info = dlMapper_libInfoForAddress(self->backtrace[i]);
-        element->binaryFile = info == NULL ? NULL : strdup(info->absoluteFileName);
-        element->binaryFileRelative = info == NULL ? NULL : strdup(info->relativeFileName);
+        element->binaryFile = info == NULL ? NULL : (useCache ? info->absoluteFileName : strdup(info->absoluteFileName));
+        element->binaryFileRelative = info == NULL ? NULL : (useCache ? info->relativeFileName : strdup(info->relativeFileName));
         element->binaryFileIsSelf = info->isSelf;
         element->reserved = info;
     }

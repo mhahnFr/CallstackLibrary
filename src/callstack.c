@@ -94,7 +94,17 @@ struct callstack_frame * callstack_getBinaries(struct callstack * self) {
     if (self == NULL) return NULL;
     
     if ((self->translationStatus == NONE || self->translationStatus == FAILED)
-        && callstack_translateBinaries(self) == FAILED) {
+        && callstack_translateBinaries(self, false) == FAILED) {
+        return NULL;
+    }
+    return self->frames;
+}
+
+struct callstack_frame* callstack_getBinariesCached(struct callstack* self) {
+    if (self == NULL) return NULL;
+
+    if ((self->translationStatus == NONE || self->translationStatus == FAILED)
+        && callstack_translateBinaries(self, true) == FAILED) {
         return NULL;
     }
     return self->frames;

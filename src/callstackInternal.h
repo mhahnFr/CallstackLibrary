@@ -22,6 +22,7 @@
 #ifndef callstackinternal_h
 #define callstackinternal_h
 
+#include <stdbool.h>
 #include <stdlib.h>
 
 #include <callstack.h>
@@ -76,7 +77,7 @@ enum callstack_type callstack_translate(struct callstack * self);
  * @param self the callstack object
  * @return whether the binaries where translated
  */
-enum callstack_type callstack_translateBinaries(struct callstack * self);
+enum callstack_type callstack_translateBinaries(struct callstack* self, bool useCache);
 
 /**
  * Removes all translated callstack frames from the given callstack object.

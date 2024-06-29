@@ -156,6 +156,10 @@ struct callstack_frame * callstack_toArray(struct callstack * self);
  */
 struct callstack_frame * callstack_getBinaries(struct callstack * self);
 
+#ifdef LCS_USE_UNSAFE_OPTIMIZATION
+struct callstack_frame* callstack_getBinariesCached(struct callstack* self);
+#endif
+
 /**
  * @brief Returns the number of frames stored in the given callstack.
  *
