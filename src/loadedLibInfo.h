@@ -25,6 +25,8 @@
 #include <stdbool.h>
 #include <stddef.h>
 
+#include "parser/file/binaryFile.h"
+
 struct loadedLibInfo {
     const void* begin, *end;
 
@@ -34,7 +36,7 @@ struct loadedLibInfo {
 
     bool isSelf;
 
-    void* reserved;
+    struct binaryFile* associated;
 };
 
 #define loadedLibInfo_initializer ((struct loadedLibInfo) { NULL, NULL, NULL, NULL, NULL, false, NULL })

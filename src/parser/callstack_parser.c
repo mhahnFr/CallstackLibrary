@@ -25,6 +25,7 @@
 #include "demangler.h"
 
 #include "../callstackInternal.h"
+#include "../loadedLibInfo.h"
 
 /**
  * @brief Translates the given callstack using the given parser.
@@ -38,7 +39,7 @@ static inline bool callstack_parser_parseImpl(struct callstack_parser* self,
     (void) self;
     
     for (size_t i = 0; i < callstack->backtraceSize; ++i) {
-        struct loadedLibInfo*    info = callstack->frames[i].info;
+        struct loadedLibInfo*    info = callstack->frames[i].reserved;
         struct callstack_frame* frame = &callstack->frames[i];
 
         if (info == NULL) continue;

@@ -24,7 +24,7 @@
 
 #include <vector.h>
 
-#include "loadedLibInfo.h"
+#include "../loadedLibInfo.h"
 
 typedef_vector_light_named(loadedLibInfo, struct loadedLibInfo);
 

@@ -31,15 +31,13 @@ extern "C" {
 #include <stdbool.h>
 #include <stdlib.h>
 
-#include "loadedLibInfo.h"
-
 /**
  * This structure represents a translated callstack frame.
  *
  * @since v1.1
  */
 struct callstack_frame {
-    struct loadedLibInfo* info;
+    void* reserved;
 
     /** The name of the binary file this frame is in.        */
     char * binaryFile;
@@ -58,6 +56,7 @@ struct callstack_frame {
      * @since v1.2
      */
     bool sourceFileOutdated;
+    bool binaryFileIsSelf;
     /** The line number in the source file this frame is on. */
     unsigned long sourceLine;
     /** The optional line column number in the source file.  */
@@ -76,9 +75,10 @@ static inline void callstack_frame_create(struct callstack_frame * self) {
     self->function           = NULL;
     self->sourceFile         = NULL;
     self->sourceFileRelative = NULL;
-    self->info               = NULL;
+    self->reserved           = NULL;
     self->sourceLine         = 0;
     self->sourceFileOutdated = false;
+    self->binaryFileIsSelf   = false;
 
     self->sourceLineColumn.has_value = false;
 

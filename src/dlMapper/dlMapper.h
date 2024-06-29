@@ -24,7 +24,7 @@
 
 #include <stdbool.h>
 
-#include <loadedLibInfo.h>
+#include "../loadedLibInfo.h"
 
 bool dlMapper_init(void);
 bool dlMapper_isInited(void);
