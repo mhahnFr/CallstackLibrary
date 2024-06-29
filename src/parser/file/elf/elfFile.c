@@ -27,6 +27,7 @@
 
 #include "elfFile.h"
 
+#include "../bounds.h"
 #include "../loader.h"
 #include "../dwarf/dwarf_parser.h"
 
@@ -226,25 +227,49 @@ static inline bool elfFile_parseFile(struct elfFile* self, void* buffer) {
     return success;
 }
 
+static inline int elfFile_functionCompare(const void* lhs, const void* rhs) {
+    const struct function* a = lhs,
+                         * b = rhs;
+    if (a->startAddress < b->startAddress) return +1;
+    if (a->startAddress > b->startAddress) return -1;
+
+    return 0;
+}
+
+static inline int elfFile_lineInfoCompare(const void* lhs, const void* rhs) {
+    const struct dwarf_lineInfo* a = lhs,
+                               * b = rhs;
+
+    if (a->address < b->address) return +1;
+    if (a->address > b->address) return -1;
+
+    return 0;
+}
+
 static inline bool elfFile_loadFile(struct elfFile* self) {
-    return loader_loadFileAndExecute(self->_.fileName, (union loader_parserFunction) {
+    const bool success =  loader_loadFileAndExecute(self->_.fileName, (union loader_parserFunction) {
         .parseFunc = (loader_parser) elfFile_parseFile
     }, false, self);
+    if (success) {
+        qsort(self->functions.content, self->functions.count, sizeof(struct function), elfFile_functionCompare);
+        qsort(self->lineInfos.content, self->lineInfos.count, sizeof(struct dwarf_lineInfo), elfFile_lineInfoCompare);
+    } else {
+        vector_iterate(struct function, &self->functions, function_destroy(element);)
+        vector_function_clear(&self->functions);
+    }
+    return success;
 }
 
 static inline optional_debugInfo_t elfFile_getDebugInfo(struct elfFile* self, void* address) {
     optional_debugInfo_t toReturn = { .has_value = false };
 
     const uint64_t translated = (uintptr_t) address - (uintptr_t) self->_.startAddress;
-    struct function* closest = NULL;
-    vector_iterate(struct function, &self->functions, {
-        if (closest == NULL && element->startAddress <= translated) {
-            closest = element;
-        } else if (closest != NULL && element->startAddress <= translated && translated - element->startAddress < translated - closest->startAddress) {
-            closest = element;
-        }
-    })
-    
+    struct function tmp = (struct function) { .startAddress = translated };
+    const struct function* closest = lower_bound(&tmp,
+                                                 self->functions.content,
+                                                 self->functions.count,
+                                                 sizeof(struct function),
+                                                 elfFile_functionCompare);
     if (closest == NULL
         || closest->startAddress > translated
         || closest->startAddress + closest->length < translated) {
@@ -258,14 +283,12 @@ static inline optional_debugInfo_t elfFile_getDebugInfo(struct elfFile* self, vo
         }
     };
     
-    struct dwarf_lineInfo* closestInfo = NULL;
-    vector_iterate(struct dwarf_lineInfo, &self->lineInfos, {
-        if (closestInfo == NULL && element->address < translated) {
-            closestInfo = element;
-        } else if (closestInfo != NULL && element->address < translated && translated - element->address < translated - closestInfo->address) {
-            closestInfo = element;
-        }
-    })
+    struct dwarf_lineInfo tmpInfo = (struct dwarf_lineInfo) { .address = translated };
+    const struct dwarf_lineInfo* closestInfo = upper_bound(&tmpInfo,
+                                                           self->lineInfos.content,
+                                                           self->lineInfos.count,
+                                                           sizeof(struct dwarf_lineInfo),
+                                                           elfFile_lineInfoCompare);
     if (closestInfo == NULL
         || closest->startAddress >= closestInfo->address
         || closest->startAddress + closest->length < closestInfo->address) {
