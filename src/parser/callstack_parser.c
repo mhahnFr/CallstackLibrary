@@ -44,10 +44,10 @@ static inline bool callstack_parser_parseImpl(struct callstack_parser* self,
 
         if (info == NULL) continue;
 
-        if (info->reserved == NULL) {
-            info->reserved = binaryFile_new(info->fileName, info->begin);
+        if (info->associated == NULL) {
+            info->associated = binaryFile_new(info->fileName, info->begin);
         }
-        struct binaryFile* file = info->reserved;
+        struct binaryFile* file = info->associated;
         if (file == NULL) continue;
 
         file->addr2String(file, callstack->backtrace[i], frame);
