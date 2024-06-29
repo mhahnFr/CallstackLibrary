@@ -29,8 +29,8 @@ static vector_loadedLibInfo_t loadedLibs = vector_initializer;
 static bool dlMapper_inited = false;
 
 static inline int dlMapper_sortCompare(const void* lhs, const void* rhs) {
-    struct loadedLibInfo* a = (struct loadedLibInfo*) lhs;
-    struct loadedLibInfo* b = (struct loadedLibInfo*) rhs;
+    const struct loadedLibInfo* a = lhs,
+                              * b = rhs;
 
     if (a->begin < b->begin) return -1;
     if (a->begin > b->begin) return +1;
@@ -61,16 +61,10 @@ static inline int dlMapper_searchCompare(const void* key, const void* element) {
     return key > e->begin ? +1 : -1;
 }
 
-optional_loadedLibInfo_t dlMapper_libInfoForAddress(const void* address) {
-    if (!dlMapper_inited) return (optional_loadedLibInfo_t) { .has_value = false };
+struct loadedLibInfo* dlMapper_libInfoForAddress(const void* address) {
+    if (!dlMapper_inited) return NULL;
 
-    struct loadedLibInfo* it = bsearch(address, loadedLibs.content, loadedLibs.count, sizeof(struct loadedLibInfo), dlMapper_searchCompare);
-    if (it != NULL) {
-        return (optional_loadedLibInfo_t) {
-            true, *it
-        };
-    }
-    return (optional_loadedLibInfo_t) { .has_value = false };
+    return bsearch(address, loadedLibs.content, loadedLibs.count, sizeof(struct loadedLibInfo), dlMapper_searchCompare);
 }
 
 void dlMapper_deinit(void) {

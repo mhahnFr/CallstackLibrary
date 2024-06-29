@@ -24,11 +24,11 @@
 
 #include <stdbool.h>
 
-#include "optional_loadedLibInfo.h"
+#include <loadedLibInfo.h>
 
 bool dlMapper_init(void);
 bool dlMapper_isInited(void);
-optional_loadedLibInfo_t dlMapper_libInfoForAddress(const void* address);
+struct loadedLibInfo* dlMapper_libInfoForAddress(const void* address);
 void dlMapper_deinit(void);
 
 #endif /* dlMapper_h */

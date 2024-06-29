@@ -23,7 +23,6 @@
 #define __lcs_callstack_frame_h
 
 #include "optional_ulong.h"
-#include "optional_loadedLibInfo.h"
 
 #ifdef __cplusplus
 extern "C" {
@@ -32,13 +31,15 @@ extern "C" {
 #include <stdbool.h>
 #include <stdlib.h>
 
+#include "loadedLibInfo.h"
+
 /**
  * This structure represents a translated callstack frame.
  *
  * @since v1.1
  */
 struct callstack_frame {
-    optional_loadedLibInfo_t info;
+    struct loadedLibInfo* info;
 
     /** The name of the binary file this frame is in.        */
     char * binaryFile;
@@ -75,12 +76,12 @@ static inline void callstack_frame_create(struct callstack_frame * self) {
     self->function           = NULL;
     self->sourceFile         = NULL;
     self->sourceFileRelative = NULL;
+    self->info               = NULL;
     self->sourceLine         = 0;
     self->sourceFileOutdated = false;
 
     self->sourceLineColumn.has_value = false;
 
-    self->info.has_value = false;
 }
 
 /**
