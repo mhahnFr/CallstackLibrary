@@ -122,7 +122,7 @@ bool dlMapper_platform_loadLoadedLibraries(vector_loadedLibInfo_t* libs) {
         struct dyld_all_image_infos* infos = (void*) dyldInfo.all_image_info_addr;
         dlMapper_platform_pushLoadedLib(libs, infos->dyldPath, infos->dyldImageLoadAddress, ourStart);
     } else {
-        printf("LCS: Warning: Failed to load the dynamic loader. Callstacks might be truncated.");
+        printf("LCS: Warning: Failed to load the dynamic loader. Callstacks might be truncated.\n");
     }
 
     return true;

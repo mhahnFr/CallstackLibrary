@@ -81,7 +81,7 @@ enum callstack_type callstack_translateBinaries(struct callstack* self, bool use
         struct loadedLibInfo* info = dlMapper_libInfoForAddress(self->backtrace[i]);
         element->binaryFile = info == NULL ? NULL : (useCache ? info->absoluteFileName : strdup(info->absoluteFileName));
         element->binaryFileRelative = info == NULL ? NULL : (useCache ? info->relativeFileName : strdup(info->relativeFileName));
-        element->binaryFileIsSelf = info->isSelf;
+        element->binaryFileIsSelf = info == NULL ? false : info->isSelf;
         element->reserved = info;
     }
     return TRANSLATED;
