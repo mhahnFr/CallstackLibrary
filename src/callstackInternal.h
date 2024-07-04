@@ -75,6 +75,7 @@ enum callstack_type callstack_translate(struct callstack * self);
  * Translates the callstack frames of the given callstack to their corresponding binary files.
  *
  * @param self the callstack object
+ * @param useCache whether to use cached values instead of copies
  * @return whether the binaries where translated
  */
 enum callstack_type callstack_translateBinaries(struct callstack* self, bool useCache);
