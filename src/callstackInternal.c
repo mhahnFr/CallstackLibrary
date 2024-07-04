@@ -83,6 +83,7 @@ enum callstack_type callstack_translateBinaries(struct callstack* self, bool use
         element->binaryFileRelative = info == NULL ? NULL : (useCache ? info->relativeFileName : strdup(info->relativeFileName));
         element->binaryFileIsSelf = info == NULL ? false : info->isSelf;
         element->reserved = info;
+        element->reserved1 = useCache;
     }
     return TRANSLATED;
 }

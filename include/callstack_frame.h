@@ -36,6 +36,7 @@ extern "C" {
  */
 struct callstack_frame {
     void* reserved;
+    bool  reserved1;
 
     /** The name of the binary file this frame is in.        */
     char * binaryFile;
@@ -78,6 +79,7 @@ static inline void callstack_frame_create(struct callstack_frame * self) {
     self->sourceLineColumn   = 0;
     self->sourceFileOutdated = false;
     self->binaryFileIsSelf   = false;
+    self->reserved1          = false;
 }
 
 /**
@@ -167,8 +169,10 @@ static inline const char* callstack_frame_getShortestSourceFileOr(const struct c
  * @since v1.1
  */
 static inline void callstack_frame_destroy(struct callstack_frame * self) {
-    free(self->binaryFile);
-    free(self->binaryFileRelative);
+    if (!self->reserved1) {
+        free(self->binaryFile);
+        free(self->binaryFileRelative);
+    }
     free(self->function);
     free(self->sourceFile);
     free(self->sourceFileRelative);
