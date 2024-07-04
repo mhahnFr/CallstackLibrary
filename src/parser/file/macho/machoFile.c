@@ -117,6 +117,9 @@ static inline int machoFile_functionSortCompare(const void* lhs, const void* rhs
     if (a->first.startAddress < b->first.startAddress) return +1;
     if (a->first.startAddress > b->first.startAddress) return -1;
 
+    if (a->second == NULL && b->second != NULL) return +1;
+    if (a->second != NULL && b->second == NULL) return -1;
+
     return 0;
 }
 
@@ -217,19 +220,7 @@ static inline bool machoFile_handleSegment64(struct machoFile *          self,
 static inline void machoFile_addFunction(struct pair_funcFile function, va_list args) {
     struct machoFile* self = va_arg(args, void*);
 
-    size_t i;
-    for (i = 0; i < self->functions.count && function.first.startAddress != self->functions.content[i].first.startAddress; ++i);
-
-    if (i == self->functions.count) {
-        vector_pairFuncFile_push_back(&self->functions, function);
-    } else {
-        if (self->functions.content[i].second == NULL) {
-            function_destroy(&self->functions.content[i].first);
-            self->functions.content[i] = function;
-        } else {
-            function_destroy(&function.first);
-        }
-    }
+    vector_pairFuncFile_push_back(&self->functions, function);
 }
 
 /**
