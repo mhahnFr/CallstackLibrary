@@ -35,7 +35,17 @@ extern "C" {
  * @since v1.1
  */
 struct callstack_frame {
+    /**
+     * Reserved value.
+     *
+     * @since v1.3
+     */
     void* reserved;
+    /**
+     * Reserved value.
+     *
+     * @since v1.3
+     */
     bool  reserved1;
 
     /** The name of the binary file this frame is in.        */
@@ -55,6 +65,11 @@ struct callstack_frame {
      * @since v1.2
      */
     bool sourceFileOutdated;
+    /**
+     * Indicates whether the binary file is the CallstackLibrary itself.
+     *
+     * @since v1.3
+     */
     bool binaryFileIsSelf;
     /** The line number in the source file this frame is on. */
     unsigned long sourceLine;
