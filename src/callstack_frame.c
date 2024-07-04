@@ -46,6 +46,7 @@ static inline char * maybeStrdup(const char * str) {
 void callstack_frame_copyHere(struct callstack_frame * destination, const struct callstack_frame * source) {
     *destination = (struct callstack_frame) {
         source->reserved,
+        source->reserved1,
         maybeStrdup(source->binaryFile),
         maybeStrdup(source->binaryFileRelative),
         maybeStrdup(source->function),
