@@ -327,9 +327,7 @@ bool elfFile_addr2String(struct binaryFile* me, void* address, struct callstack_
             frame->sourceFileRelative = path_toRelativePath((char*) result.value.sourceFileInfo.value.sourceFile);
             frame->sourceFileOutdated = result.value.sourceFileInfo.value.outdated;
             frame->sourceLine = result.value.sourceFileInfo.value.line;
-            if (result.value.sourceFileInfo.value.column > 0) {
-                frame->sourceLineColumn = (optional_ulong_t) { true, result.value.sourceFileInfo.value.column };
-            }
+            frame->sourceLineColumn = result.value.sourceFileInfo.value.column;
             frame->function = name;
         } else {
             char* toReturn = NULL;

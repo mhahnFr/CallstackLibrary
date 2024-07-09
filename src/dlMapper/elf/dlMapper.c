@@ -124,7 +124,8 @@ static inline int dlMapper_platform_iterateCallback(struct dl_phdr_info* info, s
         empty ? (char*) fileName : strdup(fileName),
         path_toAbsolutePath(fileName),
         path_toRelativePath(fileName),
-        addresses.first == data->start
+        addresses.first == data->start,
+        NULL
     });
     return 0;
 }
