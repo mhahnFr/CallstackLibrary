@@ -25,6 +25,7 @@
 
 #include <mach-o/loader.h>
 
+#include <macho/fat_handler.h>
 #include <macho/macho_utils.h>
 
 #include "objectFile.h"

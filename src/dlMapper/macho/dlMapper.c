@@ -27,12 +27,11 @@
 #include <mach-o/ldsyms.h>
 
 #include <file/pathUtils.h>
+#include <macho/fat_handler.h>
 #include <macho/macho_utils.h>
 
 #include "../pair_address.h"
 #include "../dlMapper_platform.h"
-
-#include "../../parser/file/macho/macho_parser.h"
 
 static inline const void* dlMapper_platform_loadMachO64(const struct mach_header_64* header, const bool bytesSwapped) {
     uint64_t vmsize = 0;
