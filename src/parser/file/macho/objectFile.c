@@ -74,28 +74,6 @@ static inline int objectFile_functionCompare(const void* lhs, const void* rhs) {
 }
 
 /**
- * @brief Parses the represented object file.
- *
- * If the parsing fails, the intermediate objects are cleaned up.
- *
- * @param self the object file object
- * @return whether the parsing was successful
- */
-static inline bool objectFile_parseIntern(struct objectFile* self) {
-    const bool result = objectFile_parse(self);
-    if (!result) {
-        for (size_t i = 0; i < self->ownFunctions.count; ++i) {
-            function_destroy(&self->ownFunctions.content[i]);
-        }
-        vector_function_clear(&self->ownFunctions);
-    } else {
-        qsort(self->lineInfos.content, self->lineInfos.count, sizeof(struct dwarf_lineInfo), objectFile_dwarfLineInfoSortCompare);
-        qsort(self->ownFunctions.content, self->ownFunctions.count, sizeof(struct function), objectFile_functionCompare);
-    }
-    return result;
-}
-
-/**
  * Finds and returns the function with the given name deducted from the represented object file.
  *
  * @param self the object file object
@@ -141,7 +119,7 @@ optional_debugInfo_t objectFile_getDebugInfo(struct objectFile* self, uint64_t a
     optional_debugInfo_t toReturn = { .has_value = false };
     
     if (!self->parsed) {
-        if (!(self->parsed = objectFile_parseIntern(self))) {
+        if (!(self->parsed = objectFile_parse(self))) {
             return toReturn;
         }
     }
@@ -181,7 +159,7 @@ optional_debugInfo_t objectFile_getDebugInfo(struct objectFile* self, uint64_t a
 
 uint8_t* objectFile_getUUID(struct objectFile* self) {
     if (!self->parsed) {
-        self->parsed = objectFile_parseIntern(self);
+        self->parsed = objectFile_parse(self);
     }
     return self->uuid;
 }
@@ -405,6 +383,9 @@ bool objectFile_parseBuffer(struct objectFile* self, void* buffer) {
             function_destroy(&self->ownFunctions.content[i]);
         }
         vector_function_clear(&self->ownFunctions);
+    } else {
+        qsort(self->lineInfos.content, self->lineInfos.count, sizeof(struct dwarf_lineInfo), objectFile_dwarfLineInfoSortCompare);
+        qsort(self->ownFunctions.content, self->ownFunctions.count, sizeof(struct function), objectFile_functionCompare);
     }
     return result;
 }
@@ -430,7 +411,7 @@ bool objectFile_parse(struct objectFile* self) {
     }
     const size_t count = fread(buffer, 1, fileStats.st_size, file);
     fclose(file);
-    const bool success = (off_t) count == fileStats.st_size && objectFile_parseMachO(self, buffer);
+    const bool success = (off_t) count == fileStats.st_size && objectFile_parseBuffer(self, buffer);
     free(buffer);
     return success;
 }
