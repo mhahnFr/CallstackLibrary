@@ -22,7 +22,8 @@
 #ifndef macho_parser_h
 #define macho_parser_h
 
-#include <mach-o/fat.h>
+#include <stdbool.h>
+
 #include <mach-o/loader.h>
 
 #include "objectFile.h"
@@ -73,15 +74,5 @@ bool macho_parseSymtab(struct symtab_command* command,
                        macho_addObjectFile    objCb,
                        macho_addFunction      funCb,
                        ...);
-
-/**
- * Extracts the appropriate Mach-O slice in the given fat archive.
- *
- * @param fatHeader the header of the fat archive
- * @param bitsReversed whether the bytes need to be reversed to match the host byte order
- * @param fileName the name of the represented Mach-O file
- * @return the slice the system would load or `NULL` if no appropriate slice is found
- */
-void* macho_parseFat(const struct fat_header* fatHeader, bool bitsReversed, const char* fileName);
 
 #endif /* macho_parser_h */
