@@ -105,6 +105,8 @@ static inline pair_address_t dlMapper_platform_loadELF(const void* baseAddress) 
 }
 
 static inline int dlMapper_platform_iterateCallback(struct dl_phdr_info* info, size_t size, void* d) {
+    (void) size;
+
     struct dlMapper_platform_data* data = d;
 
     const char* fileName = info->dlpi_name;
