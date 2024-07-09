@@ -32,6 +32,8 @@
 #include "../pair_address.h"
 #include "../dlMapper_platform.h"
 
+#include "../../parser/file/macho/macho_parser.h"
+
 static inline const void* dlMapper_platform_loadMachO64(const struct mach_header_64* header, const bool bytesSwapped) {
     uint64_t vmsize = 0;
     struct load_command* lc = (void*) header + sizeof(struct mach_header_64);
@@ -70,7 +72,7 @@ static inline const void* dlMapper_platform_loadMachO32(const struct mach_header
     return (void*) header + vmsize;
 }
 
-static inline pair_address_t dlMapper_platform_loadMachO(const struct mach_header* header) {
+static inline pair_address_t dlMapper_platform_loadMachO(const struct mach_header* header, const char* fileName) {
     const void* end = NULL;
     switch (header->magic) {
         case MH_MAGIC_64:
@@ -79,7 +81,11 @@ static inline pair_address_t dlMapper_platform_loadMachO(const struct mach_heade
         case MH_MAGIC:
         case MH_CIGAM: end = dlMapper_platform_loadMachO32(header, header->magic == MH_CIGAM); break;
 
-        default: abort(); // TODO: Make sure no fat handling is needed
+        case FAT_MAGIC:
+        case FAT_MAGIC_64: return dlMapper_platform_loadMachO(macho_parseFat((void*) header, false, fileName), fileName);
+
+        case FAT_CIGAM:
+        case FAT_CIGAM_64: return dlMapper_platform_loadMachO(macho_parseFat((void*) header, true, fileName), fileName);
     }
 
     return (struct pair_address) { header, end };
@@ -89,7 +95,7 @@ static inline void dlMapper_platform_pushLoadedLib(vector_loadedLibInfo_t*   lib
                                                    const char*               fileName,
                                                    const struct mach_header* header,
                                                    const void*               ourStart) {
-    const pair_address_t addresses = dlMapper_platform_loadMachO(header);
+    const pair_address_t addresses = dlMapper_platform_loadMachO(header, fileName);
     vector_loadedLibInfo_push_back(libs, (struct loadedLibInfo) {
         addresses.first,
         addresses.second,
