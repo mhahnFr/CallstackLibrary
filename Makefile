@@ -39,6 +39,8 @@ DARWIN_PATH    = ./src/parser/file/macho
 
 DL_MAPPER_LINUX_PATH  = ./src/dlMapper/elf
 DL_MAPPER_DARWIN_PATH = ./src/dlMapper/macho
+
+UTILS_DARWIN_PATH = ./src/utils/macho
 # -----
 
 # Assert submodules are available
@@ -49,7 +51,7 @@ endif
 # -------------------------------
 
 # Main sources
-SRCS = $(shell find ./src -type f -name \*.c \! -path $(LINUX_PATH)\* \! -path $(DARWIN_PATH)\* \! -path $(DL_MAPPER_LINUX_PATH)\* \! -path $(DL_MAPPER_DARWIN_PATH)\*)
+SRCS = $(shell find ./src -type f -name \*.c \! -path $(LINUX_PATH)\* \! -path $(DARWIN_PATH)\* \! -path $(DL_MAPPER_LINUX_PATH)\* \! -path $(DL_MAPPER_DARWIN_PATH)\* \! -path $(UTILS_DARWIN_PATH)\*)
 OBJS = $(patsubst %.c, %.o, $(SRCS))
 DEPS = $(patsubst %.c, %.d, $(SRCS))
 # ------------
@@ -70,6 +72,7 @@ LINUX_DEPS  = $(patsubst %.c, %.d, $(LINUX_SRCS))
 # Darwin specific sources
 DARWIN_SRCS  = $(shell find $(DARWIN_PATH) -type f -name \*.c)
 DARWIN_SRCS += $(shell find $(DL_MAPPER_DARWIN_PATH) -type f -name \*.c)
+DARWIN_SRCS += $(shell find $(UTILS_DARWIN_PATH) -type f -name \*.c)
 DARWIN_OBJS  = $(patsubst %.c, %.o, $(DARWIN_SRCS))
 DARWIN_DEPS  = $(patsubst %.c, %.d, $(DARWIN_SRCS))
 # -----------------------
