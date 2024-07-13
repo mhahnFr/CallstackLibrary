@@ -33,6 +33,13 @@
 #include "../pair_address.h"
 #include "../dlMapper_platform.h"
 
+/**
+ * Parses the given 64 bit Mach-O file.
+ *
+ * @param header the start pointer of the Mach-O file
+ * @param bytesSwapped whether the bytes need to be swapped to match the host byte order
+ * @return the end address of the Mach-O file
+ */
 static inline const void* dlMapper_platform_loadMachO64(const struct mach_header_64* header, const bool bytesSwapped) {
     uint64_t vmsize = 0;
     struct load_command* lc = (void*) header + sizeof(struct mach_header_64);
@@ -52,6 +59,13 @@ static inline const void* dlMapper_platform_loadMachO64(const struct mach_header
     return (void*) header + vmsize;
 }
 
+/**
+ * Parses the given 32 bit Mach-O file.
+ *
+ * @param header the start pointer of the Mach-O file
+ * @param bytesSwapped whether the bytes need to be swapped to match the host byte order
+ * @return the end address of the Mach-O file
+ */
 static inline const void* dlMapper_platform_loadMachO32(const struct mach_header* header, const bool bytesSwapped) {
     uint32_t vmsize = 0;
     struct load_command* lc = (void*) header + sizeof(struct mach_header);
@@ -71,6 +85,13 @@ static inline const void* dlMapper_platform_loadMachO32(const struct mach_header
     return (void*) header + vmsize;
 }
 
+/**
+ * Loads the given Mach-O file.
+ *
+ * @param header the start pointer of the Mach-O file
+ * @param fileName the file name of the Mach-O file
+ * @return the start and the end address of the Mach-O file
+ */
 static inline pair_address_t dlMapper_platform_loadMachO(const struct mach_header* header, const char* fileName) {
     const void* end = NULL;
     switch (header->magic) {
@@ -90,6 +111,14 @@ static inline pair_address_t dlMapper_platform_loadMachO(const struct mach_heade
     return (struct pair_address) { header, end };
 }
 
+/**
+ * Parses the given Mach-O file and stores the result in the cache.
+ *
+ * @param libs the vector to store the loaded library info in
+ * @param fileName the file name of the Mach-O file
+ * @param header the start pointer of the Mach-O file
+ * @param ourStart the start pointer of our runtime image
+ */
 static inline void dlMapper_platform_pushLoadedLib(vector_loadedLibInfo_t*   libs,
                                                    const char*               fileName,
                                                    const struct mach_header* header,
