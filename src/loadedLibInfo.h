@@ -27,20 +27,36 @@
 
 #include "parser/file/binaryFile.h"
 
+/**
+ * This structure represents a loaded runtime library.
+ */
 struct loadedLibInfo {
-    const void* begin, *end;
+    /** The start address of the runtime image.                           */
+    const void* begin,
+    /** The end address of the runtime image.                             */
+              * end;
 
+    /** The file name of the loaded runtime image as given by the system. */
     char* fileName;
+    /** The generated absolute file name of the runtime image.            */
     char* absoluteFileName;
+    /** The generated relative file name of the runtime image.            */
     char* relativeFileName;
 
+    /** Indicates whether the runtime image is ours.                      */
     bool isSelf;
 
+    /** The associated binary file abstraction object.                    */
     struct binaryFile* associated;
 };
 
 #define loadedLibInfo_initializer ((struct loadedLibInfo) { NULL, NULL, NULL, NULL, NULL, false, NULL })
 
+/**
+ * Destroys the given library info.
+ *
+ * @param self the library info to be destroyed
+ */
 void loadedLibInfo_destroy(struct loadedLibInfo* self);
 
 #endif /* loadedLibInfo_h */
