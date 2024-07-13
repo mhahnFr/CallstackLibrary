@@ -25,6 +25,13 @@
 
 #include "fileHelper.h"
 
+/**
+ * Duplicates or converts the given path to an absolute path.
+ *
+ * @param path the path to be converted
+ * @param f whether to free the given path name
+ * @return the allocated, converted path name
+ */
 static inline char* path_toAbsolutePathIntern(char* path, bool f) {
     char* toReturn;
 #ifdef CXX_FUNCTIONS
@@ -38,6 +45,13 @@ static inline char* path_toAbsolutePathIntern(char* path, bool f) {
     return toReturn;
 }
 
+/**
+ * Duplicates or converts the given path to a relative path.
+ *
+ * @param path the path to be converted
+ * @param f whether to free the given path name
+ * @return the allocated, converted path name
+ */
 static inline char* path_toRelativePathIntern(char* path, bool f) {
     char* toReturn;
 #ifdef CXX_FUNCTIONS

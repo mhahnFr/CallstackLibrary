@@ -22,9 +22,56 @@
 #ifndef __utils_file_pathUtils_h
 #define __utils_file_pathUtils_h
 
+/**
+ * @brief Returns the absolute path of the given path name.
+ *
+ * If `CXX_FUNCTIONS` is defined, the absolute path is returned.
+ * Otherwise, the given path name is simply duplicated.
+ * In any case, the return value should be `free`d after use.
+ *
+ * @param path the path name
+ * @return the allocated, absolute path name
+ */
 char* path_toAbsolutePath(const char* path);
+
+/**
+ * @brief Returns the absolute path of the given path name.
+ *
+ * If `CXX_FUNCTIONS` is defined, the absolute path is returned.
+ * Otherwise, the given path name is simply duplicated.
+ * In any case, the return value should be `free`d after use.
+ *
+ * The given path name is `free`d after it has been converted.
+ *
+ * @param path the path name
+ * @return the allocated, absolute path name
+ */
 char* path_toAbsolutePathFree(char* path);
+
+/**
+ * @brief Returns the relative path of the given path name.
+ *
+ * If `CXX_FUNCTIONS` is defined, the relative path is returned.
+ * Otherwise, the given path name is simply duplicated.
+ * In any case, the return value should be `free`d after use.
+ *
+ * @param path the path name
+ * @return the allocated, relative path name
+ */
 char* path_toRelativePath(const char* path);
+
+/**
+ * @brief Returns the relative path of the given path name.
+ *
+ * If `CXX_FUNCTIONS` is defined, the relative path is returned.
+ * Otherwise, the given path name is simply duplicated.
+ * In any case, the return value should be `free`d after use.
+ *
+ * The given path name is `free`d after it has been converted.
+ *
+ * @param path the path name
+ * @return the allocated, relative path name
+ */
 char* path_toRelativePathFree(char* path);
 
 #endif /* __utils_file_pathUtils_h */
