@@ -40,11 +40,22 @@
 #include "../dlMapper_platform.h"
 #include "../pair_address.h"
 
+/**
+ * This structure is used to pass the start address of our runtime image and
+ * the loaded library information vector to the iteration callback.
+ */
 struct dlMapper_platform_data {
+    /** The start address of our runtime image. */
     const void* start;
+    /** The loaded library information vector.  */
     vector_loadedLibInfo_t* libs;
 };
 
+/**
+ * Loads the file name of the main executable.
+ *
+ * @return the allocated file name of the main executable
+ */
 static inline char* dlMapper_platform_loadExecutableName(void) {
     char* buffer = malloc(PATH_MAX);
     if (buffer == NULL) {
@@ -94,6 +105,12 @@ static inline pair_address_t dlMapper_platform_loadELF##bits(const void* base, b
 dlMapper_platform_loadELF_impl(32)
 dlMapper_platform_loadELF_impl(64)
 
+/**
+ * Parses the given ELF file.
+ *
+ * @param baseAddress the start address of the ELF file
+ * @return the start and the end address of the given ELF file
+ */
 static inline pair_address_t dlMapper_platform_loadELF(const void* baseAddress) {
     const Elf32_Ehdr* header = baseAddress;
     switch (header->e_ident[EI_CLASS]) {
@@ -104,6 +121,15 @@ static inline pair_address_t dlMapper_platform_loadELF(const void* baseAddress) 
     return (pair_address_t) { NULL, NULL };
 }
 
+/**
+ * Creates a loaded library information from the given info and stores it in
+ * the passed payload.
+ *
+ * @param info the system info
+ * @param size the size of the passed info structure
+ * @param d the payload
+ * @return whether to continue iterating
+ */
 static inline int dlMapper_platform_iterateCallback(struct dl_phdr_info* info, size_t size, void* d) {
     (void) size;
 
@@ -132,6 +158,11 @@ static inline int dlMapper_platform_iterateCallback(struct dl_phdr_info* info, s
     return 0;
 }
 
+/**
+ * Loads the start address of our runtime image.
+ *
+ * @return the start address of our runtime image
+ */
 static inline void* dlMapper_platform_loadLCSAddress(void) {
     void* ourStart = NULL;
 
