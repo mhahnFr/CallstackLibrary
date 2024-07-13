@@ -26,9 +26,34 @@
 
 #include "../loadedLibInfo.h"
 
+/**
+ * @brief Initializes the dlMapper.
+ *
+ * Does nothing if it has already been initialized; if that is the case,
+ * `true` will be returned.
+ *
+ * @return whether the dlMapper has been successfully initialized
+ */
 bool dlMapper_init(void);
+
+/**
+ * Returns whether the dlMapper has already been initialized.
+ *
+ * @return whether the dlMapper is initialized
+ */
 bool dlMapper_isInited(void);
+
+/**
+ * Returns the loaded library info the given pointer is associated with.
+ *
+ * @param address the address whose runtime image to find
+ * @return the associated loaded library info object or `NULL` if not in any loaded library
+ */
 struct loadedLibInfo* dlMapper_libInfoForAddress(const void* address);
+
+/**
+ * Deinitializes the dlMapper.
+ */
 void dlMapper_deinit(void);
 
 #endif /* dlMapper_h */

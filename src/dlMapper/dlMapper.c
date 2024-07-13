@@ -25,7 +25,9 @@
 #include "dlMapper_platform.h"
 #include "vector_loadedLibInfo.h"
 
+/** The loaded library infos.                            */
 static vector_loadedLibInfo_t loadedLibs = vector_initializer;
+/** Indicates whether the dlMapper has been initialized. */
 static bool dlMapper_inited = false;
 
 static inline int dlMapper_sortCompare(const void* lhs, const void* rhs) {
@@ -51,6 +53,15 @@ bool dlMapper_init(void) {
     return result;
 }
 
+/**
+ * @brief Returns how the given key compares to the given loaded library info.
+ *
+ * The given key is the searched address, the given element is a loaded library info object.
+ *
+ * @param key the searched key
+ * @param element the element to be checked
+ * @return `0` if the key is in the loaded library or a value smaller or greater than `0` according to the sorting order
+ */
 static inline int dlMapper_searchCompare(const void* key, const void* element) {
     // IMPORTANT: key is the searched address, element the array element
 
