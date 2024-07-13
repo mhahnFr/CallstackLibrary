@@ -24,10 +24,6 @@
 
 #include <stdbool.h>
 
-#ifdef __cplusplus
-extern "C" {
-#endif
-
 /**
  * @brief The simple parser callback function prototype.
  *
@@ -73,9 +69,5 @@ union loader_parserFunction {
  * @return whether the file was loaded successfully and the parsing was successful
  */
 bool loader_loadFileAndExecute(const char* fileName, union loader_parserFunction func, bool extended, void* args);
-
-#ifdef __cplusplus
-} // extern "C"
-#endif
 
 #endif /* loader_h */

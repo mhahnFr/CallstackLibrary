@@ -34,10 +34,6 @@
 
 #include "../dwarf/vector_dwarf_lineInfo.h"
 
-#ifdef __cplusplus
-extern "C" {
-#endif
-
 /**
  * This structure represents an object file.
  */
@@ -166,9 +162,5 @@ void objectFile_destroy(struct objectFile * self);
  * @param self the object file structure to be deleted
  */
 void objectFile_delete(struct objectFile * self);
-
-#ifdef __cplusplus
-} // extern "C"
-#endif
 
 #endif /* objectFile_h */

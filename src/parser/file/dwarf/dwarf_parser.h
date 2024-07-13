@@ -33,10 +33,6 @@
 
 #include "../lcs_section.h"
 
-#ifdef __cplusplus
-extern "C" {
-#endif
-
 /**
  * @brief This type represents the function called by `dwarf_parseLineProgram`.
  *
@@ -133,9 +129,5 @@ uint64_t getULEB128(void* begin, size_t* counter);
  * @return the deducted number
  */
 int64_t getLEB128(void* begin, size_t* counter);
-
-#ifdef __cplusplus
-} // extern "C"
-#endif
 
 #endif /* dwarf_parser_h */

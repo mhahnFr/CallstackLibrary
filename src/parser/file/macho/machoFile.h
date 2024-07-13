@@ -32,10 +32,6 @@
 #include "../debugInfo.h"
 #include "../vector_function.h"
 
-#ifdef __cplusplus
-extern "C" {
-#endif
-
 /**
  * This structure represents a Mach-O binary file.
  */
@@ -120,9 +116,5 @@ void machoFile_delete(struct binaryFile * self);
  * Clears the caches created by the Mach-O binary file implementation.
  */
 void machoFile_clearCaches(void);
-
-#ifdef __cplusplus
-} // extern "C"
-#endif
 
 #endif /* machoFile_h */

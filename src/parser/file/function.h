@@ -22,10 +22,6 @@
 
 #include <stdint.h>
 
-#ifdef __cplusplus
-extern "C" {
-#endif
-
 /**
  * This structure represents a function in a Mach-O symbol table.
  */
@@ -66,10 +62,5 @@ void function_destroy(struct function * self);
  * @param self the function structure to be deleted
  */
 void function_delete(struct function * self);
-
-
-#ifdef __cplusplus
-} // extern "C"
-#endif
 
 #endif /* function_h */
