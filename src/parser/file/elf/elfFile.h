@@ -33,17 +33,19 @@
  * This structure represents an ELF binary file.
  */
 struct elfFile {
-    /** The super part of this structure.                          */
+    /** The super part of this structure.                            */
     struct binaryFile _;
 
-    /** The section corresponding to the .debug_line section.      */
+    /** The section corresponding to the .debug_line section.        */
     struct lcs_section debugLine,
-    /** The section corresponding to the .debug_line_str section.  */
+    /** The section corresponding to the .debug_line_str section.    */
                        debugLineStr,
-    /** The section corresponding to the .debug_str section.       */
+    /** The section corresponding to the .debug_str section.         */
                        debugStr;
     
+    /** The functions found in the represented ELF file.             */
     vector_function_t functions;
+    /* The DWARF line information found in the represented ELF file. */
     vector_dwarfLineInfo_t lineInfos;
 };
 

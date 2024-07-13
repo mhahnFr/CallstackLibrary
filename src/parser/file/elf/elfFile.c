@@ -212,6 +212,13 @@ static inline bool elfFile_parseFile##bits (struct elfFile* self, Elf##bits##_Eh
 elfFile_parseFileImpl(32)
 elfFile_parseFileImpl(64)
 
+/**
+ * Parses the given ELF file into the given abstraction object.
+ *
+ * @param self the ELF file abstraction object
+ * @param buffer the start pointer of the ELF file
+ * @return whether the file was parsed successfully
+ */
 static inline bool elfFile_parseFile(struct elfFile* self, void* buffer) {
     bool success = false;
     unsigned char* e_ident = buffer;
@@ -227,6 +234,15 @@ static inline bool elfFile_parseFile(struct elfFile* self, void* buffer) {
     return success;
 }
 
+/**
+ * @brief Returns how the two given functions compare.
+ *
+ * Sorted descendingly.
+ *
+ * @param lhs the left-hand side value
+ * @param rhs the right-hand side value
+ * @return `0` if the two functions compare equal or a value smaller or greater than `0` according to the sorting order
+ */
 static inline int elfFile_functionCompare(const void* lhs, const void* rhs) {
     const struct function* a = lhs,
                          * b = rhs;
@@ -236,6 +252,15 @@ static inline int elfFile_functionCompare(const void* lhs, const void* rhs) {
     return 0;
 }
 
+/**
+ * @brief Returns how the two given DWARF line infos compare.
+ *
+ * Sorted descendingly.
+ *
+ * @param lhs the left-hand side value
+ * @param rhs the right-hand side value
+ * @return `0` if the two infos compare equal or a value smaller or greater than `0` according to the sorting order
+ */
 static inline int elfFile_lineInfoCompare(const void* lhs, const void* rhs) {
     const struct dwarf_lineInfo* a = lhs,
                                * b = rhs;
@@ -246,6 +271,12 @@ static inline int elfFile_lineInfoCompare(const void* lhs, const void* rhs) {
     return 0;
 }
 
+/**
+ * Loads the ELF file represented by the given abstraction object.
+ *
+ * @param self the ELF file abstraction object
+ * @return whether the ELF file was loaded successfully
+ */
 static inline bool elfFile_loadFile(struct elfFile* self) {
     const bool success =  loader_loadFileAndExecute(self->_.fileName, (union loader_parserFunction) {
         .parseFunc = (loader_parser) elfFile_parseFile
@@ -260,6 +291,14 @@ static inline bool elfFile_loadFile(struct elfFile* self) {
     return success;
 }
 
+/**
+ * Deducts the debugging information available for the given address in the given
+ * ELF file abstraction object.
+ *
+ * @param self the ELF file abstraction object to be searched
+ * @param address the address to be translated
+ * @return the optionally available debug information
+ */
 static inline optional_debugInfo_t elfFile_getDebugInfo(struct elfFile* self, void* address) {
     optional_debugInfo_t toReturn = { .has_value = false };
 
