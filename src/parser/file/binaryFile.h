@@ -42,19 +42,20 @@ enum binaryFileType {
  * This structure represents a generic binary executable file.
  */
 struct binaryFile {
-    /** The type of this binary file.                               */
+    /** The type of this binary file.                                    */
     enum binaryFileType type;
-    /** A pointer to the concrete structure.                        */
+    /** A pointer to the concrete structure.                             */
     void * concrete;
     
-    /** Indicates whether this file has already been parsed.        */
+    /** Indicates whether this file has already been parsed.             */
     bool parsed;
+    /** Indicates whether the represented image is loaded by the system. */
     bool inMemory;
 
-    /** The name of the represented binary file.                    */
+    /** The name of the represented binary file.                         */
     const char * fileName;
     
-    /** The start address in memory of the represented binary file. */
+    /** The start address in memory of the represented binary file.      */
     const void* startAddress;
     
     /**
@@ -66,9 +67,9 @@ struct binaryFile {
      * Returns whether the address could be translated.
      */
     bool (*addr2String)(struct binaryFile*, void*, struct callstack_frame*);
-    /** The appropriate deinitializing method.                      */
+    /** The appropriate deinitializing method.                           */
     void (*destroy)    (struct binaryFile *);
-    /** The appropriate deleting method.                            */
+    /** The appropriate deleting method.                                 */
     void (*deleter)    (struct binaryFile *);
 };
 
