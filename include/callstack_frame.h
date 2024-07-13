@@ -147,6 +147,7 @@ char * callstack_frame_getShortestName(const struct callstack_frame * self);
  *
  * @param self the callstack frame
  * @param fallback the fallback string to be returned
+ * @return the shortest binary file name or the given fallback
  * @since v1.2
  */
 static inline const char* callstack_frame_getShortestNameOr(const struct callstack_frame* self, const char* fallback) {
@@ -170,6 +171,7 @@ char * callstack_frame_getShortestSourceFile(const struct callstack_frame * self
  *
  * @param self the callstack frame
  * @param fallback the fallback string to be returned
+ * @return the shortest source file name or the given fallback
  * @since v1.2
  */
 static inline const char* callstack_frame_getShortestSourceFileOr(const struct callstack_frame* self, const char* fallback) {

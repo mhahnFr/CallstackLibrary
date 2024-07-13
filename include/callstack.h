@@ -157,6 +157,22 @@ struct callstack_frame * callstack_toArray(struct callstack * self);
 struct callstack_frame * callstack_getBinaries(struct callstack * self);
 
 #ifdef LCS_USE_UNSAFE_OPTIMIZATION
+/**
+ * @brief Translates the given callstack and returns an array of the translated frames.
+ *
+ * If the given has not been translated before, only the binary file information
+ * is deducted.
+ *
+ * The deducted binary information is located in the cache of the library and becomes
+ * invalid after a call to `callstack_clearCaches()` or after the callstack has
+ * been translated entirely if `callstack_autoClearCaches` is `true`.
+ *
+ * Returns `NULL` if an error happens.
+ *
+ * @param self the callstack object
+ * @return an array of translated callstack frames
+ * @since v1.3
+ */
 struct callstack_frame* callstack_getBinariesCached(struct callstack* self);
 #endif
 
