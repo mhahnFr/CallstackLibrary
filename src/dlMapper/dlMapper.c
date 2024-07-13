@@ -30,6 +30,15 @@ static vector_loadedLibInfo_t loadedLibs = vector_initializer;
 /** Indicates whether the dlMapper has been initialized. */
 static bool dlMapper_inited = false;
 
+/**
+ * @brief Returns how the two given loaded library infos compare.
+ *
+ * Sorted ascendingly.
+ *
+ * @param lhs the left-hand side value
+ * @param rhs the right-hand side value
+ * @return `0` if the two values compare equal or a value less than or greater than `0` according to the sorting order
+ */
 static inline int dlMapper_sortCompare(const void* lhs, const void* rhs) {
     const struct loadedLibInfo* a = lhs,
                               * b = rhs;

@@ -65,11 +65,11 @@ struct dwarf_parser {
     /** Vector with the argument count of the standard op codes.                        */
     vector_uint8_t stdOpcodeLengths;
 
-    /** The .debug_line section.                                                        */
+    /** The `.debug_line` section.                                                      */
     struct lcs_section debugLine,
-    /** The .debug_str section.                                                         */
+    /** The `.debug_str` section.                                                       */
                        debugStr,
-    /** The .debug_line_str section.                                                    */
+    /** The `.debug_line_str` section.                                                  */
                        debugLineStr;
 
     /** The callback to be called when a line number table row is emitted.              */
