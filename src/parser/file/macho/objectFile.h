@@ -51,11 +51,11 @@ struct objectFile {
     /** The UUID of the represented Mach-O object file.         */
     uint8_t uuid[16];
     
-    /** The __debug_line section of the object file.            */
+    /** The `__debug_line` section of the object file.          */
     struct lcs_section debugLine;
-    /** The __debug_line_str section of the object file.        */
+    /** The `__debug_line_str` section of the object file.      */
     struct lcs_section debugLineStr;
-    /** The __debug_str section of the object file.             */
+    /** The `__debug_str` section of the object file.           */
     struct lcs_section debugStr;
 
     /** Whether the file was successfully parsed.               */
@@ -63,8 +63,11 @@ struct objectFile {
     /** Whether the represented file is part of a .dSYM bundle. */
     bool isDsymBundle;
     
+    /** The functions present in the represented object file.   */
     vector_function_t ownFunctions;
+    /** The deducted DWARF line infos.                          */
     vector_dwarfLineInfo_t lineInfos;
+    /** The cached name of the main source file.                */
     const char* mainSourceFileCache;
 
     /** Pointer to the next element in a list.                  */

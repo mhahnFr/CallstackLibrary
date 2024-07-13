@@ -57,6 +57,15 @@ static inline void objectFile_dwarfLineCallback(struct dwarf_lineInfo info, void
     vector_dwarfLineInfo_push_back(&self->lineInfos, info);
 }
 
+/**
+ * @brief Returns how the the two given DWARF line infos compare.
+ *
+ * Sorted descendingly.
+ *
+ * @param lhs the left-hand side value
+ * @param rhs the right-hand side value
+ * @return `0` if the two infos compare equal, a value smaller or bigger than `0` according to the sort order
+ */
 static inline int objectFile_dwarfLineInfoSortCompare(const void* lhs, const void* rhs) {
     const struct dwarf_lineInfo* a = lhs;
     const struct dwarf_lineInfo* b = rhs;
@@ -67,6 +76,15 @@ static inline int objectFile_dwarfLineInfoSortCompare(const void* lhs, const voi
     return 0;
 }
 
+/**
+ * @brief Returns how the two given functions compare.
+ *
+ * Sorted ascendingly.
+ *
+ * @param lhs the left-hand side value
+ * @param rhs the right-hand side value
+ * @return the difference between the two given functions
+ */
 static inline int objectFile_functionCompare(const void* lhs, const void* rhs) {
     const struct function* a = lhs;
     const struct function* b = rhs;
