@@ -24,6 +24,12 @@
 
 #include "vector_loadedLibInfo.h"
 
+/**
+ * Loads the loaded runtime images into the given loaded library information vector.
+ *
+ * @param libs the loaded library information vector
+ * @return whether the information could be loaded successfully
+ */
 bool dlMapper_platform_loadLoadedLibraries(vector_loadedLibInfo_t* libs);
 
 #endif /* dlMapper_platform_h */
