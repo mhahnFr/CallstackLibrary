@@ -24,12 +24,32 @@
 
 #include <stddef.h>
 
+/**
+ * Returns the upper bound of the given key in the given array.
+ *
+ * @param key the key whose upper bound to be found
+ * @param begin the start pointer of the array
+ * @param count the number of elements in the array
+ * @param size the size of an individual element
+ * @param compare the comparasion function to be used to search
+ * @return the upper bound value of the given key in the given array
+ */
 const void* upper_bound(const void* key,
                         const void* begin,
                         size_t      count,
                         size_t      size,
                         int (*compare)(const void*, const void*));
 
+/**
+ * Returns the lower bound of the given key in the given array.
+ *
+ * @param key the key whose lower bound to be found
+ * @param begin the start pointer of the array
+ * @param count the number of elements in the array
+ * @param size the soze of an individual element
+ * @param compare the comparasion function to be used to search
+ * @return the lower bound value of the given key in the given array
+ */
 const void* lower_bound(const void* key,
                         const void* begin,
                         size_t      count,
