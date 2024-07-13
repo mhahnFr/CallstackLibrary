@@ -57,6 +57,7 @@ struct machoFile {
     /** The UUID of the represented Mach-O file.                                */
     uint8_t uuid[16];
     
+    /** The functions mapped to their object file.                              */
     vector_pairFuncFile_t functions;
 };
 

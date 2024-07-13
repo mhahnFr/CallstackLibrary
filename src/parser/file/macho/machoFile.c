@@ -103,6 +103,12 @@ static inline struct objectFile* machoFile_findDSYMBundle(struct machoFile* self
     return toReturn;
 }
 
+/**
+ * Returns the associated debug symbol bundle of the given Mach-O file abstraction object.
+ *
+ * @param self the Mach-O file whose debug symbol bundle to be returned
+ * @return the debug symbol bundle as object file abstraction object or `NULL` if not found or unable to allocate
+ */
 static inline struct objectFile* machoFile_getDSYMBundle(struct machoFile* self) {
     if (!self->dSYMFile.triedParsing) {
         self->dSYMFile.file = machoFile_findDSYMBundle(self);
@@ -111,6 +117,15 @@ static inline struct objectFile* machoFile_getDSYMBundle(struct machoFile* self)
     return self->dSYMFile.file;
 }
 
+/**
+ * @brief Returns how the two given function / object file pairs compare.
+ *
+ * Sorted descendingly.
+ *
+ * @param lhs the left-hand side value
+ * @param rhs the right-hand side value
+ * @return `0` if the two values compare equal, a value smaller or greater than `0` according to the sorting order
+ */
 static inline int machoFile_functionSortCompare(const void* lhs, const void* rhs) {
     const pair_funcFile_t* a = lhs;
     const pair_funcFile_t* b = rhs;
@@ -124,6 +139,13 @@ static inline int machoFile_functionSortCompare(const void* lhs, const void* rhs
     return 0;
 }
 
+/**
+ * Tries to deduct the debugging information available for the given address in the given Mach-O file.
+ *
+ * @param self the Mach-O file to search the debug information in
+ * @param address the address to be translated
+ * @return the optionally deducted debug information
+ */
 static inline optional_debugInfo_t machoFile_getDebugInfo(struct machoFile* self, void* address) {
     const uint64_t searchAddress = (uintptr_t) (address - self->_.startAddress)
                                  + (self->_.inMemory ? self->text_vmaddr : self->addressOffset);
@@ -306,6 +328,13 @@ static inline bool machoFile_parseFileImpl64(struct machoFile * self,
     return true;
 }
 
+/**
+ * Parses the given Mach-O file buffer into the given Mach-O file abstraction object.
+ *
+ * @param self the Mach-O file abstraction object
+ * @param baseAddress the Mach-O file buffer
+ * @return whether the parsing was successful
+ */
 static inline bool machoFile_parseFile(struct machoFile* self, const void* baseAddress) {
     if (baseAddress == NULL) return false;
 
