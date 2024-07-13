@@ -58,6 +58,12 @@ static inline bool callstack_parser_parseImpl(struct callstack_parser* self,
 }
 
 #ifdef CXX_FUNCTIONS
+/**
+ * Returns whether the given name is a name mangled in the C++ style.
+ *
+ * @param name the name to be checked
+ * @return whether the name is a mangled one
+ */
 static inline bool callstack_parser_isMangledName(const char* name) {
     if (strncmp(name, "_Z", 2) == 0 || strncmp(name, "___Z", 4) == 0) {
         return true;
