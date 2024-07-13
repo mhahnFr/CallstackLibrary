@@ -1,7 +1,7 @@
 # Welcome to the CallstackLibrary!
 The CallstackLibrary is a library designed to create human-readable callstacks for natively compiled applications.
 
-It can be used with pure **C**, although some optimizations and features using **C++** optionally can be enabled.
+It can be used with pure **C**, although some features using **C++** optionally can be enabled.
 
 Its API is available for both **C** and **C++**.
 
@@ -30,34 +30,35 @@ Or in one step:
 git clone --recursive https://github.com/mhahnFr/CallstackLibrary.git && cd CallstackLibrary && make
 ```
 
-To enable the optional optimizations using **C++** add `CXX_OPTIMIZED=true` as argument to `make`, for the optional
-**C++** exclusive functions add `CXX_FUNCTIONS=true` as argument.
+To enable the optional **C++** exclusive functions add `CXX_FUNCTIONS=true` as argument to `make`.
 
 > [!TIP]
 > **Example**:
 > ```shell
-> make CXX_OPTIMIZED=true CXX_FUNCTIONS=true
+> make CXX_FUNCTIONS=true
 > ```
 
 > [!NOTE]
-> When statically linking against the CallstackLibrary with **C++** exclusive functions or optimizations enabled
-> make sure to also link against the C++ standard library of your compiler (this is usually already the case when
-> linking C++ code).
+> When statically linking against the CallstackLibrary with **C++** exclusive functions enabled make sure to also link
+> against the C++ standard library of your compiler (this is usually already the case when linking C++ code).
 
-More information about the **C++** exclusive functions and optimizations [here][6].
+More information about the **C++** exclusive functions [here][6].
 
 Once you have a copy of the CallstackLibrary you can install it using the following command:
 ```shell
 make INSTALL_PATH=/usr/local install
 ```
+Adapt the value of the `INSTALL_PATH` argument to your needs.
+
 If you downloaded a [release][1] you can simply move the headers and the library anywhere you like.
 
-#### Uninstallation
+### Uninstallation
 Uninstall the library by simply removing it and its header files from the installation directory.  
 This can be done using the following command:
 ```shell
 make INSTALL_PATH=/usr/local uninstall
 ```
+Adapt the value of the `INSTALL_PATH` argument to your needs.
 
 ### How to use
 In order to use this library, simply include the header [`callstack.h`][2] and [`callstack_exception.hpp`][5].
@@ -103,7 +104,8 @@ int main(void) {
     foo2();
 }
 ```
-Compiled and linked on macOS with `cc -g main.c -I<path/to/library>/include -L<path/to/library> -lcallstack` creates the following output:
+Compiled and linked on macOS with `cc -g main.c -I<path/to/library>/include -L<path/to/library> -lcallstack` the example
+creates the following output:
 ```
 The current callstack:
 In: (a.out) printCallstack (main.c:8)
@@ -149,7 +151,7 @@ int main() {
 }
 ```
 Compiled and linked on Debian with `g++ -g main.cpp -I<path/to/library>/include -L<path/to/library> -lcallstack` and
-after [enabling **C++** functions][6] of the library:
+after [enabling **C++** functions][6] of the library the following output is produced:
 ```
 The current callstack:
 In: (a.out) lcs::callstack::callstack(bool) (include/callstack.hpp:81)
@@ -197,7 +199,7 @@ int main() {
 }
 ```
 Compiled and linked on macOS using `c++ -g main.cpp -I<path/to/library>/include -L<path/to/library> -lcallstack` and
-after [enabling **C++** functions][6] of the library creates the following output:
+after [enabling **C++** functions][6] of the library the following output is produced:
 ```
 lcs::exception: "Callstack exception with a message", stacktrace:
 At: (a.out) lcs::callstack::callstack(bool) (include/callstack.hpp:81)
@@ -243,7 +245,7 @@ int main() {
 }
 ```
 Compiled and linked on Debian using `g++ -g main.cpp -I<path/to/library>/include -L<path/to/library> -lcallstack` and
-after [enabling **C++** functions][6] of the library creates the following output:
+after [enabling **C++** functions][6] of the library the example creates the following output:
 ```
 CustomStacktraceException, stacktrace:
 At: (a.out) lcs::callstack::callstack(bool) (include/callstack.hpp:81)
@@ -261,8 +263,13 @@ in: (a.out) _start + 33
 ```
 
 ## Symbolization
-The generated callstacks are generally symbolized using the information obtained by the dynamic loader (hence the
-dependency of the `libdl`).
+The callstacks are generated using the function `backtrace` of the `libexecinfo`, which is commonly preinstalled.
+
+> [!NOTE]
+> If this is not the case, you probably need to add `-lexecinfo` to the linking flags of the library.
+
+The generated callstacks are symbolized using an **ELF** file parser on Linux and a **Mach-O** file parser on macOS.  
+They are enriched using the appropriate **DWARF** debugging information that is available.
 
 The DWARF parser supports **DWARF** in version **2**, **3**, **4** and **5**.
 
@@ -270,12 +277,13 @@ The DWARF parser supports **DWARF** in version **2**, **3**, **4** and **5**.
 > Usually the appropriate compilation flag for debug symbols is `-g`.
 
 ### macOS
-On macOS the debug information available in the Mach-O binaries is used. The following kinds of debug symbols are supported:
+On macOS the debug information available in the **Mach-O** binaries is used. The following kinds of debug symbols are
+supported:
 - `.dSYM` bundles
-- `Mach-O` debug symbol maps (DWARF inside the object files)
+- **Mach-O** debug symbol maps (**DWARF** inside the object files)
 
 ### Linux
-On Linux the debug information available in the ELF binaries is used.
+On Linux the debug information available in the **ELF** binaries is used.
 
 ## Final notes
 This library is licensed under the terms of the GNU GPL in version 3 or later.
