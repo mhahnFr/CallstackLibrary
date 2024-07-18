@@ -30,10 +30,6 @@
 # undef __USE_GNU
 #undef _GNU_SOURCE
 
-#ifdef LCS_BUILD_DYLIB
-# include <callstack.h>
-#endif
-
 #include <elf/elfUtils.h>
 #include <file/pathUtils.h>
 
@@ -45,8 +41,7 @@
  * the loaded library information vector to the iteration callback.
  */
 struct dlMapper_platform_data {
-    /** The start address of our runtime image. */
-    const void* start;
+    const void* inside;
     /** The loaded library information vector.  */
     vector_loadedLibInfo_t* libs;
 };
@@ -152,29 +147,16 @@ static inline int dlMapper_platform_iterateCallback(struct dl_phdr_info* info, s
         empty ? (char*) fileName : strdup(fileName),
         path_toAbsolutePath(fileName),
         path_toRelativePath(fileName),
-        addresses.first == data->start,
+        data->inside >= addresses.first && data->inside <= addresses.second,
         NULL
     });
     return 0;
 }
 
-/**
- * Loads the start address of our runtime image.
- *
- * @return the start address of our runtime image
- */
 static inline void* dlMapper_platform_loadLCSAddress(void) {
-    void* ourStart = NULL;
-
-#ifdef LCS_BUILD_DYLIB
-    Dl_info info;
-    if (dladdr(&callstack_new, &info) == 0) {
-        return ourStart;
-    }
-    ourStart = info.dli_fbase;
-#endif
-
-    return ourStart;
+    volatile void* me = NULL;
+    me = &dlMapper_platform_loadLCSAddress;
+    return (void*) me;
 }
 
 bool dlMapper_platform_loadLoadedLibraries(vector_loadedLibInfo_t* libs) {
