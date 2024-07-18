@@ -37,12 +37,13 @@
 #include "../pair_address.h"
 
 /**
- * This structure is used to pass the start address of our runtime image and
+ * This structure is used to pass the address of our runtime image and
  * the loaded library information vector to the iteration callback.
  */
 struct dlMapper_platform_data {
+    /** The pointer into our runtime image.    */
     const void* inside;
-    /** The loaded library information vector.  */
+    /** The loaded library information vector. */
     vector_loadedLibInfo_t* libs;
 };
 
@@ -153,6 +154,11 @@ static inline int dlMapper_platform_iterateCallback(struct dl_phdr_info* info, s
     return 0;
 }
 
+/**
+ * Loads an address pointing into our runtime image.
+ *
+ * @return a pointer into our runtime image
+ */
 static inline void* dlMapper_platform_loadLCSAddress(void) {
     volatile void* me = NULL;
     me = &dlMapper_platform_loadLCSAddress;
