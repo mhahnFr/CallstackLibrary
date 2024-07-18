@@ -114,7 +114,10 @@ INSTALL_PATH ?= /usr/local
 
 default: $(NAME)
 
-all: $(SHARED_N) $(STATIC_N) $(DYLIB_N)
+all:
+	$(MAKE) $(SHARED_N)
+	$(MAKE) $(STATIC_N)
+	- $(MAKE) $(DYLIB_N)
 
 install: $(NAME)
 	mkdir -p $(INSTALL_PATH)/lib
