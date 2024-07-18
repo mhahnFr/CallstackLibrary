@@ -24,7 +24,6 @@
 
 #include <mach-o/dyld.h>
 #include <mach-o/dyld_images.h>
-#include <mach-o/ldsyms.h>
 
 #include <file/pathUtils.h>
 #include <macho/fat_handler.h>
@@ -122,7 +121,7 @@ static inline pair_address_t dlMapper_platform_loadMachO(const struct mach_heade
 static inline void dlMapper_platform_pushLoadedLib(vector_loadedLibInfo_t*   libs,
                                                    const char*               fileName,
                                                    const struct mach_header* header,
-                                                   const void*               ourStart) {
+                                                   const void*               inside) {
     const pair_address_t addresses = dlMapper_platform_loadMachO(header, fileName);
     vector_loadedLibInfo_push_back(libs, (struct loadedLibInfo) {
         addresses.first,
@@ -130,31 +129,26 @@ static inline void dlMapper_platform_pushLoadedLib(vector_loadedLibInfo_t*   lib
         strdup(fileName),
         path_toAbsolutePath(fileName),
         path_toRelativePath(fileName),
-        addresses.first == ourStart,
+        inside >= addresses.first && inside <= addresses.second,
         NULL
     });
 }
 
 bool dlMapper_platform_loadLoadedLibraries(vector_loadedLibInfo_t* libs) {
-    const void* ourStart;
-
-#ifdef LCS_BUILD_DYLIB
-    ourStart = &_mh_dylib_header;
-#else
-    ourStart = NULL;
-#endif
+    volatile const void* inside = NULL;
+    inside = &dlMapper_platform_loadLoadedLibraries;
 
     const uint32_t count = _dyld_image_count();
     vector_loadedLibInfo_reserve(libs, count + 1);
     for (uint32_t i = 0; i < count; ++i) {
-        dlMapper_platform_pushLoadedLib(libs, _dyld_get_image_name(i), _dyld_get_image_header(i), ourStart);
+        dlMapper_platform_pushLoadedLib(libs, _dyld_get_image_name(i), _dyld_get_image_header(i), (void*) inside);
     }
 
     struct task_dyld_info dyldInfo;
     mach_msg_type_number_t infoCount = TASK_DYLD_INFO_COUNT;
     if (task_info(mach_task_self_, TASK_DYLD_INFO, (task_info_t) &dyldInfo, &infoCount) == KERN_SUCCESS) {
         struct dyld_all_image_infos* infos = (void*) dyldInfo.all_image_info_addr;
-        dlMapper_platform_pushLoadedLib(libs, infos->dyldPath, infos->dyldImageLoadAddress, ourStart);
+        dlMapper_platform_pushLoadedLib(libs, infos->dyldPath, infos->dyldImageLoadAddress, (void*) inside);
     } else {
         printf("LCS: Warning: Failed to load the dynamic loader. Callstacks might be truncated.\n");
     }
