@@ -171,7 +171,7 @@ struct callstack_frame * callstack_getBinaries(struct callstack * self);
  *
  * @param self the callstack object
  * @return an array of translated callstack frames
- * @since v1.3
+ * @since v2.0
  */
 struct callstack_frame* callstack_getBinariesCached(struct callstack* self);
 #endif

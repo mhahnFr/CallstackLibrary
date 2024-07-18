@@ -38,13 +38,13 @@ struct callstack_frame {
     /**
      * Reserved value.
      *
-     * @since v1.3
+     * @since v2.0
      */
     void* reserved;
     /**
      * Reserved value.
      *
-     * @since v1.3
+     * @since v2.0
      */
     bool  reserved1;
 
@@ -68,7 +68,7 @@ struct callstack_frame {
     /**
      * Indicates whether the binary file is the CallstackLibrary itself.
      *
-     * @since v1.3
+     * @since v2.0
      */
     bool binaryFileIsSelf;
     /** The line number in the source file this frame is on. */
