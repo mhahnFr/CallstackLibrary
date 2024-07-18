@@ -116,7 +116,7 @@ static inline pair_address_t dlMapper_platform_loadMachO(const struct mach_heade
  * @param libs the vector to store the loaded library info in
  * @param fileName the file name of the Mach-O file
  * @param header the start pointer of the Mach-O file
- * @param ourStart the start pointer of our runtime image
+ * @param inside the pointer pointing inside our runtime image
  */
 static inline void dlMapper_platform_pushLoadedLib(vector_loadedLibInfo_t*   libs,
                                                    const char*               fileName,
