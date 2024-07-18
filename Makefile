@@ -108,7 +108,6 @@ else ifeq ($(shell uname -s),Linux)
 	DEPS += $(LINUX_DEPS)
 
 	NAME = $(SHARED_N)
-	LDFLAGS += -ldl
 else
 $(error Unsupported platform)
 endif
