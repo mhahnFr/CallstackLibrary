@@ -114,7 +114,7 @@ In: (a.out) foo (main.c:23)
 In: (a.out) bar2 (main.c:24)
 In: (a.out) foo2 (main.c:25)
 In: (a.out) main (main.c:28)
-In: (/usr/lib/dyld) start + 1903 (???:0)
+In: (/usr/lib/dyld) start + 1942 (???:0)
 ```
 
 #### C++
@@ -212,7 +212,7 @@ in: (a.out) foo2() (main.cpp:12)
 in: (a.out) bar() (main.cpp:14)
 in: (a.out) foo() (main.cpp:15)
 in: (a.out) main (main.cpp:19)
-in: (/usr/lib/dyld) start + 1903
+in: (/usr/lib/dyld) start + 1942
 ```
 
 #### Extending the callstack exception
