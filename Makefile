@@ -88,13 +88,6 @@ LDFLAGS =
 
 NAME = $(STATIC_N)
 
-ifeq ($(CXX_FUNCTIONS),true)
-	LD      = $(CXX)
-	OBJS   += $(CXX_OBJS)
-	CFLAGS += -DCXX_FUNCTIONS
-	DEPS   += $(CXX_DEPS)
-endif
-
 ifeq ($(shell uname -s),Darwin)
 	LDFLAGS   += -current_version 2.0 -compatibility_version 1 $(MACOS_ARCH_FLAGS)
 	COM_FLAGS += $(MACOS_ARCH_FLAGS)
@@ -113,6 +106,13 @@ endif
 
 CFLAGS   = $(COM_FLAGS) -std=gnu11
 CXXFLAGS = $(COM_FLAGS) -std=gnu++17
+
+ifeq ($(CXX_FUNCTIONS),true)
+	LD      = $(CXX)
+	OBJS   += $(CXX_OBJS)
+	CFLAGS += -DCXX_FUNCTIONS
+	DEPS   += $(CXX_DEPS)
+endif
 
 INSTALL_PATH ?= /usr/local
 
