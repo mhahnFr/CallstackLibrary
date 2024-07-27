@@ -22,6 +22,8 @@
 CXX_FUNCTIONS = false
 USE_BUILTINS  = true
 
+MACOS_ARCH_FLAGS =
+
 # Library names
 CORE_NAME = libcallstack
 DYLIB_N   = $(CORE_NAME).dylib
@@ -81,9 +83,7 @@ ifeq ($(USE_BUILTINS),true)
 	COM_FLAGS += -DLCS_USE_BUILTINS
 endif
 
-CFLAGS    = $(COM_FLAGS) -std=gnu11
-CXXFLAGS  = $(COM_FLAGS) -std=gnu++17
-LDFLAGS   =
+LDFLAGS =
 # ----------------------
 
 NAME = $(STATIC_N)
@@ -96,9 +96,10 @@ ifeq ($(CXX_FUNCTIONS),true)
 endif
 
 ifeq ($(shell uname -s),Darwin)
-	LDFLAGS += -current_version 2.0 -compatibility_version 1
-	OBJS    += $(DARWIN_OBJS)
-	DEPS    += $(DARWIN_DEPS)
+	LDFLAGS   += -current_version 2.0 -compatibility_version 1 $(MACOS_ARCH_FLAGS)
+	COM_FLAGS += $(MACOS_ARCH_FLAGS)
+	OBJS      += $(DARWIN_OBJS)
+	DEPS      += $(DARWIN_DEPS)
 
 	NAME = $(DYLIB_N)
 else ifeq ($(shell uname -s),Linux)
@@ -110,6 +111,9 @@ else
 $(error Unsupported platform)
 endif
 
+CFLAGS   = $(COM_FLAGS) -std=gnu11
+CXXFLAGS = $(COM_FLAGS) -std=gnu++17
+
 INSTALL_PATH ?= /usr/local
 
 default: $(NAME)
@@ -118,6 +122,9 @@ all:
 	$(MAKE) $(SHARED_N)
 	$(MAKE) $(STATIC_N)
 	- $(MAKE) $(DYLIB_N)
+
+release: fclean
+	$(MAKE) MACOS_ARCH_FLAGS="-arch x86_64 -arch arm64 -arch arm64e" $(NAME) $(STATIC_N)
 
 install: $(NAME)
 	mkdir -p $(INSTALL_PATH)/lib
@@ -154,6 +161,6 @@ fclean: clean
 re: fclean
 	$(MAKE) default
 
-.PHONY: re fclean clean all default install uninstall
+.PHONY: re fclean clean all default install uninstall release
 
 -include $(DEPS)
