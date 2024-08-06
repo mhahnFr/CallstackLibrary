@@ -282,7 +282,8 @@ bool dwarf_parseLineProgram(struct lcs_section debugLine,
         .debugLineStr = debugLineStr,
         .cb = cb,
         .args = args,
-        .stdOpcodeLengths = vector_initializer
+        .stdOpcodeLengths = vector_initializer,
+        .compilationDirectory = NULL // TODO: Implement: Only use for DWARF version 4 or older
     };
     switch (version) {
         case 2:

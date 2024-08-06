@@ -77,6 +77,8 @@ struct dwarf_parser {
     /** The payload for the DWARF line callback.                                        */
     void* args;
 
+    char* compilationDirectory;
+
     /** The function to destroy the version dependent part of this parser.              */
     void                    (*destroy)    (struct dwarf_parser*);
     /** The function to parse the line number program's header for the current version. */
