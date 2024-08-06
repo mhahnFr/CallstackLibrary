@@ -57,6 +57,7 @@ struct objectFile {
     struct lcs_section debugLineStr;
     /** The `__debug_str` section of the object file.           */
     struct lcs_section debugStr;
+    struct lcs_section debugInfo;
 
     /** Whether the file was successfully parsed.               */
     bool parsed;

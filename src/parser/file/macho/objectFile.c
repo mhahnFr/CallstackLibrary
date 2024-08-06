@@ -202,6 +202,8 @@ static inline void objectFile_handleSection(struct objectFile* self,
             self->debugLineStr = section;
         } else if (strcmp("__debug_str", sectname) == 0) {
             self->debugStr = section;
+        } else if (strcmp("__debug_info", sectname) == 0) {
+            self->debugInfo = section;
         }
     }
 }
