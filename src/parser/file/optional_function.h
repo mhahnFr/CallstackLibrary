@@ -22,7 +22,7 @@
 #ifndef optional_function_h
 #define optional_function_h
 
-#include <optional.h>
+#include <DC4C/optional.h>
 
 #include "function.h"
 

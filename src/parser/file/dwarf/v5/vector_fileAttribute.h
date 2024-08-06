@@ -22,7 +22,7 @@
 #ifndef vector_fileAttribute_h
 #define vector_fileAttribute_h
 
-#include <vector.h>
+#include <DC4C/vector.h>
 
 #include "fileAttribute.h"
 

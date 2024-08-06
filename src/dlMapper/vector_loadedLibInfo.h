@@ -22,7 +22,7 @@
 #ifndef vector_loadedLibInfo_h
 #define vector_loadedLibInfo_h
 
-#include <vector.h>
+#include <DC4C/vector.h>
 
 #include "../loadedLibInfo.h"
 

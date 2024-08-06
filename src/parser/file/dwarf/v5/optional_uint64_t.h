@@ -24,7 +24,7 @@
 
 #include <stdint.h>
 
-#include <optional.h>
+#include <DC4C/optional.h>
 
 typedef_optional_named(uint64, uint64_t);
 

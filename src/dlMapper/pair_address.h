@@ -22,7 +22,7 @@
 #ifndef pair_address_h
 #define pair_address_h
 
-#include <pair.h>
+#include <DC4C/pair.h>
 
 typedef_pair_named(address, const void*, const void*);
 

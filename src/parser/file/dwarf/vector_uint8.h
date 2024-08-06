@@ -24,7 +24,7 @@
 
 #include <stdint.h>
 
-#include <vector.h>
+#include <DC4C/vector.h>
 
 typedef_vector_light_named(uint8, uint8_t);
 

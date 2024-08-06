@@ -22,8 +22,8 @@
 #ifndef optional_pair_funcFile_h
 #define optional_pair_funcFile_h
 
-#include <optional.h>
-#include <pair.h>
+#include <DC4C/optional.h>
+#include <DC4C/pair.h>
 
 #include "objectFile.h"
 
