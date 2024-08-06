@@ -70,7 +70,8 @@ struct dwarf_parser {
     /** The `.debug_str` section.                                                       */
                        debugStr,
     /** The `.debug_line_str` section.                                                  */
-                       debugLineStr;
+                       debugLineStr,
+                       debugInfo;
 
     /** The callback to be called when a line number table row is emitted.              */
     dwarf_line_callback cb;
@@ -108,6 +109,7 @@ struct dwarf_parser {
 bool dwarf_parseLineProgram(struct lcs_section debugLine,
                             struct lcs_section debugLineStr,
                             struct lcs_section debugStr,
+                            struct lcs_section debugInfo,
                             dwarf_line_callback cb, void* args);
 
 /**

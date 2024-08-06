@@ -247,14 +247,19 @@ static inline bool dwarf_parser_parse(struct dwarf_parser* self, size_t counter,
         return dwarf_parseLineProgram((struct lcs_section) {
             self->debugLine.content + counter,
             self->debugLine.size - 2 - (self->bit64 ? 12 : 4) - counter
-        }, self->debugLineStr, self->debugStr, self->cb, self->args);
+        }, self->debugLineStr, self->debugStr, self->debugInfo, self->cb, self->args);
     }
     return true;
+}
+
+static inline void dwarf_parseCompDir(struct dwarf_parser* self) {
+    // TODO: Implement
 }
 
 bool dwarf_parseLineProgram(struct lcs_section debugLine,
                             struct lcs_section debugLineStr,
                             struct lcs_section debugStr,
+                            struct lcs_section debugInfo,
                             dwarf_line_callback cb, void* args) {
     size_t counter = 0;
     
@@ -280,15 +285,20 @@ bool dwarf_parseLineProgram(struct lcs_section debugLine,
         .debugLine = debugLine,
         .debugStr = debugStr,
         .debugLineStr = debugLineStr,
+        .debugInfo = debugInfo,
         .cb = cb,
         .args = args,
         .stdOpcodeLengths = vector_initializer,
-        .compilationDirectory = NULL // TODO: Implement: Only use for DWARF version 4 or older
+        .compilationDirectory = NULL
     };
     switch (version) {
         case 2:
         case 3:
-        case 4: dwarf4_parser_create(&parser); break;
+        case 4:
+            dwarf_parseCompDir(&parser);
+            dwarf4_parser_create(&parser);
+            break;
+
         case 5: dwarf5_parser_create(&parser); break;
 
         default: return false;
