@@ -126,6 +126,7 @@ static inline void dlMapper_platform_pushLoadedLib(vector_loadedLibInfo_t*   lib
     vector_loadedLibInfo_push_back(libs, (struct loadedLibInfo) {
         addresses.first,
         addresses.second,
+        0,
         strdup(fileName),
         path_toAbsolutePath(fileName),
         path_toRelativePath(fileName),
