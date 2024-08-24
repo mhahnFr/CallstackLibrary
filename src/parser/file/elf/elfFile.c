@@ -316,7 +316,7 @@ static inline bool elfFile_loadFile(struct elfFile* self) {
 static inline optional_debugInfo_t elfFile_getDebugInfo(struct elfFile* self, void* address) {
     optional_debugInfo_t toReturn = { .has_value = false };
 
-    const uint64_t translated = (uintptr_t) address - (uintptr_t) self->_.startAddress;
+    const uint64_t translated = (uintptr_t) address - self->_.relocationOffset;
     struct function tmp = (struct function) { .startAddress = translated };
     const struct function* closest = lower_bound(&tmp,
                                                  self->functions.content,
@@ -384,7 +384,7 @@ bool elfFile_addr2String(struct binaryFile* me, void* address, struct callstack_
             frame->function = name;
         } else {
             char* toReturn = NULL;
-            asprintf(&toReturn, "%s + %td", name, (ptrdiff_t) (address - self->_.startAddress - result.value.function.startAddress));
+            asprintf(&toReturn, "%s + %td", name, (ptrdiff_t) (address - self->_.relocationOffset - result.value.function.startAddress));
             free(name);
             frame->function = toReturn;
         }
