@@ -253,7 +253,35 @@ static inline bool dwarf_parser_parse(struct dwarf_parser* self, size_t counter,
 }
 
 static inline void dwarf_parseCompDir(struct dwarf_parser* self) {
-    // TODO: Implement
+    // TODO: Properly implement
+    size_t counter = 0;
+    const uint32_t size = *((uint32_t*) self->debugInfo.content);
+    counter += 4;
+
+    bool bit64;
+    uint64_t actualSize;
+    if (size == 0xffffffff) {
+        actualSize = *((uint64_t*) (self->debugInfo.content + counter));
+        bit64 = true;
+        counter += 8;
+    } else {
+        actualSize = size;
+        bit64 = false;
+    }
+    const uint16_t version = *((uint16_t*) (self->debugInfo.content + counter));
+    counter += 2;
+
+    uint64_t abbrevOffset;
+    if (bit64) {
+        abbrevOffset = *((uint64_t*) (self->debugInfo.content + counter));
+        counter += 8;
+    } else {
+        abbrevOffset = *((uint32_t*) (self->debugInfo.content + counter));
+        counter += 4;
+    }
+    const uint8_t address_size = *((uint8_t*) (self->debugInfo.content + counter++));
+    __builtin_printf("%llu %u %llu %u\n", actualSize, version, abbrevOffset, address_size);
+    // TODO: Support other versions, look up the abbreviation and load the variables
 }
 
 bool dwarf_parseLineProgram(struct lcs_section debugLine,
