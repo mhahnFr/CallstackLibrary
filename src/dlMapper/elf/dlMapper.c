@@ -158,6 +158,7 @@ static inline int dlMapper_platform_iterateCallback(struct dl_phdr_info* info, s
     vector_loadedLibInfo_push_back(data->libs, (struct loadedLibInfo) {
         addresses.first,
         addresses.second,
+        info->dlpi_addr,
         empty ? (char*) fileName : strdup(fileName),
         path_toAbsolutePath(fileName),
         path_toRelativePath(fileName),

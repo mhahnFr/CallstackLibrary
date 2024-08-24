@@ -36,6 +36,8 @@ struct loadedLibInfo {
     /** The end address of the runtime image.                             */
               * end;
 
+    uintptr_t relocationOffset;
+
     /** The file name of the loaded runtime image as given by the system. */
     char* fileName;
     /** The generated absolute file name of the runtime image.            */
@@ -50,7 +52,7 @@ struct loadedLibInfo {
     struct binaryFile* associated;
 };
 
-#define loadedLibInfo_initializer ((struct loadedLibInfo) { NULL, NULL, NULL, NULL, NULL, false, NULL })
+#define loadedLibInfo_initializer ((struct loadedLibInfo) { NULL, NULL, 0, NULL, NULL, NULL, false, NULL })
 
 /**
  * Destroys the given library info.
