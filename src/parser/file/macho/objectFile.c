@@ -394,7 +394,12 @@ static inline bool objectFile_parseMachO(struct objectFile* self,
     }
 
     if (success && self->debugLine.size > 0) {
-        dwarf_parseLineProgram(self->debugLine, self->debugLineStr, self->debugStr, self->debugInfo, objectFile_dwarfLineCallback, self);
+        dwarf_parseLineProgram(self->debugLine,
+                               self->debugLineStr,
+                               self->debugStr,
+                               self->debugInfo,
+                               self->debugAbbrev,
+                               objectFile_dwarfLineCallback, self);
     }
     return success;
 }
