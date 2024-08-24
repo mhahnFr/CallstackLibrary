@@ -204,6 +204,8 @@ static inline void objectFile_handleSection(struct objectFile* self,
             self->debugStr = section;
         } else if (strcmp("__debug_info", sectname) == 0) {
             self->debugInfo = section;
+        } else if (strcmp("__debug_abbrev", sectname) == 0) {
+            self->debugAbbrev = section;
         }
     }
 }
