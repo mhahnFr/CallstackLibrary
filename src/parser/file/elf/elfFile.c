@@ -55,6 +55,8 @@ void elfFile_create(struct elfFile* self) {
     lcs_section_create(&self->debugLine);
     lcs_section_create(&self->debugLineStr);
     lcs_section_create(&self->debugStr);
+    lcs_section_create(&self->debugInfo);
+    lcs_section_create(&self->debugAbbrev);
     vector_dwarfLineInfo_create(&self->lineInfos);
     vector_function_create(&self->functions);
 }
@@ -166,14 +168,21 @@ static inline bool elfFile_parseFile##bits (struct elfFile* self, Elf##bits##_Eh
     uint16_t shnum = elfFile_loadShnum##bits(buffer, littleEndian);                                                  \
     for (uint16_t i = 0; i < shnum; ++i) {                                                                           \
         Elf##bits##_Shdr* current = sectBegin + i * ELF_TO_HOST(16, buffer->e_shentsize, littleEndian);              \
-        if (strcmp(".debug_line", sectStrBegin + ELF_TO_HOST(32, current->sh_name, littleEndian)) == 0) {            \
+        const char* sectionName = sectStrBegin + ELF_TO_HOST(32, current->sh_name, littleEndian);                    \
+        if (strcmp(".debug_line", sectionName) == 0) {                                                               \
             self->debugLine = elfFile_sectionToLCSSection##bits(buffer, current, littleEndian);                      \
             continue;                                                                                                \
-        } else if (strcmp(".debug_str", sectStrBegin + ELF_TO_HOST(32, current->sh_name, littleEndian)) == 0) {      \
+        } else if (strcmp(".debug_str", sectionName) == 0) {                                                         \
             self->debugStr = elfFile_sectionToLCSSection##bits(buffer, current, littleEndian);                       \
             continue;                                                                                                \
-        } else if (strcmp(".debug_line_str", sectStrBegin + ELF_TO_HOST(32, current->sh_name, littleEndian)) == 0) { \
+        } else if (strncmp(".debug_line_str", sectionName, 16) == 0) {                                               \
             self->debugLineStr = elfFile_sectionToLCSSection##bits(buffer, current, littleEndian);                   \
+            continue;                                                                                                \
+        } else if (strcmp(".debug_info", sectionName) == 0) {                                                        \
+            self->debugInfo = elfFile_sectionToLCSSection##bits(buffer, current, littleEndian);                      \
+            continue;                                                                                                \
+        } else if (strcmp(".debug_abbrev", sectionName) == 0) {                                                      \
+            self->debugAbbrev = elfFile_sectionToLCSSection##bits(buffer, current, littleEndian);                    \
             continue;                                                                                                \
         }                                                                                                            \
         switch (ELF_TO_HOST(32, current->sh_type, littleEndian)) {                                                   \
@@ -228,7 +237,12 @@ static inline bool elfFile_parseFile(struct elfFile* self, void* buffer) {
     }
 
     if (success && self->debugLine.size > 0) {
-        dwarf_parseLineProgram(self->debugLine, self->debugLineStr, self->debugStr, elfFile_lineProgramCallback, self);
+        dwarf_parseLineProgram(self->debugLine,
+                               self->debugLineStr,
+                               self->debugStr,
+                               self->debugInfo,
+                               self->debugAbbrev,
+                               elfFile_lineProgramCallback, self);
     }
 
     return success;

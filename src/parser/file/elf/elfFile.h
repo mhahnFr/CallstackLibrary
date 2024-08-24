@@ -41,7 +41,9 @@ struct elfFile {
     /** The section corresponding to the .debug_line_str section.    */
                        debugLineStr,
     /** The section corresponding to the .debug_str section.         */
-                       debugStr;
+                       debugStr,
+                       debugInfo,
+                       debugAbbrev;
     
     /** The functions found in the represented ELF file.             */
     vector_function_t functions;
