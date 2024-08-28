@@ -22,33 +22,35 @@
 #ifndef dwarf_definitions_h
 #define dwarf_definitions_h
 
-#define DW_LNS_copy               0x01
-#define DW_LNS_advance_pc         0x02
-#define DW_LNS_advance_line       0x03
-#define DW_LNS_set_file           0x04
-#define DW_LNS_set_column         0x05
-#define DW_LNS_negate_stmt        0x06
-#define DW_LNS_set_basic_block    0x07
-#define DW_LNS_const_add_pc       0x08
-#define DW_LNS_fixed_advance_pc   0x09
+#define DW_LNS_copy             0x01
+#define DW_LNS_advance_pc       0x02
+#define DW_LNS_advance_line     0x03
+#define DW_LNS_set_file         0x04
+#define DW_LNS_set_column       0x05
+#define DW_LNS_negate_stmt      0x06
+#define DW_LNS_set_basic_block  0x07
+#define DW_LNS_const_add_pc     0x08
+#define DW_LNS_fixed_advance_pc 0x09
 
-#define DW_LNE_end_sequence      0x01
-#define DW_LNE_set_address       0x02
-#define DW_LNE_define_file       0x03
+#define DW_LNE_end_sequence 0x01
+#define DW_LNE_set_address  0x02
+#define DW_LNE_define_file  0x03
 
-#define DW_FORM_addr       0x01
-#define DW_FORM_block2     0x03
-#define DW_FORM_block4     0x04
-#define DW_FORM_data2      0x05
-#define DW_FORM_data4      0x06
-#define DW_FORM_data8      0x07
-#define DW_FORM_string     0x08
-#define DW_FORM_block      0x09
-#define DW_FORM_block1     0x0a
-#define DW_FORM_data1      0x0b
-#define DW_FORM_flag       0x0c
-#define DW_FORM_sdata      0x0d
-#define DW_FORM_strp       0x0e
-#define DW_FORM_udata      0x0f
+#define DW_FORM_addr   0x01
+#define DW_FORM_block2 0x03
+#define DW_FORM_block4 0x04
+#define DW_FORM_data2  0x05
+#define DW_FORM_data4  0x06
+#define DW_FORM_data8  0x07
+#define DW_FORM_string 0x08
+#define DW_FORM_block  0x09
+#define DW_FORM_block1 0x0a
+#define DW_FORM_data1  0x0b
+#define DW_FORM_flag   0x0c
+#define DW_FORM_sdata  0x0d
+#define DW_FORM_strp   0x0e
+#define DW_FORM_udata  0x0f
+
+#define DW_AT_comp_dir 0x1b
 
 #endif /* dwarf_definitions_h */

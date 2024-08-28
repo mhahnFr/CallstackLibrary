@@ -265,6 +265,8 @@ static inline vector_pair_uint64_t dwarf_getAbbreviationTable(struct lcs_section
         code = getULEB128(section.content, &counter);
         const uint64_t tag = getULEB128(section.content, &counter);
         const uint8_t children = *((uint8_t*) (section.content + counter++));
+        (void) tag;
+        (void) children;
 
         uint64_t name, form;
         do {
@@ -296,8 +298,7 @@ static inline uint64_t dwarf_parseInitialSize(void* buffer, size_t* counter, boo
     return toReturn;
 }
 
-static inline void dwarf_parseCompDir(struct dwarf_parser* self) {
-    // TODO: Properly implement
+static inline bool dwarf_parseCompDir(struct dwarf_parser* self) {
     bool bit64;
     size_t counter = 0;
     const uint64_t size = dwarf_parseInitialSize(self->debugInfo.content, &counter, &bit64);
@@ -312,22 +313,28 @@ static inline void dwarf_parseCompDir(struct dwarf_parser* self) {
         abbrevOffset = *((uint32_t*) (self->debugInfo.content + counter));
         counter += 4;
     }
-    const uint8_t address_size = *((uint8_t*) (self->debugInfo.content + counter++));
-    __builtin_printf("%llu %u %llu %u\n", size, version, abbrevOffset, address_size);
+    const uint8_t addressSize = *((uint8_t*) (self->debugInfo.content + counter++));
+    (void) size;
+    (void) addressSize;
 
     const uint64_t abbrevCode = getULEB128(self->debugInfo.content, &counter);
     const vector_pair_uint64_t abbrevs = dwarf_getAbbreviationTable(self->debugAbbrev, abbrevCode, abbrevOffset);
     vector_iterate(pair_uint64_t, &abbrevs, {
-        if (element->first == 0x1b/*DW_AT_comp_dir*/) {
-            self->compilationDirectory = dwarf5_readString(self->debugInfo.content, &counter, element->second, bit64, self->debugLineStr, self->debugStr);
+        if (element->first == DW_AT_comp_dir) {
+            self->compilationDirectory = dwarf5_readString(self->debugInfo.content,
+                                                           &counter,
+                                                           element->second,
+                                                           bit64,
+                                                           self->debugLineStr,
+                                                           self->debugStr);
             break;
-        } else {
-            // TODO: Check
-            dwarf5_consumeSome(self->debugInfo.content, &counter, element->second, bit64);
+        } else if (!dwarf5_consumeSome(self->debugInfo.content, &counter, element->second, bit64)) {
+            break;
         }
     })
-    __builtin_printf("--> %s\n", self->compilationDirectory);
-    // TODO: Support other versions, load the variables
+    // TODO: Support other versions, actually use the comp dir
+    vector_pair_uint64_destroy(&abbrevs);
+    return self->compilationDirectory != NULL;
 }
 
 bool dwarf_parseLineProgram(struct lcs_section debugLine,
@@ -355,11 +362,13 @@ bool dwarf_parseLineProgram(struct lcs_section debugLine,
         .stdOpcodeLengths = vector_initializer,
         .compilationDirectory = NULL
     };
+    if (!dwarf_parseCompDir(&parser)) {
+        return false;
+    }
     switch (version) {
         case 2:
         case 3:
         case 4:
-            dwarf_parseCompDir(&parser);
             dwarf4_parser_create(&parser);
             break;
 
