@@ -333,18 +333,22 @@ fail:
  * @param directories the include directory file attributes
  * @return the allocated full source file path or `NULL` if the allocation failed
  */
-static inline char* dwarf5_constructFileName(const struct fileAttribute* file, const vector_fileAttribute_t* directories) {
+static inline char* dwarf5_constructFileName(const struct fileAttribute*   file,
+                                             const vector_fileAttribute_t* directories,
+                                             const char*                   defaultDirectory) {
+    bool freeDir = false;
     const char* dirPath = directories->content[file->index].path;
-    const size_t dirPathLen  = strlen(dirPath),
-                 filePathLen = strlen(file->path);
-    char* toReturn = malloc(dirPathLen + filePathLen + 2);
-    if (toReturn == NULL) {
-        return NULL;
+    if (*dirPath != '/') {
+        dirPath = dwarf_pathConcatenate(defaultDirectory, dirPath);
+        if (dirPath == NULL) {
+            return NULL;
+        }
+        freeDir = true;
     }
-    memcpy(toReturn, dirPath, dirPathLen);
-    toReturn[dirPathLen] = '/';
-    memcpy(toReturn + dirPathLen + 1, file->path, filePathLen);
-    toReturn[dirPathLen + filePathLen + 1] = '\0';
+    char* toReturn = dwarf_pathConcatenate(dirPath, file->path);
+    if (freeDir) {
+        free((char*) dirPath);
+    }
     return toReturn;
 }
 
@@ -358,7 +362,7 @@ static inline char* dwarf5_constructFileName(const struct fileAttribute* file, c
 static inline struct dwarf_sourceFile dwarf5_getFileName(struct dwarf_parser* self, uint64_t file) {
     struct fileAttribute* filePtr = &self->specific.v5.files.content[file];
     return (struct dwarf_sourceFile) {
-        dwarf5_constructFileName(filePtr, &self->specific.v5.directories),
+        dwarf5_constructFileName(filePtr, &self->specific.v5.directories, self->compilationDirectory),
         filePtr->timestamp,
         filePtr->size
     };
