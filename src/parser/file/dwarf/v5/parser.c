@@ -360,15 +360,16 @@ fail:
  */
 static inline char* dwarf5_constructFileName(const struct fileAttribute* file, const vector_fileAttribute_t* directories) {
     const char* dirPath = directories->content[file->index].path;
-    const size_t size = strlen(dirPath) + strlen(file->path) + 2;
-    char* toReturn = malloc(size);
+    const size_t dirPathLen  = strlen(dirPath),
+                 filePathLen = strlen(file->path);
+    char* toReturn = malloc(dirPathLen + filePathLen + 2);
     if (toReturn == NULL) {
         return NULL;
     }
-    strncpy(toReturn, dirPath, size);
-    strncat(toReturn, "/", size);
-    strncat(toReturn, file->path, size);
-    toReturn[size - 1] = '\0';
+    memcpy(toReturn, dirPath, dirPathLen);
+    toReturn[dirPathLen] = '/';
+    memcpy(toReturn + dirPathLen + 1, file->path, filePathLen);
+    toReturn[dirPathLen + filePathLen + 1] = '\0';
     return toReturn;
 }
 

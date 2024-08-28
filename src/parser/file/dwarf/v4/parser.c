@@ -89,15 +89,16 @@ static inline char* dwarf4_stringFrom(struct dwarf_fileNameEntry* file, struct v
         return file->name == NULL ? NULL : strdup(file->name);
     }
     const char* directory = directories->content[file->dirIndex - 1];
-    const size_t size  = strlen(directory) + strlen(file->name) + 2;
-    char* toReturn = malloc(size);
+    const size_t dirLen  = strlen(directory),
+                 fileLen = strlen(file->name);
+    char* toReturn = malloc(dirLen + fileLen + 2);
     if (toReturn == NULL) {
         return NULL;
     }
-    strncpy(toReturn, directory, size);
-    strncat(toReturn, "/", size);
-    strncat(toReturn, file->name, size);
-    toReturn[size - 1] = '\0';
+    memcpy(toReturn, directory, dirLen);
+    toReturn[dirLen] = '/';
+    memcpy(toReturn + dirLen + 1, file->name, fileLen);
+    toReturn[dirLen + fileLen + 1] = '\0';
     return toReturn;
 }
 
