@@ -21,6 +21,7 @@
 
 #include "dwarf_parser.h"
 #include "v4/definitions.h"
+#include "v5/definitions.h"
 
 // FIXME: Move up!!!
 #include "v5/vector_pair_uint64.h"
@@ -255,14 +256,18 @@ static inline bool dwarf_parser_parse(struct dwarf_parser* self, size_t counter,
     return true;
 }
 
-static inline vector_pair_uint64_t dwarf_getAbbreviationTable(struct lcs_section section, uint64_t abbreviationCode, uint64_t offset) {
+static inline vector_pair_uint64_t dwarf_getAbbreviationTable(struct lcs_section section,
+                                                              uint64_t abbreviationCode,
+                                                              uint64_t offset,
+                                                              uint16_t version) {
     vector_pair_uint64_t toReturn = vector_initializer;
     size_t counter = (size_t) offset;
 
     uint64_t code;
     do {
-        // TODO: Null entries
         code = getULEB128(section.content, &counter);
+        if (code == 0) continue;
+
         const uint64_t tag = getULEB128(section.content, &counter);
         const uint8_t children = *((uint8_t*) (section.content + counter++));
         (void) tag;
@@ -272,12 +277,16 @@ static inline vector_pair_uint64_t dwarf_getAbbreviationTable(struct lcs_section
         do {
             name = getULEB128(section.content, &counter);
             form = getULEB128(section.content, &counter);
+            if (version >= 5 && form == DW_FORM_implicit_const) {
+                const uint64_t value = getLEB128(section.content, &counter);
+                (void) value;
+            }
 
-            if (code == abbreviationCode && name != 0 && form != 0) {
+            if (code == abbreviationCode && name != 0 && (version < 5 ? form != 0 : true)) {
                 vector_pair_uint64_push_back(&toReturn, (pair_uint64_t) { name, form });
             }
-        } while (name != 0 && form != 0);
-    } while (code != abbreviationCode);
+        } while (name != 0 && (version < 5 ? form != 0 : true));
+    } while (code != abbreviationCode && counter < (size_t) section.size);
 
     return toReturn;
 }
@@ -305,20 +314,42 @@ static inline bool dwarf_parseCompDir(struct dwarf_parser* self) {
     const uint16_t version = *((uint16_t*) (self->debugInfo.content + counter));
     counter += 2;
 
+    uint8_t addressSize;
     uint64_t abbrevOffset;
-    if (bit64) {
-        abbrevOffset = *((uint64_t*) (self->debugInfo.content + counter));
-        counter += 8;
+    if (version == 5) {
+        const uint8_t unitType = *((uint8_t*) (self->debugInfo.content + counter++));
+        addressSize = *((uint8_t*) (self->debugInfo.content + counter++));
+        if (bit64) {
+            abbrevOffset = *((uint64_t*) (self->debugInfo.content + counter));
+            counter += 8;
+        } else {
+            abbrevOffset = *((uint32_t*) (self->debugInfo.content + counter));
+            counter += 4;
+        }
+        switch (unitType) {
+            case DW_UT_skeleton:
+            case DW_UT_split_compile: counter += 8; break;
+
+            case DW_UT_type:
+            case DW_UT_split_type: counter += 8 + (bit64 ? 8 : 4); break;
+
+            default: break;
+        }
     } else {
-        abbrevOffset = *((uint32_t*) (self->debugInfo.content + counter));
-        counter += 4;
+        if (bit64) {
+            abbrevOffset = *((uint64_t*) (self->debugInfo.content + counter));
+            counter += 8;
+        } else {
+            abbrevOffset = *((uint32_t*) (self->debugInfo.content + counter));
+            counter += 4;
+        }
+        addressSize = *((uint8_t*) (self->debugInfo.content + counter++));
     }
-    const uint8_t addressSize = *((uint8_t*) (self->debugInfo.content + counter++));
     (void) size;
     (void) addressSize;
 
     const uint64_t abbrevCode = getULEB128(self->debugInfo.content, &counter);
-    const vector_pair_uint64_t abbrevs = dwarf_getAbbreviationTable(self->debugAbbrev, abbrevCode, abbrevOffset);
+    const vector_pair_uint64_t abbrevs = dwarf_getAbbreviationTable(self->debugAbbrev, abbrevCode, abbrevOffset, version);
     vector_iterate(pair_uint64_t, &abbrevs, {
         if (element->first == DW_AT_comp_dir) {
             self->compilationDirectory = dwarf5_readString(self->debugInfo.content,
@@ -328,11 +359,18 @@ static inline bool dwarf_parseCompDir(struct dwarf_parser* self) {
                                                            self->debugLineStr,
                                                            self->debugStr);
             break;
+        } else if (version >= 5 && element->second == DW_FORM_implicit_const) {
+            continue;
+        } else if (element->second == DW_FORM_indirect) {
+            const uint64_t actualForm = getULEB128(self->debugInfo.content, &counter);
+            if (!dwarf5_consumeSome(self->debugInfo.content, &counter, actualForm, bit64)) {
+                break;
+            }
         } else if (!dwarf5_consumeSome(self->debugInfo.content, &counter, element->second, bit64)) {
             break;
         }
     })
-    // TODO: Support other versions, actually use the comp dir
+    // TODO: Actually use the comp dir
     vector_pair_uint64_destroy(&abbrevs);
     return self->compilationDirectory != NULL;
 }
