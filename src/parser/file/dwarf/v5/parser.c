@@ -48,27 +48,12 @@ static inline char* dwarf5_stringFromSection(uint64_t offset,
     return toReturn;
 }
 
-/**
- * @brief Reads a string.
- *
- * The string may follow in the given data buffer or may come from one of the debug string sections.
- * The returned string is not allocated.
- *
- * @param buffer the data buffer
- * @param counter the reading index into the given data buffer
- * @param type the type of string to load
- * @param bit64 whether the 64 bit DWARF format is used
- * @param debugLineStr the section corresponding to the .debug_line_str section
- * @param debugStr the section corresponding to the .debug_str section
- * @return a pointer to the string which points into either the given data buffer or into one of the given sections;
- * `NULL` is returned if the given data type was not allowed
- */
-static inline char* dwarf5_readString(void*    buffer,
-                                      size_t*  counter,
-                                      uint64_t type,
-                                      bool     bit64,
-                                      struct lcs_section debugLineStr,
-                                      struct lcs_section debugStr) {
+char* dwarf5_readString(void*    buffer,
+                        size_t*  counter,
+                        uint64_t type,
+                        bool     bit64,
+                        struct lcs_section debugLineStr,
+                        struct lcs_section debugStr) {
     if (type == DW_FORM_string) {
         char* toReturn = (buffer + *counter);
         *counter += strlen(toReturn) + 1;
@@ -206,17 +191,7 @@ static inline uint8_t* dwarf5_readMD5(void* buffer, size_t* counter) {
     return toReturn;
 }
 
-/**
- * Consumes the following data block of different possible types, according to the
- * formats available for additional vendor specific data.
- *
- * @param buffer the data buffer
- * @param counter the reading index
- * @param type the expected data type
- * @param bit64 whether to use the 64 bit format
- * @return whether the data was allowed and skipped successfully
- */
-static inline bool dwarf5_consumeSome(void* buffer, size_t* counter, uint64_t type, bool bit64) {
+bool dwarf5_consumeSome(void* buffer, size_t* counter, uint64_t type, bool bit64) {
     switch (type) {
         case DW_FORM_block: {
             const uint64_t length = getULEB128(buffer, counter);
