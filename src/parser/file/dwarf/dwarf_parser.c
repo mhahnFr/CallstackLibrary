@@ -22,6 +22,9 @@
 #include "dwarf_parser.h"
 #include "v4/definitions.h"
 
+// FIXME: Move up!!!
+#include "v5/vector_pair_uint64.h"
+
 uint64_t getULEB128(void* begin, size_t* counter) {
     uint64_t result = 0,
              shift  = 0;
@@ -252,6 +255,31 @@ static inline bool dwarf_parser_parse(struct dwarf_parser* self, size_t counter,
     return true;
 }
 
+static inline vector_pair_uint64_t dwarf_getAbbreviationTable(struct lcs_section section, uint64_t abbreviationCode, uint64_t offset) {
+    vector_pair_uint64_t toReturn = vector_initializer;
+    size_t counter = (size_t) offset;
+
+    uint64_t code;
+    do {
+        // TODO: Null entries
+        code = getULEB128(section.content, &counter);
+        const uint64_t tag = getULEB128(section.content, &counter);
+        const uint8_t children = *((uint8_t*) (section.content + counter++));
+
+        uint64_t name, form;
+        do {
+            name = getULEB128(section.content, &counter);
+            form = getULEB128(section.content, &counter);
+
+            if (code == abbreviationCode && name != 0 && form != 0) {
+                vector_pair_uint64_push_back(&toReturn, (pair_uint64_t) { name, form });
+            }
+        } while (name != 0 && form != 0);
+    } while (code != abbreviationCode);
+
+    return toReturn;
+}
+
 static inline void dwarf_parseCompDir(struct dwarf_parser* self) {
     // TODO: Properly implement
     size_t counter = 0;
@@ -281,7 +309,20 @@ static inline void dwarf_parseCompDir(struct dwarf_parser* self) {
     }
     const uint8_t address_size = *((uint8_t*) (self->debugInfo.content + counter++));
     __builtin_printf("%llu %u %llu %u\n", actualSize, version, abbrevOffset, address_size);
-    // TODO: Support other versions, look up the abbreviation and load the variables
+    
+    const uint64_t abbrevCode = getULEB128(self->debugInfo.content, &counter);
+    const vector_pair_uint64_t abbrevs = dwarf_getAbbreviationTable(self->debugAbbrev, abbrevCode, abbrevOffset);
+    vector_iterate(pair_uint64_t, &abbrevs, {
+        if (element->first == 0x1b/*DW_AT_comp_dir*/) {
+            self->compilationDirectory = dwarf5_readString(self->debugInfo.content, &counter, element->second, bit64, self->debugLineStr, self->debugStr);
+            break;
+        } else {
+            // TODO: Check
+            dwarf5_consumeSome(self->debugInfo.content, &counter, element->second, bit64);
+        }
+    })
+    __builtin_printf("--> %s\n", self->compilationDirectory);
+    // TODO: Support other versions, load the variables
 }
 
 bool dwarf_parseLineProgram(struct lcs_section debugLine,
