@@ -84,21 +84,28 @@ static inline bool dwarf4_parseLineProgramHeader(struct dwarf_parser* self, size
  * @param directories the included directories
  * @return an allocated full path string of the given file or `NULL` if the allocation failed or the main source file was referred
  */
-static inline char* dwarf4_stringFrom(struct dwarf_fileNameEntry* file, struct vector_string* directories) {
+static inline char* dwarf4_stringFrom(struct dwarf_fileNameEntry* file, struct vector_string* directories, const char* defaultDirectory) {
+    if (*file->name == '/') {
+        return strdup(file->name);
+    }
+    const char* directory;
+    bool freeDir = false;
     if (file->dirIndex == 0) {
-        return file->name == NULL ? NULL : strdup(file->name);
+        directory = defaultDirectory;
+    } else {
+        directory = directories->content[file->dirIndex - 1];
+        if (*directory != '/') {
+            directory = dwarf_pathConcatenate(defaultDirectory, directory);
+            if (directory == NULL) {
+                return NULL;
+            }
+            freeDir = true;
+        }
     }
-    const char* directory = directories->content[file->dirIndex - 1];
-    const size_t dirLen  = strlen(directory),
-                 fileLen = strlen(file->name);
-    char* toReturn = malloc(dirLen + fileLen + 2);
-    if (toReturn == NULL) {
-        return NULL;
+    char* toReturn = dwarf_pathConcatenate(directory, file->name);
+    if (freeDir) {
+        free((char*) directory);
     }
-    memcpy(toReturn, directory, dirLen);
-    toReturn[dirLen] = '/';
-    memcpy(toReturn + dirLen + 1, file->name, fileLen);
-    toReturn[dirLen + fileLen + 1] = '\0';
     return toReturn;
 }
 
@@ -112,7 +119,7 @@ static inline char* dwarf4_stringFrom(struct dwarf_fileNameEntry* file, struct v
 static inline struct dwarf_sourceFile dwarf4_parser_getFileName(struct dwarf_parser* self, uint64_t file) {
     struct dwarf_fileNameEntry* filePtr = file == 0 ? NULL : &self->specific.v4.fileNames.content[file - 1];
     return (struct dwarf_sourceFile) {
-        filePtr == NULL ? NULL : dwarf4_stringFrom(filePtr, &self->specific.v4.includeDirectories),
+        filePtr == NULL ? NULL : dwarf4_stringFrom(filePtr, &self->specific.v4.includeDirectories, self->compilationDirectory),
         filePtr->modTime,
         filePtr->size
     };

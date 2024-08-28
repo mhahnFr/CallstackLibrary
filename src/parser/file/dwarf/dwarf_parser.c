@@ -384,7 +384,6 @@ static inline bool dwarf_parseCompDir(struct dwarf_parser* self) {
             break;
         }
     })
-    // TODO: Actually use the comp dir
     vector_pair_uint64_destroy(&abbrevs);
     return self->compilationDirectory != NULL;
 }
