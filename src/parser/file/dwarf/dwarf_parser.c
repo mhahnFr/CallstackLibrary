@@ -280,22 +280,27 @@ static inline vector_pair_uint64_t dwarf_getAbbreviationTable(struct lcs_section
     return toReturn;
 }
 
+static inline uint64_t dwarf_parseInitialSize(void* buffer, size_t* counter, bool* bit64) {
+    const uint32_t size = *((uint32_t*) (buffer + *counter));
+    *counter += 4;
+
+    uint64_t toReturn;
+    if (size == 0xffffffff) {
+        toReturn = *((uint64_t*) (buffer + *counter));
+        *bit64 = true;
+        *counter += 8;
+    } else {
+        toReturn = size;
+        *bit64 = false;
+    }
+    return toReturn;
+}
+
 static inline void dwarf_parseCompDir(struct dwarf_parser* self) {
     // TODO: Properly implement
-    size_t counter = 0;
-    const uint32_t size = *((uint32_t*) self->debugInfo.content);
-    counter += 4;
-
     bool bit64;
-    uint64_t actualSize;
-    if (size == 0xffffffff) {
-        actualSize = *((uint64_t*) (self->debugInfo.content + counter));
-        bit64 = true;
-        counter += 8;
-    } else {
-        actualSize = size;
-        bit64 = false;
-    }
+    size_t counter = 0;
+    const uint64_t size = dwarf_parseInitialSize(self->debugInfo.content, &counter, &bit64);
     const uint16_t version = *((uint16_t*) (self->debugInfo.content + counter));
     counter += 2;
 
@@ -308,8 +313,8 @@ static inline void dwarf_parseCompDir(struct dwarf_parser* self) {
         counter += 4;
     }
     const uint8_t address_size = *((uint8_t*) (self->debugInfo.content + counter++));
-    __builtin_printf("%llu %u %llu %u\n", actualSize, version, abbrevOffset, address_size);
-    
+    __builtin_printf("%llu %u %llu %u\n", size, version, abbrevOffset, address_size);
+
     const uint64_t abbrevCode = getULEB128(self->debugInfo.content, &counter);
     const vector_pair_uint64_t abbrevs = dwarf_getAbbreviationTable(self->debugAbbrev, abbrevCode, abbrevOffset);
     vector_iterate(pair_uint64_t, &abbrevs, {
@@ -331,21 +336,9 @@ bool dwarf_parseLineProgram(struct lcs_section debugLine,
                             struct lcs_section debugInfo,
                             struct lcs_section debugAbbrev,
                             dwarf_line_callback cb, void* args) {
+    bool bit64;
     size_t counter = 0;
-    
-    const uint32_t size = *((uint32_t*) debugLine.content);
-    counter += 4;
-    
-    bool     bit64;
-    uint64_t actualSize;
-    if (size == 0xffffffff) {
-        actualSize = *((uint64_t*) (debugLine.content + counter));
-        bit64      = true;
-        counter += 8;
-    } else {
-        actualSize = size;
-        bit64      = false;
-    }
+    const uint64_t size = dwarf_parseInitialSize(debugLine.content, &counter, &bit64);
     const uint16_t version = *((uint16_t*) (debugLine.content + counter));
     counter += 2;
     
@@ -375,7 +368,7 @@ bool dwarf_parseLineProgram(struct lcs_section debugLine,
         default: return false;
     }
 
-    const bool toReturn = dwarf_parser_parse(&parser, counter, actualSize);
+    const bool toReturn = dwarf_parser_parse(&parser, counter, size);
     vector_uint8_destroy(&parser.stdOpcodeLengths);
     parser.destroy(&parser);
     return toReturn;
