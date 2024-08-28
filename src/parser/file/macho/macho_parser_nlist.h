@@ -83,7 +83,7 @@ static inline struct macho_parser_nlist macho_parser_nlist_from(const void* poin
  * Returns the size of the real nlist structure used.
  *
  * @param bit64 whether the 64 bit version is used
- * @return the size in bytes of the real nöist structure used
+ * @return the size in bytes of the real nlist structure used
  */
 static inline size_t macho_parser_nlist_sizeof(bool bit64) {
     return bit64 ? sizeof(struct nlist_64) : sizeof(struct nlist);

@@ -193,8 +193,8 @@ static inline optional_debugInfo_t machoFile_getDebugInfo(struct machoFile* self
  *
  * @param self the Mach-O file abstraction object
  * @param segment the segment command to handle
- * @param bitsReversed whether to swap the numbers' endianess
- * @return whether the handling was successfull
+ * @param bitsReversed whether to swap the numbers' endianness
+ * @return whether the handling was successful
  */
 static inline bool machoFile_handleSegment(struct machoFile *       self,
                                            struct segment_command * segment,

@@ -53,7 +53,7 @@ namespace lcs {
         struct_callstack self;
         
         /**
-         * @brief Helper function to throw the appopriate exception.
+         * @brief Helper function to throw the appropriate exception.
          *
          * @throws A `system_error` if compiled using C++11 or newer, a runtime error otherwise.
          */

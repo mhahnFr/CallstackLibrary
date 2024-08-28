@@ -62,7 +62,7 @@ typedef void (*macho_addFunction)(pair_funcFile_t, va_list);
  * @param offset the additional parsing offset
  * @param bytesSwapped whether the bytes need to be swapped to be in host byte order
  * @param bit64 whether a 64 bit Mach-O file is parsed
- * @param objCb the object file calback function
+ * @param objCb the object file callback function
  * @param funCb the function / object file pair callback function
  * @return whether the symbol table was parsed successfully
  */

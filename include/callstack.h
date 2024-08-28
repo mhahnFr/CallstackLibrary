@@ -82,7 +82,7 @@ struct callstack * callstack_newWithAddress(void * address);
  *
  * Stores the backtrace of the calling function.
  * The callstack object needs to be destructed using the function `callstack_destroy(struct callstack *)`
- * upon successfull construction and use.
+ * upon successful construction and use.
  * If an error occurs during the initialization of the given callstack object, `false` is returned.
  *
  * @param self A pointer to the callstack object to be constructed.

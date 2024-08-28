@@ -145,7 +145,7 @@ static inline optional_uint64_t dwarf5_readTimestamp(void* buffer, size_t* count
         case DW_FORM_block: {
             const uint64_t length = getULEB128(buffer, counter);
             *counter += length;
-            toReturn = 0; // Propriatary timestamp format not supported -> skipped.  - mhahnFr
+            toReturn = 0; // Proprietary timestamp format not supported -> skipped.  - mhahnFr
             break;
         }
 
@@ -197,7 +197,7 @@ static inline optional_uint64_t dwarf5_readSize(void* buffer, size_t* counter, u
  * Reads the MD5 hash that follows in the buffer.
  *
  * @param buffer the data buffer
- * @param counter the reding index
+ * @param counter the reading index
  * @return the read MD5 hash
  */
 static inline uint8_t* dwarf5_readMD5(void* buffer, size_t* counter) {
@@ -355,7 +355,7 @@ fail:
  * Constructs the full file name for the given source file attribute using the given include directory attributes.
  *
  * @param file the source file attribute to construct the full file name for
- * @param directories the inlcude directory file attributes
+ * @param directories the include directory file attributes
  * @return the allocated full source file path or `NULL` if the allocation failed
  */
 static inline char* dwarf5_constructFileName(const struct fileAttribute* file, const vector_fileAttribute_t* directories) {
