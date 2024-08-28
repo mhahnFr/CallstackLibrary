@@ -63,6 +63,20 @@ int64_t getLEB128(void* begin, size_t* counter) {
     return result;
 }
 
+char* dwarf_pathConcatenate(const char* string1, const char* string2) {
+    const size_t len1 = strlen(string1),
+                 len2 = strlen(string2);
+    char* toReturn = malloc(len1 + len2 + 2);
+    if (toReturn == NULL) {
+        return NULL;
+    }
+    memcpy(toReturn, string1, len1);
+    toReturn[len1] = '/';
+    memcpy(toReturn + len1 + 1, string2, len2);
+    toReturn[len1 + len2 + 1] = '\0';
+    return toReturn;
+}
+
 /**
  * @brief This function parses the actual DWARF line program.
  *
