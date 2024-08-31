@@ -71,8 +71,11 @@ struct dwarf_parser {
                        debugStr,
     /** The `.debug_line_str` section.                                                  */
                        debugLineStr,
+    /** The `.debug_info` section.                                                      */
                        debugInfo,
+    /** The @c .debug_abbrev section.                                                   */
                        debugAbbrev,
+    /** The @c .debug_str_offsets section.                                              */
                        debugStrOffsets;
 
     /** The callback to be called when a line number table row is emitted.              */
@@ -102,9 +105,12 @@ struct dwarf_parser {
  *
  * Calls the callback with each emitted line table row and the given payload.
  *
- * @param debugLine the section corresponding to the .debug_line section
- * @param debugLineStr the section corresponding to the .debug_line_str section
- * @param debugStr the section corresponding to the .debug_str section
+ * @param debugLine the section corresponding to the @c .debug_line section
+ * @param debugLineStr the section corresponding to the @c .debug_line_str section
+ * @param debugStr the section corresponding to the @c .debug_str section
+ * @param debugInfo the section corresponding to the @c .debug_info section
+ * @param debugAbbrev the section corresponding to the @c .debug_abbrev section
+ * @param debugStrOffsets the section corresponding to the @c .debug_str_offsets section
  * @param cb the line table row callback
  * @param args the payload to additionally pass to the callback function
  */
@@ -138,7 +144,23 @@ uint64_t getULEB128(void* begin, size_t* counter);
  */
 int64_t getLEB128(void* begin, size_t* counter);
 
+/**
+ * Concatenates the two given strings as paths.
+ *
+ * @param string1 the left part of the path to construct
+ * @param string2 the right part of the path to construct
+ * @return the allocated concatenated path
+ */
 char* dwarf_pathConcatenate(const char* string1, const char* string2);
+
+/**
+ * Parses the initial length of a DWARF section.
+ *
+ * @param buffer the memory buffer to parse in
+ * @param counter the memory bytes counter
+ * @param bit64 will be set according to the parsed information
+ * @return the actual length of the DWARF section
+ */
 uint64_t dwarf_parseInitialSize(void* buffer, size_t* counter, bool* bit64);
 
 #endif /* dwarf_parser_h */

@@ -269,6 +269,20 @@ static inline bool dwarf_parser_parse(struct dwarf_parser* self, size_t counter,
     return true;
 }
 
+/**
+ * @brief Parses the abbreviation table and returns the description found for the given
+ * abbreviation code.
+ *
+ * Implicitly constants of DWARF in version 5 are handled but discarded.
+ *
+ * @note This function does not check any parameters for validity.
+ *
+ * @param section the debug abbreviation section
+ * @param abbreviationCode the abbreviation code whose description to load
+ * @param offset the offset into the section
+ * @param version the DWARF version to be used
+ * @return a vector with the type descriptions
+ */
 static inline vector_pair_uint64_t dwarf_getAbbreviationTable(struct lcs_section section,
                                                               uint64_t abbreviationCode,
                                                               uint64_t offset,
@@ -320,6 +334,12 @@ uint64_t dwarf_parseInitialSize(void* buffer, size_t* counter, bool* bit64) {
     return toReturn;
 }
 
+/**
+ * Parses the compilation directory.
+ *
+ * @param self the DWARF parser object
+ * @return whether the parsing was successful
+ */
 static inline bool dwarf_parseCompDir(struct dwarf_parser* self) {
     bool bit64;
     size_t counter = 0;
@@ -421,10 +441,7 @@ bool dwarf_parseLineProgram(struct lcs_section debugLine,
     switch (version) {
         case 2:
         case 3:
-        case 4:
-            dwarf4_parser_create(&parser);
-            break;
-
+        case 4: dwarf4_parser_create(&parser); break;
         case 5: dwarf5_parser_create(&parser); break;
 
         default: return false;
