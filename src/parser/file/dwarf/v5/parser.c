@@ -23,9 +23,9 @@
 #include "optional_uint64_t.h"
 #include "optional_vector_fileAttribute.h"
 #include "parser.h"
-#include "vector_pair_uint64.h"
 
 #include "../dwarf_parser.h"
+#include "../vector_pair_uint64.h"
 
 /**
  * Calculates a string pointer into one of the given sections.

@@ -20,11 +20,10 @@
  */
 
 #include "dwarf_parser.h"
+#include "vector_pair_uint64.h"
+
 #include "v4/definitions.h"
 #include "v5/definitions.h"
-
-// FIXME: Move up!!!
-#include "v5/vector_pair_uint64.h"
 
 uint64_t getULEB128(void* begin, size_t* counter) {
     uint64_t result = 0,
