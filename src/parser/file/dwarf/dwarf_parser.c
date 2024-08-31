@@ -265,7 +265,7 @@ static inline bool dwarf_parser_parse(struct dwarf_parser* self, size_t counter,
         return dwarf_parseLineProgram((struct lcs_section) {
             self->debugLine.content + counter,
             self->debugLine.size - 2 - (self->bit64 ? 12 : 4) - counter
-        }, self->debugLineStr, self->debugStr, self->debugInfo, self->debugAbbrev, self->cb, self->args);
+        }, self->debugLineStr, self->debugStr, self->debugInfo, self->debugAbbrev, self->debugStrOffsets, self->cb, self->args);
     }
     return true;
 }
@@ -393,6 +393,7 @@ bool dwarf_parseLineProgram(struct lcs_section debugLine,
                             struct lcs_section debugStr,
                             struct lcs_section debugInfo,
                             struct lcs_section debugAbbrev,
+                            struct lcs_section debugStrOffsets,
                             dwarf_line_callback cb, void* args) {
     bool bit64;
     size_t counter = 0;
@@ -408,6 +409,7 @@ bool dwarf_parseLineProgram(struct lcs_section debugLine,
         .debugLineStr = debugLineStr,
         .debugInfo = debugInfo,
         .debugAbbrev = debugAbbrev,
+        .debugStrOffsets = debugStrOffsets,
         .cb = cb,
         .args = args,
         .stdOpcodeLengths = vector_initializer,
