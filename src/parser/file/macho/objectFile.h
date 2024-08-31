@@ -59,6 +59,7 @@ struct objectFile {
     struct lcs_section debugStr;
     struct lcs_section debugInfo;
     struct lcs_section debugAbbrev;
+    struct lcs_section debugStrOffsets;
 
     /** Whether the file was successfully parsed.               */
     bool parsed;
@@ -107,6 +108,7 @@ static inline void objectFile_create(struct objectFile * self) {
     lcs_section_create(&self->debugStr);
     lcs_section_create(&self->debugInfo);
     lcs_section_create(&self->debugAbbrev);
+    lcs_section_create(&self->debugStrOffsets);
 
     vector_function_create(&self->ownFunctions);
     vector_dwarfLineInfo_create(&self->lineInfos);

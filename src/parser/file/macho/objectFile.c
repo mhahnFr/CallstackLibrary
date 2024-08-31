@@ -206,6 +206,8 @@ static inline void objectFile_handleSection(struct objectFile* self,
             self->debugInfo = section;
         } else if (strcmp("__debug_abbrev", sectname) == 0) {
             self->debugAbbrev = section;
+        } else if (strncmp("__debug_str_offsets", sectname, 16) == 0) {
+            self->debugStrOffsets = section;
         }
     }
 }
@@ -399,6 +401,7 @@ static inline bool objectFile_parseMachO(struct objectFile* self,
                                self->debugStr,
                                self->debugInfo,
                                self->debugAbbrev,
+                               self->debugStrOffsets,
                                objectFile_dwarfLineCallback, self);
     }
     return success;
