@@ -72,6 +72,7 @@ bool dwarf5_consumeSome(void* buffer, size_t* counter, uint64_t type, bool bit64
  * @param bit64 whether the 64 bit DWARF format is used
  * @param debugLineStr the section corresponding to the .debug_line_str section
  * @param debugStr the section corresponding to the .debug_str section
+ * @param debugStrOffsets the debug string offsets section
  * @return a pointer to the string which points into either the given data buffer or into one of the given sections;
  * `NULL` is returned if the given data type was not allowed
  */

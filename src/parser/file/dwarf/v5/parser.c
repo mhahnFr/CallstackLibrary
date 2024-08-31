@@ -48,6 +48,16 @@ static inline char* dwarf5_stringFromSection(uint64_t offset,
     return toReturn;
 }
 
+/**
+ * @brief Loads the offset into the debug string section for the given index in
+ * the given debug string offsets section.
+ *
+ * The section must not be empty, the index though is range checked.
+ *
+ * @param index the index of the offset
+ * @param debugStrOffsets the debug string offsets section
+ * @return the optionally deducted string table offset
+ */
 static inline optional_uint64_t dwarf5_loadStringOffset(uint64_t index, struct lcs_section debugStrOffsets) {
     bool bit64;
     size_t counter = 0;
@@ -377,6 +387,7 @@ fail:
  *
  * @param file the source file attribute to construct the full file name for
  * @param directories the include directory file attributes
+ * @param defaultDirectory the compilation directory
  * @return the allocated full source file path or `NULL` if the allocation failed
  */
 static inline char* dwarf5_constructFileName(const struct fileAttribute*   file,

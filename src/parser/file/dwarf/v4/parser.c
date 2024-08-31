@@ -41,14 +41,14 @@ static inline bool dwarf4_parseLineProgramHeader(struct dwarf_parser* self, size
     }
     (void) headerLength;
 
-    self->minimumInstructionLength        = *((uint8_t*) (self->debugLine.content + (*counter)++));
+    self->minimumInstructionLength = *((uint8_t*) (self->debugLine.content + (*counter)++));
     if (self->version == 4) {
         self->maximumOperationsPerInstruction = *((uint8_t*) (self->debugLine.content + (*counter)++));
     }
-    self->defaultIsStmt                   = *((uint8_t*) (self->debugLine.content + (*counter)++));
-    self->lineBase                        = *((int8_t*)  (self->debugLine.content + (*counter)++));
-    self->lineRange                       = *((uint8_t*) (self->debugLine.content + (*counter)++));
-    self->opCodeBase                      = *((uint8_t*) (self->debugLine.content + (*counter)++));
+    self->defaultIsStmt = *((uint8_t*) (self->debugLine.content + (*counter)++));
+    self->lineBase      = *((int8_t*)  (self->debugLine.content + (*counter)++));
+    self->lineRange     = *((uint8_t*) (self->debugLine.content + (*counter)++));
+    self->opCodeBase    = *((uint8_t*) (self->debugLine.content + (*counter)++));
 
     vector_uint8_reserve(&self->stdOpcodeLengths, self->opCodeBase - 2);
     for (uint8_t i = 1; i < self->opCodeBase; ++i) {
@@ -82,6 +82,7 @@ static inline bool dwarf4_parseLineProgramHeader(struct dwarf_parser* self, size
  *
  * @param file the file name entry whose full path to construct
  * @param directories the included directories
+ * @param defaultDirectory the compilation directory
  * @return an allocated full path string of the given file or `NULL` if the allocation failed or the main source file was referred
  */
 static inline char* dwarf4_stringFrom(struct dwarf_fileNameEntry* file, struct vector_string* directories, const char* defaultDirectory) {
