@@ -57,6 +57,7 @@ struct binaryFile {
     
     /** The start address in memory of the represented binary file.      */
     const void* startAddress;
+    /** The relocation offset of the binary file.                        */
     uintptr_t relocationOffset;
     
     /**

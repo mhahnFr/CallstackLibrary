@@ -36,6 +36,7 @@ struct loadedLibInfo {
     /** The end address of the runtime image.                             */
               * end;
 
+    /** The relocation offset of the represented binary file.             */
     uintptr_t relocationOffset;
 
     /** The file name of the loaded runtime image as given by the system. */
