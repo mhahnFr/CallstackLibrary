@@ -110,13 +110,21 @@ char* dwarf5_readString(void*    buffer,
                 *counter += 2;
                 break;
 
-            case DW_FORM_strx3: abort(); // TODO: Implement
+            case DW_FORM_strx3: {
+                uint8_t bytes[3];
+                bytes[0] = *((uint8_t*) (buffer + *counter++));
+                bytes[1] = *((uint8_t*) (buffer + *counter++));
+                bytes[2] = *((uint8_t*) (buffer + *counter++));
+
+                index = bytes[0] + (bytes[1] << 8) + (bytes[2] << 16);
+                break;
+            }
 
             case DW_FORM_strx4:
                 index = *((uint32_t*) (buffer + *counter));
                 *counter += 4;
 
-            default: abort(); // TODO: Better handling
+            default: return NULL;
         }
         type = DW_FORM_strp;
         optional_uint64_t value = dwarf5_loadStringOffset(index, debugStrOffsets);
