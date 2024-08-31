@@ -139,5 +139,6 @@ uint64_t getULEB128(void* begin, size_t* counter);
 int64_t getLEB128(void* begin, size_t* counter);
 
 char* dwarf_pathConcatenate(const char* string1, const char* string2);
+uint64_t dwarf_parseInitialSize(void* buffer, size_t* counter, bool* bit64);
 
 #endif /* dwarf_parser_h */

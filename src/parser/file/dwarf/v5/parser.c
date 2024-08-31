@@ -48,27 +48,72 @@ static inline char* dwarf5_stringFromSection(uint64_t offset,
     return toReturn;
 }
 
+static inline optional_uint64_t dwarf5_loadStringOffset(uint64_t index, struct lcs_section debugStrOffsets) {
+    bool bit64;
+    size_t counter = 0;
+    const uint64_t size = dwarf_parseInitialSize(debugStrOffsets.content, &counter, &bit64);
+    if (bit64) {
+        if (index >= size / 8) {
+            return (optional_uint64_t) { .has_value = false };
+        }
+        return (optional_uint64_t) { true, ((uint64_t*) (debugStrOffsets.content + counter))[index] };
+    } else if (index >= size / 4) {
+        return (optional_uint64_t) { .has_value = false };
+    }
+    return (optional_uint64_t) { true, ((uint32_t*) (debugStrOffsets.content + counter))[index] };
+}
+
 char* dwarf5_readString(void*    buffer,
                         size_t*  counter,
                         uint64_t type,
                         bool     bit64,
                         struct lcs_section debugLineStr,
-                        struct lcs_section debugStr) {
+                        struct lcs_section debugStr,
+                        struct lcs_section debugStrOffsets) {
     if (type == DW_FORM_string) {
         char* toReturn = (buffer + *counter);
         *counter += strlen(toReturn) + 1;
         return toReturn;
     }
-    if (type != DW_FORM_line_strp && type != DW_FORM_strp && type != DW_FORM_strp_sup) {
+    if (type != DW_FORM_line_strp && type != DW_FORM_strp && type != DW_FORM_strp_sup
+        && type != DW_FORM_strx && type != DW_FORM_strx1 && type != DW_FORM_strx2
+        && type != DW_FORM_strx3 && type != DW_FORM_strx4) {
         return NULL;
     }
     uint64_t offset;
-    if (bit64) {
-        offset = *((uint64_t*) (buffer + *counter));
-        *counter += 8;
+    if (type == DW_FORM_strp || type == DW_FORM_line_strp || type == DW_FORM_strp_sup) {
+        if (bit64) {
+            offset = *((uint64_t*) (buffer + *counter));
+            *counter += 8;
+        } else {
+            offset = *((uint32_t*) (buffer + *counter));
+            *counter += 4;
+        }
     } else {
-        offset = *((uint32_t*) (buffer + *counter));
-        *counter += 4;
+        uint64_t index;
+        switch (type) {
+            case DW_FORM_strx:  index = getULEB128(buffer, counter);         break;
+            case DW_FORM_strx1: index = *((uint8_t*) (buffer + *counter++)); break;
+
+            case DW_FORM_strx2:
+                index = *((uint16_t*) (buffer + *counter));
+                *counter += 2;
+                break;
+
+            case DW_FORM_strx3: abort(); // TODO: Implement
+
+            case DW_FORM_strx4:
+                index = *((uint32_t*) (buffer + *counter));
+                *counter += 4;
+
+            default: abort(); // TODO: Better handling
+        }
+        type = DW_FORM_strp;
+        optional_uint64_t value = dwarf5_loadStringOffset(index, debugStrOffsets);
+        if (!value.has_value) {
+            return NULL;
+        }
+        offset = value.value;
     }
     return dwarf5_stringFromSection(offset, type, debugLineStr, debugStr);
 }
@@ -233,6 +278,7 @@ bool dwarf5_consumeSome(void* buffer, size_t* counter, uint64_t type, bool bit64
         case DW_FORM_line_strp:
             (void) dwarf5_readString(buffer, counter, type, bit64,
                                      (struct lcs_section) { .content = NULL, .size = 0 },
+                                     (struct lcs_section) { .content = NULL, .size = 0 },
                                      (struct lcs_section) { .content = NULL, .size = 0 });
             break;
 
@@ -279,7 +325,7 @@ static inline optional_vector_fileAttribute_t dwarf5_parseFileAttributes(struct 
         vector_iterate(pair_uint64_t, &entryFormats, {
             switch (element->first) {
                 case DW_LNCT_path:
-                    attribute.path = dwarf5_readString(self->debugLine.content, counter, element->second, self->bit64, self->debugLineStr, self->debugStr);
+                    attribute.path = dwarf5_readString(self->debugLine.content, counter, element->second, self->bit64, self->debugLineStr, self->debugStr, self->debugStrOffsets);
                     break;
 
                 case DW_LNCT_directory_index: {

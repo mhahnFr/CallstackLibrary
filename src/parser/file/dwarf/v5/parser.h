@@ -80,6 +80,7 @@ char* dwarf5_readString(void*    buffer,
                         uint64_t type,
                         bool     bit64,
                         struct lcs_section debugLineStr,
-                        struct lcs_section debugStr);
+                        struct lcs_section debugStr,
+                        struct lcs_section debugStrOffsets);
 
 #endif /* dwarf_v5_parser_h */

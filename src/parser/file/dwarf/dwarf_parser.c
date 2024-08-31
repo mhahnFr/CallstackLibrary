@@ -305,7 +305,7 @@ static inline vector_pair_uint64_t dwarf_getAbbreviationTable(struct lcs_section
     return toReturn;
 }
 
-static inline uint64_t dwarf_parseInitialSize(void* buffer, size_t* counter, bool* bit64) {
+uint64_t dwarf_parseInitialSize(void* buffer, size_t* counter, bool* bit64) {
     const uint32_t size = *((uint32_t*) (buffer + *counter));
     *counter += 4;
 
@@ -371,7 +371,8 @@ static inline bool dwarf_parseCompDir(struct dwarf_parser* self) {
                                                            element->second,
                                                            bit64,
                                                            self->debugLineStr,
-                                                           self->debugStr);
+                                                           self->debugStr,
+                                                           self->debugStrOffsets);
             break;
         } else if (version >= 5 && element->second == DW_FORM_implicit_const) {
             continue;
