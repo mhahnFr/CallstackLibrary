@@ -218,6 +218,7 @@ static inline void objectFile_handleSection(struct objectFile* self,
  * If the given segment contains the DWARF debug line information, it is parsed using the given
  * DWARF line callback and the given additional arguments.
  *
+ * @param self the object file object
  * @param command the command to process
  * @param baseAddress the beginning of the Mach-O file
  * @param bytesSwapped whether the bytes need to be swapped to match the host byte order
@@ -245,6 +246,7 @@ static inline bool objectFile_handleSegment64(struct objectFile*         self,
  * If the given segment contains the DWARF debug line information, it is parsed using the given
  * DWARF line callback and the given additional arguments.
  *
+ * @param self the object file object
  * @param command the command to process
  * @param baseAddress the beginning of the Mach-O file
  * @param bytesSwapped whether the bytes need to be swapped to match the host byte order

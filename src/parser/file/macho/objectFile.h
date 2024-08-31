@@ -57,8 +57,11 @@ struct objectFile {
     struct lcs_section debugLineStr;
     /** The `__debug_str` section of the object file.           */
     struct lcs_section debugStr;
+    /** The @c __debug_info section of the object file.         */
     struct lcs_section debugInfo;
+    /** The @c __debug_abbrev section of the object file.       */
     struct lcs_section debugAbbrev;
+    /** The @c __debug_str_offset section of the object file.   */
     struct lcs_section debugStrOffsets;
 
     /** Whether the file was successfully parsed.               */
