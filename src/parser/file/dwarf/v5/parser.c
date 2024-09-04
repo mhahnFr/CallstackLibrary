@@ -123,6 +123,7 @@ char* dwarf5_readString(void*    buffer,
             case DW_FORM_strx4:
                 index = *((uint32_t*) (buffer + *counter));
                 *counter += 4;
+                break;
 
             default: return NULL;
         }
