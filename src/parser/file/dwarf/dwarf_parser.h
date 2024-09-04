@@ -83,6 +83,7 @@ struct dwarf_parser {
     /** The payload for the DWARF line callback.                                        */
     void* args;
 
+    /** The directory where the binary was compiled in.                                 */
     char* compilationDirectory;
 
     /** The function to destroy the version dependent part of this parser.              */
