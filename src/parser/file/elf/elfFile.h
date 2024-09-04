@@ -42,8 +42,11 @@ struct elfFile {
                        debugLineStr,
     /** The section corresponding to the .debug_str section.         */
                        debugStr,
+    /** The section corresponding to the @c .debug_info section.     */
                        debugInfo,
+    /** The section corresponding to the @c .debug_abbrev section.   */
                        debugAbbrev,
+    /** The section corresponding to the @c .debug_str_offsets.      */
                        debugStrOffsets;
     
     /** The functions found in the represented ELF file.             */
