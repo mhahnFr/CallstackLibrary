@@ -57,6 +57,7 @@ void elfFile_create(struct elfFile* self) {
     lcs_section_create(&self->debugStr);
     lcs_section_create(&self->debugInfo);
     lcs_section_create(&self->debugAbbrev);
+    lcs_section_create(&self->debugStrOffsets);
     vector_dwarfLineInfo_create(&self->lineInfos);
     vector_function_create(&self->functions);
 }
@@ -184,6 +185,8 @@ static inline bool elfFile_parseFile##bits (struct elfFile* self, Elf##bits##_Eh
         } else if (strcmp(".debug_abbrev", sectionName) == 0) {                                                      \
             self->debugAbbrev = elfFile_sectionToLCSSection##bits(buffer, current, littleEndian);                    \
             continue;                                                                                                \
+        } else if (strcmp(".debug_str_offsets", sectionName) == 0) {                                                 \
+            self->debugStrOffsets = elfFile_sectionToLCSSection##bits(buffer, current, littleEndian);                \
         }                                                                                                            \
         switch (ELF_TO_HOST(32, current->sh_type, littleEndian)) {                                                   \
             case SHT_SYMTAB:                                                                                         \
@@ -242,6 +245,7 @@ static inline bool elfFile_parseFile(struct elfFile* self, void* buffer) {
                                self->debugStr,
                                self->debugInfo,
                                self->debugAbbrev,
+                               self->debugStrOffsets,
                                elfFile_lineProgramCallback, self);
     }
 
