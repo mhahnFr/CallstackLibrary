@@ -95,7 +95,7 @@ bool callstack_emplace(struct callstack * self);
  *
  * Stores the backtrace of the calling function, ignoring all frames after the given address.
  * The callstack object needs to be destructed using the function `callstack_destroy(struct callstack *)`
- * upon successfull construction and use.
+ * upon successful construction and use.
  *
  * @param self A pointer to the callstack object to be constructed.
  * @param address The stack address after which frames are ignored.
