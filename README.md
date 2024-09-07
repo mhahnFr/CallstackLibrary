@@ -5,10 +5,16 @@ It can be used with pure **C**, although some features using **C++** optionally 
 
 Its API is available for both **C** and **C++**.
 
+This stacktrace library is designed to be fast and to have almost no dependencies, with the notable exception being the
+usually preinstalled `libexecinfo` (for the function `backtrace`).
+
 ## Quickstart
 Use the CallstackLibrary for creating human-readable callstacks and for creating C++ exceptions that can print their
 stacktrace.
 
+Either [download a release here][1] and use the prebuilt library and the headers.
+
+Alternatively easily build it yourself:
 1. Clone the repository: `git clone --recursive https://github.com/mhahnFr/CallstackLibrary.git`
 2. Build it: `cd CallstackLibrary && make`
 3. Link your code with `-L<path/to/library> -lcallstack`
@@ -20,6 +26,7 @@ More explanation can be found in the [wiki][3]; the detailed explanation follows
 ## Usage
 ### Installation
 Get started by either downloading a prebuilt version of this library [here][1].
+
 Alternatively you can also build it from source:
 1. Clone the repository: `git clone --recursive https://github.com/mhahnFr/CallstackLibrary.git`
 2. go into the cloned repository: `cd CallstackLibrary`
@@ -44,7 +51,8 @@ To enable the optional **C++** exclusive functions add `CXX_FUNCTIONS=true` as a
 
 More information about the **C++** exclusive functions [here][6].
 
-Once you have a copy of the CallstackLibrary you can install it using the following command:
+If you want to install the library, which is *not* necessary for it to work properly, you can do so using the
+following command:
 ```shell
 make INSTALL_PATH=/usr/local install
 ```
