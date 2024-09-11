@@ -16,7 +16,7 @@ Either [download a release here][1] and use the prebuilt library and the headers
 
 Alternatively easily build it yourself:
 1. Clone the repository: `git clone --recursive https://github.com/mhahnFr/CallstackLibrary.git`
-2. Build it: `cd CallstackLibrary && make`
+2. Build it: `cd CallstackLibrary && make -j`
 3. Link your code with `-L<path/to/library> -lcallstack`
 
 Now, you can use the headers [`callstack.h`][2] and [`callstack_exception.hpp`][5], respectively.
@@ -30,11 +30,11 @@ Get started by either downloading a prebuilt version of this library [here][1].
 Alternatively you can also build it from source:
 1. Clone the repository: `git clone --recursive https://github.com/mhahnFr/CallstackLibrary.git`
 2. go into the cloned repository: `cd CallstackLibrary`
-3. and build the library: `make`
+3. and build the library: `make -j`
 
 Or in one step:
 ```shell
-git clone --recursive https://github.com/mhahnFr/CallstackLibrary.git && cd CallstackLibrary && make
+git clone --recursive https://github.com/mhahnFr/CallstackLibrary.git && cd CallstackLibrary && make -j
 ```
 
 To enable the optional **C++** exclusive functions add `CXX_FUNCTIONS=true` as argument to `make`.
@@ -42,7 +42,7 @@ To enable the optional **C++** exclusive functions add `CXX_FUNCTIONS=true` as a
 > [!TIP]
 > **Example**:
 > ```shell
-> make CXX_FUNCTIONS=true
+> make -j CXX_FUNCTIONS=true
 > ```
 
 > [!NOTE]
@@ -294,6 +294,9 @@ supported:
 On Linux the debug information available in the **ELF** binaries is used.
 
 ## Final notes
+If you experience any problems with the CallstackLibrary or if you have ideas to further improve this library don't
+hesitate to [open an issue][9] or a [pull request][10].
+
 This library is licensed under the terms of the GNU GPL in version 3 or later.
 
 © Copyright 2022 - 2024 [mhahnFr][4]
@@ -306,3 +309,5 @@ This library is licensed under the terms of the GNU GPL in version 3 or later.
 [6]: https://github.com/mhahnFr/CallstackLibrary/wiki/Home#enabling-additional-c-exclusive-functions
 [7]: #callstacks
 [8]: https://github.com/mhahnFr/CallstackLibrary/wiki/callstack.hpp#class-callstack
+[9]: https://github.com/mhahnFr/CallstackLibrary/issues/new
+[10]: https://github.com/mhahnFr/CallstackLibrary/pulls
