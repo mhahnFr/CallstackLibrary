@@ -26,11 +26,11 @@
 #include <stdint.h>
 
 #include "dwarf_lineInfo.h"
+#include "optional_uint64_t.h"
 #include "vector_uint8.h"
 
 #include "v4/parser.h"
 #include "v5/parser.h"
-#include "v5/optional_uint64_t.h" // TODO: Move up!!!
 
 #include "../lcs_section.h"
 
