@@ -56,6 +56,7 @@ static inline char* dwarf5_stringFromSection(uint64_t offset,
  *
  * @param index the index of the offset
  * @param debugStrOffsets the debug string offsets section
+ * @param offset the optional offset into the debug string offsets table
  * @return the optionally deducted string table offset
  */
 static inline optional_uint64_t dwarf5_loadStringOffset(uint64_t index, struct lcs_section debugStrOffsets, optional_uint64_t offset) {
