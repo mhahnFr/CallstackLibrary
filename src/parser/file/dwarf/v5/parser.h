@@ -49,18 +49,6 @@ struct dwarf5_parser {
 void dwarf5_parser_create(struct dwarf_parser* self);
 
 /**
- * Consumes the following data block of different possible types, according to the
- * formats available for additional vendor specific data.
- *
- * @param self the dwarf parser structure
- * @param buffer the data buffer
- * @param counter the reading index
- * @param type the expected data type
- * @return whether the data was allowed and skipped successfully
- */
-bool dwarf5_consumeSome(struct dwarf_parser* self, void* buffer, size_t* counter, uint64_t type);
-
-/**
  * @brief Reads a string.
  *
  * The string may follow in the given data buffer or may come from one of the debug string sections.

@@ -334,6 +334,62 @@ uint64_t dwarf_parseInitialSize(void* buffer, size_t* counter, bool* bit64) {
     return toReturn;
 }
 
+bool dwarf_consumeSome(struct dwarf_parser* self, void* buffer, size_t* counter, uint64_t type) {
+    switch (type) {
+        case DW_FORM_block: {
+            const uint64_t length = getULEB128(buffer, counter);
+            *counter += length;
+            break;
+        }
+
+        case DW_FORM_block1: {
+            uint8_t length = *((uint8_t*) (buffer + (*counter)++));
+            *counter += length;
+            break;
+        }
+
+        case DW_FORM_block2: {
+            uint16_t length = *((uint16_t*) (buffer + *counter));
+            *counter += 2 + length;
+            break;
+        }
+
+        case DW_FORM_block4: {
+            uint32_t length = *((uint32_t*) (buffer + *counter));
+            *counter += 4 + length;
+            break;
+        }
+
+        case DW_FORM_flag:
+        case DW_FORM_strx1:
+        case DW_FORM_data1:  ++(*counter);   break;
+        case DW_FORM_strx2:
+        case DW_FORM_data2:  *counter += 2;  break;
+        case DW_FORM_strx3:  *counter += 3;  break;
+        case DW_FORM_strx4:
+        case DW_FORM_data4:  *counter += 4;  break;
+        case DW_FORM_data8:  *counter += 8;  break;
+        case DW_FORM_data16: *counter += 16; break;
+
+        case DW_FORM_strp:
+        case DW_FORM_string:
+        case DW_FORM_line_strp:
+            (void) dwarf5_readString(self, buffer, counter, type);
+            break;
+
+        case DW_FORM_sdata: getLEB128(buffer, counter);  break;
+
+        case DW_FORM_strx:
+        case DW_FORM_udata: getULEB128(buffer, counter); break;
+
+        case DW_FORM_sec_offset: *counter += self->bit64 ? 8 : 4; break;
+
+        default: return false;
+    }
+    return true;
+}
+
+
 /**
  * Parses the compilation directory.
  *
@@ -403,10 +459,10 @@ static inline bool dwarf_parseCompDir(struct dwarf_parser* self) {
             continue;
         } else if (element->second == DW_FORM_indirect) {
             const uint64_t actualForm = getULEB128(self->debugInfo.content, &counter);
-            if (!dwarf5_consumeSome(self, self->debugInfo.content, &counter, actualForm)) {
+            if (!dwarf_consumeSome(self, self->debugInfo.content, &counter, actualForm)) {
                 break;
             }
-        } else if (!dwarf5_consumeSome(self, self->debugInfo.content, &counter, element->second)) {
+        } else if (!dwarf_consumeSome(self, self->debugInfo.content, &counter, element->second)) {
             break;
         }
     })

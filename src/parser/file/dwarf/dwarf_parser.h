@@ -167,4 +167,16 @@ char* dwarf_pathConcatenate(const char* string1, const char* string2);
  */
 uint64_t dwarf_parseInitialSize(void* buffer, size_t* counter, bool* bit64);
 
+/**
+ * Consumes the following data block of different possible types, according to the
+ * formats available for additional vendor specific data.
+ *
+ * @param self the dwarf parser structure
+ * @param buffer the data buffer
+ * @param counter the reading index
+ * @param type the expected data type
+ * @return whether the data was allowed and skipped successfully
+ */
+bool dwarf_consumeSome(struct dwarf_parser* self, void* buffer, size_t* counter, uint64_t type);
+
 #endif /* dwarf_parser_h */
