@@ -58,7 +58,7 @@ void dwarf5_parser_create(struct dwarf_parser* self);
  * @param bit64 whether to use the 64 bit format
  * @return whether the data was allowed and skipped successfully
  */
-bool dwarf5_consumeSome(void* buffer, size_t* counter, uint64_t type, bool bit64);
+bool dwarf5_consumeSome(struct dwarf_parser* self, void* buffer, size_t* counter, uint64_t type);
 
 /**
  * @brief Reads a string.
@@ -76,12 +76,6 @@ bool dwarf5_consumeSome(void* buffer, size_t* counter, uint64_t type, bool bit64
  * @return a pointer to the string which points into either the given data buffer or into one of the given sections;
  * `NULL` is returned if the given data type was not allowed
  */
-char* dwarf5_readString(void*    buffer,
-                        size_t*  counter,
-                        uint64_t type,
-                        bool     bit64,
-                        struct lcs_section debugLineStr,
-                        struct lcs_section debugStr,
-                        struct lcs_section debugStrOffsets);
+char* dwarf5_readString(struct dwarf_parser* self, void* buffer, size_t* counter, uint64_t type);
 
 #endif /* dwarf_v5_parser_h */

@@ -58,7 +58,7 @@ static inline char* dwarf5_stringFromSection(uint64_t offset,
  * @param debugStrOffsets the debug string offsets section
  * @return the optionally deducted string table offset
  */
-static inline optional_uint64_t dwarf5_loadStringOffset(uint64_t index, struct lcs_section debugStrOffsets) {
+static inline optional_uint64_t dwarf5_loadStringOffset(uint64_t index, struct lcs_section debugStrOffsets, optional_uint64_t offset) {
     bool bit64;
     size_t counter = 0;
     const uint64_t size = dwarf_parseInitialSize(debugStrOffsets.content, &counter, &bit64);
@@ -66,20 +66,20 @@ static inline optional_uint64_t dwarf5_loadStringOffset(uint64_t index, struct l
         if (index >= size / 8) {
             return (optional_uint64_t) { .has_value = false };
         }
+        if (offset.has_value) {
+            return (optional_uint64_t) { true, ((uint64_t*) (debugStrOffsets.content + offset.value))[index] };
+        }
         return (optional_uint64_t) { true, ((uint64_t*) (debugStrOffsets.content + counter))[index] };
     } else if (index >= size / 4) {
         return (optional_uint64_t) { .has_value = false };
     }
+    if (offset.has_value) {
+        return (optional_uint64_t) { true, ((uint32_t*) (debugStrOffsets.content + offset.value))[index] };
+    }
     return (optional_uint64_t) { true, ((uint32_t*) (debugStrOffsets.content + counter))[index] };
 }
 
-char* dwarf5_readString(void*    buffer,
-                        size_t*  counter,
-                        uint64_t type,
-                        bool     bit64,
-                        struct lcs_section debugLineStr,
-                        struct lcs_section debugStr,
-                        struct lcs_section debugStrOffsets) {
+char* dwarf5_readString(struct dwarf_parser* self, void* buffer, size_t* counter, uint64_t type) {
     if (type == DW_FORM_string) {
         char* toReturn = (buffer + *counter);
         *counter += strlen(toReturn) + 1;
@@ -92,7 +92,7 @@ char* dwarf5_readString(void*    buffer,
     }
     uint64_t offset;
     if (type == DW_FORM_strp || type == DW_FORM_line_strp || type == DW_FORM_strp_sup) {
-        if (bit64) {
+        if (self->bit64) {
             offset = *((uint64_t*) (buffer + *counter));
             *counter += 8;
         } else {
@@ -128,13 +128,13 @@ char* dwarf5_readString(void*    buffer,
             default: return NULL;
         }
         type = DW_FORM_strp;
-        optional_uint64_t value = dwarf5_loadStringOffset(index, debugStrOffsets);
+        optional_uint64_t value = dwarf5_loadStringOffset(index, self->debugStrOffsets, self->debugStrOffset);
         if (!value.has_value) {
             return NULL;
         }
         offset = value.value;
     }
-    return dwarf5_stringFromSection(offset, type, debugLineStr, debugStr);
+    return dwarf5_stringFromSection(offset, type, self->debugLineStr, self->debugStr);
 }
 
 /**
@@ -255,7 +255,7 @@ static inline uint8_t* dwarf5_readMD5(void* buffer, size_t* counter) {
     return toReturn;
 }
 
-bool dwarf5_consumeSome(void* buffer, size_t* counter, uint64_t type, bool bit64) {
+bool dwarf5_consumeSome(struct dwarf_parser* self, void* buffer, size_t* counter, uint64_t type) {
     switch (type) {
         case DW_FORM_block: {
             const uint64_t length = getULEB128(buffer, counter);
@@ -295,10 +295,7 @@ bool dwarf5_consumeSome(void* buffer, size_t* counter, uint64_t type, bool bit64
         case DW_FORM_strp:
         case DW_FORM_string:
         case DW_FORM_line_strp:
-            (void) dwarf5_readString(buffer, counter, type, bit64,
-                                     (struct lcs_section) { .content = NULL, .size = 0 },
-                                     (struct lcs_section) { .content = NULL, .size = 0 },
-                                     (struct lcs_section) { .content = NULL, .size = 0 });
+            (void) dwarf5_readString(self, buffer, counter, type);
             break;
 
         case DW_FORM_sdata: getLEB128(buffer, counter);  break;
@@ -306,7 +303,7 @@ bool dwarf5_consumeSome(void* buffer, size_t* counter, uint64_t type, bool bit64
         case DW_FORM_strx:
         case DW_FORM_udata: getULEB128(buffer, counter); break;
 
-        case DW_FORM_sec_offset: *counter += bit64 ? 8 : 4; break;
+        case DW_FORM_sec_offset: *counter += self->bit64 ? 8 : 4; break;
 
         default: return false;
     }
@@ -344,7 +341,7 @@ static inline optional_vector_fileAttribute_t dwarf5_parseFileAttributes(struct 
         vector_iterate(pair_uint64_t, &entryFormats, {
             switch (element->first) {
                 case DW_LNCT_path:
-                    attribute.path = dwarf5_readString(self->debugLine.content, counter, element->second, self->bit64, self->debugLineStr, self->debugStr, self->debugStrOffsets);
+                    attribute.path = dwarf5_readString(self, self->debugLine.content, counter, element->second);
                     break;
 
                 case DW_LNCT_directory_index: {
@@ -374,7 +371,7 @@ static inline optional_vector_fileAttribute_t dwarf5_parseFileAttributes(struct 
                     break;
 
                 default:
-                    if (!dwarf5_consumeSome(self->debugLine.content, counter, element->second, self->bit64)) goto fail;
+                    if (!dwarf5_consumeSome(self, self->debugLine.content, counter, element->second)) goto fail;
                     break;
             }
         })
