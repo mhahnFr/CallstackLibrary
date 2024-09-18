@@ -385,22 +385,28 @@ static inline bool dwarf_parseCompDir(struct dwarf_parser* self) {
     const vector_pair_uint64_t abbrevs = dwarf_getAbbreviationTable(self->debugAbbrev, abbrevCode, abbrevOffset, version);
     vector_iterate(pair_uint64_t, &abbrevs, {
         if (element->first == DW_AT_comp_dir) {
-            self->compilationDirectory = dwarf5_readString(self->debugInfo.content,
+            self->compilationDirectory = dwarf5_readString(self,
+                                                           self->debugInfo.content,
                                                            &counter,
-                                                           element->second,
-                                                           bit64,
-                                                           self->debugLineStr,
-                                                           self->debugStr,
-                                                           self->debugStrOffsets);
+                                                           element->second);
             break;
+        } else if (version >= 5 && element->first == DW_AT_str_offsets_base) {
+            if (self->bit64) {
+                self->debugStrOffset.value = *((uint64_t*) (self->debugInfo.content + counter));
+                counter += 8;
+            } else {
+                self->debugStrOffset.value = *((uint32_t*) (self->debugInfo.content + counter));
+                counter += 4;
+            }
+            self->debugStrOffset.has_value = true;
         } else if (version >= 5 && element->second == DW_FORM_implicit_const) {
             continue;
         } else if (element->second == DW_FORM_indirect) {
             const uint64_t actualForm = getULEB128(self->debugInfo.content, &counter);
-            if (!dwarf5_consumeSome(self->debugInfo.content, &counter, actualForm, bit64)) {
+            if (!dwarf5_consumeSome(self, self->debugInfo.content, &counter, actualForm)) {
                 break;
             }
-        } else if (!dwarf5_consumeSome(self->debugInfo.content, &counter, element->second, bit64)) {
+        } else if (!dwarf5_consumeSome(self, self->debugInfo.content, &counter, element->second)) {
             break;
         }
     })
@@ -433,7 +439,8 @@ bool dwarf_parseLineProgram(struct lcs_section debugLine,
         .cb = cb,
         .args = args,
         .stdOpcodeLengths = vector_initializer,
-        .compilationDirectory = NULL
+        .compilationDirectory = NULL,
+        .debugStrOffset = (optional_uint64_t) { .has_value = false },
     };
     if (!dwarf_parseCompDir(&parser)) {
         return false;
