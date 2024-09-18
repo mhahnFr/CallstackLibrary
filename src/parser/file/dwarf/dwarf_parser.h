@@ -86,6 +86,7 @@ struct dwarf_parser {
 
     /** The directory where the binary was compiled in.                                 */
     char* compilationDirectory;
+    /** The main offset into the debug string offsets table.                            */
     optional_uint64_t debugStrOffset;
 
     /** The function to destroy the version dependent part of this parser.              */
