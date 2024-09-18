@@ -374,7 +374,7 @@ bool dwarf_consumeSome(struct dwarf_parser* self, void* buffer, size_t* counter,
         case DW_FORM_strp:
         case DW_FORM_string:
         case DW_FORM_line_strp:
-            (void) dwarf5_readString(self, buffer, counter, type);
+            (void) dwarf_readString(self, buffer, counter, type);
             break;
 
         case DW_FORM_sdata: getLEB128(buffer, counter);  break;
@@ -389,6 +389,116 @@ bool dwarf_consumeSome(struct dwarf_parser* self, void* buffer, size_t* counter,
     return true;
 }
 
+/**
+ * Calculates a string pointer into one of the given sections.
+ *
+ * @param offset the string offset
+ * @param type the type of string to load
+ * @param debugLineStr the section corresponding to the .debug_line_str section
+ * @param debugStr the section corresponding to the .debug_str section
+ * @return a pointer to the string in either section or `NULL` if the given type specifies neither section
+ */
+static inline char* dwarf_stringFromSection(uint64_t offset,
+                                            uint64_t type,
+                                            struct lcs_section debugLineStr,
+                                            struct lcs_section debugStr) {
+    char* toReturn = NULL;
+    switch (type) {
+        case DW_FORM_line_strp: toReturn = debugLineStr.content + offset; break;
+        case DW_FORM_strp:      toReturn = debugStr.content + offset;     break;
+    }
+    return toReturn;
+}
+
+/**
+ * @brief Loads the offset into the debug string section for the given index in
+ * the given debug string offsets section.
+ *
+ * The section must not be empty, the index though is range checked.
+ *
+ * @param index the index of the offset
+ * @param debugStrOffsets the debug string offsets section
+ * @param offset the optional offset into the debug string offsets table
+ * @return the optionally deducted string table offset
+ */
+static inline optional_uint64_t dwarf_loadStringOffset(uint64_t index, struct lcs_section debugStrOffsets, optional_uint64_t offset) {
+    bool bit64;
+    size_t counter = 0;
+    const uint64_t size = dwarf_parseInitialSize(debugStrOffsets.content, &counter, &bit64);
+    if (bit64) {
+        if (index >= size / 8) {
+            return (optional_uint64_t) { .has_value = false };
+        }
+        if (offset.has_value) {
+            return (optional_uint64_t) { true, ((uint64_t*) (debugStrOffsets.content + offset.value))[index] };
+        }
+        return (optional_uint64_t) { true, ((uint64_t*) (debugStrOffsets.content + counter))[index] };
+    } else if (index >= size / 4) {
+        return (optional_uint64_t) { .has_value = false };
+    }
+    if (offset.has_value) {
+        return (optional_uint64_t) { true, ((uint32_t*) (debugStrOffsets.content + offset.value))[index] };
+    }
+    return (optional_uint64_t) { true, ((uint32_t*) (debugStrOffsets.content + counter))[index] };
+}
+
+char* dwarf_readString(struct dwarf_parser* self, void* buffer, size_t* counter, uint64_t type) {
+    if (type == DW_FORM_string) {
+        char* toReturn = (buffer + *counter);
+        *counter += strlen(toReturn) + 1;
+        return toReturn;
+    }
+    if (type != DW_FORM_line_strp && type != DW_FORM_strp && type != DW_FORM_strp_sup
+        && type != DW_FORM_strx && type != DW_FORM_strx1 && type != DW_FORM_strx2
+        && type != DW_FORM_strx3 && type != DW_FORM_strx4) {
+        return NULL;
+    }
+    uint64_t offset;
+    if (type == DW_FORM_strp || type == DW_FORM_line_strp || type == DW_FORM_strp_sup) {
+        if (self->bit64) {
+            offset = *((uint64_t*) (buffer + *counter));
+            *counter += 8;
+        } else {
+            offset = *((uint32_t*) (buffer + *counter));
+            *counter += 4;
+        }
+    } else {
+        uint64_t index;
+        switch (type) {
+            case DW_FORM_strx:  index = getULEB128(buffer, counter);         break;
+            case DW_FORM_strx1: index = *((uint8_t*) (buffer + *counter++)); break;
+
+            case DW_FORM_strx2:
+                index = *((uint16_t*) (buffer + *counter));
+                *counter += 2;
+                break;
+
+            case DW_FORM_strx3: {
+                uint8_t bytes[3];
+                bytes[0] = *((uint8_t*) (buffer + *counter++));
+                bytes[1] = *((uint8_t*) (buffer + *counter++));
+                bytes[2] = *((uint8_t*) (buffer + *counter++));
+
+                index = bytes[0] + (bytes[1] << 8) + (bytes[2] << 16);
+                break;
+            }
+
+            case DW_FORM_strx4:
+                index = *((uint32_t*) (buffer + *counter));
+                *counter += 4;
+                break;
+
+            default: return NULL;
+        }
+        type = DW_FORM_strp;
+        optional_uint64_t value = dwarf_loadStringOffset(index, self->debugStrOffsets, self->debugStrOffset);
+        if (!value.has_value) {
+            return NULL;
+        }
+        offset = value.value;
+    }
+    return dwarf_stringFromSection(offset, type, self->debugLineStr, self->debugStr);
+}
 
 /**
  * Parses the compilation directory.
@@ -441,10 +551,10 @@ static inline bool dwarf_parseCompDir(struct dwarf_parser* self) {
     const vector_pair_uint64_t abbrevs = dwarf_getAbbreviationTable(self->debugAbbrev, abbrevCode, abbrevOffset, version);
     vector_iterate(pair_uint64_t, &abbrevs, {
         if (element->first == DW_AT_comp_dir) {
-            self->compilationDirectory = dwarf5_readString(self,
-                                                           self->debugInfo.content,
-                                                           &counter,
-                                                           element->second);
+            self->compilationDirectory = dwarf_readString(self,
+                                                          self->debugInfo.content,
+                                                          &counter,
+                                                          element->second);
             break;
         } else if (version >= 5 && element->first == DW_AT_str_offsets_base) {
             if (self->bit64) {

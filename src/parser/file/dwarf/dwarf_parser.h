@@ -179,4 +179,19 @@ uint64_t dwarf_parseInitialSize(void* buffer, size_t* counter, bool* bit64);
  */
 bool dwarf_consumeSome(struct dwarf_parser* self, void* buffer, size_t* counter, uint64_t type);
 
+/**
+ * @brief Reads a string.
+ *
+ * The string may follow in the given data buffer or may come from one of the debug string sections.
+ * The returned string is not allocated.
+ *
+ * @param self the dwarf parser structure
+ * @param buffer the data buffer
+ * @param counter the reading index into the given data buffer
+ * @param type the type of string to load
+ * @return a pointer to the string which points into either the given data buffer or into one of the given sections;
+ * `NULL` is returned if the given data type was not allowed
+ */
+char* dwarf_readString(struct dwarf_parser* self, void* buffer, size_t* counter, uint64_t type);
+
 #endif /* dwarf_parser_h */
