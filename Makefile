@@ -24,6 +24,10 @@ USE_BUILTINS  = true
 
 MACOS_ARCH_FLAGS =
 
+ifdef MACOS_ARCH_FLAGS2
+MACOS_ARCH_FLAGS = $(MACOS_ARCH_FLAGS2)
+endif
+
 # Library names
 CORE_NAME = libcallstack
 DYLIB_N   = $(CORE_NAME).dylib
@@ -88,6 +92,14 @@ LDFLAGS =
 
 NAME = $(STATIC_N)
 
+ifdef MACOS_ARCH_FLAGS2
+ifeq ($(CXX_FUNCTIONS),true)
+MACOS_ARCH_FLAGS += -mmacosx-version-min=10.15
+else
+MACOS_ARCH_FLAGS += -mmacosx-version-min=10.6
+endif
+endif
+
 ifeq ($(shell uname -s),Darwin)
 	LDFLAGS   += -current_version 2.0.1 -compatibility_version 1 $(MACOS_ARCH_FLAGS)
 	COM_FLAGS += $(MACOS_ARCH_FLAGS)
@@ -124,7 +136,7 @@ all:
 	- $(MAKE) $(DYLIB_N)
 
 release: fclean
-	$(MAKE) MACOS_ARCH_FLAGS="-arch x86_64 -arch arm64 -arch arm64e" $(NAME) $(STATIC_N)
+	$(MAKE) MACOS_ARCH_FLAGS2="-arch x86_64 -arch arm64 -arch arm64e" $(NAME) $(STATIC_N)
 
 install: $(NAME)
 	mkdir -p $(INSTALL_PATH)/lib
