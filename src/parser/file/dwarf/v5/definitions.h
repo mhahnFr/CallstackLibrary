@@ -34,6 +34,8 @@
 #define DW_FORM_strx3          0x27
 #define DW_FORM_strx4          0x28
 
+#define DW_AT_str_offsets_base 0x72
+
 #define DW_LNCT_path            0x1
 #define DW_LNCT_directory_index 0x2
 #define DW_LNCT_timestamp       0x3
