@@ -30,6 +30,7 @@
 
 #include "v4/parser.h"
 #include "v5/parser.h"
+#include "v5/optional_uint64_t.h" // TODO: Move up!!!
 
 #include "../lcs_section.h"
 
@@ -85,6 +86,7 @@ struct dwarf_parser {
 
     /** The directory where the binary was compiled in.                                 */
     char* compilationDirectory;
+    optional_uint64_t debugStrOffset;
 
     /** The function to destroy the version dependent part of this parser.              */
     void                    (*destroy)    (struct dwarf_parser*);
