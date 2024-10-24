@@ -117,7 +117,7 @@ $(error Unsupported platform)
 endif
 
 CFLAGS   = $(COM_FLAGS) -std=gnu11
-CXXFLAGS = $(COM_FLAGS) -std=gnu++17
+CXXFLAGS = $(COM_FLAGS) -std=c++17
 
 ifeq ($(CXX_FUNCTIONS),true)
 	LD      = $(CXX)
