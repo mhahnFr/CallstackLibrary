@@ -60,6 +60,21 @@ Adapt the value of the `INSTALL_PATH` argument to your needs.
 
 If you downloaded a [release][1] you can simply move the headers and the library anywhere you like.
 
+#### Build dependencies
+The following dependencies are needed in order to successfully build the library:
+- C11 compatible compiler with GNU language extensions
+- Standard C library with the following additional functions:
+    - `strdup` (POSIX.1-2001)
+    - `asprintf` (POSIX.1-2024)
+    - `backtrace`
+
+##### Linux
+The following additional Linux specific dependencies are needed:
+- GNU standard C library
+
+##### macOS
+Currently, no additional macOS specific dependencies are necessary.
+
 ### Uninstallation
 Uninstall the library by simply removing it and its header files from the installation directory.  
 This can be done using the following command:
