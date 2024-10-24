@@ -61,12 +61,19 @@ Adapt the value of the `INSTALL_PATH` argument to your needs.
 If you downloaded a [release][1] you can simply move the headers and the library anywhere you like.
 
 #### Build dependencies
-The following dependencies are needed in order to successfully build the library:
+The following command line tools are required for a successful build:
+- GNU compatible `make` command line tool
+- The `find` command line tool *(POSIX.1-2001)*
+- The `uname` command line tool *(POSIX.2)*
+
+The following code dependencies are needed in order to successfully build the library:
 - C11 compatible compiler with GNU language extensions
 - Standard C library with the following additional functions:
-    - `strdup` (POSIX.1-2001)
-    - `asprintf` (POSIX.1-2024)
+    - `strdup` *(POSIX.1-2001)*
+    - `asprintf` *(POSIX.1-2024)*
     - `backtrace`
+
+For the optional C++ functionality a C++17 compatible compiler is necessary.
 
 ##### Linux
 The following additional Linux specific dependencies are needed:
