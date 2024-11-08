@@ -31,20 +31,7 @@
 
 #include "callstack.h"
 
-#if __cplusplus >= 201103
- #define LCS_NOEXCEPT  noexcept
- #define LCS_CONSTEXPR constexpr
- #define LCS_OVERRIDE  override
- #define LCS_NULL      nullptr
-
- #define LCS_CXX11
-
-#else
- #define LCS_NOEXCEPT  throw()
- #define LCS_CONSTEXPR
- #define LCS_OVERRIDE
- #define LCS_NULL      NULL
-#endif
+#include "callstack_cxx_compat.hpp"
 
 /**
  * @brief The namespace all C++ classes of the CallstackLibrary can be found in.
