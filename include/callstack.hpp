@@ -35,6 +35,8 @@
 
  #include "callstack_create.h"
 
+ #include "callstack_cxx_compat.hpp"
+
 /**
  * This namespace contains a wrapper class for the `struct callstack`.
  * It is needed to avoid name conflicts between the structure and the wrapper class.
@@ -95,7 +97,7 @@ namespace lcs {
          *
          * @param address The stack address after which frames are ignored.
          */
-        inline explicit callstack(void * address) {
+        inline explicit callstack(void* address) {
             if (!callstack_emplaceWithAddress(*this, address)) {
                 error();
             }
@@ -110,13 +112,13 @@ namespace lcs {
          * @param trace The backtrace.
          * @param length The length of the given backtrace.
          */
-        inline callstack(void ** trace, int length) {
+        inline callstack(void** trace, int length) {
             if (!callstack_emplaceWithBacktrace(*this, trace, length)) {
                 error();
             }
         }
         
-        inline callstack(const callstack & other) {
+        inline callstack(const callstack& other) LCS_NOEXCEPT {
             callstack_create(*this);
             callstack_copy(*this, other);
         }
@@ -126,16 +128,16 @@ namespace lcs {
          *
          * @param cCallstack The C structure to be copied.
          */
-        inline explicit callstack(const struct_callstack * cCallstack) {
+        inline explicit callstack(const struct_callstack* cCallstack) LCS_NOEXCEPT {
             callstack_create(*this);
             callstack_copy(*this, cCallstack);
         }
         
-        inline ~callstack() {
+        inline ~callstack() LCS_NOEXCEPT {
            callstack_destroy(*this);
         }
         
-        inline callstack & operator=(const callstack & other) {
+        inline callstack& operator=(const callstack& other) LCS_NOEXCEPT {
             if (&other != this) {
                 callstack_copy(*this, other);
             }
@@ -143,12 +145,12 @@ namespace lcs {
         }
         
  #if __cplusplus >= 201103
-        inline callstack(callstack && other)
+        inline callstack(callstack&& other) noexcept
             : self(std::move(other.self)) {
             callstack_create(other);
         }
         
-        inline auto operator=(callstack && other) -> callstack & {
+        inline auto operator=(callstack&& other) noexcept -> callstack& {
             callstack_destroy(*this);
             self = std::move(other.self);
             callstack_create(other);
@@ -156,11 +158,11 @@ namespace lcs {
         }
  #endif
         
-        inline operator       struct_callstack * ()       { return &self; }
-        inline operator const struct_callstack * () const { return &self; }
-        
-        inline       struct_callstack * operator -> ()       { return &self; }
-        inline const struct_callstack * operator -> () const { return &self; }
+        inline operator       struct_callstack*()       LCS_NOEXCEPT { return &self; }
+        inline operator const struct_callstack*() const LCS_NOEXCEPT { return &self; }
+
+        inline       struct_callstack* operator->()       LCS_NOEXCEPT { return &self; }
+        inline const struct_callstack* operator->() const LCS_NOEXCEPT { return &self; }
     };
 }
 
