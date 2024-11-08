@@ -157,7 +157,37 @@ namespace lcs {
             return *this;
         }
  #endif
-        
+
+        inline callstack& translate(bool onlyBinaries = false) {
+            if (onlyBinaries) {
+                if (callstack_getBinaries(*this) == LCS_NULL) {
+                    throw std::runtime_error("LCS: Failed to translate the callstack (binaries only)");
+                }
+            } else {
+                if (callstack_toArray(*this) == LCS_NULL) {
+                    throw std::runtime_error("LCS: Failed to translate the callstack");
+                }
+            }
+            return *this;
+        }
+
+ #ifdef LCS_USE_UNSAFE_OPTIMIZATION
+        inline callstack& translateBinariesCached() {
+            if (callstack_getBinariesCached(*this) == LCS_NULL) {
+                throw std::runtime_error("LCS: Failed to translate the callstack (cached binaries)");
+            }
+            return *this;
+        }
+ #endif
+
+        LCS_CONSTEXPR inline const callstack_frame* begin() const LCS_NOEXCEPT {
+            return self.frames;
+        }
+
+        LCS_CONSTEXPR inline const callstack_frame* end() const LCS_NOEXCEPT {
+            return self.frames + self.frameCount;
+        }
+
         inline operator       struct_callstack*()       LCS_NOEXCEPT { return &self; }
         inline operator const struct_callstack*() const LCS_NOEXCEPT { return &self; }
 
