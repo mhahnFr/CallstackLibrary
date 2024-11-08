@@ -158,14 +158,13 @@ The [example above][7] can be written in C++ using the C++ wrapper class as foll
 
 void printCallstack() {
     lcs::callstack callstack;
-    callstack_frame* frames = callstack_toArray(callstack);
     
     std::cout << "The current callstack:" << std::endl;
-    for (size_t i = 0; i < callstack_getFrameCount(callstack); ++i) {
-        std::cout << "In: (" << callstack_frame_getShortestName(&frames[i])
-                  << ") "    << (frames[i].function == NULL ? "???" : frames[i].function)
-                  << " ("    << callstack_frame_getShortestSourceFileOr(&frames[i], "???")
-                  << ":"     << frames[i].sourceLine
+    for (const auto& frame : callstack.translate()) {
+        std::cout << "In: (" << callstack_frame_getShortestName(&frame)
+                  << ") "    << (frame.function == NULL ? "???" : frame.function)
+                  << " ("    << callstack_frame_getShortestSourceFileOr(&frame, "???")
+                  << ":"     << frame.sourceLine
                   << ")"     << std::endl;
     }   
 }
@@ -180,8 +179,8 @@ int main() {
     foo2();
 }
 ```
-Compiled and linked on Debian with `g++ -g main.cpp -I<path/to/library>/include -L<path/to/library> -lcallstack` and
-after [enabling **C++** functions][6] of the library the following output is produced:
+Compiled and linked on Debian with `g++ -g -std=c++11 main.cpp -I<path/to/library>/include -L<path/to/library> -lcallstack`
+and after [enabling **C++** functions][6] of the library the following output is produced:
 ```
 The current callstack:
 In: (a.out) lcs::callstack::callstack(bool) (include/callstack.hpp:81)
