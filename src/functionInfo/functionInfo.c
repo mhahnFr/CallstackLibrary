@@ -19,11 +19,35 @@
  * CallstackLibrary, see the file LICENSE.  If not, see <https://www.gnu.org/licenses/>.
  */
 
+#include <stdbool.h>
+
 #include <callstack_internals.h>
 #include <functionInfo/functionInfo.h>
 
+#include "../dlMapper/dlMapper.h"
+
 struct functionInfo functionInfo_loadHint(const char* functionName, const char* libraryName) {
     struct functionInfo toReturn = (struct functionInfo) { 0, 0 };
+
+    dlMapper_init();
+    bool found = false;
+    if (libraryName != NULL) {
+        struct loadedLibInfo* info = dlMapper_libInfoForFileName(libraryName);
+        if (info != NULL) {
+            if (info->associated == NULL) {
+                info->associated = binaryFile_new(info->fileName, info->begin);
+            }
+            struct binaryFile* file = info->associated;
+            if (file != NULL) {
+                file->relocationOffset = info->relocationOffset;
+                file->inMemory = true;
+                found = file->getFunctionInfo(file, functionName, &toReturn);
+            }
+        }
+    }
+    if (!found) {
+        // TODO: Search in all known binaries
+    }
 
     if (callstack_autoClearCaches) {
         callstack_clearCaches();
