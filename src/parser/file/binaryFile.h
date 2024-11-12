@@ -25,6 +25,7 @@
 #include <stdbool.h>
 
 #include <callstack_frame.h>
+#include <functionInfo/functionInfo.h>
 
 #include "dwarf/dwarf_lineInfo.h"
 
@@ -69,10 +70,11 @@ struct binaryFile {
      * Returns whether the address could be translated.
      */
     bool (*addr2String)(struct binaryFile*, void*, struct callstack_frame*);
+    bool (*getFunctionInfo)(struct binaryFile*, const char*, struct functionInfo*);
     /** The appropriate deinitializing method.                           */
-    void (*destroy)    (struct binaryFile *);
+    void (*destroy)(struct binaryFile*);
     /** The appropriate deleting method.                                 */
-    void (*deleter)    (struct binaryFile *);
+    void (*deleter)(struct binaryFile*);
 };
 
 /**
