@@ -29,7 +29,8 @@ extern "C" {
 #include <stdint.h>
 
 struct functionInfo {
-    uintptr_t begin, end;
+    uintptr_t begin;
+    size_t length;
 };
 
 struct functionInfo functionInfo_loadHint(const char* functionName, const char* libraryName);
