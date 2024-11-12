@@ -87,6 +87,19 @@ struct loadedLibInfo* dlMapper_libInfoForAddress(const void* address) {
     return bsearch(address, loadedLibs.content, loadedLibs.count, sizeof(struct loadedLibInfo), dlMapper_searchCompare);
 }
 
+struct loadedLibInfo* dlMapper_libInfoForFileName(const char* fileName) {
+    if (!dlMapper_inited) return NULL;
+
+    vector_iterate(struct loadedLibInfo, &loadedLibs, {
+        if (strcmp(fileName, element->fileName) == 0
+            || strcmp(fileName, element->absoluteFileName) == 0
+            || strcmp(fileName, element->relativeFileName) == 0) {
+            return element;
+        }
+    })
+    return NULL;
+}
+
 void dlMapper_deinit(void) {
     vector_loadedLibInfo_destroyWithPtr(&loadedLibs, loadedLibInfo_destroy);
     vector_loadedLibInfo_create(&loadedLibs);

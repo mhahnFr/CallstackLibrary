@@ -51,6 +51,8 @@ bool dlMapper_isInited(void);
  */
 struct loadedLibInfo* dlMapper_libInfoForAddress(const void* address);
 
+struct loadedLibInfo* dlMapper_libInfoForFileName(const char* fileName);
+
 /**
  * Deinitializes the dlMapper.
  */
