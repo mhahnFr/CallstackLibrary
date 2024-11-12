@@ -19,14 +19,11 @@
  * CallstackLibrary, see the file LICENSE.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-#ifndef __callstack_callstack_defs_h
-#define __callstack_callstack_defs_h
-
-#include <stdbool.h>
-#include <stddef.h>
+#ifndef __lcs_callstack_defs_h
+#define __lcs_callstack_defs_h
 
 #ifndef CALLSTACK_BACKTRACE_SIZE
  #define CALLSTACK_BACKTRACE_SIZE 128
 #endif
 
-#endif /* __callstack_callstack_defs_h */
+#endif /* __lcs_callstack_defs_h */
