@@ -67,14 +67,14 @@ struct machoFile {
  * @param fileName the name of the file
  * @return the allocated Mach-O file structure or `NULL` on error
  */
-struct machoFile * machoFile_new(const char* fileName);
+struct machoFile* machoFile_new(void);
 
 /**
  * Initializes the given Mach-O file structure.
  *
  * @param self the Mach-O file structure to be initialized
  */
-void machoFile_create(struct machoFile* self, const char* fileName);
+void machoFile_create(struct machoFile* self);
 
 /**
  * Returns the represented Mach-O file structure from the given binary

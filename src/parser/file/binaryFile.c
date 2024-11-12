@@ -36,7 +36,7 @@ struct binaryFile* binaryFile_new(const char* fileName, const void* startAddress
     struct binaryFile * toReturn;
     
 #ifdef LCS_MACHO
-    struct machoFile * tmp = machoFile_new(fileName);
+    struct machoFile* tmp = machoFile_new();
     toReturn = tmp == NULL ? NULL : &tmp->_;
 #elif defined(LCS_ELF)
     struct elfFile * tmp = elfFile_new();

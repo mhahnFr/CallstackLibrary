@@ -39,21 +39,20 @@
 
 #include "../../callstack_parser.h"
 
-struct machoFile* machoFile_new(const char* fileName)  {
+struct machoFile* machoFile_new(void)  {
     struct machoFile* toReturn = malloc(sizeof(struct machoFile));
     
     if (toReturn != NULL) {
-        machoFile_create(toReturn, fileName);
+        machoFile_create(toReturn);
     }
     return toReturn;
 }
 
-void machoFile_create(struct machoFile* self, const char* fileName) {
+void machoFile_create(struct machoFile* self) {
     binaryFile_create(&self->_);
 
     self->_.type     = MACHO_FILE;
     self->_.concrete = self;
-    self->_.fileName = fileName;
 
     self->_.addr2String = &machoFile_addr2String;
     self->_.destroy     = &machoFile_destroy;
