@@ -24,7 +24,7 @@
 
 #include <stdbool.h>
 
-#include "../loadedLibInfo.h"
+#include "vector_loadedLibInfo.h"
 
 /**
  * @brief Initializes the dlMapper.
@@ -52,6 +52,8 @@ bool dlMapper_isInited(void);
 struct loadedLibInfo* dlMapper_libInfoForAddress(const void* address);
 
 struct loadedLibInfo* dlMapper_libInfoForFileName(const char* fileName);
+
+const vector_loadedLibInfo_t* dlMapper_getLoadedLibraries(void);
 
 /**
  * Deinitializes the dlMapper.

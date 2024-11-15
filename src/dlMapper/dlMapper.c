@@ -23,7 +23,6 @@
 
 #include "dlMapper.h"
 #include "dlMapper_platform.h"
-#include "vector_loadedLibInfo.h"
 
 /** The loaded library infos.                            */
 static vector_loadedLibInfo_t loadedLibs = vector_initializer;
@@ -98,6 +97,10 @@ struct loadedLibInfo* dlMapper_libInfoForFileName(const char* fileName) {
         }
     })
     return NULL;
+}
+
+const vector_loadedLibInfo_t* dlMapper_getLoadedLibraries(void) {
+    return &loadedLibs;
 }
 
 void dlMapper_deinit(void) {
