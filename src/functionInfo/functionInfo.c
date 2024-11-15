@@ -37,11 +37,11 @@ static inline bool functionInfo_getFrom(struct loadedLibInfo* info, const char* 
 
     file->relocationOffset = info->relocationOffset;
     file->inMemory = true;
-    return file->getFunctionInfo(file, functionName, functionInfo);
+    return functionInfo->found = file->getFunctionInfo(file, functionName, functionInfo);
 }
 
 struct functionInfo functionInfo_loadHint(const char* functionName, const char* libraryName) {
-    struct functionInfo toReturn = (struct functionInfo) { 0, 0 };
+    struct functionInfo toReturn = (struct functionInfo) { 0, 0, false };
 
     dlMapper_init();
     if (libraryName != NULL && functionInfo_getFrom(dlMapper_libInfoForFileName(libraryName), functionName, &toReturn)) {

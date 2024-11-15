@@ -26,12 +26,14 @@
 extern "C" {
 #endif
 
+#include <stdbool.h>
 #include <stddef.h>
 #include <stdint.h>
 
 struct functionInfo {
     uintptr_t begin;
     size_t length;
+    bool found;
 };
 
 struct functionInfo functionInfo_loadHint(const char* functionName, const char* libraryName);
