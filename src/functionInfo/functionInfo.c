@@ -26,28 +26,37 @@
 
 #include "../dlMapper/dlMapper.h"
 
+static inline bool functionInfo_getFrom(struct loadedLibInfo* info, const char* functionName, struct functionInfo* functionInfo) {
+    if (info == NULL) return false;
+
+    if (info->associated == NULL) {
+        info->associated = binaryFile_new(info->fileName, info->begin);
+    }
+    struct binaryFile* file = info->associated;
+    if (file == NULL) return false;
+
+    file->relocationOffset = info->relocationOffset;
+    file->inMemory = true;
+    return file->getFunctionInfo(file, functionName, functionInfo);
+}
+
 struct functionInfo functionInfo_loadHint(const char* functionName, const char* libraryName) {
     struct functionInfo toReturn = (struct functionInfo) { 0, 0 };
 
     dlMapper_init();
-    bool found = false;
-    if (libraryName != NULL) {
-        struct loadedLibInfo* info = dlMapper_libInfoForFileName(libraryName);
-        if (info != NULL) {
-            if (info->associated == NULL) {
-                info->associated = binaryFile_new(info->fileName, info->begin);
-            }
-            struct binaryFile* file = info->associated;
-            if (file != NULL) {
-                file->relocationOffset = info->relocationOffset;
-                file->inMemory = true;
-                found = file->getFunctionInfo(file, functionName, &toReturn);
-            }
+    if (libraryName != NULL && functionInfo_getFrom(dlMapper_libInfoForFileName(libraryName), functionName, &toReturn)) {
+        if (callstack_autoClearCaches) {
+            callstack_clearCaches();
         }
+        return toReturn;
     }
-    if (!found) {
-        // TODO: Search in all known binaries
-    }
+
+    const vector_loadedLibInfo_t* libs = dlMapper_getLoadedLibraries();
+    vector_iterate(struct loadedLibInfo, libs, {
+        if (functionInfo_getFrom(element, functionName, &toReturn)) {
+            break;
+        }
+    })
 
     if (callstack_autoClearCaches) {
         callstack_clearCaches();
