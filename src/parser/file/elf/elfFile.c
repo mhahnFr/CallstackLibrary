@@ -49,9 +49,11 @@ void elfFile_create(struct elfFile* self) {
     self->_.type     = ELF_FILE;
     self->_.concrete = self;
     
-    self->_.addr2String = &elfFile_addr2String;
-    self->_.destroy     = &elfFile_destroy;
-    self->_.deleter     = &elfFile_delete;
+    self->_.getFunctionInfo = &elfFile_getFunctionInfo;
+    self->_.addr2String     = &elfFile_addr2String;
+    self->_.destroy         = &elfFile_destroy;
+    self->_.deleter         = &elfFile_delete;
+
     lcs_section_create(&self->debugLine);
     lcs_section_create(&self->debugLineStr);
     lcs_section_create(&self->debugStr);
@@ -361,6 +363,25 @@ static inline optional_debugInfo_t elfFile_getDebugInfo(struct elfFile* self, vo
         }
     };
     return toReturn;
+}
+
+bool elfFile_getFunctionInfo(struct binaryFile* me, const char* functionName, struct functionInfo* info) {
+    struct elfFile* self = elfFileOrNull(me);
+    if (self == NULL) return false;
+
+    if (!me->parsed &&
+        !(me->parsed = elfFile_loadFile(self))) {
+        return false;
+    }
+
+    vector_iterate(struct function, &self->functions, {
+        if (strcmp(element->linkedName, functionName) == 0) {
+            info->begin = (uintptr_t) element->startAddress;
+            info->length = element->length;
+            return true;
+        }
+    })
+    return false;
 }
 
 bool elfFile_addr2String(struct binaryFile* me, void* address, struct callstack_frame* frame) {
