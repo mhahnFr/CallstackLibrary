@@ -54,9 +54,10 @@ void machoFile_create(struct machoFile* self) {
     self->_.type     = MACHO_FILE;
     self->_.concrete = self;
 
-    self->_.addr2String = &machoFile_addr2String;
-    self->_.destroy     = &machoFile_destroy;
-    self->_.deleter     = &machoFile_delete;
+    self->_.getFunctionInfo = &machoFile_getFunctionInfo;
+    self->_.addr2String     = &machoFile_addr2String;
+    self->_.destroy         = &machoFile_destroy;
+    self->_.deleter         = &machoFile_delete;
 
     self->addressOffset    = 0;
     self->linkedit_fileoff = 0;
@@ -373,6 +374,26 @@ static inline bool machoFile_loadFile(struct machoFile* self) {
     }
 
     return success;
+}
+
+bool machoFile_getFunctionInfo(struct binaryFile* me, const char* functionName, struct functionInfo* info) {
+    struct machoFile* self = machoFileOrNull(me);
+    if (self == NULL) {
+        return false;
+    }
+    if (!self->_.parsed &&
+        !(self->_.parsed = machoFile_loadFile(self))) {
+        return false;
+    }
+
+    vector_iterate(pair_funcFile_t, &self->functions, {
+        if (strcmp(element->first.linkedName, functionName) == 0) {
+            info->begin = (uintptr_t) element->first.startAddress;
+            info->length = element->first.length;
+            return true;
+        }
+    })
+    return false;
 }
 
 bool machoFile_addr2String(struct binaryFile* me, void* address, struct callstack_frame* frame) {

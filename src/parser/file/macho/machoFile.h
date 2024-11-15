@@ -64,7 +64,6 @@ struct machoFile {
 /**
  * Allocates and initializes a Mach-O file structure.
  *
- * @param fileName the name of the file
  * @return the allocated Mach-O file structure or `NULL` on error
  */
 struct machoFile* machoFile_new(void);
@@ -97,6 +96,8 @@ static inline struct machoFile* machoFileOrNull(struct binaryFile * self) {
  * @return whether it was possible to deduct some debug information
  */
 bool machoFile_addr2String(struct binaryFile* self, void* address, struct callstack_frame* frame);
+
+bool machoFile_getFunctionInfo(struct binaryFile* self, const char* functionName, struct functionInfo* info);
 
 /**
  * Deinitializes the given binary file structure if it is a Mach-O file structure.
