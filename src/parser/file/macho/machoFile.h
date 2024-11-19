@@ -97,7 +97,7 @@ static inline struct machoFile* machoFileOrNull(struct binaryFile * self) {
  */
 bool machoFile_addr2String(struct binaryFile* self, void* address, struct callstack_frame* frame);
 
-bool machoFile_getFunctionInfo(struct binaryFile* self, const char* functionName, struct functionInfo* info);
+bool machoFile_getFunctionInfo(struct machoFile* self, const char* functionName, struct functionInfo* info);
 
 /**
  * Deinitializes the given binary file structure if it is a Mach-O file structure.

@@ -92,7 +92,7 @@ static inline struct elfFile* elfFileOrNull(struct binaryFile * self) {
  */
 bool elfFile_addr2String(struct binaryFile* self, void* address, struct callstack_frame* frame);
 
-bool elfFile_getFunctionInfo(struct binaryFile* self, const char* functionName, struct functionInfo* info);
+bool elfFile_getFunctionInfo(struct elfFile* self, const char* functionName, struct functionInfo* info);
 
 /**
  * Deinitializes the given binary file structure, if it is an ELF file structure.

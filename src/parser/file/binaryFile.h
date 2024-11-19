@@ -70,7 +70,6 @@ struct binaryFile {
      * Returns whether the address could be translated.
      */
     bool (*addr2String)(struct binaryFile*, void*, struct callstack_frame*);
-    bool (*getFunctionInfo)(struct binaryFile*, const char*, struct functionInfo*);
     /** The appropriate deinitializing method.                           */
     void (*destroy)(struct binaryFile*);
     /** The appropriate deleting method.                                 */
@@ -95,6 +94,8 @@ static inline void binaryFile_create(struct binaryFile* self) {
     self->parsed   = false;
     self->inMemory = false;
 }
+
+bool binaryFile_getFunctionInfo(struct binaryFile* self, const char* functionName, struct functionInfo* info);
 
 /**
  * Clears the caches created by the binary file implementations.

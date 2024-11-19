@@ -52,6 +52,21 @@ struct binaryFile* binaryFile_new(const char* fileName, const void* startAddress
     return toReturn;
 }
 
+bool binaryFile_getFunctionInfo(struct binaryFile* self, const char* functionName, struct functionInfo* info) {
+    bool result = false;
+
+#ifdef LCS_MACHO
+    result = machoFile_getFunctionInfo(self->concrete, functionName, info);
+#elif defined(LCS_ELF)
+    result = elfFile_getFunctionInfo(self->concrete, functionName, info);
+#endif
+
+    if (result) {
+        info->imageBegin = (uintptr_t) self->startAddress;
+    }
+    return result;
+}
+
 void binaryFile_clearCaches(void) {
 #ifdef LCS_MACHO
     machoFile_clearCaches();

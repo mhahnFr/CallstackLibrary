@@ -54,10 +54,9 @@ void machoFile_create(struct machoFile* self) {
     self->_.type     = MACHO_FILE;
     self->_.concrete = self;
 
-    self->_.getFunctionInfo = &machoFile_getFunctionInfo;
-    self->_.addr2String     = &machoFile_addr2String;
-    self->_.destroy         = &machoFile_destroy;
-    self->_.deleter         = &machoFile_delete;
+    self->_.addr2String = &machoFile_addr2String;
+    self->_.destroy     = &machoFile_destroy;
+    self->_.deleter     = &machoFile_delete;
 
     self->addressOffset    = 0;
     self->linkedit_fileoff = 0;
@@ -376,11 +375,7 @@ static inline bool machoFile_loadFile(struct machoFile* self) {
     return success;
 }
 
-bool machoFile_getFunctionInfo(struct binaryFile* me, const char* functionName, struct functionInfo* info) {
-    struct machoFile* self = machoFileOrNull(me);
-    if (self == NULL) {
-        return false;
-    }
+bool machoFile_getFunctionInfo(struct machoFile* self, const char* functionName, struct functionInfo* info) {
     if (!self->_.parsed &&
         !(self->_.parsed = machoFile_loadFile(self))) {
         return false;

@@ -37,7 +37,7 @@ static inline bool functionInfo_getFrom(struct loadedLibInfo* info, const char* 
 
     file->relocationOffset = info->relocationOffset;
     file->inMemory = true;
-    return functionInfo->found = file->getFunctionInfo(file, functionName, functionInfo);
+    return functionInfo->found = binaryFile_getFunctionInfo(file, functionName, functionInfo);
 }
 
 struct functionInfo functionInfo_loadHint(const char* functionName, const char* libraryName) {

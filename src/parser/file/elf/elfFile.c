@@ -49,10 +49,9 @@ void elfFile_create(struct elfFile* self) {
     self->_.type     = ELF_FILE;
     self->_.concrete = self;
     
-    self->_.getFunctionInfo = &elfFile_getFunctionInfo;
-    self->_.addr2String     = &elfFile_addr2String;
-    self->_.destroy         = &elfFile_destroy;
-    self->_.deleter         = &elfFile_delete;
+    self->_.addr2String = &elfFile_addr2String;
+    self->_.destroy     = &elfFile_destroy;
+    self->_.deleter     = &elfFile_delete;
 
     lcs_section_create(&self->debugLine);
     lcs_section_create(&self->debugLineStr);
@@ -365,12 +364,9 @@ static inline optional_debugInfo_t elfFile_getDebugInfo(struct elfFile* self, vo
     return toReturn;
 }
 
-bool elfFile_getFunctionInfo(struct binaryFile* me, const char* functionName, struct functionInfo* info) {
-    struct elfFile* self = elfFileOrNull(me);
-    if (self == NULL) return false;
-
-    if (!me->parsed &&
-        !(me->parsed = elfFile_loadFile(self))) {
+bool elfFile_getFunctionInfo(struct elfFile* self, const char* functionName, struct functionInfo* info) {
+    if (!self->_.parsed &&
+        !(self->_.parsed = elfFile_loadFile(self))) {
         return false;
     }
 
