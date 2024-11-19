@@ -30,8 +30,10 @@ extern "C" {
 #include <stddef.h>
 #include <stdint.h>
 
+// The actual function address is beginOffset + imageBegin.
 struct functionInfo {
-    uintptr_t begin;
+    uintptr_t beginOffset,
+              imageBegin;
     size_t length;
     bool found;
 };
