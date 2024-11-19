@@ -372,7 +372,7 @@ bool elfFile_getFunctionInfo(struct elfFile* self, const char* functionName, str
 
     vector_iterate(struct function, &self->functions, {
         if (strcmp(element->linkedName, functionName) == 0) {
-            info->begin = (uintptr_t) element->startAddress;
+            info->begin = (uintptr_t) element->startAddress + self->_.relocationOffset;
             info->length = element->length;
             return true;
         }

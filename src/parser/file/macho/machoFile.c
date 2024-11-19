@@ -383,7 +383,8 @@ bool machoFile_getFunctionInfo(struct machoFile* self, const char* functionName,
 
     vector_iterate(pair_funcFile_t, &self->functions, {
         if (strcmp(element->first.linkedName, functionName) == 0) {
-            info->beginOffset = (uintptr_t) element->first.startAddress;
+            info->begin = (uintptr_t) element->first.startAddress + (uintptr_t) self->_.startAddress
+                        - (self->_.inMemory ? self->text_vmaddr : self->addressOffset);
             info->length = element->first.length;
             return true;
         }

@@ -61,9 +61,6 @@ bool binaryFile_getFunctionInfo(struct binaryFile* self, const char* functionNam
     result = elfFile_getFunctionInfo(self->concrete, functionName, info);
 #endif
 
-    if (result) {
-        info->imageBegin = (uintptr_t) self->startAddress;
-    }
     return result;
 }
 
