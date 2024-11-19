@@ -41,7 +41,7 @@ static inline bool functionInfo_getFrom(struct loadedLibInfo* info, const char* 
 }
 
 struct functionInfo functionInfo_loadHint(const char* functionName, const char* libraryName) {
-    struct functionInfo toReturn = (struct functionInfo) { 0, 0, 0, false };
+    struct functionInfo toReturn = (struct functionInfo) { 0, 0, false };
 
     dlMapper_init();
     if (libraryName != NULL && functionInfo_getFrom(dlMapper_libInfoForFileName(libraryName), functionName, &toReturn)) {
