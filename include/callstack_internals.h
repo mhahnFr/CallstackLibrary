@@ -28,6 +28,8 @@
 extern "C" {
 #endif
 
+extern bool callstack_rawNames;
+
 /**
  * Indicates whether the caches should be cleared automatically.
  *

@@ -26,6 +26,8 @@
 #include "parser/file/binaryFile.h"
 #include "dlMapper/dlMapper.h"
 
+bool callstack_rawNames = false;
+
 bool callstack_autoClearCaches = true;
 
 void callstack_clearCaches(void) {
