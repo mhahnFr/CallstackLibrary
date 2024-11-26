@@ -408,11 +408,16 @@ bool machoFile_addr2String(struct binaryFile* me, void* address, struct callstac
             return false;
         }
 
-        char* name = (char*) result.value.function.linkedName;
-        if (*name == '_' || *name == '\1') {
-            ++name;
+        char* name = result.value.function.linkedName;
+        if (callstack_rawNames) {
+            if (*name == '\1') ++name;
+            name = strdup(name);
+        } else {
+            if (*name == '_' || *name == '\1') {
+                ++name;
+            }
+            name = callstack_parser_demangle(name);
         }
-        name = callstack_parser_demangle(name);
         if (result.value.sourceFileInfo.has_value) {
             frame->sourceFile = path_toAbsolutePath((char*) result.value.sourceFileInfo.value.sourceFile);
             frame->sourceFileRelative = path_toRelativePath((char*) result.value.sourceFileInfo.value.sourceFile);
