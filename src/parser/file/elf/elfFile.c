@@ -394,8 +394,8 @@ bool elfFile_addr2String(struct binaryFile* me, void* address, struct callstack_
         if (result.value.function.linkedName == NULL) {
             return false;
         }
-        char* name = (char*) result.value.function.linkedName;
-        name = callstack_parser_demangle(name);
+        char* name = result.value.function.linkedName;
+        name = callstack_rawNames ? strdup(name) : callstack_parser_demangle(name);
         if (result.value.sourceFileInfo.has_value) {
             frame->sourceFile = path_toAbsolutePath((char*) result.value.sourceFileInfo.value.sourceFile);
             frame->sourceFileRelative = path_toRelativePath((char*) result.value.sourceFileInfo.value.sourceFile);
