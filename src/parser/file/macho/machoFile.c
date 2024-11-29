@@ -36,6 +36,7 @@
 
 #include "../bounds.h"
 #include "../loader.h"
+#include "../dwarf/leb128.h"
 
 #include "../../callstack_parser.h"
 
@@ -245,6 +246,26 @@ static inline void machoFile_addFunction(struct pair_funcFile function, va_list 
     vector_pairFuncFile_push_back(&self->functions, function);
 }
 
+static inline int machoFile_uint64Compare(uint64_t* lhs, uint64_t* rhs) {
+    if (*lhs == *rhs) return 0;
+
+    return *lhs < *rhs ? -1 : +1;
+}
+
+static inline bool machoFile_handleFunctionStarts(struct machoFile* self, struct linkedit_data_command* command, const void* baseAddress, bool bitsReversed) {
+    uint32_t offset = macho_maybeSwap(32, bitsReversed, command->dataoff);
+    uint32_t size   = macho_maybeSwap(32, bitsReversed, command->datasize);
+
+    const void* bytes = baseAddress + offset;
+    uint64_t funcAddr = self->addressOffset;
+    for (size_t i = 0; i < size;) {
+        funcAddr += getULEB128(bytes, &i);
+        vector_uint64_push_back(&self->functionStarts, funcAddr);
+    }
+    vector_uint64_sort(&self->functionStarts, &machoFile_uint64Compare);
+    return true;
+}
+
 /**
  * Parses a Mach-O file into the given Mach-O file abstraction object.
  *
@@ -276,6 +297,10 @@ static inline bool machoFile_parseFileImpl(struct machoFile * self,
             case LC_UUID:
                 memcpy(&self->uuid, &((struct uuid_command*) ((void*) lc))->uuid, 16);
                 result = true;
+                break;
+
+            case LC_FUNCTION_STARTS:
+                result = machoFile_handleFunctionStarts(self, (void*) lc, baseAddress, bitsReversed);
                 break;
         }
         if (!result) {
@@ -317,6 +342,10 @@ static inline bool machoFile_parseFileImpl64(struct machoFile * self,
             case LC_UUID:
                 memcpy(&self->uuid, &((struct uuid_command*) ((void*) lc))->uuid, 16);
                 result = true;
+                break;
+
+            case LC_FUNCTION_STARTS:
+                result = machoFile_handleFunctionStarts(self, (void*) lc, baseAddress, bitsReversed);
                 break;
         }
         if (!result) {
