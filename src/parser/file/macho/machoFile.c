@@ -353,6 +353,16 @@ static inline bool machoFile_parseFileImpl64(struct machoFile * self,
         }
         lc = (void *) lc + macho_maybeSwap(32, bitsReversed, lc->cmdsize);
     }
+
+    vector_iterate(pair_funcFile_t, &self->functions, {
+        if (element->first.length != 0) continue;
+
+        uint64_t* address = vector_uint64_search(&self->functionStarts, &element->first.startAddress, &machoFile_uint64Compare);
+        if (address != NULL && (size_t) (address - self->functionStarts.content) < self->functionStarts.count - 2) {
+            element->first.length = *++address - element->first.startAddress;
+        }
+    })
+
     return true;
 }
 
