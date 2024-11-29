@@ -34,7 +34,7 @@
  * @param counter the memory position
  * @return the deducted number
  */
-uint64_t getULEB128(void* begin, size_t* counter);
+uint64_t getULEB128(const void* begin, size_t* counter);
 
 /**
  * @brief Reads a signed LEB128 integer from the given memory at the given position.
@@ -45,7 +45,7 @@ uint64_t getULEB128(void* begin, size_t* counter);
  * @param counter the memory position
  * @return the deducted number
  */
-int64_t getLEB128(void* begin, size_t* counter);
+int64_t getLEB128(const void* begin, size_t* counter);
 
 
 

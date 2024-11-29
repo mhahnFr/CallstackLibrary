@@ -23,13 +23,13 @@
 
 #include "leb128.h"
 
-uint64_t getULEB128(void* begin, size_t* counter) {
+uint64_t getULEB128(const void* begin, size_t* counter) {
     uint64_t result = 0,
              shift  = 0;
 
     bool more = true;
     do {
-        uint8_t b = *((uint8_t*) (begin + *counter));
+        uint8_t b = *((const uint8_t*) (begin + *counter));
         *counter += 1;
         result |= (b & 0x7f) << shift;
         shift += 7;
@@ -40,13 +40,13 @@ uint64_t getULEB128(void* begin, size_t* counter) {
     return result;
 }
 
-int64_t getLEB128(void* begin, size_t* counter) {
+int64_t getLEB128(const void* begin, size_t* counter) {
     int64_t result = 0,
             shift  = 0;
 
     bool more = true;
     do {
-        uint8_t b = *((uint8_t*) (begin + *counter));
+        uint8_t b = *((const uint8_t*) (begin + *counter));
         *counter += 1;
         result |= (b & 0x7f) << shift;
         shift += 7;
