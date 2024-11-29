@@ -127,28 +127,6 @@ bool dwarf_parseLineProgram(struct lcs_section debugLine,
                             dwarf_line_callback cb, void* args);
 
 /**
- * @brief Reads an unsigned LEB128 integer from the given memory at the given position.
- *
- * The given memory position points to the first byte after the read number once this function returns.
- *
- * @param begin the memory pointer
- * @param counter the memory position
- * @return the deducted number
- */
-uint64_t getULEB128(void* begin, size_t* counter);
-
-/**
- * @brief Reads a signed LEB128 integer from the given memory at the given position.
- *
- * The given memory position points to the first byte after the read number once this function returns.
- *
- * @param begin the memory pointer
- * @param counter the memory position
- * @return the deducted number
- */
-int64_t getLEB128(void* begin, size_t* counter);
-
-/**
  * Concatenates the two given strings as paths.
  *
  * @param string1 the left part of the path to construct

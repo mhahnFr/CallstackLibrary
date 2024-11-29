@@ -22,6 +22,7 @@
 #include "parser.h"
 
 #include "../dwarf_parser.h"
+#include "../leb128.h"
 
 /**
  * Parses the line number program header in version 2, 3 or 4.

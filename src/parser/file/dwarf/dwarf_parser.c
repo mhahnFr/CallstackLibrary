@@ -20,47 +20,11 @@
  */
 
 #include "dwarf_parser.h"
+#include "leb128.h"
 #include "vector_pair_uint64.h"
 
 #include "v4/definitions.h"
 #include "v5/definitions.h"
-
-uint64_t getULEB128(void* begin, size_t* counter) {
-    uint64_t result = 0,
-             shift  = 0;
-    
-    bool more = true;
-    do {
-        uint8_t b = *((uint8_t*) (begin + *counter));
-        *counter += 1;
-        result |= (b & 0x7f) << shift;
-        shift += 7;
-        if (b < 0x80) {
-            more = false;
-        }
-    } while (more);
-    return result;
-}
-
-int64_t getLEB128(void* begin, size_t* counter) {
-    int64_t result = 0,
-            shift  = 0;
-    
-    bool more = true;
-    do {
-        uint8_t b = *((uint8_t*) (begin + *counter));
-        *counter += 1;
-        result |= (b & 0x7f) << shift;
-        shift += 7;
-        if ((0x80 & b) == 0) {
-            if (shift < 32 && (b & 0x40) != 0) {
-                result |= ((uint64_t) ~0 << shift);
-            }
-            more = false;
-        }
-    } while (more);
-    return result;
-}
 
 char* dwarf_pathConcatenate(const char* string1, const char* string2) {
     const size_t len1 = strlen(string1),
