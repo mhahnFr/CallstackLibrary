@@ -256,8 +256,8 @@ static inline bool machoFile_handleFunctionStarts(struct machoFile* self, struct
     uint32_t offset = macho_maybeSwap(32, bitsReversed, command->dataoff);
     uint32_t size   = macho_maybeSwap(32, bitsReversed, command->datasize);
 
-    const void* bytes = baseAddress + offset;
-    uint64_t funcAddr = self->addressOffset;
+    const void* bytes = baseAddress + offset + ((self->linkedit_vmaddr - self->text_vmaddr) - self->linkedit_fileoff);
+    uint64_t funcAddr = 0;
     for (size_t i = 0; i < size;) {
         funcAddr += getULEB128(bytes, &i);
         vector_uint64_push_back(&self->functionStarts, funcAddr);
