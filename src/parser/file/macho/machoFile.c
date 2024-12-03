@@ -266,6 +266,17 @@ static inline bool machoFile_handleFunctionStarts(struct machoFile* self, struct
     return true;
 }
 
+static inline void machoFile_fixupFunctions(struct machoFile* self) {
+    vector_iterate(pair_funcFile_t, &self->functions, {
+        if (element->first.length != 0) continue;
+
+        uint64_t* address = vector_uint64_search(&self->functionStarts, &element->first.startAddress, &machoFile_uint64Compare);
+        if (address != NULL && (size_t) (address - self->functionStarts.content) < self->functionStarts.count - 2) {
+            element->first.length = *++address - element->first.startAddress;
+        }
+    })
+}
+
 /**
  * Parses a Mach-O file into the given Mach-O file abstraction object.
  *
@@ -308,6 +319,9 @@ static inline bool machoFile_parseFileImpl(struct machoFile * self,
         }
         lc = (void *) lc + macho_maybeSwap(32, bitsReversed, lc->cmdsize);
     }
+
+    machoFile_fixupFunctions(self);
+
     return true;
 }
 
@@ -354,14 +368,7 @@ static inline bool machoFile_parseFileImpl64(struct machoFile * self,
         lc = (void *) lc + macho_maybeSwap(32, bitsReversed, lc->cmdsize);
     }
 
-    vector_iterate(pair_funcFile_t, &self->functions, {
-        if (element->first.length != 0) continue;
-
-        uint64_t* address = vector_uint64_search(&self->functionStarts, &element->first.startAddress, &machoFile_uint64Compare);
-        if (address != NULL && (size_t) (address - self->functionStarts.content) < self->functionStarts.count - 2) {
-            element->first.length = *++address - element->first.startAddress;
-        }
-    })
+    machoFile_fixupFunctions(self);
 
     return true;
 }
