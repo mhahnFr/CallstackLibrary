@@ -95,6 +95,13 @@ static inline void binaryFile_create(struct binaryFile* self) {
     self->inMemory = false;
 }
 
+/**
+ * Retrieves the function information available in the given binary file object.
+ *
+ * @param self the binary file object
+ * @param functionName the name of the function (as it was linked) to look up
+ * @param info the function info structure to be filled
+ */
 bool binaryFile_getFunctionInfo(struct binaryFile* self, const char* functionName, struct functionInfo* info);
 
 /**
