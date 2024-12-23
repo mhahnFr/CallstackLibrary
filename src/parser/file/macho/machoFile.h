@@ -60,6 +60,7 @@ struct machoFile {
     
     /** The functions mapped to their object file.                              */
     vector_pairFuncFile_t functions;
+    /** The start addresses of the contained functions.                         */
     vector_uint64_t functionStarts;
 };
 
@@ -99,6 +100,15 @@ static inline struct machoFile* machoFileOrNull(struct binaryFile * self) {
  */
 bool machoFile_addr2String(struct binaryFile* self, void* address, struct callstack_frame* frame);
 
+/**
+ * Tries to fill the given function info structure with the information for the
+ * function of the given name.
+ *
+ * @param self the Mach-O file abstraction structure
+ * @param functionName the name of the desired function
+ * @param info the info structure to be filled
+ * @return whether the function was found
+ */
 bool machoFile_getFunctionInfo(struct machoFile* self, const char* functionName, struct functionInfo* info);
 
 /**
