@@ -30,14 +30,43 @@ extern "C" {
 #include <stddef.h>
 #include <stdint.h>
 
+/**
+ * Represents the gathered information for a function.
+ *
+ * @since v2.1
+ */
 struct functionInfo {
+    /** The beginning address of the function in memory. */
     uintptr_t begin;
+    /** The length of the function. May include padding. */
     size_t length;
+    /** Whether the requested function was found.        */
     bool found;
 };
 
+/**
+ * @brief Loads the information for the function of the given name.
+ *
+ * The runtime image of the given name is searched for the function. If the
+ * function is not found in it all loaded runtime images are searched. If no
+ * runtime image of the given name is loaded all runtime images are searched.
+ *
+ * @param functionName the name of the function to load its information
+ * @param libraryName the name of the runtime image to search first
+ * @return the gathered information for the desired function
+ * @since v2.1
+ */
 struct functionInfo functionInfo_loadHint(const char* functionName, const char* libraryName);
 
+/**
+ * @brief Loads the information for the function of the given name.
+ *
+ * All loaded runtime images are searched for the function.
+ *
+ * @param functionName the name of the function to load its information
+ * @return the gathered information for the desired function
+ * @since v2.1
+ */
 static inline struct functionInfo functionInfo_load(const char* functionName) {
     return functionInfo_loadHint(functionName, NULL);
 }
