@@ -68,6 +68,7 @@ void machoFile_create(struct machoFile* self) {
     self->dSYMFile.file         = NULL;
 
     vector_pairFuncFile_create(&self->functions);
+    vector_uint64_create(&self->functionStarts);
 }
 
 /**
