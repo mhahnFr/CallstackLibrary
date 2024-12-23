@@ -51,8 +51,19 @@ bool dlMapper_isInited(void);
  */
 struct loadedLibInfo* dlMapper_libInfoForAddress(const void* address);
 
+/**
+ * Returns the runtime image info for the runtime image of the given name.
+ *
+ * @param fileName the file name of the runtime image
+ * @return the associated runtime image info or `NULL` if not found
+ */
 struct loadedLibInfo* dlMapper_libInfoForFileName(const char* fileName);
 
+/**
+ * Returns the loaded runtime image infos.
+ *
+ * @return the loaded runtime image infos
+ */
 const vector_loadedLibInfo_t* dlMapper_getLoadedLibraries(void);
 
 /**
