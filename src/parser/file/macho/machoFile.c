@@ -247,13 +247,30 @@ static inline void machoFile_addFunction(struct pair_funcFile function, va_list 
     vector_pairFuncFile_push_back(&self->functions, function);
 }
 
+/**
+ * Compares the given @c uint64_t numbers.
+ *
+ * @param lhs the left hand side number
+ * @param rhs the right hand side number
+ * @return the comparasion result, that is, `lhs - rhs`
+ */
 static inline int machoFile_uint64Compare(uint64_t* lhs, uint64_t* rhs) {
     if (*lhs == *rhs) return 0;
 
     return *lhs < *rhs ? -1 : +1;
 }
 
-static inline bool machoFile_handleFunctionStarts(struct machoFile* self, struct linkedit_data_command* command, const void* baseAddress, bool bitsReversed) {
+/**
+ * Handles the function starts Mach-O command.
+ *
+ * @param self the Mach-O file abstraction structure
+ * @param command the Mach-O data command
+ * @param baseAddress the start address of the runtime image
+ * @param bitsReversed whether to swap the endianess of read numbers
+ * @return whether the parsing was successful
+ */
+static inline bool machoFile_handleFunctionStarts(struct machoFile* self, struct linkedit_data_command* command,
+                                                  const void* baseAddress, bool bitsReversed) {
     uint32_t offset = macho_maybeSwap(32, bitsReversed, command->dataoff);
     uint32_t size   = macho_maybeSwap(32, bitsReversed, command->datasize);
 
@@ -267,6 +284,11 @@ static inline bool machoFile_handleFunctionStarts(struct machoFile* self, struct
     return true;
 }
 
+/**
+ * Adds the function length to the functions that do not have this information.
+ *
+ * @param self the Mach-O file abstraction structure
+ */
 static inline void machoFile_fixupFunctions(struct machoFile* self) {
     vector_iterate(pair_funcFile_t, &self->functions, {
         if (element->first.length != 0) continue;
