@@ -63,7 +63,6 @@ If you downloaded a [release][1] you can simply move the headers and the library
 #### Build dependencies
 The following command line tools are required for a successful build:
 - GNU compatible `make` command line tool
-- The `find` command line tool *(POSIX.1-2001)*
 - The `uname` command line tool *(POSIX.2)*
 
 The following code dependencies are needed in order to successfully build the library:
