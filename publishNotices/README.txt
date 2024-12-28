@@ -6,4 +6,4 @@ GNU GPL in version 3 or later. See the file LICENSE in the root folder.
 This distribution includes DC4C, Copyright (C) mhahnFr, which is licensed
 under the terms of the GNU GPL in version 3 or later, see the file LICENSE in
 the root folder. The source code can be found at:
-https://github.com/mhahnFr/DC4C/tree/1c53a14cb3a4636c73052aae6a5132421aafbb21
+https://github.com/mhahnFr/DC4C/tree/41ae04fba7abf9e60266cdf8edaa1dfdc867a101
