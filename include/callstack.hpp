@@ -42,158 +42,174 @@
  * It is needed to avoid name conflicts between the structure and the wrapper class.
  */
 namespace lcs {
+/**
+ * @brief A wrapper class around the `struct callstack`.
+ *
+ * It provides the usual constructors and operator overloads. Additionally, it contains the
+ * possibility to implicitly cast an object of this class to a pointer to the C structure.
+ */
+class callstack {
+    /** A `typedef` for convenience. */
+    typedef ::callstack struct_callstack;
+    /** The original C structure.    */
+    struct_callstack self;
+
     /**
-     * @brief A wrapper class around the `struct callstack`.
+     * @brief Helper function to throw the appropriate exception.
      *
-     * It provides the usual constructors and operator overloads. Additionally, it contains the
-     * possibility to implicitly cast an object of this class to a pointer to the C structure.
+     * @throws A `system_error` if compiled using C++11 or newer, a runtime error otherwise.
      */
-    class callstack {
-        /** A `typedef` for convenience. */
-        typedef ::callstack struct_callstack;
-        /** The original C structure.    */
-        struct_callstack self;
-        
-        /**
-         * @brief Helper function to throw the appropriate exception.
-         *
-         * @throws A `system_error` if compiled using C++11 or newer, a runtime error otherwise.
-         */
-        inline static void error() {
+    inline static void error() {
 #if __cplusplus >= 201103
-            throw std::system_error(errno, std::generic_category());
+        throw std::system_error(errno, std::generic_category());
 #else
-            throw std::runtime_error("Backtrace invalid");
+        throw std::runtime_error("Backtrace invalid");
 #endif
-        }
-        
-    public:
-        /**
-         * @brief A trivial default constructor.
-         *
-         * Zero-initializes the underlying C structure. If the given boolean value is `true`,
-         * it is initialized using the function `callstack_emplace()`.
-         * Throws a `runtime_error` or a `system_error` if compiled using C++11 or newer if
-         * `emplace` is set to `true` and the backtrace could not be created.
-         *
-         * @param emplace Whether to call `callstack_emplace()`.
-         */
-        inline explicit callstack(bool emplace = true) {
-            if (emplace) {
-                if (!callstack_emplace(*this)) {
-                    error();
-                }
-            } else {
-                callstack_create(*this);
-            }
-        }
-        
-        /**
-         * @brief Constructs this object using the given stack address.
-         *
-         * Initializes the underlying C structure using the function `callstack_emplaceWithAddress()`.
-         * Throws a `runtime_error` or a `system_error` if compiled using C++11 or newer if
-         * the backtrace could not be created.
-         *
-         * @param address The stack address after which frames are ignored.
-         */
-        inline explicit callstack(void* address) {
-            if (!callstack_emplaceWithAddress(*this, address)) {
+    }
+
+public:
+    /**
+     * @brief A trivial default constructor.
+     *
+     * Zero-initializes the underlying C structure. If the given boolean value is `true`,
+     * it is initialized using the function `callstack_emplace()`.
+     * Throws a `runtime_error` or a `system_error` if compiled using C++11 or newer if
+     * `emplace` is set to `true` and the backtrace could not be created.
+     *
+     * @param emplace Whether to call `callstack_emplace()`.
+     */
+    inline explicit callstack(bool emplace = true) {
+        if (emplace) {
+            if (!callstack_emplace(*this)) {
                 error();
             }
-        }
-        
-        /**
-         * @brief Constructs the underlying C structure with the given backtrace.
-         *
-         * if the given trace length is smaller than zero, a `runtime_error` or a `system_error`
-         * if compiled using C++11 or newer is thrown.
-         *
-         * @param trace The backtrace.
-         * @param length The length of the given backtrace.
-         */
-        inline callstack(void** trace, int length) {
-            if (!callstack_emplaceWithBacktrace(*this, trace, length)) {
-                error();
-            }
-        }
-        
-        inline callstack(const callstack& other) LCS_NOEXCEPT {
+        } else {
             callstack_create(*this);
+        }
+    }
+
+    /**
+     * @brief Constructs this object using the given stack address.
+     *
+     * Initializes the underlying C structure using the function `callstack_emplaceWithAddress()`.
+     * Throws a `runtime_error` or a `system_error` if compiled using C++11 or newer if
+     * the backtrace could not be created.
+     *
+     * @param address The stack address after which frames are ignored.
+     */
+    inline explicit callstack(void* address) {
+        if (!callstack_emplaceWithAddress(*this, address)) {
+            error();
+        }
+    }
+
+    /**
+     * @brief Constructs the underlying C structure with the given backtrace.
+     *
+     * if the given trace length is smaller than zero, a `runtime_error` or a `system_error`
+     * if compiled using C++11 or newer is thrown.
+     *
+     * @param trace The backtrace.
+     * @param length The length of the given backtrace.
+     */
+    inline callstack(void** trace, int length) {
+        if (!callstack_emplaceWithBacktrace(*this, trace, length)) {
+            error();
+        }
+    }
+
+    inline callstack(const callstack& other) LCS_NOEXCEPT {
+        callstack_create(*this);
+        callstack_copy(*this, other);
+    }
+
+    /**
+     * @brief Constructs a callstack object from the given C structure.
+     *
+     * @param cCallstack The C structure to be copied.
+     */
+    inline explicit callstack(const struct_callstack* cCallstack) LCS_NOEXCEPT {
+        callstack_create(*this);
+        callstack_copy(*this, cCallstack);
+    }
+
+    inline ~callstack() LCS_NOEXCEPT {
+       callstack_destroy(*this);
+    }
+
+    inline callstack& operator=(const callstack& other) LCS_NOEXCEPT {
+        if (&other != this) {
             callstack_copy(*this, other);
         }
-        
-        /**
-         * @brief Constructs a callstack object from the given C structure.
-         *
-         * @param cCallstack The C structure to be copied.
-         */
-        inline explicit callstack(const struct_callstack* cCallstack) LCS_NOEXCEPT {
-            callstack_create(*this);
-            callstack_copy(*this, cCallstack);
-        }
-        
-        inline ~callstack() LCS_NOEXCEPT {
-           callstack_destroy(*this);
-        }
-        
-        inline callstack& operator=(const callstack& other) LCS_NOEXCEPT {
-            if (&other != this) {
-                callstack_copy(*this, other);
+        return *this;
+    }
+
+#if __cplusplus >= 201103
+    inline callstack(callstack&& other) noexcept
+        : self(std::move(other.self)) {
+        callstack_create(other);
+    }
+
+    inline auto operator=(callstack&& other) noexcept -> callstack& {
+        callstack_destroy(*this);
+        self = std::move(other.self);
+        callstack_create(other);
+        return *this;
+    }
+#endif
+
+    /**
+     * Translates this callstack object.
+     *
+     * @param onlyBinaries whether to only deduct the names of the runtime images
+     * @return @c this
+     * @throws an exception when the translation failed
+     */
+    inline callstack& translate(bool onlyBinaries = false) {
+        if (onlyBinaries) {
+            if (callstack_getBinaries(*this) == LCS_NULL) {
+                throw std::runtime_error("LCS: Failed to translate the callstack (binaries only)");
             }
-            return *this;
-        }
-        
- #if __cplusplus >= 201103
-        inline callstack(callstack&& other) noexcept
-            : self(std::move(other.self)) {
-            callstack_create(other);
-        }
-        
-        inline auto operator=(callstack&& other) noexcept -> callstack& {
-            callstack_destroy(*this);
-            self = std::move(other.self);
-            callstack_create(other);
-            return *this;
-        }
- #endif
-
-        inline callstack& translate(bool onlyBinaries = false) {
-            if (onlyBinaries) {
-                if (callstack_getBinaries(*this) == LCS_NULL) {
-                    throw std::runtime_error("LCS: Failed to translate the callstack (binaries only)");
-                }
-            } else {
-                if (callstack_toArray(*this) == LCS_NULL) {
-                    throw std::runtime_error("LCS: Failed to translate the callstack");
-                }
+        } else {
+            if (callstack_toArray(*this) == LCS_NULL) {
+                throw std::runtime_error("LCS: Failed to translate the callstack");
             }
-            return *this;
         }
+        return *this;
+    }
 
- #ifdef LCS_USE_UNSAFE_OPTIMIZATION
-        inline callstack& translateBinariesCached() {
-            if (callstack_getBinariesCached(*this) == LCS_NULL) {
-                throw std::runtime_error("LCS: Failed to translate the callstack (cached binaries)");
-            }
-            return *this;
+#ifdef LCS_USE_UNSAFE_OPTIMIZATION
+    /**
+     * @brief Translates this callstack object.
+     *
+     * Only the names of the runtime images are deducted. They are backed by
+     * the cache of the library and only valid as long as the cache is.
+     *
+     * @return @c this
+     * @throws an exception if the translation failed
+     */
+    inline callstack& translateBinariesCached() {
+        if (callstack_getBinariesCached(*this) == LCS_NULL) {
+            throw std::runtime_error("LCS: Failed to translate the callstack (cached binaries)");
         }
- #endif
+        return *this;
+    }
+#endif
 
-        LCS_CONSTEXPR inline const callstack_frame* begin() const LCS_NOEXCEPT {
-            return self.frames;
-        }
+    LCS_CONSTEXPR inline const callstack_frame* begin() const LCS_NOEXCEPT {
+        return self.frames;
+    }
 
-        LCS_CONSTEXPR inline const callstack_frame* end() const LCS_NOEXCEPT {
-            return self.frames + self.frameCount;
-        }
+    LCS_CONSTEXPR inline const callstack_frame* end() const LCS_NOEXCEPT {
+        return self.frames + self.frameCount;
+    }
 
-        inline operator       struct_callstack*()       LCS_NOEXCEPT { return &self; }
-        inline operator const struct_callstack*() const LCS_NOEXCEPT { return &self; }
+    inline operator       struct_callstack*()       LCS_NOEXCEPT { return &self; }
+    inline operator const struct_callstack*() const LCS_NOEXCEPT { return &self; }
 
-        inline       struct_callstack* operator->()       LCS_NOEXCEPT { return &self; }
-        inline const struct_callstack* operator->() const LCS_NOEXCEPT { return &self; }
-    };
+    inline       struct_callstack* operator->()       LCS_NOEXCEPT { return &self; }
+    inline const struct_callstack* operator->() const LCS_NOEXCEPT { return &self; }
+};
 }
 
  #endif /* __lcs_callstack_hpp */
