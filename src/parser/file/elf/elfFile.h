@@ -92,6 +92,14 @@ static inline struct elfFile* elfFileOrNull(struct binaryFile * self) {
  */
 bool elfFile_addr2String(struct binaryFile* self, void* address, struct callstack_frame* frame);
 
+/**
+ * Loads the function information for the function of the given name.
+ *
+ * @param self the ELF file abstraction structure to search in
+ * @param functionName the name of the function to load the information
+ * @param info the @c functionInfo structure to fill in
+ * @return whether the function was found
+ */
 bool elfFile_getFunctionInfo(struct elfFile* self, const char* functionName, struct functionInfo* info);
 
 /**
