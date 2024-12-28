@@ -28,6 +28,11 @@
 extern "C" {
 #endif
 
+/**
+ * Indicates to the symbolizer whether to make function names human-readable.
+ *
+ * @since v2.1
+ */
 extern bool callstack_rawNames;
 
 /**
