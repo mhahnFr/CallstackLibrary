@@ -1,7 +1,7 @@
 /*
  * CallstackLibrary - Library creating human-readable call stacks.
  *
- * Copyright (C) 2023 - 2024  mhahnFr
+ * Copyright (C) 2023 - 2025  mhahnFr
  *
  * This file is part of the CallstackLibrary.
  *
@@ -47,11 +47,6 @@ void elfFile_create(struct elfFile* self) {
     binaryFile_create(&self->_);
     
     self->_.type     = ELF_FILE;
-    self->_.concrete = self;
-    
-    self->_.addr2String = &elfFile_addr2String;
-    self->_.destroy     = &elfFile_destroy;
-    self->_.deleter     = &elfFile_delete;
 
     lcs_section_create(&self->debugLine);
     lcs_section_create(&self->debugLineStr);
@@ -380,10 +375,7 @@ bool elfFile_getFunctionInfo(struct elfFile* self, const char* functionName, str
     return false;
 }
 
-bool elfFile_addr2String(struct binaryFile* me, void* address, struct callstack_frame* frame) {
-    struct elfFile* self = elfFileOrNull(me);
-    if (self == NULL) return false;
-    
+bool elfFile_addr2String(struct elfFile* self, void* address, struct callstack_frame* frame) {
     if (!me->parsed &&
         !(me->parsed = elfFile_loadFile(self))) {
         return false;
@@ -414,17 +406,13 @@ bool elfFile_addr2String(struct binaryFile* me, void* address, struct callstack_
     return false;
 }
 
-void elfFile_destroy(struct binaryFile* me) {
-    struct elfFile* self = elfFileOrNull(me);
-    if (self == NULL) return;
-
+void elfFile_destroy(struct elfFile* self) {
     vector_iterate(struct function, &self->functions, function_destroy(element);)
     vector_function_destroy(&self->functions);
     vector_dwarfLineInfo_destroyWith(&self->lineInfos, dwarf_lineInfo_destroyValue);
 }
 
-void elfFile_delete(struct binaryFile* self) {
-    self->destroy(self);
-    struct elfFile* me = elfFileOrNull(self);
-    free(me);
+void elfFile_delete(struct elfFile* self) {
+    elfFile_destroy(self);
+    free(self);
 }
