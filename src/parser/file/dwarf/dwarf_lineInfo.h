@@ -1,7 +1,7 @@
 /*
  * CallstackLibrary - Library creating human-readable call stacks.
  *
- * Copyright (C) 2024  mhahnFr
+ * Copyright (C) 2024 - 2025  mhahnFr
  *
  * This file is part of the CallstackLibrary.
  *
@@ -34,6 +34,8 @@
 struct dwarf_sourceFile {
     /** The allocated source file name.         */
     const char* fileName;
+    const char* fileNameRelative;
+    const char* fileNameAbsolute;
     /** The timestamp of the last modification. */
     uint64_t timestamp;
     /** The size of the file.                   */
@@ -77,6 +79,8 @@ struct dwarf_lineInfo {
  */
 static inline void dwarf_lineInfo_destroyValue(struct dwarf_lineInfo self) {
     free((void*) self.sourceFile.fileName);
+    free((void*) self.sourceFile.fileNameRelative);
+    free((void*) self.sourceFile.fileNameAbsolute);
 }
 
 /**

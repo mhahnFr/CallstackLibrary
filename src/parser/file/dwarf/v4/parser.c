@@ -1,7 +1,7 @@
 /*
  * CallstackLibrary - Library creating human-readable call stacks.
  *
- * Copyright (C) 2024  mhahnFr
+ * Copyright (C) 2024 - 2025  mhahnFr
  *
  * This file is part of the CallstackLibrary.
  *
@@ -122,6 +122,7 @@ static inline struct dwarf_sourceFile dwarf4_parser_getFileName(struct dwarf_par
     struct dwarf_fileNameEntry* filePtr = file == 0 ? NULL : &self->specific.v4.fileNames.content[file - 1];
     return (struct dwarf_sourceFile) {
         filePtr == NULL ? NULL : dwarf4_stringFrom(filePtr, &self->specific.v4.includeDirectories, self->compilationDirectory),
+        NULL, NULL,
         filePtr->modTime,
         filePtr->size
     };
