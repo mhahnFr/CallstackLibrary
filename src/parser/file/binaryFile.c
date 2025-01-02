@@ -1,7 +1,7 @@
 /*
  * CallstackLibrary - Library creating human-readable call stacks.
  *
- * Copyright (C) 2023 - 2024  mhahnFr
+ * Copyright (C) 2023 - 2025  mhahnFr
  *
  * This file is part of the CallstackLibrary.
  *
@@ -52,13 +52,23 @@ struct binaryFile* binaryFile_new(const char* fileName, const void* startAddress
     return toReturn;
 }
 
+bool binaryFile_addr2String(struct binaryFile* self, void* address, struct callstack_frame* frame) {
+    bool result = false;
+#ifdef LCS_MACHO
+    result = machoFile_addr2String((struct machoFile*) self, address, frame);
+#elif defined(LCS_ELF)
+    result = elfFile_addr2String((struct elfFile*) self, address, frame);
+#endif
+    return result;
+}
+
 bool binaryFile_getFunctionInfo(struct binaryFile* self, const char* functionName, struct functionInfo* info) {
     bool result = false;
 
 #ifdef LCS_MACHO
-    result = machoFile_getFunctionInfo(self->concrete, functionName, info);
+    result = machoFile_getFunctionInfo((struct machoFile*) self, functionName, info);
 #elif defined(LCS_ELF)
-    result = elfFile_getFunctionInfo(self->concrete, functionName, info);
+    result = elfFile_getFunctionInfo((struct elfFile*) self, functionName, info);
 #endif
 
     return result;
@@ -85,4 +95,20 @@ bool binaryFile_isOutdated(struct dwarf_sourceFile file) {
         return true;
     }
     return false;
+}
+
+void binaryFile_destroy(struct binaryFile* self) {
+#ifdef LCS_MACHO
+    machoFile_destroy((struct machoFile*) self);
+#elif defined(LCS_ELF)
+    elfFile_destroy((struct elfFile*) self);
+#endif
+}
+
+void binaryFile_delete(struct binaryFile* self) {
+#ifdef LCS_MACHO
+    machoFile_delete((struct machoFile*) self);
+#elif defined(LCS_ELF)
+    elfFile_delete((struct elfFile*) self);
+#endif
 }

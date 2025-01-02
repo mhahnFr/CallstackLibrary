@@ -1,7 +1,7 @@
 /*
  * CallstackLibrary - Library creating human-readable call stacks.
  *
- * Copyright (C) 2022 - 2024  mhahnFr
+ * Copyright (C) 2022 - 2025  mhahnFr
  *
  * This file is part of the CallstackLibrary.
  *
@@ -53,7 +53,7 @@ static inline bool callstack_parser_parseImpl(struct callstack_parser* self,
         file->relocationOffset = info->relocationOffset;
         file->inMemory = true;
 
-        file->addr2String(file, callstack->backtrace[i], frame);
+        binaryFile_addr2String(file, callstack->backtrace[i], frame);
     }
     return true;
 }

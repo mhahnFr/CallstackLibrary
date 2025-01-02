@@ -1,7 +1,7 @@
 /*
  * CallstackLibrary - Library creating human-readable call stacks.
  *
- * Copyright (C) 2024  mhahnFr
+ * Copyright (C) 2024 - 2025  mhahnFr
  *
  * This file is part of the CallstackLibrary.
  *
@@ -29,6 +29,6 @@ void loadedLibInfo_destroy(struct loadedLibInfo* self) {
     free(self->relativeFileName);
 
     if (self->associated != NULL) {
-        self->associated->deleter(self->associated);
+        binaryFile_delete(self->associated);
     }
 }
