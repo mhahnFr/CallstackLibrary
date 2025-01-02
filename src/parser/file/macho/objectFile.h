@@ -1,7 +1,7 @@
 /*
  * CallstackLibrary - Library creating human-readable call stacks.
  *
- * Copyright (C) 2023 - 2024  mhahnFr
+ * Copyright (C) 2023 - 2025  mhahnFr
  *
  * This file is part of the CallstackLibrary.
  *
@@ -75,6 +75,8 @@ struct objectFile {
     vector_dwarfLineInfo_t lineInfos;
     /** The cached name of the main source file.                */
     const char* mainSourceFileCache;
+    const char* mainSourceFileCacheRelative;
+    const char* mainSourceFileCacheAbsolute;
 
     /** Pointer to the next element in a list.                  */
     struct objectFile * next;
@@ -101,7 +103,9 @@ static inline void objectFile_create(struct objectFile * self) {
         .lastModified        = 0,
         .parsed              = false,
         .isDsymBundle        = false,
-        .mainSourceFileCache = NULL
+        .mainSourceFileCache = NULL,
+        .mainSourceFileCacheRelative = NULL,
+        .mainSourceFileCacheAbsolute = NULL,
     };
 
     memset(self->uuid, 0, 16);

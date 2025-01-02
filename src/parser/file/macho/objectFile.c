@@ -1,7 +1,7 @@
 /*
  * CallstackLibrary - Library creating human-readable call stacks.
  *
- * Copyright (C) 2023 - 2024  mhahnFr
+ * Copyright (C) 2023 - 2025  mhahnFr
  *
  * This file is part of the CallstackLibrary.
  *
@@ -27,6 +27,8 @@
 
 #include <macho/fat_handler.h>
 #include <macho/macho_utils.h>
+
+#include <file/pathUtils.h>
 
 #include "objectFile.h"
 #include "macho_parser.h"
@@ -131,6 +133,10 @@ static inline const char* objectFile_getSourceFileName(struct objectFile* self) 
     strlcpy(toReturn, self->directory, size);
     strlcat(toReturn, self->sourceFile, size);
     toReturn[size - 1] = '\0';
+
+    self->mainSourceFileCacheRelative = path_toRelativePath(toReturn);
+    self->mainSourceFileCacheAbsolute = path_toAbsolutePath(toReturn);
+
     return self->mainSourceFileCache = toReturn;
 }
 
@@ -162,13 +168,21 @@ optional_debugInfo_t objectFile_getDebugInfo(struct objectFile* self, uint64_t a
     if (closest == NULL) {
         return toReturn;
     }
+    if (closest->sourceFile.fileName != NULL && closest->sourceFile.fileNameRelative == NULL && closest->sourceFile.fileNameAbsolute == NULL) {
+        struct dwarf_lineInfo* mutableClosest = (struct dwarf_lineInfo*) closest;
+        mutableClosest->sourceFile.fileNameRelative = path_toRelativePath(closest->sourceFile.fileName);
+        mutableClosest->sourceFile.fileNameAbsolute = path_toAbsolutePath(closest->sourceFile.fileName);
+    }
+    const char* fileName = closest->sourceFile.fileName == NULL ? objectFile_getSourceFileName(self) : closest->sourceFile.fileName;
     return (optional_debugInfo_t) {
         true, (struct debugInfo) {
             function, (optional_sourceFileInfo_t) {
                 true, (struct sourceFileInfo) {
                     closest->line,
                     closest->column,
-                    closest->sourceFile.fileName == NULL ? objectFile_getSourceFileName(self) : closest->sourceFile.fileName,
+                    fileName,
+                    closest->sourceFile.fileName == NULL ? self->mainSourceFileCacheRelative : closest->sourceFile.fileNameRelative,
+                    closest->sourceFile.fileName == NULL ? self->mainSourceFileCacheAbsolute : closest->sourceFile.fileNameAbsolute,
                     binaryFile_isOutdated(closest->sourceFile)
                 }
             }
@@ -460,6 +474,8 @@ void objectFile_destroy(struct objectFile* self) {
     }
     vector_dwarfLineInfo_destroy(&self->lineInfos);
     free((void*) self->mainSourceFileCache);
+    free((void*) self->mainSourceFileCacheRelative);
+    free((void*) self->mainSourceFileCacheAbsolute);
     free(self->sourceFile);
     free(self->directory);
     free(self->name);
