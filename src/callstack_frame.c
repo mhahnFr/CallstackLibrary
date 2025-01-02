@@ -1,7 +1,7 @@
 /*
  * CallstackLibrary - Library creating human-readable call stacks.
  *
- * Copyright (C) 2023 - 2024  mhahnFr
+ * Copyright (C) 2023 - 2025  mhahnFr
  *
  * This file is part of the CallstackLibrary. 
  *
@@ -47,8 +47,8 @@ void callstack_frame_copyHere(struct callstack_frame * destination, const struct
     *destination = (struct callstack_frame) {
         source->reserved,
         source->reserved1,
-        maybeStrdup(source->binaryFile),
-        maybeStrdup(source->binaryFileRelative),
+        source->reserved1 ? source->binaryFile : maybeStrdup(source->binaryFile),
+        source->reserved1 ? source->binaryFileRelative : maybeStrdup(source->binaryFileRelative),
         maybeStrdup(source->function),
         maybeStrdup(source->sourceFile),
         maybeStrdup(source->sourceFileRelative),
