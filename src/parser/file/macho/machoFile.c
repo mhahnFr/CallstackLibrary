@@ -26,7 +26,6 @@
 
 #include <mach-o/loader.h>
 
-#include <file/pathUtils.h>
 #include <macho/fat_handler.h>
 #include <macho/macho_utils.h>
 
@@ -511,6 +510,7 @@ void machoFile_destroy(struct machoFile* self) {
     if (self->dSYMFile.file != NULL) {
         objectFile_delete(self->dSYMFile.file);
     }
+    vector_uint64_destroy(&self->functionStarts);
 }
 
 void machoFile_delete(struct machoFile* self) {
