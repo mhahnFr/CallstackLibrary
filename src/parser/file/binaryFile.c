@@ -25,26 +25,28 @@
 #include "binaryFile.h"
 
 #ifdef __APPLE__
- #include "macho/machoFile.h"
- #define LCS_MACHO
+# include "macho/machoFile.h"
+# define LCS_MACHO
 #elif defined(__linux__)
- #include "elf/elfFile.h"
- #define LCS_ELF
+# include "elf/elfFile.h"
+# define LCS_ELF
 #endif
 
-struct binaryFile* binaryFile_new(const char* fileName, const void* startAddress) {
-    struct binaryFile * toReturn;
-    
 #ifdef LCS_MACHO
-    struct machoFile* tmp = machoFile_new();
-    toReturn = tmp == NULL ? NULL : &tmp->_;
+# define LCS_FILE_NAME machoFile
+# define LCS_FILE(NAME) machoFile_##NAME
 #elif defined(LCS_ELF)
-    struct elfFile * tmp = elfFile_new();
-    toReturn = tmp == NULL ? NULL : &tmp->_;
-#else
-    toReturn = NULL;
+# define LCS_FILE_NAME elfFile
+# define LCS_FILE(NAME) elfFile_##NAME
 #endif
-    
+
+typedef struct LCS_FILE_NAME ConcreteFile;
+typedef ConcreteFile* Concrete;
+
+struct binaryFile* binaryFile_new(const char* fileName, const void* startAddress) {
+    Concrete tmp = LCS_FILE(new)();
+    struct binaryFile* toReturn = &tmp->_;
+
     if (toReturn != NULL) {
         toReturn->fileName     = fileName;
         toReturn->startAddress = startAddress;
@@ -53,25 +55,11 @@ struct binaryFile* binaryFile_new(const char* fileName, const void* startAddress
 }
 
 bool binaryFile_addr2String(struct binaryFile* self, void* address, struct callstack_frame* frame) {
-    bool result = false;
-#ifdef LCS_MACHO
-    result = machoFile_addr2String((struct machoFile*) self, address, frame);
-#elif defined(LCS_ELF)
-    result = elfFile_addr2String((struct elfFile*) self, address, frame);
-#endif
-    return result;
+    return LCS_FILE(addr2String)((Concrete) self, address, frame);
 }
 
 bool binaryFile_getFunctionInfo(struct binaryFile* self, const char* functionName, struct functionInfo* info) {
-    bool result = false;
-
-#ifdef LCS_MACHO
-    result = machoFile_getFunctionInfo((struct machoFile*) self, functionName, info);
-#elif defined(LCS_ELF)
-    result = elfFile_getFunctionInfo((struct elfFile*) self, functionName, info);
-#endif
-
-    return result;
+    return LCS_FILE(getFunctionInfo)((Concrete) self, functionName, info);
 }
 
 void binaryFile_clearCaches(void) {
@@ -98,17 +86,9 @@ bool binaryFile_isOutdated(struct dwarf_sourceFile file) {
 }
 
 void binaryFile_destroy(struct binaryFile* self) {
-#ifdef LCS_MACHO
-    machoFile_destroy((struct machoFile*) self);
-#elif defined(LCS_ELF)
-    elfFile_destroy((struct elfFile*) self);
-#endif
+    LCS_FILE(destroy)((Concrete) self);
 }
 
 void binaryFile_delete(struct binaryFile* self) {
-#ifdef LCS_MACHO
-    machoFile_delete((struct machoFile*) self);
-#elif defined(LCS_ELF)
-    elfFile_delete((struct elfFile*) self);
-#endif
+    LCS_FILE(delete)((Concrete) self);
 }
