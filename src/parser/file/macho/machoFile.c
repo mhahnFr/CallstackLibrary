@@ -454,6 +454,13 @@ bool machoFile_getFunctionInfo(struct machoFile* self, const char* functionName,
     return false;
 }
 
+static inline char* machoFile_maybeCopySave(const char* string, bool copy) {
+    if (copy && string != NULL) {
+        return strdup(string);
+    }
+    return (char*) string;
+}
+
 bool machoFile_addr2String(struct machoFile* self, void* address, struct callstack_frame* frame) {
     if (!self->_.parsed &&
         !(self->_.parsed = machoFile_loadFile(self))) {
@@ -477,8 +484,8 @@ bool machoFile_addr2String(struct machoFile* self, void* address, struct callsta
             name = callstack_parser_demangle(name);
         }
         if (result.value.sourceFileInfo.has_value) {
-            frame->sourceFile = path_toAbsolutePath((char*) result.value.sourceFileInfo.value.sourceFile);
-            frame->sourceFileRelative = path_toRelativePath((char*) result.value.sourceFileInfo.value.sourceFile);
+            frame->sourceFile = machoFile_maybeCopySave(result.value.sourceFileInfo.value.sourceFileAbsolute, !frame->reserved1);
+            frame->sourceFileRelative = machoFile_maybeCopySave(result.value.sourceFileInfo.value.sourceFileRelative, !frame->reserved1);
             frame->sourceFileOutdated = result.value.sourceFileInfo.value.outdated;
             frame->sourceLine = result.value.sourceFileInfo.value.line;
             frame->sourceLineColumn = result.value.sourceFileInfo.value.column;

@@ -1,7 +1,7 @@
 /*
  * CallstackLibrary - Library creating human-readable call stacks.
  *
- * Copyright (C) 2023 - 2024  mhahnFr
+ * Copyright (C) 2023 - 2025  mhahnFr
  *
  * This file is part of the CallstackLibrary.
  *
@@ -191,8 +191,10 @@ static inline void callstack_frame_destroy(struct callstack_frame * self) {
         free(self->binaryFileRelative);
     }
     free(self->function);
-    free(self->sourceFile);
-    free(self->sourceFileRelative);
+    if (!self->reserved1) {
+        free(self->sourceFile);
+        free(self->sourceFileRelative);
+    }
 }
 
 /**
