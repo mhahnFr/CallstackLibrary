@@ -1,7 +1,7 @@
 /*
  * CallstackLibrary - Library creating human-readable call stacks.
  *
- * Copyright (C) 2023 - 2024  mhahnFr
+ * Copyright (C) 2023 - 2025  mhahnFr
  *
  * This file is part of the CallstackLibrary.
  *
@@ -79,17 +79,6 @@ struct machoFile* machoFile_new(void);
 void machoFile_create(struct machoFile* self);
 
 /**
- * Returns the represented Mach-O file structure from the given binary
- * file structure or `NULL` if it does not represent a Mach-O file structure.
- *
- * @param self the binary file structure to be casted
- * @return the represented Mach-O file structure or `NULL`
- */
-static inline struct machoFile* machoFileOrNull(struct binaryFile * self) {
-    return self->type == MACHO_FILE ? self->concrete : NULL;
-}
-
-/**
  * Stores all debug information that is possible to deduct about the given address 
  * into the given callstack frame object.
  *
@@ -98,7 +87,7 @@ static inline struct machoFile* machoFileOrNull(struct binaryFile * self) {
  * @param frame the callstack frame object to store the debug information in
  * @return whether it was possible to deduct some debug information
  */
-bool machoFile_addr2String(struct binaryFile* self, void* address, struct callstack_frame* frame);
+bool machoFile_addr2String(struct machoFile* self, void* address, struct callstack_frame* frame);
 
 /**
  * Tries to fill the given function info structure with the information for the
@@ -116,7 +105,7 @@ bool machoFile_getFunctionInfo(struct machoFile* self, const char* functionName,
  *
  * @param self the binary file structure to be deinitialized
  */
-void machoFile_destroy(struct binaryFile * self);
+void machoFile_destroy(struct machoFile* self);
 
 /**
  * Deinitializes and `free`s the given binary file structure if it is a
@@ -124,7 +113,7 @@ void machoFile_destroy(struct binaryFile * self);
  *
  * @param self the binary file structure to be deleted
  */
-void machoFile_delete(struct binaryFile * self);
+void machoFile_delete(struct machoFile* self);
 
 /**
  * Clears the caches created by the Mach-O binary file implementation.

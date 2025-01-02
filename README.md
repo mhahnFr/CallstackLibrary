@@ -319,7 +319,7 @@ hesitate to [open an issue][9] or a [pull request][10].
 
 This library is licensed under the terms of the GNU GPL in version 3 or later.
 
-© Copyright 2022 - 2024 [mhahnFr][4]
+© Copyright 2022 - 2025 [mhahnFr][4]
 
 [1]: https://github.com/mhahnFr/CallstackLibrary/releases/latest
 [2]: https://github.com/mhahnFr/CallstackLibrary/blob/main/include/callstack.h

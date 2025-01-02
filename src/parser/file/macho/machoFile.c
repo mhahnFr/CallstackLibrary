@@ -1,7 +1,7 @@
 /*
  * CallstackLibrary - Library creating human-readable call stacks.
  *
- * Copyright (C) 2023 - 2024  mhahnFr
+ * Copyright (C) 2023 - 2025  mhahnFr
  *
  * This file is part of the CallstackLibrary.
  *
@@ -51,13 +51,6 @@ struct machoFile* machoFile_new(void)  {
 
 void machoFile_create(struct machoFile* self) {
     binaryFile_create(&self->_);
-
-    self->_.type     = MACHO_FILE;
-    self->_.concrete = self;
-
-    self->_.addr2String = &machoFile_addr2String;
-    self->_.destroy     = &machoFile_destroy;
-    self->_.deleter     = &machoFile_delete;
 
     self->addressOffset    = 0;
     self->linkedit_fileoff = 0;
@@ -461,11 +454,7 @@ bool machoFile_getFunctionInfo(struct machoFile* self, const char* functionName,
     return false;
 }
 
-bool machoFile_addr2String(struct binaryFile* me, void* address, struct callstack_frame* frame) {
-    struct machoFile * self = machoFileOrNull(me);
-    if (self == NULL) {
-        return false;
-    }
+bool machoFile_addr2String(struct machoFile* self, void* address, struct callstack_frame* frame) {
     if (!self->_.parsed &&
         !(self->_.parsed = machoFile_loadFile(self))) {
         return false;
@@ -509,12 +498,7 @@ bool machoFile_addr2String(struct binaryFile* me, void* address, struct callstac
     return false;
 }
 
-void machoFile_destroy(struct binaryFile * me) {
-    struct machoFile* self = machoFileOrNull(me);
-    if (self == NULL) {
-        return;
-    }
-    
+void machoFile_destroy(struct machoFile* self) {
     vector_iterate(pair_funcFile_t, &self->functions, function_destroy(&element->first);)
     vector_pairFuncFile_destroy(&self->functions);
     if (self->dSYMFile.file != NULL) {
@@ -522,12 +506,8 @@ void machoFile_destroy(struct binaryFile * me) {
     }
 }
 
-void machoFile_delete(struct binaryFile* me) {
-    me->destroy(me);
-    struct machoFile* self = machoFileOrNull(me);
-    if (self == NULL) {
-        return;
-    }
+void machoFile_delete(struct machoFile* self) {
+    machoFile_destroy(self);
     free(self);
 }
 
