@@ -46,8 +46,6 @@ struct elfFile* elfFile_new(void) {
 void elfFile_create(struct elfFile* self) {
     binaryFile_create(&self->_);
     
-    self->_.type     = ELF_FILE;
-
     lcs_section_create(&self->debugLine);
     lcs_section_create(&self->debugLineStr);
     lcs_section_create(&self->debugStr);
@@ -347,12 +345,19 @@ static inline optional_debugInfo_t elfFile_getDebugInfo(struct elfFile* self, vo
         || closest->startAddress + closest->length < closestInfo->address) {
         return toReturn;
     }
+    if (closestInfo->sourceFile.fileName != NULL && closestInfo->sourceFile.fileNameRelative == NULL && closestInfo->sourceFile.fileNameAbsolute == NULL) {
+        struct dwarf_lineInfo* mutableClosest = (struct dwarf_lineInfo*) closestInfo;
+        mutableClosest->sourceFile.fileNameRelative = path_toRelativePath(closestInfo->sourceFile.fileName);
+        mutableClosest->sourceFile.fileNameAbsolute = path_toAbsolutePath(closestInfo->sourceFile.fileName);
+    }
     toReturn.value.sourceFileInfo = (optional_sourceFileInfo_t) {
         .has_value = true,
         .value = {
             closestInfo->line,
             closestInfo->column,
             closestInfo->sourceFile.fileName,
+            closestInfo->sourceFile.fileNameRelative,
+            closestInfo->sourceFile.fileNameAbsolute,
             binaryFile_isOutdated(closestInfo->sourceFile)
         }
     };
