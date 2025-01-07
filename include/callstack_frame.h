@@ -190,13 +190,11 @@ static inline void callstack_frame_destroy(struct callstack_frame * self) {
     if (!self->reserved1) {
         free(self->binaryFile);
         free(self->binaryFileRelative);
+        free(self->sourceFile);
+        free(self->sourceFileRelative);
     }
     if (!self->reserved2) {
         free(self->function);
-    }
-    if (!self->reserved1) {
-        free(self->sourceFile);
-        free(self->sourceFileRelative);
     }
 }
 
