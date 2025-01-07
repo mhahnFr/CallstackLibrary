@@ -28,6 +28,7 @@
 
 #include <macho/fat_handler.h>
 #include <macho/macho_utils.h>
+#include <misc/string_utils.h>
 
 #include "cache.h"
 #include "machoFile.h"
@@ -464,13 +465,6 @@ bool machoFile_getFunctionInfo(struct machoFile* self, const char* functionName,
     return false;
 }
 
-static inline char* machoFile_maybeCopySave(const char* string, bool copy) {
-    if (copy && string != NULL) {
-        return strdup(string);
-    }
-    return (char*) string;
-}
-
 bool machoFile_addr2String(struct machoFile* self, void* address, struct callstack_frame* frame) {
     if (!self->_.parsed &&
         !(self->_.parsed = machoFile_loadFile(self))) {
@@ -501,12 +495,12 @@ bool machoFile_addr2String(struct machoFile* self, void* address, struct callsta
         }
 
         if (result.value.sourceFileInfo.has_value) {
-            frame->sourceFile = machoFile_maybeCopySave(result.value.sourceFileInfo.value.sourceFileAbsolute, !frame->reserved1);
-            frame->sourceFileRelative = machoFile_maybeCopySave(result.value.sourceFileInfo.value.sourceFileRelative, !frame->reserved1);
+            frame->sourceFile = utils_maybeCopySave(result.value.sourceFileInfo.value.sourceFileAbsolute, !frame->reserved1);
+            frame->sourceFileRelative = utils_maybeCopySave(result.value.sourceFileInfo.value.sourceFileRelative, !frame->reserved1);
             frame->sourceFileOutdated = result.value.sourceFileInfo.value.outdated;
             frame->sourceLine = result.value.sourceFileInfo.value.line;
             frame->sourceLineColumn = result.value.sourceFileInfo.value.column;
-            frame->function = machoFile_maybeCopySave(name, !frame->reserved1);
+            frame->function = utils_maybeCopySave(name, !frame->reserved1);
             frame->reserved2 = frame->reserved1;
         } else {
             char* toReturn = NULL;
