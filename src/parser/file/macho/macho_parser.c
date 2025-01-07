@@ -1,7 +1,7 @@
 /*
  * CallstackLibrary - Library creating human-readable call stacks.
  *
- * Copyright (C) 2024  mhahnFr
+ * Copyright (C) 2024 - 2025  mhahnFr
  *
  * This file is part of the CallstackLibrary.
  *
@@ -171,7 +171,9 @@ bool macho_parseSymtab(struct symtab_command* command,
                     funCb((pair_funcFile_t) {
                         (struct function) {
                             .linkedName = strdup(stringBegin + entry.n_strx),
-                            .startAddress = entry.n_value
+                            .startAddress = entry.n_value,
+                            .length = 0x0,
+                            .demangledName.has_value = false,
                         }, NULL
                     }, copy);
                     va_end(copy);
