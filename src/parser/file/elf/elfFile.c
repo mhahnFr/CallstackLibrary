@@ -24,6 +24,7 @@
 
 #include <elf/elfUtils.h>
 #include <file/pathUtils.h>
+#include <misc/string_utils.h>
 
 #include "elfFile.h"
 
@@ -106,7 +107,8 @@ static inline bool elfFile_parseSymtab##bits(struct elfFile*   self,            
             struct function f = {                                                                                       \
                 .startAddress = ELF_TO_HOST(bits, entry->st_value, littleEndian),                                       \
                 .linkedName   = strdup(strBegin + ELF_TO_HOST(32, entry->st_name, littleEndian)),                       \
-                .length       = ELF_TO_HOST(bits, entry->st_size, littleEndian)                                         \
+                .length       = ELF_TO_HOST(bits, entry->st_size, littleEndian),                                        \
+                .demangledName.has_value = false,                                                                       \
             };                                                                                                          \
             vector_function_push_back(&self->functions, f);                                                             \
         }                                                                                                               \
@@ -326,6 +328,13 @@ static inline optional_debugInfo_t elfFile_getDebugInfo(struct elfFile* self, vo
         || closest->startAddress + closest->length < translated) {
         return toReturn;
     }
+    if (!closest->demangledName.has_value) {
+        struct function* mutableClosest = (struct function*) closest;
+        mutableClosest->demangledName = (optional_string_t) {
+            true,
+            callstack_parser_demangle(closest->linkedName),
+        };
+    }
     toReturn = (optional_debugInfo_t) {
         .has_value = true,
         .value = (struct debugInfo) {
@@ -381,8 +390,8 @@ bool elfFile_getFunctionInfo(struct elfFile* self, const char* functionName, str
 }
 
 bool elfFile_addr2String(struct elfFile* self, void* address, struct callstack_frame* frame) {
-    if (!me->parsed &&
-        !(me->parsed = elfFile_loadFile(self))) {
+    if (!self->_.parsed &&
+        !(self->_.parsed = elfFile_loadFile(self))) {
         return false;
     }
 
@@ -391,20 +400,21 @@ bool elfFile_addr2String(struct elfFile* self, void* address, struct callstack_f
         if (result.value.function.linkedName == NULL) {
             return false;
         }
-        char* name = result.value.function.linkedName;
-        name = callstack_rawNames ? strdup(name) : callstack_parser_demangle(name);
+        const char* name = callstack_rawNames || result.value.function.demangledName.value == NULL
+            ? result.value.function.linkedName : result.value.function.demangledName.value;
         if (result.value.sourceFileInfo.has_value) {
-            frame->sourceFile = path_toAbsolutePath((char*) result.value.sourceFileInfo.value.sourceFile);
-            frame->sourceFileRelative = path_toRelativePath((char*) result.value.sourceFileInfo.value.sourceFile);
+            frame->sourceFile = utils_maybeCopySave(result.value.sourceFileInfo.value.sourceFileAbsolute, !frame->reserved1);
+            frame->sourceFileRelative = utils_maybeCopySave(result.value.sourceFileInfo.value.sourceFileRelative, !frame->reserved1);
             frame->sourceFileOutdated = result.value.sourceFileInfo.value.outdated;
             frame->sourceLine = result.value.sourceFileInfo.value.line;
             frame->sourceLineColumn = result.value.sourceFileInfo.value.column;
-            frame->function = name;
+            frame->function = utils_maybeCopySave(name, !frame->reserved1);
+            frame->reserved2 = frame->reserved1;
         } else {
             char* toReturn = NULL;
             asprintf(&toReturn, "%s + %td", name, (ptrdiff_t) (address - self->_.relocationOffset - result.value.function.startAddress));
-            free(name);
             frame->function = toReturn;
+            frame->reserved2 = false;
         }
         return true;
     }
