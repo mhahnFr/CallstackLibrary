@@ -96,6 +96,7 @@ static inline void callstack_frame_create(struct callstack_frame * self) {
     self->sourceFileOutdated = false;
     self->binaryFileIsSelf   = false;
     self->reserved1          = false;
+    self->reserved2          = false;
 }
 
 /**
