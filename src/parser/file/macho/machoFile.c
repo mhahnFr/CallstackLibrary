@@ -155,6 +155,17 @@ static inline optional_debugInfo_t machoFile_getDebugInfo(struct machoFile* self
         return (optional_debugInfo_t) { .has_value = false };
     }
     optional_debugInfo_t info = { .has_value = false };
+    if (!closest->first.demangledName.has_value) {
+        pair_funcFile_t* mutableClosest = (struct pair_funcFile*) closest;
+        char* toDemangle = closest->first.linkedName;
+        if (*toDemangle == '\1' || *toDemangle == '_') {
+            ++toDemangle;
+        }
+        mutableClosest->first.demangledName = (optional_string_t) {
+            true,
+            callstack_parser_demangle(toDemangle)
+        };
+    }
     if (machoFile_getDSYMBundle(self) != NULL && memcmp(self->uuid, objectFile_getUUID(self->dSYMFile.file), 16) == 0) {
         info = objectFile_getDebugInfo(self->dSYMFile.file, searchAddress, closest->first);
         if (info.has_value) {
@@ -472,23 +483,31 @@ bool machoFile_addr2String(struct machoFile* self, void* address, struct callsta
             return false;
         }
 
-        char* name = result.value.function.linkedName;
+        const char* name;
         if (callstack_rawNames) {
-            if (*name == '\1') ++name;
-            name = strdup(name);
-        } else {
-            if (*name == '_' || *name == '\1') {
+            name = result.value.function.linkedName;
+            if (*name == '\1') {
                 ++name;
             }
-            name = callstack_parser_demangle(name);
+        } else {
+            if (result.value.function.demangledName.value == NULL) {
+                name = result.value.function.linkedName;
+                if (*name == '_' || *name == '\1') {
+                    ++name;
+                }
+            } else {
+                name = result.value.function.demangledName.value;
+            }
         }
+
         if (result.value.sourceFileInfo.has_value) {
             frame->sourceFile = machoFile_maybeCopySave(result.value.sourceFileInfo.value.sourceFileAbsolute, !frame->reserved1);
             frame->sourceFileRelative = machoFile_maybeCopySave(result.value.sourceFileInfo.value.sourceFileRelative, !frame->reserved1);
             frame->sourceFileOutdated = result.value.sourceFileInfo.value.outdated;
             frame->sourceLine = result.value.sourceFileInfo.value.line;
             frame->sourceLineColumn = result.value.sourceFileInfo.value.column;
-            frame->function = name;
+            frame->function = machoFile_maybeCopySave(name, !frame->reserved1);
+            frame->reserved2 = frame->reserved1;
         } else {
             char* toReturn = NULL;
             asprintf(&toReturn, "%s + %td",
@@ -496,8 +515,8 @@ bool machoFile_addr2String(struct machoFile* self, void* address, struct callsta
                      (ptrdiff_t) (address - self->_.startAddress
                                   + (self->_.inMemory ? self->text_vmaddr : self->addressOffset)
                                   - result.value.function.startAddress));
-            free(name);
             frame->function = toReturn;
+            frame->reserved2 = false;
         }
         return true;
     }

@@ -47,9 +47,10 @@ void callstack_frame_copyHere(struct callstack_frame * destination, const struct
     *destination = (struct callstack_frame) {
         source->reserved,
         source->reserved1,
+        source->reserved2,
         source->reserved1 ? source->binaryFile : maybeStrdup(source->binaryFile),
         source->reserved1 ? source->binaryFileRelative : maybeStrdup(source->binaryFileRelative),
-        maybeStrdup(source->function),
+        source->reserved2 ? source->function : maybeStrdup(source->function),
         source->reserved1 ? source->sourceFile : maybeStrdup(source->sourceFile),
         source->reserved1 ? source->sourceFileRelative : maybeStrdup(source->sourceFileRelative),
         source->sourceFileOutdated,

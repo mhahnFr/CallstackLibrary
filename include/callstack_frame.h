@@ -47,6 +47,7 @@ struct callstack_frame {
      * @since v2.0
      */
     bool  reserved1;
+    bool reserved2;
 
     /** The name of the binary file this frame is in.        */
     char * binaryFile;
@@ -190,7 +191,9 @@ static inline void callstack_frame_destroy(struct callstack_frame * self) {
         free(self->binaryFile);
         free(self->binaryFileRelative);
     }
-    free(self->function);
+    if (!self->reserved2) {
+        free(self->function);
+    }
     if (!self->reserved1) {
         free(self->sourceFile);
         free(self->sourceFileRelative);
