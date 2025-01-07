@@ -22,6 +22,7 @@
 #ifndef utils_misc_string_utils_h
 #define utils_misc_string_utils_h
 
+#include <stdbool.h>
 #include <stddef.h>
 #include <string.h>
 
