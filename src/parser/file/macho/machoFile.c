@@ -164,7 +164,7 @@ static inline optional_debugInfo_t machoFile_getDebugInfo(struct machoFile* self
         }
         mutableClosest->first.demangledName = (optional_string_t) {
             true,
-            callstack_parser_demangle(toDemangle)
+            callstack_parser_demangleCopy(toDemangle, false),
         };
     }
     if (machoFile_getDSYMBundle(self) != NULL && memcmp(self->uuid, objectFile_getUUID(self->dSYMFile.file), 16) == 0) {

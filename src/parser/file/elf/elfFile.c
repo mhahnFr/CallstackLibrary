@@ -332,7 +332,7 @@ static inline optional_debugInfo_t elfFile_getDebugInfo(struct elfFile* self, vo
         struct function* mutableClosest = (struct function*) closest;
         mutableClosest->demangledName = (optional_string_t) {
             true,
-            callstack_parser_demangle(closest->linkedName),
+            callstack_parser_demangleCopy(closest->linkedName, false),
         };
     }
     toReturn = (optional_debugInfo_t) {
