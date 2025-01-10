@@ -76,7 +76,7 @@ static inline bool callstack_parser_isMangledName(const char* name) {
 }
 #endif
 
-char* callstack_parser_demangle(char* name) {
+char* callstack_parser_demangleCopy(char* name, bool copy) {
     char* result   = name;
     bool needsCopy = true;
     
@@ -89,7 +89,7 @@ char* callstack_parser_demangle(char* name) {
     }
 #endif
     
-    return needsCopy ? strdup(result) : result;
+    return needsCopy ? (copy ? strdup(result) : NULL) : result;
 }
 
 enum callstack_type callstack_parser_parse(struct callstack_parser * self,

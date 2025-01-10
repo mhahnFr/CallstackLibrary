@@ -1,7 +1,7 @@
 /*
  * CallstackLibrary - Library creating human-readable call stacks.
  *
- * Copyright (C) 2022 - 2024  mhahnFr
+ * Copyright (C) 2022 - 2025  mhahnFr
  *
  * This file is part of the CallstackLibrary. 
  *
@@ -69,6 +69,8 @@ static inline void callstack_parser_destroy(struct callstack_parser* self) {
 enum callstack_type callstack_parser_parse(struct callstack_parser * self,
                                            struct callstack * callstack);
 
+char* callstack_parser_demangleCopy(char* name, bool copy);
+
 /**
  * @brief Demangles the given name if possible and enabled.
  *
@@ -78,6 +80,8 @@ enum callstack_type callstack_parser_parse(struct callstack_parser * self,
  * @param name the name to be demangled
  * @return the allocated name
  */
-char * callstack_parser_demangle(char * name);
+static inline char* callstack_parser_demangle(char* name) {
+    return callstack_parser_demangleCopy(name, true);
+}
 
 #endif /* callstack_parser_h */
