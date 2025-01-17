@@ -39,7 +39,9 @@ struct sourceFileInfo {
     
     /** The deducted source file name.       */
     const char* sourceFile;
+    /** The relativated source file path.    */
     const char* sourceFileRelative;
+    /** The absolute source file path.       */
     const char* sourceFileAbsolute;
     /** Whether the source file is outdated. */
     bool outdated;
