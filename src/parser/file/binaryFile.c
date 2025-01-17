@@ -34,10 +34,10 @@
 
 #ifdef LCS_MACHO
 # define LCS_FILE_NAME machoFile
-# define LCS_FILE(NAME) machoFile_##NAME
+# define LCS_FILE_RAW(NAME) machoFile_##NAME
 #elif defined(LCS_ELF)
 # define LCS_FILE_NAME elfFile
-# define LCS_FILE(NAME) elfFile_##NAME
+# define LCS_FILE_RAW(NAME) elfFile_##NAME
 #endif
 
 /** The concrete binary file abstraction structure type.         */
@@ -45,8 +45,11 @@ typedef struct LCS_FILE_NAME ConcreteFile;
 /** The concrete binary file abstraction structure pointer type. */
 typedef ConcreteFile* Concrete;
 
+#define LCS_FILE(self, NAME, ...) LCS_FILE_RAW(NAME)((Concrete) (self), __VA_ARGS__)
+#define LCS_FILE_1(self, NAME) LCS_FILE_RAW(NAME)((Concrete) (self))
+
 struct binaryFile* binaryFile_new(const char* fileName, const void* startAddress) {
-    Concrete tmp = LCS_FILE(new)();
+    Concrete tmp = LCS_FILE_RAW(new)();
     struct binaryFile* toReturn = &tmp->_;
 
     if (toReturn != NULL) {
@@ -57,11 +60,11 @@ struct binaryFile* binaryFile_new(const char* fileName, const void* startAddress
 }
 
 bool binaryFile_addr2String(struct binaryFile* self, void* address, struct callstack_frame* frame) {
-    return LCS_FILE(addr2String)((Concrete) self, address, frame);
+    return LCS_FILE(self, addr2String, address, frame);
 }
 
 bool binaryFile_getFunctionInfo(struct binaryFile* self, const char* functionName, struct functionInfo* info) {
-    return LCS_FILE(getFunctionInfo)((Concrete) self, functionName, info);
+    return LCS_FILE(self, getFunctionInfo, functionName, info);
 }
 
 void binaryFile_clearCaches(void) {
@@ -88,9 +91,9 @@ bool binaryFile_isOutdated(struct dwarf_sourceFile file) {
 }
 
 void binaryFile_destroy(struct binaryFile* self) {
-    LCS_FILE(destroy)((Concrete) self);
+    LCS_FILE_1(self, destroy);
 }
 
 void binaryFile_delete(struct binaryFile* self) {
-    LCS_FILE(delete)((Concrete) self);
+    LCS_FILE_1(self, delete);
 }
