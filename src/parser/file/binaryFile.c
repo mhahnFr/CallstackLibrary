@@ -40,7 +40,9 @@
 # define LCS_FILE(NAME) elfFile_##NAME
 #endif
 
+/** The concrete binary file abstraction structure type.         */
 typedef struct LCS_FILE_NAME ConcreteFile;
+/** The concrete binary file abstraction structure pointer type. */
 typedef ConcreteFile* Concrete;
 
 struct binaryFile* binaryFile_new(const char* fileName, const void* startAddress) {
