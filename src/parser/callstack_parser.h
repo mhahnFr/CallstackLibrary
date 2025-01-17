@@ -69,6 +69,16 @@ static inline void callstack_parser_destroy(struct callstack_parser* self) {
 enum callstack_type callstack_parser_parse(struct callstack_parser * self,
                                            struct callstack * callstack);
 
+/**
+ * @brief Demangles the given name if possible and enabled.
+ *
+ * Either the allocated, demangled name is returned or depending on @c copy
+ * a copy of the given string if not possible to demangle.
+ *
+ * @param name the name to be demangled
+ * @param copy whether to copy the input string if not demangled
+ * @return the demangled name or the copy or the input string
+ */
 char* callstack_parser_demangleCopy(char* name, bool copy);
 
 /**
