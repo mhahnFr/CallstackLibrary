@@ -37,6 +37,7 @@ struct function {
     
     /** The name of the function at linking time.                     */
     char * linkedName;
+    /** The demangled name of the function.                           */
     optional_string_t demangledName;
 };
 
