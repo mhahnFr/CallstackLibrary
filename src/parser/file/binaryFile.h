@@ -52,6 +52,7 @@ struct binaryFile {
  *
  * @param fileName the name of the represented binary file
  * @param startAddress the start address of the represented binary file
+ * @return the allocated binary file structure
  */
 struct binaryFile* binaryFile_new(const char* fileName, const void* startAddress);
 
@@ -68,6 +69,15 @@ static inline void binaryFile_create(struct binaryFile* self) {
     self->relocationOffset = 0;
 }
 
+/**
+ * Deducts the debug information available for the given address and stores it
+ * in the given callstack frame.
+ *
+ * @param self the binary file abstraction structure
+ * @param address the address to translate
+ * @param frame the callstack frame structure to store the information in
+ * @return whether debug information was deducted successfully
+ */
 bool binaryFile_addr2String(struct binaryFile* self, void* address, struct callstack_frame* frame);
 
 /**
@@ -76,6 +86,7 @@ bool binaryFile_addr2String(struct binaryFile* self, void* address, struct calls
  * @param self the binary file object
  * @param functionName the name of the function (as it was linked) to look up
  * @param info the function info structure to be filled
+ * @return whether the function was found
  */
 bool binaryFile_getFunctionInfo(struct binaryFile* self, const char* functionName, struct functionInfo* info);
 
@@ -92,7 +103,18 @@ void binaryFile_clearCaches(void);
  */
 bool binaryFile_isOutdated(struct dwarf_sourceFile file);
 
+/**
+ * Destroys the given binary file.
+ *
+ * @param self the binary file abstraction structure to destroy
+ */
 void binaryFile_destroy(struct binaryFile* self);
+
+/**
+ * Destroys and deallocates the given binary file.
+ *
+ * @param self the binary file structure to delete
+ */
 void binaryFile_delete(struct binaryFile* self);
 
 #endif /* binaryFile_h */
