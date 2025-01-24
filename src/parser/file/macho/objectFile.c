@@ -165,7 +165,8 @@ optional_debugInfo_t objectFile_getDebugInfo(struct objectFile* self, uint64_t a
                                                        self->lineInfos.count,
                                                        sizeof(struct dwarf_lineInfo),
                                                        objectFile_dwarfLineInfoSortCompare);
-    if (closest == NULL) {
+    if (closest == NULL || closest->address < function.startAddress
+        || (function.length != 0 && closest->address >= function.startAddress + function.length)) {
         return toReturn;
     }
     if (closest->sourceFile.fileName != NULL && closest->sourceFile.fileNameRelative == NULL && closest->sourceFile.fileNameAbsolute == NULL) {
