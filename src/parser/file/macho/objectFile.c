@@ -149,14 +149,17 @@ optional_debugInfo_t objectFile_getDebugInfo(struct objectFile* self, uint64_t a
         }
     }
     uint64_t lineAddress;
+    uint64_t functionBegin;
     if (self->isDsymBundle) {
         lineAddress = address;
+        functionBegin = function.startAddress;
     } else {
         optional_function_t ownFunction = objectFile_findOwnFunction(self, function.linkedName);
         if (!ownFunction.has_value) {
             return toReturn;
         }
         lineAddress = ownFunction.value.startAddress + address - function.startAddress;
+        functionBegin = ownFunction.value.startAddress;
     }
 
     struct dwarf_lineInfo tmp = (struct dwarf_lineInfo) { .address = lineAddress };
@@ -165,8 +168,8 @@ optional_debugInfo_t objectFile_getDebugInfo(struct objectFile* self, uint64_t a
                                                        self->lineInfos.count,
                                                        sizeof(struct dwarf_lineInfo),
                                                        objectFile_dwarfLineInfoSortCompare);
-    if (closest == NULL || closest->address < function.startAddress
-        || (function.length != 0 && closest->address >= function.startAddress + function.length)) {
+    if (closest == NULL || closest->address < functionBegin
+        || (function.length != 0 && closest->address >= functionBegin + function.length)) {
         return toReturn;
     }
     if (closest->sourceFile.fileName != NULL && closest->sourceFile.fileNameRelative == NULL && closest->sourceFile.fileNameAbsolute == NULL) {
