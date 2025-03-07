@@ -1,7 +1,7 @@
 #
 # CallstackLibrary - Library creating human-readable call stacks.
 #
-# Copyright (C) 2022 - 2024  mhahnFr
+# Copyright (C) 2022 - 2025  mhahnFr
 #
 # This file is part of the CallstackLibrary.
 #
@@ -135,7 +135,7 @@ all:
 	$(MAKE) $(STATIC_N)
 	- $(MAKE) $(DYLIB_N)
 
-release: fclean
+release: clean
 	$(MAKE) MACOS_ARCH_FLAGS2="-arch x86_64 -arch arm64 -arch arm64e" $(NAME) $(STATIC_N)
 
 install: $(NAME)
@@ -166,13 +166,11 @@ $(STATIC_N): $(OBJS)
 clean:
 	- $(RM) $(OBJS) $(DEPS)
 	- $(RM) $(CXX_OBJS) $(CXX_DEPS)
-
-fclean: clean
 	- $(RM) $(DYLIB_N) $(SHARED_N) $(STATIC_N)
 
-re: fclean
+re: clean
 	$(MAKE) default
 
-.PHONY: re fclean clean all default install uninstall release
+.PHONY: re clean all default install uninstall release
 
 -include $(DEPS)
