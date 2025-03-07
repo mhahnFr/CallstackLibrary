@@ -25,6 +25,12 @@
 
 #include "demangler.h"
 
+#ifdef __APPLE__
+# define LCS_UNDERSCORE "_"
+#else
+# define LCS_UNDERSCORE
+#endif
+
 typedef char* (*SwiftDemanglerFunc)(const char*, size_t, char*, size_t*, uint32_t);
 
 static inline SwiftDemanglerFunc callstack_demangle_getSwiftDemangler(void) {
@@ -35,7 +41,7 @@ static inline SwiftDemanglerFunc callstack_demangle_getSwiftDemangler(void) {
 
     if (!loadingState.searched) {
         loadingState.searched = true;
-        struct functionInfo info = functionInfo_load("swift_demangle");
+        struct functionInfo info = functionInfo_load(LCS_UNDERSCORE "swift_demangle");
         if (info.found) {
             loadingState.func = (void*) info.begin;
         }
