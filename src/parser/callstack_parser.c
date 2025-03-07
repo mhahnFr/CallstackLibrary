@@ -58,37 +58,15 @@ static inline bool callstack_parser_parseImpl(struct callstack_parser* self,
     return true;
 }
 
-#ifdef CXX_FUNCTIONS
-/**
- * Returns whether the given name is a name mangled in the C++ style.
- *
- * @param name the name to be checked
- * @return whether the name is a mangled one
- */
-static inline bool callstack_parser_isMangledName(const char* name) {
-    if (strncmp(name, "_Z", 2) == 0 || strncmp(name, "___Z", 4) == 0) {
-        return true;
-    }
-    return strlen(name) >= 11 && strncmp(name, "_GLOBAL_", 8) == 0
-        && (name[8] == '.' || name[8] == '_' || name[8] == '$')
-        && (name[9] == 'D' || name[9] == 'I')
-        && name[10] == '_';
-}
-#endif
-
 char* callstack_parser_demangleCopy(char* name, bool copy) {
     char* result   = name;
     bool needsCopy = true;
-    
-#ifdef CXX_FUNCTIONS
-    if (callstack_parser_isMangledName(name)) {
-        result = callstack_demangle(result);
-        if (result != name) {
-            needsCopy = false;
-        }
+
+    result = callstack_demangle(result);
+    if (result != name) {
+        needsCopy = false;
     }
-#endif
-    
+
     return needsCopy ? (copy ? strdup(result) : NULL) : result;
 }
 
