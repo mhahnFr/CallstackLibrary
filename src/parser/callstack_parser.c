@@ -22,7 +22,7 @@
 #include <string.h>
 
 #include "callstack_parser.h"
-#include "demangler.h"
+#include "demangling/demangler.h"
 
 #include "../callstackInternal.h"
 #include "../loadedLibInfo.h"
