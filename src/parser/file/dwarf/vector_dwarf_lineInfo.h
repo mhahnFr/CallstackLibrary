@@ -1,7 +1,7 @@
 /*
  * CallstackLibrary - Library creating human-readable call stacks.
  *
- * Copyright (C) 2024  mhahnFr
+ * Copyright (C) 2024 - 2025  mhahnFr
  *
  * This file is part of the CallstackLibrary.
  *
@@ -22,10 +22,10 @@
 #ifndef vector_dwarf_lineInfo_h
 #define vector_dwarf_lineInfo_h
 
-#include <DC4C/vector.h>
+#include <DC4C/v2/vector.h>
 
 #include "dwarf_lineInfo.h"
 
-typedef_vector_light_named(dwarfLineInfo, struct dwarf_lineInfo);
+typedef_vector_named(dwarfLineInfo, struct dwarf_lineInfo);
 
 #endif /* vector_dwarf_lineInfo_h */

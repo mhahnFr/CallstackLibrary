@@ -56,7 +56,7 @@ struct objectFile* objectFile_new(void) {
 static inline void objectFile_dwarfLineCallback(struct dwarf_lineInfo info, void* args) {
     struct objectFile* self = args;
     
-    vector_dwarfLineInfo_push_back(&self->lineInfos, info);
+    vector_push_back(&self->lineInfos, info);
 }
 
 /**
@@ -295,7 +295,7 @@ static inline bool objectFile_handleSegment(struct objectFile*      self,
 static inline void objectFile_addFunctionCallback(struct pair_funcFile f, va_list args) {
     struct objectFile* self = va_arg(args, void*);
 
-    vector_function_push_back(&self->ownFunctions, f.first);
+    vector_push_back(&self->ownFunctions, f.first);
 }
 
 /**
@@ -433,7 +433,7 @@ bool objectFile_parseBuffer(struct objectFile* self, void* buffer) {
         for (size_t i = 0; i < self->ownFunctions.count; ++i) {
             function_destroy(&self->ownFunctions.content[i]);
         }
-        vector_function_clear(&self->ownFunctions);
+        vector_clear(&self->ownFunctions);
     } else {
         qsort(self->lineInfos.content, self->lineInfos.count, sizeof(struct dwarf_lineInfo), objectFile_dwarfLineInfoSortCompare);
         qsort(self->ownFunctions.content, self->ownFunctions.count, sizeof(struct function), objectFile_functionCompare);
@@ -472,11 +472,11 @@ void objectFile_destroy(struct objectFile* self) {
     for (size_t i = 0; i < self->ownFunctions.count; ++i) {
         function_destroy(&self->ownFunctions.content[i]);
     }
-    vector_function_destroy(&self->ownFunctions);
+    vector_destroy(&self->ownFunctions);
     for (size_t i = 0; i < self->lineInfos.count; ++i) {
         dwarf_lineInfo_destroy(&self->lineInfos.content[i]);
     }
-    vector_dwarfLineInfo_destroy(&self->lineInfos);
+    vector_destroy(&self->lineInfos);
     free((void*) self->mainSourceFileCache);
     free((void*) self->mainSourceFileCacheRelative);
     free((void*) self->mainSourceFileCacheAbsolute);

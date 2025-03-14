@@ -117,8 +117,8 @@ static inline void objectFile_create(struct objectFile * self) {
     lcs_section_create(&self->debugAbbrev);
     lcs_section_create(&self->debugStrOffsets);
 
-    vector_function_create(&self->ownFunctions);
-    vector_dwarfLineInfo_create(&self->lineInfos);
+    vector_init(&self->ownFunctions);
+    vector_init(&self->lineInfos);
 }
 
 /**

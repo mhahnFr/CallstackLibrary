@@ -1,7 +1,7 @@
 /*
  * CallstackLibrary - Library creating human-readable call stacks.
  *
- * Copyright (C) 2023 - 2024  mhahnFr
+ * Copyright (C) 2023 - 2025  mhahnFr
  *
  * This file is part of the CallstackLibrary.
  *
@@ -22,10 +22,10 @@
 #ifndef vector_function_h
 #define vector_function_h
 
-#include <DC4C/vector.h>
+#include <DC4C/v2/vector.h>
 
 #include "function.h"
 
-typedef_vector_light_named(function, struct function);
+typedef_vector_named(function, struct function);
 
 #endif /* vector_function_h */
