@@ -58,7 +58,7 @@ static inline bool dwarf4_parseLineProgramHeader(struct dwarf_parser* self, size
 
     while (*((uint8_t*) (self->debugLine.content + *counter)) != 0x0) {
         const char* string = self->debugLine.content + *counter;
-        vector_string_push_back(&self->specific.v4.includeDirectories, string);
+        vector_push_back(&self->specific.v4.includeDirectories, string);
         *counter += strlen(string) + 1;
     }
     ++(*counter);

@@ -1,7 +1,7 @@
 /*
  * CallstackLibrary - Library creating human-readable call stacks.
  *
- * Copyright (C) 2024  mhahnFr
+ * Copyright (C) 2024 - 2025  mhahnFr
  *
  * This file is part of the CallstackLibrary.
  *
@@ -110,11 +110,11 @@ static inline bool macho_cache_loadArchive(const char* archiveName) {
  * @return whether the archive was already loaded
  */
 static inline bool macho_cache_archiveLoaded(const char* archiveName) {
-    vector_iterate(const char*, &cache.loadedArchives, {
+    vector_iterate(&cache.loadedArchives, {
         if (strcmp(archiveName, *element) == 0) {
             return true;
         }
-    })
+    });
     return false;
 }
 
@@ -126,7 +126,7 @@ struct objectFile* macho_cache_findOrAdd(const char* fileName, uint64_t lastModi
         if (macho_cache_isInArchive(fileName)) {
             char* archiveName = macho_cache_getArchiveName(fileName);
             if (!macho_cache_archiveLoaded(archiveName) && macho_cache_loadArchive(archiveName)) {
-                vector_string_push_back(&cache.loadedArchives, archiveName);
+                vector_push_back(&cache.loadedArchives, archiveName);
                 return macho_cache_findOrAdd(fileName, lastModified);
             } else {
                 free(archiveName);
@@ -166,6 +166,6 @@ void macho_cache_destroy(void) {
         objectFile_delete(it);
     }
     cache.objectFiles = NULL;
-    vector_string_destroyWith(&cache.loadedArchives, (void (*)(const char*)) free);
-    vector_string_create(&cache.loadedArchives);
+    vector_destroyWith(&cache.loadedArchives, ((void (*)(const char*)) free));
+    vector_init(&cache.loadedArchives);
 }

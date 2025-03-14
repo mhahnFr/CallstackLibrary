@@ -1,7 +1,7 @@
 /*
  * CallstackLibrary - Library creating human-readable call stacks.
  *
- * Copyright (C) 2024  mhahnFr
+ * Copyright (C) 2024 - 2025  mhahnFr
  *
  * This file is part of the CallstackLibrary.
  *
@@ -22,8 +22,8 @@
 #ifndef vector_string_h
 #define vector_string_h
 
-#include <DC4C/vector.h>
+#include <DC4C/v2/vector.h>
 
-typedef_vector_light_named(string, const char*);
+typedef_vector_named(string, const char*);
 
 #endif /* vector_string_h */
