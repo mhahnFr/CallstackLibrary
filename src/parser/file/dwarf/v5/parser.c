@@ -156,11 +156,11 @@ static inline uint8_t* dwarf5_readMD5(void* buffer, size_t* counter) {
 static inline optional_vector_fileAttribute_t dwarf5_parseFileAttributes(struct dwarf_parser* self, size_t* counter) {
     const uint8_t entryFormatCount = *((uint8_t*) (self->debugLine.content + (*counter)++));
     vector_pair_uint64_t entryFormats = vector_initializer;
-    vector_pair_uint64_reserve(&entryFormats, entryFormatCount);
+    vector_reserve(&entryFormats, entryFormatCount);
     for (uint8_t i = 0; i < entryFormatCount; ++i) {
         const uint64_t contentType = getULEB128(self->debugLine.content, counter),
                           formCode = getULEB128(self->debugLine.content, counter);
-        vector_pair_uint64_push_back(&entryFormats, (pair_uint64_t) { contentType, formCode });
+        vector_push_back(&entryFormats, ((pair_uint64_t) { contentType, formCode }));
     }
 
     const uint64_t attributeCount = getULEB128(self->debugLine.content, counter);
@@ -174,7 +174,7 @@ static inline optional_vector_fileAttribute_t dwarf5_parseFileAttributes(struct 
             .index     = 0,
             .timestamp = 0,
         };
-        vector_iterate(pair_uint64_t, &entryFormats, {
+        vector_iterate(&entryFormats, {
             switch (element->first) {
                 case DW_LNCT_path:
                     attribute.path = dwarf_readString(self, self->debugLine.content, counter, element->second);
@@ -213,7 +213,7 @@ static inline optional_vector_fileAttribute_t dwarf5_parseFileAttributes(struct 
         })
         vector_fileAttribute_push_back(&attributes, attribute);
     }
-    vector_pair_uint64_destroy(&entryFormats);
+    vector_destroy(&entryFormats);
 
     return (optional_vector_fileAttribute_t) { true, attributes };
 

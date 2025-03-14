@@ -60,8 +60,8 @@ void machoFile_create(struct machoFile* self) {
     self->dSYMFile.triedParsing = false;
     self->dSYMFile.file         = NULL;
 
-    vector_pairFuncFile_create(&self->functions);
-    vector_uint64_create(&self->functionStarts);
+    vector_init(&self->functions);
+    vector_init(&self->functionStarts);
 }
 
 /**
@@ -248,7 +248,7 @@ static inline bool machoFile_handleSegment64(struct machoFile *          self,
 static inline void machoFile_addFunction(struct pair_funcFile function, va_list args) {
     struct machoFile* self = va_arg(args, void*);
 
-    vector_pairFuncFile_push_back(&self->functions, function);
+    vector_push_back(&self->functions, function);
 }
 
 /**
@@ -282,9 +282,9 @@ static inline bool machoFile_handleFunctionStarts(struct machoFile* self, struct
     uint64_t funcAddr = self->text_vmaddr; // <--- TODO: What is the appropriate start when read from disk?
     for (size_t i = 0; i < size;) {
         funcAddr += getULEB128(bytes, &i);
-        vector_uint64_push_back(&self->functionStarts, funcAddr);
+        vector_push_back(&self->functionStarts, funcAddr);
     }
-    vector_uint64_sort(&self->functionStarts, &machoFile_uint64Compare);
+    vector_sort(&self->functionStarts, &machoFile_uint64Compare);
     return true;
 }
 
@@ -294,14 +294,14 @@ static inline bool machoFile_handleFunctionStarts(struct machoFile* self, struct
  * @param self the Mach-O file abstraction structure
  */
 static inline void machoFile_fixupFunctions(struct machoFile* self) {
-    vector_iterate(pair_funcFile_t, &self->functions, {
+    vector_iterate(&self->functions, {
         if (element->first.length != 0) continue;
 
-        uint64_t* address = vector_uint64_search(&self->functionStarts, &element->first.startAddress, &machoFile_uint64Compare);
+        uint64_t* address = vector_search(&self->functionStarts, &element->first.startAddress, &machoFile_uint64Compare);
         if (address != NULL && (size_t) (address - self->functionStarts.content) < self->functionStarts.count - 2) {
             element->first.length = *++address - element->first.startAddress;
         }
-    })
+    });
 }
 
 /**
@@ -441,8 +441,8 @@ static inline bool machoFile_loadFile(struct machoFile* self) {
     if (success) {
         qsort(self->functions.content, self->functions.count, sizeof(pair_funcFile_t), machoFile_functionSortCompare);
     } else {
-        vector_iterate(pair_funcFile_t, &self->functions, function_destroy(&element->first);)
-        vector_pairFuncFile_clear(&self->functions);
+        vector_iterate(&self->functions, function_destroy(&element->first););
+        vector_clear(&self->functions);
     }
 
     return success;
@@ -454,14 +454,14 @@ bool machoFile_getFunctionInfo(struct machoFile* self, const char* functionName,
         return false;
     }
 
-    vector_iterate(pair_funcFile_t, &self->functions, {
+    vector_iterate(&self->functions, {
         if (strcmp(element->first.linkedName, functionName) == 0) {
             info->begin = (uintptr_t) element->first.startAddress + (uintptr_t) self->_.startAddress
                         - (self->_.inMemory ? self->text_vmaddr : self->addressOffset);
             info->length = element->first.length;
             return true;
         }
-    })
+    });
     return false;
 }
 
@@ -518,12 +518,12 @@ bool machoFile_addr2String(struct machoFile* self, void* address, struct callsta
 }
 
 void machoFile_destroy(struct machoFile* self) {
-    vector_iterate(pair_funcFile_t, &self->functions, function_destroy(&element->first);)
-    vector_pairFuncFile_destroy(&self->functions);
+    vector_iterate(&self->functions, function_destroy(&element->first););
+    vector_destroy(&self->functions);
     if (self->dSYMFile.file != NULL) {
         objectFile_delete(self->dSYMFile.file);
     }
-    vector_uint64_destroy(&self->functionStarts);
+    vector_destroy(&self->functionStarts);
 }
 
 void machoFile_delete(struct machoFile* self) {

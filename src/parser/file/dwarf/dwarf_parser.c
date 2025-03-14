@@ -1,7 +1,7 @@
 /*
  * CallstackLibrary - Library creating human-readable call stacks.
  *
- * Copyright (C) 2024  mhahnFr
+ * Copyright (C) 2024 - 2025  mhahnFr
  *
  * This file is part of the CallstackLibrary.
  *
@@ -274,7 +274,7 @@ static inline vector_pair_uint64_t dwarf_getAbbreviationTable(struct lcs_section
             }
 
             if (code == abbreviationCode && name != 0 && (version < 5 ? form != 0 : true)) {
-                vector_pair_uint64_push_back(&toReturn, (pair_uint64_t) { name, form });
+                vector_push_back(&toReturn, ((pair_uint64_t) { name, form }));
             }
         } while (name != 0 && (version < 5 ? form != 0 : true));
     } while (code != abbreviationCode && counter < (size_t) section.size);
@@ -513,7 +513,7 @@ static inline bool dwarf_parseCompDir(struct dwarf_parser* self) {
 
     const uint64_t abbrevCode = getULEB128(self->debugInfo.content, &counter);
     const vector_pair_uint64_t abbrevs = dwarf_getAbbreviationTable(self->debugAbbrev, abbrevCode, abbrevOffset, version);
-    vector_iterate(pair_uint64_t, &abbrevs, {
+    vector_iterate(&abbrevs, {
         if (element->first == DW_AT_comp_dir) {
             self->compilationDirectory = dwarf_readString(self,
                                                           self->debugInfo.content,
@@ -539,8 +539,8 @@ static inline bool dwarf_parseCompDir(struct dwarf_parser* self) {
         } else if (!dwarf_consumeSome(self, self->debugInfo.content, &counter, element->second)) {
             break;
         }
-    })
-    vector_pair_uint64_destroy(&abbrevs);
+    });
+    vector_destroy(&abbrevs);
     return self->compilationDirectory != NULL;
 }
 
