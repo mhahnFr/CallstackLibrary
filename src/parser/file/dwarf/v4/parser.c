@@ -70,9 +70,9 @@ static inline bool dwarf4_parseLineProgramHeader(struct dwarf_parser* self, size
         const uint64_t dirIndex     = getULEB128(self->debugLine.content, counter),
                        modification = getULEB128(self->debugLine.content, counter),
                        size         = getULEB128(self->debugLine.content, counter);
-        vector_dwarfFileEntry_push_back(&self->specific.v4.fileNames, (struct dwarf_fileNameEntry) {
+        vector_push_back(&self->specific.v4.fileNames, ((struct dwarf_fileNameEntry) {
             string, dirIndex, modification, size
-        });
+        }));
     }
     ++(*counter);
     return true;
@@ -134,8 +134,8 @@ static inline struct dwarf_sourceFile dwarf4_parser_getFileName(struct dwarf_par
  * @param self the generified parser object
  */
 static inline void dwarf4_parser_destroy(struct dwarf_parser* self) {
-    vector_string_destroy(&self->specific.v4.includeDirectories);
-    vector_dwarfFileEntry_destroy(&self->specific.v4.fileNames);
+    vector_destroy(&self->specific.v4.includeDirectories);
+    vector_destroy(&self->specific.v4.fileNames);
 }
 
 void dwarf4_parser_create(struct dwarf_parser* self) {

@@ -1,7 +1,7 @@
 /*
  * CallstackLibrary - Library creating human-readable call stacks.
  *
- * Copyright (C) 2024  mhahnFr
+ * Copyright (C) 2024 - 2025  mhahnFr
  *
  * This file is part of the CallstackLibrary.
  *
@@ -22,10 +22,10 @@
 #ifndef vector_fileAttribute_h
 #define vector_fileAttribute_h
 
-#include <DC4C/vector.h>
+#include <DC4C/v2/vector.h>
 
 #include "fileAttribute.h"
 
-typedef_vector_light_named(fileAttribute, struct fileAttribute);
+typedef_vector_named(fileAttribute, struct fileAttribute);
 
 #endif /* vector_fileAttribute_h */

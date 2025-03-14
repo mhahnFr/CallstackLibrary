@@ -165,7 +165,7 @@ static inline optional_vector_fileAttribute_t dwarf5_parseFileAttributes(struct 
 
     const uint64_t attributeCount = getULEB128(self->debugLine.content, counter);
     vector_fileAttribute_t attributes = vector_initializer;
-    vector_fileAttribute_reserve(&attributes, attributeCount);
+    vector_reserve(&attributes, attributeCount);
     for (uint64_t i = 0; i < attributeCount; ++i) {
         struct fileAttribute attribute = {
             .path = NULL,
@@ -210,16 +210,16 @@ static inline optional_vector_fileAttribute_t dwarf5_parseFileAttributes(struct 
                     if (!dwarf_consumeSome(self, self->debugLine.content, counter, element->second)) goto fail;
                     break;
             }
-        })
-        vector_fileAttribute_push_back(&attributes, attribute);
+        });
+        vector_push_back(&attributes, attribute);
     }
     vector_destroy(&entryFormats);
 
     return (optional_vector_fileAttribute_t) { true, attributes };
 
 fail:
-    vector_pair_uint64_destroy(&entryFormats);
-    vector_fileAttribute_destroy(&attributes);
+    vector_destroy(&entryFormats);
+    vector_destroy(&attributes);
 
     return (optional_vector_fileAttribute_t) { .has_value = false };
 }
@@ -323,8 +323,8 @@ static inline bool dwarf5_parseLineProgramHeader(struct dwarf_parser* self, size
  * @param self the generified parser object
  */
 static inline void dwarf5_parser_destroy(struct dwarf_parser* self) {
-    vector_fileAttribute_destroy(&self->specific.v5.files);
-    vector_fileAttribute_destroy(&self->specific.v5.directories);
+    vector_destroy(&self->specific.v5.files);
+    vector_destroy(&self->specific.v5.directories);
 }
 
 void dwarf5_parser_create(struct dwarf_parser* self) {
