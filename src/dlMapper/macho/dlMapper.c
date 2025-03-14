@@ -1,7 +1,7 @@
 /*
  * CallstackLibrary - Library creating human-readable call stacks.
  *
- * Copyright (C) 2024  mhahnFr
+ * Copyright (C) 2024 - 2025  mhahnFr
  *
  * This file is part of the CallstackLibrary.
  *
@@ -123,7 +123,7 @@ static inline void dlMapper_platform_pushLoadedLib(vector_loadedLibInfo_t*   lib
                                                    const struct mach_header* header,
                                                    const void*               inside) {
     const pair_address_t addresses = dlMapper_platform_loadMachO(header, fileName);
-    vector_loadedLibInfo_push_back(libs, (struct loadedLibInfo) {
+    vector_push_back(libs, ((struct loadedLibInfo) {
         addresses.first,
         addresses.second,
         0,
@@ -132,7 +132,7 @@ static inline void dlMapper_platform_pushLoadedLib(vector_loadedLibInfo_t*   lib
         path_toRelativePath(fileName),
         inside >= addresses.first && inside <= addresses.second,
         NULL
-    });
+    }));
 }
 
 bool dlMapper_platform_loadLoadedLibraries(vector_loadedLibInfo_t* libs) {
@@ -140,7 +140,7 @@ bool dlMapper_platform_loadLoadedLibraries(vector_loadedLibInfo_t* libs) {
     inside = &dlMapper_platform_loadLoadedLibraries;
 
     const uint32_t count = _dyld_image_count();
-    vector_loadedLibInfo_reserve(libs, count + 1);
+    vector_reserve(libs, count + 1);
     for (uint32_t i = 0; i < count; ++i) {
         dlMapper_platform_pushLoadedLib(libs, _dyld_get_image_name(i), _dyld_get_image_header(i), (void*) inside);
     }

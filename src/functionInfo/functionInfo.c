@@ -1,7 +1,7 @@
 /*
  * CallstackLibrary - Library creating human-readable call stacks.
  *
- * Copyright (C) 2022 - 2024  mhahnFr
+ * Copyright (C) 2024 - 2025  mhahnFr
  *
  * This file is part of the CallstackLibrary.
  *
@@ -60,11 +60,11 @@ struct functionInfo functionInfo_loadHint(const char* functionName, const char* 
     }
 
     const vector_loadedLibInfo_t* libs = dlMapper_getLoadedLibraries();
-    vector_iterate(struct loadedLibInfo, libs, {
+    vector_iterate(libs, {
         if (functionInfo_getFrom(element, functionName, &toReturn)) {
             break;
         }
-    })
+    });
 
     if (callstack_autoClearCaches) {
         callstack_clearCaches();

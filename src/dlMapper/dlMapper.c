@@ -1,7 +1,7 @@
 /*
  * CallstackLibrary - Library creating human-readable call stacks.
  *
- * Copyright (C) 2024  mhahnFr
+ * Copyright (C) 2024 - 2025  mhahnFr
  *
  * This file is part of the CallstackLibrary.
  *
@@ -89,13 +89,13 @@ struct loadedLibInfo* dlMapper_libInfoForAddress(const void* address) {
 struct loadedLibInfo* dlMapper_libInfoForFileName(const char* fileName) {
     if (!dlMapper_inited) return NULL;
 
-    vector_iterate(struct loadedLibInfo, &loadedLibs, {
+    vector_iterate(&loadedLibs, {
         if (strcmp(fileName, element->fileName) == 0
             || strcmp(fileName, element->absoluteFileName) == 0
             || strcmp(fileName, element->relativeFileName) == 0) {
             return element;
         }
-    })
+    });
     return NULL;
 }
 
@@ -104,7 +104,7 @@ const vector_loadedLibInfo_t* dlMapper_getLoadedLibraries(void) {
 }
 
 void dlMapper_deinit(void) {
-    vector_loadedLibInfo_destroyWithPtr(&loadedLibs, loadedLibInfo_destroy);
-    vector_loadedLibInfo_create(&loadedLibs);
+    vector_destroyWithPtr(&loadedLibs, loadedLibInfo_destroy);
+    vector_init(&loadedLibs);
     dlMapper_inited = false;
 }
