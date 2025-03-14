@@ -105,9 +105,9 @@ static inline bool dwarf_parser_parse(struct dwarf_parser* self, size_t counter,
                                    timeStamp = getULEB128(self->debugLine.content, &counter),
                                         size = getULEB128(self->debugLine.content, &counter);
                     if (self->version < 5) {
-                        vector_dwarfFileEntry_push_back(&self->specific.v4.fileNames, (struct dwarf_fileNameEntry) {
+                        vector_push_back(&self->specific.v4.fileNames, ((struct dwarf_fileNameEntry) {
                             fileName, dirIndex, timeStamp, size
-                        });
+                        }));
                     }
                     break;
                 }
