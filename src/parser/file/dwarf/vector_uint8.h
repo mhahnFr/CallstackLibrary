@@ -1,7 +1,7 @@
 /*
  * CallstackLibrary - Library creating human-readable call stacks.
  *
- * Copyright (C) 2024  mhahnFr
+ * Copyright (C) 2024 - 2025  mhahnFr
  *
  * This file is part of the CallstackLibrary.
  *
@@ -24,8 +24,8 @@
 
 #include <stdint.h>
 
-#include <DC4C/vector.h>
+#include <DC4C/v2/vector.h>
 
-typedef_vector_light_named(uint8, uint8_t);
+typedef_vector_named(uint8, uint8_t);
 
 #endif /* vector_uint8_h */

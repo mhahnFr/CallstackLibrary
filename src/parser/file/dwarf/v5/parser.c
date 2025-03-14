@@ -298,9 +298,9 @@ static inline bool dwarf5_parseLineProgramHeader(struct dwarf_parser* self, size
     self->lineRange                       = *((uint8_t*) (self->debugLine.content + (*counter)++));
     self->opCodeBase                      = *((uint8_t*) (self->debugLine.content + (*counter)++));
 
-    vector_uint8_reserve(&self->stdOpcodeLengths, self->opCodeBase - 1);
+    vector_reserve(&self->stdOpcodeLengths, self->opCodeBase - 1);
     for (uint8_t i = 1; i < self->opCodeBase; ++i) {
-        vector_uint8_push_back(&self->stdOpcodeLengths, *((uint8_t*) (self->debugLine.content + (*counter)++)));
+        vector_push_back(&self->stdOpcodeLengths, *((uint8_t*) (self->debugLine.content + (*counter)++)));
     }
 
     optional_vector_fileAttribute_t maybeDirs = dwarf5_parseFileAttributes(self, counter);

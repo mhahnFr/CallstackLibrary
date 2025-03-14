@@ -585,7 +585,7 @@ bool dwarf_parseLineProgram(struct lcs_section debugLine,
     }
 
     const bool toReturn = dwarf_parser_parse(&parser, counter, size);
-    vector_uint8_destroy(&parser.stdOpcodeLengths);
+    vector_destroy(&parser.stdOpcodeLengths);
     parser.destroy(&parser);
     return toReturn;
 }
