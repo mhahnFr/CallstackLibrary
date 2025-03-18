@@ -47,8 +47,11 @@ static inline bool callstack_demangle_isCxx(const char* name) {
 }
 
 static inline bool callstack_demangle_isSwift(const char* name) {
-    // TODO: Is this correct?
-    return strncmp(name, "$s", 2) == 0 || strncmp(name, "_$s", 3) == 0;
+    return strncmp(name, "_$s", 3) == 0 || strncmp(name, "$s", 2) == 0
+        || strncmp(name, "_$e", 3) == 0 || strncmp(name, "$e", 2) == 0
+        || strncmp(name, "_$S", 3) == 0 || strncmp(name, "$S", 2) == 0
+        || strncmp(name, "_T0", 3) == 0
+        || strncmp(name, "@__swiftmacro_", 14) == 0;
 }
 
 char* callstack_demangle(char* name) {
