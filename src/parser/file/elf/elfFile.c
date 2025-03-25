@@ -53,8 +53,8 @@ void elfFile_create(struct elfFile* self) {
     lcs_section_create(&self->debugInfo);
     lcs_section_create(&self->debugAbbrev);
     lcs_section_create(&self->debugStrOffsets);
-    vector_dwarfLineInfo_create(&self->lineInfos);
-    vector_function_create(&self->functions);
+    vector_init(&self->lineInfos);
+    vector_init(&self->functions);
 }
 
 /**
@@ -68,7 +68,7 @@ void elfFile_create(struct elfFile* self) {
 static inline void elfFile_lineProgramCallback(struct dwarf_lineInfo info, void* args) {
     struct elfFile* self = args;
 
-    vector_dwarfLineInfo_push_back(&self->lineInfos, info);
+    vector_push_back(&self->lineInfos, info);
 }
 
 #define elfFile_loadSectionStrtab(bits)                                                                                         \
@@ -110,7 +110,7 @@ static inline bool elfFile_parseSymtab##bits(struct elfFile*   self,            
                 .length       = ELF_TO_HOST(bits, entry->st_size, littleEndian),                                        \
                 .demangledName.has_value = false,                                                                       \
             };                                                                                                          \
-            vector_function_push_back(&self->functions, f);                                                             \
+            vector_push_back(&self->functions, f);                                                                      \
         }                                                                                                               \
     }                                                                                                                   \
     return true;                                                                                                        \
@@ -299,8 +299,8 @@ static inline bool elfFile_loadFile(struct elfFile* self) {
         qsort(self->functions.content, self->functions.count, sizeof(struct function), elfFile_functionCompare);
         qsort(self->lineInfos.content, self->lineInfos.count, sizeof(struct dwarf_lineInfo), elfFile_lineInfoCompare);
     } else {
-        vector_iterate(struct function, &self->functions, function_destroy(element);)
-        vector_function_clear(&self->functions);
+        vector_iterate(&self->functions, function_destroy(element););
+        vector_clear(&self->functions);
     }
     return success;
 }
@@ -379,13 +379,13 @@ bool elfFile_getFunctionInfo(struct elfFile* self, const char* functionName, str
         return false;
     }
 
-    vector_iterate(struct function, &self->functions, {
+    vector_iterate(&self->functions, {
         if (strcmp(element->linkedName, functionName) == 0) {
             info->begin = (uintptr_t) element->startAddress + self->_.relocationOffset;
             info->length = element->length;
             return true;
         }
-    })
+    });
     return false;
 }
 
@@ -422,9 +422,9 @@ bool elfFile_addr2String(struct elfFile* self, void* address, struct callstack_f
 }
 
 void elfFile_destroy(struct elfFile* self) {
-    vector_iterate(struct function, &self->functions, function_destroy(element);)
-    vector_function_destroy(&self->functions);
-    vector_dwarfLineInfo_destroyWith(&self->lineInfos, dwarf_lineInfo_destroyValue);
+    vector_iterate(&self->functions, function_destroy(element););
+    vector_destroy(&self->functions);
+    vector_destroyWith(&self->lineInfos, dwarf_lineInfo_destroyValue);
 }
 
 void elfFile_delete(struct elfFile* self) {
