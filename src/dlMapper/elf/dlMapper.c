@@ -1,7 +1,7 @@
 /*
  * CallstackLibrary - Library creating human-readable call stacks.
  *
- * Copyright (C) 2024  mhahnFr
+ * Copyright (C) 2024 - 2025  mhahnFr
  *
  * This file is part of the CallstackLibrary.
  *
@@ -161,7 +161,7 @@ static inline int dlMapper_platform_iterateCallback(struct dl_phdr_info* info, s
         return 0;
     }
     pair_address_t addresses = dlMapper_platform_loadELF(loadedAddress);
-    vector_loadedLibInfo_push_back(data->libs, (struct loadedLibInfo) {
+    vector_push_back(data->libs, ((struct loadedLibInfo) {
         addresses.first,
         addresses.second,
         info->dlpi_addr,
@@ -170,7 +170,7 @@ static inline int dlMapper_platform_iterateCallback(struct dl_phdr_info* info, s
         path_toRelativePath(fileName),
         data->inside >= addresses.first && data->inside <= addresses.second,
         NULL
-    });
+    }));
     return 0;
 }
 
