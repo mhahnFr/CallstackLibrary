@@ -57,8 +57,8 @@ struct regionInfo regions_getLoadedRegions(void) {
 }
 
 void regions_destroy(struct region self) {
-    maybe((void(*)(const char*)) free, self.name);
-    maybe((void(*)(const char*)) free, self.nameRelative);
+    maybe(free, (void*) self.name);
+    maybe(free, (void*) self.nameRelative);
 }
 
 void regions_destroyInfo(struct regionInfo* info) {
