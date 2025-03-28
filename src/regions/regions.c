@@ -25,11 +25,11 @@
 #include <callstack_internals.h>
 #include <regions/regions.h>
 
-#include <DC4C/vector.h>
+#include <DC4C/v2/vector.h>
 
 #include "../dlMapper/dlMapper.h"
 
-typedef_vector_light_named(region, struct region);
+typedef_vector_named(region, struct region);
 
 #define maybeRun(b, func, ...) ({ (b) ? (func)(__VA_ARGS__) : (__VA_ARGS__); })
 #define maybe(func, ...) maybeRun(callstack_autoClearCaches, func, __VA_ARGS__)
@@ -40,15 +40,15 @@ struct regionInfo regions_getLoadedRegions(void) {
     }
 
     vector_region_t toReturn = vector_initializer;
-    vector_forEach(struct loadedLibInfo, dlMapper_getLoadedLibraries(), outerElement, {
-        vector_iterate(struct pair_ptr, &outerElement->associated->regions, {
-            vector_region_push_back(&toReturn, ((struct region) {
+    vector_forEach(dlMapper_getLoadedLibraries(), outerElement, {
+        vector_iterate(&outerElement->associated->regions, {
+            vector_push_back(&toReturn, ((struct region) {
                 element->first, element->second,
                 maybe(strdup, outerElement->absoluteFileName),
                 maybe(strdup, outerElement->relativeFileName),
             }));
-        })
-    })
+        });
+    });
 
     if (callstack_autoClearCaches) {
         callstack_clearCaches();
@@ -63,5 +63,5 @@ static inline void region_destroy(struct region self) {
 
 void regions_destroyInfo(struct regionInfo* info) {
     vector_region_t tmp = (vector_region_t) { info->amount, info->amount, info->regions };
-    vector_region_destroyWith(&tmp, &region_destroy);
+    vector_destroyWith(&tmp, region_destroy);
 }
