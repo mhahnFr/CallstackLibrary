@@ -25,9 +25,9 @@
 #include <stdint.h>
 
 #include <DC4C/pair.h>
-#include <DC4C/vector.h>
+#include <DC4C/v2/vector.h>
 
 typedef_pair_named(ptr, uintptr_t, uintptr_t);
-typedef_vector_light_named(pair_ptr, struct pair_ptr);
+typedef_vector_named(pair_ptr, struct pair_ptr);
 
 #endif /* vector_pair_ptr_h */

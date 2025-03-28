@@ -92,7 +92,7 @@ bool binaryFile_isOutdated(struct dwarf_sourceFile file) {
 
 void binaryFile_destroy(struct binaryFile* self) {
     LCS_FILE_1(self, destroy);
-    vector_pair_ptr_destroy(&self->regions);
+    vector_destroy(&self->regions);
 }
 
 void binaryFile_delete(struct binaryFile* self) {

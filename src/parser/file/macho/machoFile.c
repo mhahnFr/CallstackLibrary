@@ -193,24 +193,23 @@ static inline optional_debugInfo_t machoFile_getDebugInfo(struct machoFile* self
     return info;
 }
 
-#define machoFile_handleSegment(type, bits)                                                                  \
-static inline bool machoFile_handleSegment##bits(struct machoFile* self, type* segment, bool bytesSwapped) { \
-    if (strcmp(segment->segname, SEG_PAGEZERO) == 0) {                                                       \
-        self->addressOffset = macho_maybeSwap(bits, bytesSwapped, segment->vmaddr)                           \
-                            + macho_maybeSwap(bits, bytesSwapped, segment->vmsize);                          \
-    } else if (strcmp(segment->segname, SEG_LINKEDIT) == 0) {                                                \
-        self->linkedit_vmaddr  = macho_maybeSwap(bits, bytesSwapped, segment->vmaddr);                       \
-        self->linkedit_fileoff = macho_maybeSwap(bits, bytesSwapped, segment->fileoff);                      \
-    } else if (strcmp(segment->segname, SEG_TEXT) == 0) {                                                    \
-        self->text_vmaddr = macho_maybeSwap(bits, bytesSwapped, segment->vmaddr);                            \
-    }                                                                                                        \
-                                                                                                             \
-    if (segment->initprot & 2 && segment->initprot & 1) {                                                    \
-        vector_pair_ptr_push_back(&self->_.regions,                                                          \
-                                  (pair_ptr_t) { segment->vmaddr, segment->vmaddr + segment->vmsize });      \
-    }                                                                                                        \
-                                                                                                             \
-    return true;                                                                                             \
+#define machoFile_handleSegment(type, bits)                                                                        \
+static inline bool machoFile_handleSegment##bits(struct machoFile* self, type* segment, bool bytesSwapped) {       \
+    if (strcmp(segment->segname, SEG_PAGEZERO) == 0) {                                                             \
+        self->addressOffset = macho_maybeSwap(bits, bytesSwapped, segment->vmaddr)                                 \
+                            + macho_maybeSwap(bits, bytesSwapped, segment->vmsize);                                \
+    } else if (strcmp(segment->segname, SEG_LINKEDIT) == 0) {                                                      \
+        self->linkedit_vmaddr  = macho_maybeSwap(bits, bytesSwapped, segment->vmaddr);                             \
+        self->linkedit_fileoff = macho_maybeSwap(bits, bytesSwapped, segment->fileoff);                            \
+    } else if (strcmp(segment->segname, SEG_TEXT) == 0) {                                                          \
+        self->text_vmaddr = macho_maybeSwap(bits, bytesSwapped, segment->vmaddr);                                  \
+    }                                                                                                              \
+                                                                                                                   \
+    if (segment->initprot & 2 && segment->initprot & 1) {                                                          \
+        vector_push_back(&self->_.regions, ((pair_ptr_t) { segment->vmaddr, segment->vmaddr + segment->vmsize })); \
+    }                                                                                                              \
+                                                                                                                   \
+    return true;                                                                                                   \
 }
 
 machoFile_handleSegment(struct segment_command,    32)
@@ -320,10 +319,10 @@ static inline bool machoFile_parseFileImpl##bits(struct machoFile* self, const v
     machoFile_fixupFunctions(self);                                                                                    \
                                                                                                                        \
     intptr_t diff = (uintptr_t) header - self->text_vmaddr;                                                            \
-    vector_iterate(pair_ptr_t, &self->_.regions, {                                                                     \
+    vector_iterate(&self->_.regions, {                                                                                 \
         element->first += diff;                                                                                        \
         element->second += diff;                                                                                       \
-    })                                                                                                                 \
+    });                                                                                                                \
                                                                                                                        \
     return true;                                                                                                       \
 }
