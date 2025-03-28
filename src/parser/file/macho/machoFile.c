@@ -204,6 +204,12 @@ static inline bool machoFile_handleSegment##bits(struct machoFile* self, type* s
     } else if (strcmp(segment->segname, SEG_TEXT) == 0) {                                                    \
         self->text_vmaddr = macho_maybeSwap(bits, bytesSwapped, segment->vmaddr);                            \
     }                                                                                                        \
+                                                                                                             \
+    if (segment->initprot & 2 && segment->initprot & 1) {                                                    \
+        vector_pair_ptr_push_back(&self->_.regions,                                                          \
+                                  (pair_ptr_t) { segment->vmaddr, segment->vmaddr + segment->vmsize });      \
+    }                                                                                                        \
+                                                                                                             \
     return true;                                                                                             \
 }
 
