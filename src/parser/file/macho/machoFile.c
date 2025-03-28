@@ -319,6 +319,12 @@ static inline bool machoFile_parseFileImpl##bits(struct machoFile* self, const v
                                                                                                                        \
     machoFile_fixupFunctions(self);                                                                                    \
                                                                                                                        \
+    intptr_t diff = (uintptr_t) header - self->text_vmaddr;                                                            \
+    vector_iterate(pair_ptr_t, &self->_.regions, {                                                                     \
+        element->first += diff;                                                                                        \
+        element->second += diff;                                                                                       \
+    })                                                                                                                 \
+                                                                                                                       \
     return true;                                                                                                       \
 }
 
