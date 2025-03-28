@@ -193,51 +193,28 @@ static inline optional_debugInfo_t machoFile_getDebugInfo(struct machoFile* self
     return info;
 }
 
-/**
- * Handles the given segment command.
- *
- * @param self the Mach-O file abstraction object
- * @param segment the segment command to handle
- * @param bitsReversed whether to swap the numbers' endianness
- * @return whether the handling was successful
- */
-static inline bool machoFile_handleSegment(struct machoFile *       self,
-                                           struct segment_command * segment,
-                                           bool                     bitsReversed) {
-    if (strcmp(segment->segname, SEG_PAGEZERO) == 0) {
-        self->addressOffset = macho_maybeSwap(32, bitsReversed, segment->vmaddr)
-                            + macho_maybeSwap(32, bitsReversed, segment->vmsize);
-    } else if (strcmp(segment->segname, SEG_LINKEDIT) == 0) {
-        self->linkedit_vmaddr  = macho_maybeSwap(32, bitsReversed, segment->vmaddr);
-        self->linkedit_fileoff = macho_maybeSwap(32, bitsReversed, segment->fileoff);
-    } else if (strcmp(segment->segname, SEG_TEXT) == 0) {
-        self->text_vmaddr = macho_maybeSwap(32, bitsReversed, segment->vmaddr);
-    }
-    return true;
+#define machoFile_handleSegment(type, bits)                                                                  \
+static inline bool machoFile_handleSegment##bits(struct machoFile* self, type* segment, bool bytesSwapped) { \
+    if (strcmp(segment->segname, SEG_PAGEZERO) == 0) {                                                       \
+        self->addressOffset = macho_maybeSwap(bits, bytesSwapped, segment->vmaddr)                           \
+                            + macho_maybeSwap(bits, bytesSwapped, segment->vmsize);                          \
+    } else if (strcmp(segment->segname, SEG_LINKEDIT) == 0) {                                                \
+        self->linkedit_vmaddr  = macho_maybeSwap(bits, bytesSwapped, segment->vmaddr);                       \
+        self->linkedit_fileoff = macho_maybeSwap(bits, bytesSwapped, segment->fileoff);                      \
+    } else if (strcmp(segment->segname, SEG_TEXT) == 0) {                                                    \
+        self->text_vmaddr = macho_maybeSwap(bits, bytesSwapped, segment->vmaddr);                            \
+    }                                                                                                        \
+                                                                                                             \
+    if (segment->initprot & 2 && segment->initprot & 1) {                                                    \
+        vector_pair_ptr_push_back(&self->_.regions,                                                          \
+                                  (pair_ptr_t) { segment->vmaddr, segment->vmaddr + segment->vmsize });      \
+    }                                                                                                        \
+                                                                                                             \
+    return true;                                                                                             \
 }
 
-/**
- * Handles the given 64 bit segment command.
- *
- * @param self the Mach-O file abstraction object
- * @param segment the 64 bit segment command to handle
- * @param bitsReversed whether to swap the numbers' endianness
- * @return whether the handling was successfully
- */
-static inline bool machoFile_handleSegment64(struct machoFile *          self,
-                                             struct segment_command_64 * segment,
-                                             bool                        bitsReversed) {
-    if (strcmp(segment->segname, SEG_PAGEZERO) == 0) {
-        self->addressOffset = macho_maybeSwap(64, bitsReversed, segment->vmaddr)
-                            + macho_maybeSwap(64, bitsReversed, segment->vmsize);
-    } else if (strcmp(segment->segname, SEG_LINKEDIT) == 0) {
-        self->linkedit_vmaddr  = macho_maybeSwap(64, bitsReversed, segment->vmaddr);
-        self->linkedit_fileoff = macho_maybeSwap(64, bitsReversed, segment->fileoff);
-    } else if (strcmp(segment->segname, SEG_TEXT) == 0) {
-        self->text_vmaddr = macho_maybeSwap(64, bitsReversed, segment->vmaddr);
-    }
-    return true;
-}
+machoFile_handleSegment(struct segment_command,    32)
+machoFile_handleSegment(struct segment_command_64, 64)
 
 /**
  * Adds the given function / object file pair to the Mach-O file abstraction object passed via the `va_list`.
@@ -304,101 +281,55 @@ static inline void machoFile_fixupFunctions(struct machoFile* self) {
     });
 }
 
-/**
- * Parses a Mach-O file into the given Mach-O file abstraction object.
- *
- * @param self the Mach-O file abstraction object
- * @param baseAddress the base address of the Mach-O file
- * @param bitsReversed whether to swap the numbers' endianess
- * @return whether the parsing was successfull
- */
-static inline bool machoFile_parseFileImpl(struct machoFile * self,
-                                           const void*        baseAddress,
-                                           bool               bitsReversed) {
-    const struct mach_header* header = baseAddress;
-    struct load_command * lc     = (void *) header + sizeof(struct mach_header);
-    const  uint32_t       ncmds  = macho_maybeSwap(32, bitsReversed, header->ncmds);
-
-    for (size_t i = 0; i < ncmds; ++i) {
-        bool result = true;
-        switch (macho_maybeSwap(32, bitsReversed, lc->cmd)) {
-            case LC_SEGMENT:
-                result = machoFile_handleSegment(self, (void *) lc, bitsReversed);
-                break;
-
-            case LC_SYMTAB:
-                result = macho_parseSymtab((void*) lc, baseAddress,
-                                           self->_.inMemory ? (self->linkedit_vmaddr - self->text_vmaddr) - self->linkedit_fileoff : 0,
-                                           bitsReversed, false, NULL, machoFile_addFunction, self);
-                break;
-
-            case LC_UUID:
-                memcpy(&self->uuid, &((struct uuid_command*) ((void*) lc))->uuid, 16);
-                result = true;
-                break;
-
-            case LC_FUNCTION_STARTS:
-                result = machoFile_handleFunctionStarts(self, (void*) lc, baseAddress, bitsReversed);
-                break;
-        }
-        if (!result) {
-            return false;
-        }
-        lc = (void *) lc + macho_maybeSwap(32, bitsReversed, lc->cmdsize);
-    }
-
-    machoFile_fixupFunctions(self);
-
-    return true;
+#define machoFile_parseFileImpl(bits, type, segMacro)                                                                  \
+static inline bool machoFile_parseFileImpl##bits(struct machoFile* self, const void* baseAddress, bool bytesSwapped) { \
+    const struct type*   header = baseAddress;                                                                         \
+    struct load_command* lc     = (void *) header + sizeof(struct type);                                               \
+    const  uint32_t      ncmds  = macho_maybeSwap(32, bytesSwapped, header->ncmds);                                    \
+                                                                                                                       \
+    for (size_t i = 0; i < ncmds; ++i) {                                                                               \
+        bool result = true;                                                                                            \
+        switch (macho_maybeSwap(32, bytesSwapped, lc->cmd)) {                                                          \
+            case segMacro:                                                                                             \
+                result = machoFile_handleSegment##bits(self, (void *) lc, bytesSwapped);                               \
+                break;                                                                                                 \
+                                                                                                                       \
+            case LC_SYMTAB:                                                                                            \
+                result = macho_parseSymtab((void*) lc, baseAddress,                                                    \
+                                           self->_.inMemory ? (self->linkedit_vmaddr - self->text_vmaddr)              \
+                                                              - self->linkedit_fileoff                                 \
+                                                            : 0,                                                       \
+                                           bytesSwapped, false, NULL, machoFile_addFunction, self);                    \
+                break;                                                                                                 \
+                                                                                                                       \
+            case LC_UUID:                                                                                              \
+                memcpy(&self->uuid, &((struct uuid_command*) ((void*) lc))->uuid, 16);                                 \
+                result = true;                                                                                         \
+                break;                                                                                                 \
+                                                                                                                       \
+            case LC_FUNCTION_STARTS:                                                                                   \
+                result = machoFile_handleFunctionStarts(self, (void*) lc, baseAddress, bytesSwapped);                  \
+                break;                                                                                                 \
+        }                                                                                                              \
+        if (!result) {                                                                                                 \
+            return false;                                                                                              \
+        }                                                                                                              \
+        lc = (void *) lc + macho_maybeSwap(32, bytesSwapped, lc->cmdsize);                                             \
+    }                                                                                                                  \
+                                                                                                                       \
+    machoFile_fixupFunctions(self);                                                                                    \
+                                                                                                                       \
+    intptr_t diff = (uintptr_t) header - self->text_vmaddr;                                                            \
+    vector_iterate(pair_ptr_t, &self->_.regions, {                                                                     \
+        element->first += diff;                                                                                        \
+        element->second += diff;                                                                                       \
+    })                                                                                                                 \
+                                                                                                                       \
+    return true;                                                                                                       \
 }
 
-/**
- * Parses a 64 bit Mach-O file into the given Mach-O file abstraction object.
- *
- * @param self the Mach-O file abstraction object
- * @param baseAddress the base address of the Mach-O file
- * @param bitsReversed whether to swap the numbers' endianess
- * @return whether the parsing was successfull
- */
-static inline bool machoFile_parseFileImpl64(struct machoFile * self,
-                                             const void*        baseAddress,
-                                             bool               bitsReversed) {
-    const struct mach_header_64* header = baseAddress;
-    struct load_command *   lc     = (void *) header + sizeof(struct mach_header_64);
-    const  uint32_t         ncmds  = macho_maybeSwap(32, bitsReversed, header->ncmds);
-
-    for (size_t i = 0; i < ncmds; ++i) {
-        bool result = true;
-        switch (macho_maybeSwap(32, bitsReversed, lc->cmd)) {
-            case LC_SEGMENT_64:
-                result = machoFile_handleSegment64(self, (void *) lc, bitsReversed);
-                break;
-
-            case LC_SYMTAB:
-                result = macho_parseSymtab((void*) lc, baseAddress,
-                                           self->_.inMemory ? (self->linkedit_vmaddr - self->text_vmaddr) - self->linkedit_fileoff : 0,
-                                           bitsReversed, true, NULL, machoFile_addFunction, self);
-                break;
-
-            case LC_UUID:
-                memcpy(&self->uuid, &((struct uuid_command*) ((void*) lc))->uuid, 16);
-                result = true;
-                break;
-
-            case LC_FUNCTION_STARTS:
-                result = machoFile_handleFunctionStarts(self, (void*) lc, baseAddress, bitsReversed);
-                break;
-        }
-        if (!result) {
-            return false;
-        }
-        lc = (void *) lc + macho_maybeSwap(32, bitsReversed, lc->cmdsize);
-    }
-
-    machoFile_fixupFunctions(self);
-
-    return true;
-}
+machoFile_parseFileImpl(32, mach_header,    LC_SEGMENT)
+machoFile_parseFileImpl(64, mach_header_64, LC_SEGMENT_64)
 
 /**
  * Parses the given Mach-O file buffer into the given Mach-O file abstraction object.
@@ -412,8 +343,8 @@ static inline bool machoFile_parseFile(struct machoFile* self, const void* baseA
 
     const struct mach_header* header = baseAddress;
     switch (header->magic) {
-        case MH_MAGIC:    return machoFile_parseFileImpl(self, baseAddress, false);
-        case MH_CIGAM:    return machoFile_parseFileImpl(self, baseAddress, true);
+        case MH_MAGIC:    return machoFile_parseFileImpl32(self, baseAddress, false);
+        case MH_CIGAM:    return machoFile_parseFileImpl32(self, baseAddress, true);
         case MH_MAGIC_64: return machoFile_parseFileImpl64(self, baseAddress, false);
         case MH_CIGAM_64: return machoFile_parseFileImpl64(self, baseAddress, true);
 

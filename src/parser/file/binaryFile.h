@@ -27,6 +27,8 @@
 #include <callstack_frame.h>
 #include <functionInfo/functionInfo.h>
 
+#include "vector_pair_ptr.h"
+
 #include "dwarf/dwarf_lineInfo.h"
 
 /**
@@ -45,6 +47,7 @@ struct binaryFile {
     const void* startAddress;
     /** The relocation offset of the binary file.                        */
     uintptr_t relocationOffset;
+    vector_pair_ptr_t regions;
 };
 
 /**
@@ -67,6 +70,7 @@ static inline void binaryFile_create(struct binaryFile* self) {
     self->inMemory = false;
     self->startAddress = NULL;
     self->relocationOffset = 0;
+    self->regions = (struct vector_pair_ptr) vector_initializer;
 }
 
 /**
