@@ -56,12 +56,12 @@ struct regionInfo regions_getLoadedRegions(void) {
     return (struct regionInfo) { toReturn.content, toReturn.count };
 }
 
-static inline void region_destroy(struct region self) {
+void regions_destroy(struct region self) {
     maybe((void(*)(const char*)) free, self.name);
     maybe((void(*)(const char*)) free, self.nameRelative);
 }
 
 void regions_destroyInfo(struct regionInfo* info) {
     vector_region_t tmp = (vector_region_t) { info->amount, info->amount, info->regions };
-    vector_destroyWith(&tmp, region_destroy);
+    vector_destroyWith(&tmp, regions_destroy);
 }
