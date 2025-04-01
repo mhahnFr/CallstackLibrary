@@ -42,9 +42,6 @@ struct regionInfo {
 
 struct regionInfo regions_getLoadedRegions(void);
 
-struct region regions_getRegionFor(const void* begin, const char* fileName);
-void regions_destroyRegion(struct region region);
-
 void regions_destroyInfo(struct regionInfo* info);
 
 #ifdef __cplusplus

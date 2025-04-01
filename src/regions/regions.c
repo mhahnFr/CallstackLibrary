@@ -56,7 +56,7 @@ struct regionInfo regions_getLoadedRegions(void) {
     return (struct regionInfo) { toReturn.content, toReturn.count };
 }
 
-void regions_destroy(struct region self) {
+static inline void regions_destroy(struct region self) {
     maybe(free, (void*) self.name);
     maybe(free, (void*) self.nameRelative);
 }
