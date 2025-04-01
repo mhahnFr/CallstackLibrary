@@ -42,18 +42,10 @@ static inline bool callstack_parser_parseImpl(struct callstack_parser* self,
         struct loadedLibInfo*    info = callstack->frames[i].reserved;
         struct callstack_frame* frame = &callstack->frames[i];
 
-        if (info == NULL) continue;
-
-        if (info->associated == NULL) {
-            info->associated = binaryFile_new(info->fileName, info->begin);
+        if (!loadedLibInfo_prepare(info)) {
+            continue;
         }
-        struct binaryFile* file = info->associated;
-        if (file == NULL) continue;
-
-        file->relocationOffset = info->relocationOffset;
-        file->inMemory = true;
-
-        binaryFile_addr2String(file, callstack->backtrace[i], frame);
+        binaryFile_addr2String(info->associated, callstack->backtrace[i], frame);
     }
     return true;
 }
