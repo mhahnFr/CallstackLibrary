@@ -41,6 +41,10 @@ struct regionInfo regions_getLoadedRegions(void) {
 
     vector_region_t toReturn = vector_initializer;
     vector_forEach(dlMapper_getLoadedLibraries(), outerElement, {
+        if (!loadedLibInfo_prepare(outerElement)) {
+            continue;
+        }
+        binaryFile_maybeParse(outerElement->associated);
         vector_iterate(&outerElement->associated->regions, {
             vector_push_back(&toReturn, ((struct region) {
                 element->first, element->second,
