@@ -94,6 +94,8 @@ bool binaryFile_addr2String(struct binaryFile* self, void* address, struct calls
  */
 bool binaryFile_getFunctionInfo(struct binaryFile* self, const char* functionName, struct functionInfo* info);
 
+bool binaryFile_maybeParse(struct binaryFile* self);
+
 /**
  * Clears the caches created by the binary file implementations.
  */

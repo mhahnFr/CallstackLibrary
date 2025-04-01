@@ -356,13 +356,7 @@ static inline bool machoFile_parseFile(struct machoFile* self, const void* baseA
     return false;
 }
 
-/**
- * Loads and parses the Mach-O file represented by the given Mach-O file abstraction object.
- *
- * @param self the Mach-O file abstraction object
- * @return whether the file was parsed successfully
- */
-static inline bool machoFile_loadFile(struct machoFile* self) {
+bool machoFile_parse(struct machoFile* self) {
     const bool success = self->_.inMemory ? machoFile_parseFile(self, self->_.startAddress)
                                         : loader_loadFileAndExecute(self->_.fileName,
                                                                     (union loader_parserFunction) { (loader_parser) machoFile_parseFile },

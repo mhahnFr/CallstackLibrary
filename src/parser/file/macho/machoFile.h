@@ -101,6 +101,14 @@ bool machoFile_addr2String(struct machoFile* self, void* address, struct callsta
 bool machoFile_getFunctionInfo(struct machoFile* self, const char* functionName, struct functionInfo* info);
 
 /**
+ * Loads and parses the Mach-O file represented by the given Mach-O file abstraction object.
+ *
+ * @param self the Mach-O file abstraction object
+ * @return whether the file was parsed successfully
+ */
+bool machoFile_parse(struct machoFile* self);
+
+/**
  * Deinitializes the given binary file structure if it is a Mach-O file structure.
  *
  * @param self the binary file structure to be deinitialized

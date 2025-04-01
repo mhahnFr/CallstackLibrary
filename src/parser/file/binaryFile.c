@@ -67,6 +67,10 @@ bool binaryFile_getFunctionInfo(struct binaryFile* self, const char* functionNam
     return LCS_FILE(self, getFunctionInfo, functionName, info);
 }
 
+bool binaryFile_maybeParse(struct binaryFile* self) {
+    return self->parsed || (self->parsed = LCS_FILE_1(self, parse));
+}
+
 void binaryFile_clearCaches(void) {
 #ifdef LCS_MACHO
     machoFile_clearCaches();
