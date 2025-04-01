@@ -55,7 +55,7 @@ bool dlMapper_init(void) {
     if (!result) {
         dlMapper_deinit();
     } else {
-        qsort(loadedLibs.content, loadedLibs.count, sizeof(struct loadedLibInfo), dlMapper_sortCompare);
+        vector_sort(&loadedLibs, dlMapper_sortCompare);
     }
     dlMapper_inited = result;
     return result;
@@ -83,7 +83,7 @@ static inline int dlMapper_searchCompare(const void* key, const void* element) {
 struct loadedLibInfo* dlMapper_libInfoForAddress(const void* address) {
     if (!dlMapper_inited) return NULL;
 
-    return bsearch(address, loadedLibs.content, loadedLibs.count, sizeof(struct loadedLibInfo), dlMapper_searchCompare);
+    return vector_search(&loadedLibs, address, dlMapper_searchCompare);
 }
 
 struct loadedLibInfo* dlMapper_libInfoForFileName(const char* fileName) {

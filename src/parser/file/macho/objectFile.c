@@ -105,7 +105,7 @@ static inline optional_function_t objectFile_findOwnFunction(struct objectFile* 
     optional_function_t toReturn = { .has_value = false };
     
     struct function searched = (struct function) { .linkedName = (char*) name };
-    struct function* it = bsearch(&searched, self->ownFunctions.content, self->ownFunctions.count, sizeof(struct function), objectFile_functionCompare);
+    struct function* it = vector_search(&self->ownFunctions, &searched, objectFile_functionCompare);
     if (it != NULL) {
         toReturn = (struct optional_function) { true, *it };
     }
@@ -430,13 +430,11 @@ static inline bool objectFile_parseMachO(struct objectFile* self,
 bool objectFile_parseBuffer(struct objectFile* self, void* buffer) {
     const bool result = objectFile_parseMachO(self, buffer);
     if (!result) {
-        for (size_t i = 0; i < self->ownFunctions.count; ++i) {
-            function_destroy(&self->ownFunctions.content[i]);
-        }
-        vector_clear(&self->ownFunctions);
+        vector_destroyWithPtr(&self->ownFunctions, function_destroy);
+        vector_init(&self->ownFunctions);
     } else {
-        qsort(self->lineInfos.content, self->lineInfos.count, sizeof(struct dwarf_lineInfo), objectFile_dwarfLineInfoSortCompare);
-        qsort(self->ownFunctions.content, self->ownFunctions.count, sizeof(struct function), objectFile_functionCompare);
+        vector_sort(&self->lineInfos, objectFile_dwarfLineInfoSortCompare);
+        vector_sort(&self->ownFunctions, objectFile_functionCompare);
     }
     return result;
 }
@@ -469,14 +467,8 @@ bool objectFile_parse(struct objectFile* self) {
 
 
 void objectFile_destroy(struct objectFile* self) {
-    for (size_t i = 0; i < self->ownFunctions.count; ++i) {
-        function_destroy(&self->ownFunctions.content[i]);
-    }
-    vector_destroy(&self->ownFunctions);
-    for (size_t i = 0; i < self->lineInfos.count; ++i) {
-        dwarf_lineInfo_destroy(&self->lineInfos.content[i]);
-    }
-    vector_destroy(&self->lineInfos);
+    vector_destroyWithPtr(&self->ownFunctions, function_destroy);
+    vector_destroyWithPtr(&self->lineInfos, dwarf_lineInfo_destroy);
     free((void*) self->mainSourceFileCache);
     free((void*) self->mainSourceFileCacheRelative);
     free((void*) self->mainSourceFileCacheAbsolute);

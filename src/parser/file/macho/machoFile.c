@@ -363,7 +363,7 @@ bool machoFile_parse(struct machoFile* self) {
                                                                     false,
                                                                     self);
     if (success) {
-        qsort(self->functions.content, self->functions.count, sizeof(pair_funcFile_t), machoFile_functionSortCompare);
+        vector_sort(&self->functions, machoFile_functionSortCompare);
     } else {
         vector_iterate(&self->functions, function_destroy(&element->first););
         vector_clear(&self->functions);

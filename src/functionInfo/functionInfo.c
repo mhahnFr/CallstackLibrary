@@ -59,8 +59,7 @@ struct functionInfo functionInfo_loadHint(const char* functionName, const char* 
         return toReturn;
     }
 
-    const vector_loadedLibInfo_t* libs = dlMapper_getLoadedLibraries();
-    vector_iterate(libs, {
+    vector_iterate(dlMapper_getLoadedLibraries(), {
         if (functionInfo_getFrom(element, functionName, &toReturn)) {
             break;
         }

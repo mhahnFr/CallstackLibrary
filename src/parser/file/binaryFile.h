@@ -70,7 +70,7 @@ static inline void binaryFile_create(struct binaryFile* self) {
     self->inMemory = false;
     self->startAddress = NULL;
     self->relocationOffset = 0;
-    self->regions = (struct vector_pair_ptr) vector_initializer;
+    vector_init(&self->regions);
 }
 
 /**
