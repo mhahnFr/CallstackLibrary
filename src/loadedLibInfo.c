@@ -23,6 +23,22 @@
 
 #include "loadedLibInfo.h"
 
+bool loadedLibInfo_prepare(struct loadedLibInfo* info) {
+    if (info == NULL) {
+        return false;
+    }
+    if (info->associated == NULL) {
+        info->associated = binaryFile_new(info->fileName, info->begin);
+    }
+    struct binaryFile* file = info->associated;
+    if (file == NULL) {
+        return false;
+    }
+    file->relocationOffset = info->relocationOffset;
+    file->inMemory = true;
+    return true;
+}
+
 void loadedLibInfo_destroy(struct loadedLibInfo* self) {
     free(self->fileName);
     free(self->absoluteFileName);

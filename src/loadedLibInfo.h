@@ -1,7 +1,7 @@
 /*
  * CallstackLibrary - Library creating human-readable call stacks.
  *
- * Copyright (C) 2024  mhahnFr
+ * Copyright (C) 2024 - 2025  mhahnFr
  *
  * This file is part of the CallstackLibrary.
  *
@@ -54,6 +54,8 @@ struct loadedLibInfo {
 };
 
 #define loadedLibInfo_initializer ((struct loadedLibInfo) { NULL, NULL, 0, NULL, NULL, NULL, false, NULL })
+
+bool loadedLibInfo_prepare(struct loadedLibInfo* self);
 
 /**
  * Destroys the given library info.
