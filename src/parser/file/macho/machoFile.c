@@ -373,8 +373,7 @@ bool machoFile_parse(struct machoFile* self) {
 }
 
 bool machoFile_getFunctionInfo(struct machoFile* self, const char* functionName, struct functionInfo* info) {
-    if (!self->_.parsed &&
-        !(self->_.parsed = machoFile_loadFile(self))) {
+    if (!BINARY_FILE_SUPER_1(self, maybeParse)) {
         return false;
     }
 
@@ -390,8 +389,7 @@ bool machoFile_getFunctionInfo(struct machoFile* self, const char* functionName,
 }
 
 bool machoFile_addr2String(struct machoFile* self, void* address, struct callstack_frame* frame) {
-    if (!self->_.parsed &&
-        !(self->_.parsed = machoFile_loadFile(self))) {
+    if (!BINARY_FILE_SUPER_1(self, maybeParse)) {
         return false;
     }
 
