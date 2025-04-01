@@ -298,7 +298,7 @@ static inline bool machoFile_parseFileImpl##bits(struct machoFile* self, const v
                                            self->_.inMemory ? (self->linkedit_vmaddr - self->text_vmaddr)              \
                                                               - self->linkedit_fileoff                                 \
                                                             : 0,                                                       \
-                                           bytesSwapped, false, NULL, machoFile_addFunction, self);                    \
+                                           bytesSwapped, bits == 64, NULL, machoFile_addFunction, self);               \
                 break;                                                                                                 \
                                                                                                                        \
             case LC_UUID:                                                                                              \
