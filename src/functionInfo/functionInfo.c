@@ -35,17 +35,7 @@
  * @return whether the structure was filled, e. g. whether the function was found in the runtime image
  */
 static inline bool functionInfo_getFrom(struct loadedLibInfo* info, const char* functionName, struct functionInfo* functionInfo) {
-    if (info == NULL) return false;
-
-    if (info->associated == NULL) {
-        info->associated = binaryFile_new(info->fileName, info->begin);
-    }
-    struct binaryFile* file = info->associated;
-    if (file == NULL) return false;
-
-    file->relocationOffset = info->relocationOffset;
-    file->inMemory = true;
-    return functionInfo->found = binaryFile_getFunctionInfo(file, functionName, functionInfo);
+    return functionInfo->found = loadedLibInfo_prepare(info) && binaryFile_getFunctionInfo(info->associated, functionName, functionInfo);
 }
 
 struct functionInfo functionInfo_loadHint(const char* functionName, const char* libraryName) {
