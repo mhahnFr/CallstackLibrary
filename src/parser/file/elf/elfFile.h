@@ -70,6 +70,14 @@ struct elfFile * elfFile_new(void);
 void elfFile_create(struct elfFile * self);
 
 /**
+ * Loads the ELF file represented by the given abstraction object.
+ *
+ * @param self the ELF file abstraction object
+ * @return whether the ELF file was loaded successfully
+ */
+bool elfFile_parse(struct elfFile* self);
+
+/**
  * Loads the debug information available for the given address into the given
  * callstack frame object.
  *
