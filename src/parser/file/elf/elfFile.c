@@ -45,7 +45,7 @@ struct elfFile* elfFile_new(void) {
 }
 
 void elfFile_create(struct elfFile* self) {
-    binaryFile_create(&self->_);
+    BINARY_FILE_SUPER_1(self, create);
     
     lcs_section_create(&self->debugLine);
     lcs_section_create(&self->debugLineStr);

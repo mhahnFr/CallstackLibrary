@@ -50,7 +50,7 @@ struct machoFile* machoFile_new(void)  {
 }
 
 void machoFile_create(struct machoFile* self) {
-    binaryFile_create(&self->_);
+    BINARY_FILE_SUPER_1(self, create);
 
     self->addressOffset    = 0;
     self->linkedit_fileoff = 0;
