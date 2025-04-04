@@ -296,11 +296,11 @@ bool elfFile_parse(struct elfFile* self) {
         .parseFunc = (loader_parser) elfFile_parseFile
     }, false, self);
     if (success) {
-        qsort(self->functions.content, self->functions.count, sizeof(struct function), elfFile_functionCompare);
-        qsort(self->lineInfos.content, self->lineInfos.count, sizeof(struct dwarf_lineInfo), elfFile_lineInfoCompare);
+        vector_sort(&self->functions, elfFile_functionCompare);
+        vector_sort(&self->lineInfos, elfFile_lineInfoCompare);
     } else {
-        vector_iterate(&self->functions, function_destroy(element););
-        vector_clear(&self->functions);
+        vector_destroyWithPtr(&self->functions, function_destroy);
+        vector_init(&self->functions);
     }
     return success;
 }
@@ -420,8 +420,7 @@ bool elfFile_addr2String(struct elfFile* self, void* address, struct callstack_f
 }
 
 void elfFile_destroy(struct elfFile* self) {
-    vector_iterate(&self->functions, function_destroy(element););
-    vector_destroy(&self->functions);
+    vector_destroyWithPtr(&self->functions, function_destroy);
     vector_destroyWith(&self->lineInfos, dwarf_lineInfo_destroyValue);
 }
 
