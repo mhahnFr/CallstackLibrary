@@ -82,7 +82,7 @@ DARWIN_DEPS  = $(patsubst %.c, %.d, $(DARWIN_SRCS))
 # -----------------------
 
 # Compile and link flags
-COM_FLAGS = -Wall -Wextra -fPIC -Ofast -I DC4C -I 'include' -I src/utils
+COM_FLAGS = -Wall -Wextra -fPIC -I DC4C -I 'include' -I src/utils
 ifeq ($(USE_BUILTINS),true)
 	COM_FLAGS += -DLCS_USE_BUILTINS
 endif
@@ -102,7 +102,7 @@ endif
 
 ifeq ($(shell uname -s),Darwin)
 	LDFLAGS   += -current_version 2.1 -compatibility_version 1 $(MACOS_ARCH_FLAGS)
-	COM_FLAGS += $(MACOS_ARCH_FLAGS)
+	COM_FLAGS += $(MACOS_ARCH_FLAGS) -O3 -ffast-math
 	OBJS      += $(DARWIN_OBJS)
 	DEPS      += $(DARWIN_DEPS)
 
@@ -110,6 +110,7 @@ ifeq ($(shell uname -s),Darwin)
 else ifeq ($(shell uname -s),Linux)
 	OBJS += $(LINUX_OBJS)
 	DEPS += $(LINUX_DEPS)
+	COM_FLAGS += -Ofast
 
 	NAME = $(SHARED_N)
 else
