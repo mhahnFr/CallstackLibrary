@@ -47,6 +47,7 @@ struct binaryFile {
     const void* startAddress;
     /** The relocation offset of the binary file.                        */
     uintptr_t relocationOffset;
+    /** The regions for global storage in this binary file.              */
     vector_pair_ptr_t regions;
 };
 
@@ -94,6 +95,14 @@ bool binaryFile_addr2String(struct binaryFile* self, void* address, struct calls
  */
 bool binaryFile_getFunctionInfo(struct binaryFile* self, const char* functionName, struct functionInfo* info);
 
+/**
+ * @brief Parses this binary file if it has not been (successfully) parsed.
+ *
+ * Stores whether the parsing succeeded.
+ *
+ * @param self the binary file to be parsed
+ * @return whether the parsing was successful
+ */
 bool binaryFile_maybeParse(struct binaryFile* self);
 
 /**
