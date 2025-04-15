@@ -19,6 +19,10 @@
  * CallstackLibrary, see the file LICENSE.  If not, see <https://www.gnu.org/licenses/>.
  */
 
+#include <stdio.h>
+
+#include <try_catch.h>
+
 #include "definitions.h"
 #include "optional_vector_fileAttribute.h"
 #include "parser.h"
@@ -175,53 +179,54 @@ static inline optional_vector_fileAttribute_t dwarf5_parseFileAttributes(struct 
             .timestamp = 0,
         };
         vector_iterate(&entryFormats, {
-            switch (element->first) {
+            TRY(switch (element->first) {
                 case DW_LNCT_path:
                     attribute.path = dwarf_readString(self, self->debugLine.content, counter, element->second);
                     break;
 
                 case DW_LNCT_directory_index: {
                     optional_uint64_t value = dwarf5_readIndex(self->debugLine.content, counter, element->second);
-                    if (!value.has_value) goto fail;
+                    if (!value.has_value) THROW("Failed to read DW_LNCT_directory_index");
                     attribute.index = value.value;
                     break;
                 }
 
                 case DW_LNCT_timestamp: {
                     optional_uint64_t value = dwarf5_readTimestamp(self->debugLine.content, counter, element->second);
-                    if (!value.has_value) goto fail;
+                    if (!value.has_value) THROW("Failed to read DW_LNCT_timestamp");
                     attribute.timestamp = value.value;
                     break;
                 }
 
                 case DW_LNCT_size: {
                     optional_uint64_t value = dwarf5_readSize(self->debugLine.content, counter, element->second);
-                    if (!value.has_value) goto fail;
+                    if (!value.has_value) THROW("Failed to read DW_LNCT_size");
                     attribute.size = value.value;
                     break;
                 }
 
                 case DW_LNCT_MD5:
-                    if (element->second != DW_FORM_data16) goto fail;
+                    if (element->second != DW_FORM_data16) THROW("Shall read DW_LNCT_MD5 but format is not DW_FORM_data16");
                     attribute.md5 = dwarf5_readMD5(self->debugLine.content, counter);
                     break;
 
                 default:
-                    if (!dwarf_consumeSome(self, self->debugLine.content, counter, element->second)) goto fail;
+                    if (!dwarf_consumeSome(self, self->debugLine.content, counter, element->second)) {
+                        THROW("Failed to skip unknown value");
+                    }
                     break;
-            }
+            }, CATCH(const char*, message, {
+                printf("LCS: Failed to parse DWARF 5: %s\n", message);
+                vector_destroy(&entryFormats);
+                vector_destroy(&attributes);
+                return (optional_vector_fileAttribute_t) { .has_value = false };
+            }))
         });
         vector_push_back(&attributes, attribute);
     }
     vector_destroy(&entryFormats);
 
     return (optional_vector_fileAttribute_t) { true, attributes };
-
-fail:
-    vector_destroy(&entryFormats);
-    vector_destroy(&attributes);
-
-    return (optional_vector_fileAttribute_t) { .has_value = false };
 }
 
 /**
