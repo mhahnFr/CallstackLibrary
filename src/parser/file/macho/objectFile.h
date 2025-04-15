@@ -75,7 +75,9 @@ struct objectFile {
     vector_dwarfLineInfo_t lineInfos;
     /** The cached name of the main source file.                */
     const char* mainSourceFileCache;
+    /** The cached relative name of the main source file.       */
     const char* mainSourceFileCacheRelative;
+    /** The cached absolute name of the main source file.       */
     const char* mainSourceFileCacheAbsolute;
 
     /** Pointer to the next element in a list.                  */
