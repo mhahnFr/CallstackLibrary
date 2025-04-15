@@ -32,13 +32,15 @@
  * Unavailable fields are set to `0` and `NULL`, respectively.
  */
 struct dwarf_sourceFile {
-    /** The allocated source file name.         */
+    /** The allocated source file name.          */
     const char* fileName;
+    /** The allocated relative source file name. */
     const char* fileNameRelative;
+    /** The allocated absolute source file name. */
     const char* fileNameAbsolute;
-    /** The timestamp of the last modification. */
+    /** The timestamp of the last modification.  */
     uint64_t timestamp;
-    /** The size of the file.                   */
+    /** The size of the file.                    */
     uint64_t size;
 };
 
