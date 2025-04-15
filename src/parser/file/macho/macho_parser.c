@@ -19,10 +19,13 @@
  * CallstackLibrary, see the file LICENSE.  If not, see <https://www.gnu.org/licenses/>.
  */
 
+#include <stdio.h>
 #include <string.h>
 
 #include <mach-o/nlist.h>
 #include <mach-o/stab.h>
+
+#include <try_catch.h>
 
 #include "macho_parser.h"
 
@@ -65,122 +68,114 @@ bool macho_parseSymtab(struct symtab_command* command,
     const char*              sourceFileName = NULL;
     struct optional_function currFun        = { .has_value = false };
     struct objectFile*       currObj        = NULL;
-    
-    for (uint32_t i = 0; i < nsyms; ++i) {
-        struct macho_parser_nlist entry = macho_parser_nlist_from(baseAddress + symoff + offset + i * macho_parser_nlist_sizeof(bit64), bit64, bytesSwapped);
-        switch (entry.n_type) {
-            case N_BNSYM:
-                if (currFun.has_value) {
-                    function_destroy(&currFun.value);
-                    va_end(args);
-                    return false;
-                }
-                function_create(&currFun.value);
-                currFun.has_value = true;
-                currFun.value.startAddress = entry.n_value;
-                break;
-                
-            case N_ENSYM:
-                if (!currFun.has_value) {
-                    va_end(args);
-                    return false;
-                }
-                if (funCb != NULL) {
-                    va_list copy;
-                    va_copy(copy, args);
-                    funCb((pair_funcFile_t) { currFun.value, currObj }, copy);
-                    va_end(copy);
-                } else {
-                    function_destroy(&currFun.value);
-                }
-                currFun.has_value = false;
-                break;
-                
-            case N_SO: {
-                const char* value = stringBegin + entry.n_strx;
-                if (*value == '\0') {
-                    if (currObj == NULL) {
-                        // Beginning, ignore
-                        continue;
-                    }
-                    if (objCb != NULL) {
+
+#define ENSURE(condition, message) if (!(condition)) THROW(message)
+
+    TRY({
+        for (uint32_t i = 0; i < nsyms; ++i) {
+            struct macho_parser_nlist entry = macho_parser_nlist_from(baseAddress + symoff + offset + i * macho_parser_nlist_sizeof(bit64), bit64, bytesSwapped);
+            switch (entry.n_type) {
+                case N_BNSYM:
+                    ENSURE(!currFun.has_value, "N_BNSYM with active function");
+
+                    function_create(&currFun.value);
+                    currFun.has_value = true;
+                    currFun.value.startAddress = entry.n_value;
+                    break;
+
+                case N_ENSYM:
+                    ENSURE(currFun.has_value, "N_ENSYM without active function");
+
+                    if (funCb != NULL) {
                         va_list copy;
                         va_copy(copy, args);
-                        objCb(currObj, copy);
+                        funCb((pair_funcFile_t) { currFun.value, currObj }, copy);
+                        va_end(copy);
+                    } else {
+                        function_destroy(&currFun.value);
+                    }
+                    currFun.has_value = false;
+                    break;
+
+                case N_SO: {
+                    const char* value = stringBegin + entry.n_strx;
+                    if (*value == '\0') {
+                        if (currObj == NULL) {
+                            // Beginning, ignore
+                            continue;
+                        }
+                        if (objCb != NULL) {
+                            va_list copy;
+                            va_copy(copy, args);
+                            objCb(currObj, copy);
+                            va_end(copy);
+                        }
+                        currObj = NULL;
+                        path = NULL;
+                        sourceFileName = NULL;
+                    } else if (path == NULL) {
+                        path = value;
+                    } else {
+                        sourceFileName = value;
+                    }
+                    break;
+                }
+
+                case N_OSO: {
+                    ENSURE(currObj == NULL, "N_OSO with active object file");
+
+                    const char*    fileName     = stringBegin + entry.n_strx;
+                    const uint64_t lastModified = entry.n_value;
+
+                    ENSURE((currObj = macho_cache_findOrAdd(fileName, lastModified)) != NULL,
+                           "N_OSO: object file not found");
+                    if (currObj->directory == NULL) {
+                        currObj->directory = path == NULL ? NULL : strdup(path);
+                    }
+                    if (currObj->sourceFile == NULL) {
+                        currObj->sourceFile = sourceFileName == NULL ? NULL : strdup(sourceFileName);
+                    }
+                    break;
+                }
+
+                case N_FUN: {
+                    ENSURE(currFun.has_value, "N_FUN without active function");
+
+                    const char* value = stringBegin + entry.n_strx;
+                    if (*value == '\0') {
+                        currFun.value.length = entry.n_value;
+                    } else {
+                        currFun.value.linkedName   = strdup(value);
+                        currFun.value.startAddress = entry.n_value;
+                    }
+                    break;
+                }
+
+                default:
+                    if (funCb != NULL && (entry.n_type & N_TYPE) == N_SECT) {
+                        va_list copy;
+                        va_copy(copy, args);
+                        funCb((pair_funcFile_t) {
+                            (struct function) {
+                                .linkedName = strdup(stringBegin + entry.n_strx),
+                                .startAddress = entry.n_value,
+                                .length = 0x0,
+                                .demangledName.has_value = false,
+                            }, NULL
+                        }, copy);
                         va_end(copy);
                     }
-                    currObj = NULL;
-                    path = NULL;
-                    sourceFileName = NULL;
-                } else if (path == NULL) {
-                    path = value;
-                } else {
-                    sourceFileName = value;
-                }
-                break;
+                    break;
             }
-                
-            case N_OSO: {
-                if (currObj != NULL) {
-                    if (currFun.has_value) {
-                        function_destroy(&currFun.value);
-                    }
-                    va_end(args);
-                    return false;
-                }
-                
-                const char*    fileName     = stringBegin + entry.n_strx;
-                const uint64_t lastModified = entry.n_value;
-                
-                currObj = macho_cache_findOrAdd(fileName, lastModified);
-                if (currObj == NULL) {
-                    if (currFun.has_value) {
-                        function_destroy(&currFun.value);
-                    }
-                    va_end(args);
-                    return false;
-                }
-                if (currObj->directory == NULL) {
-                    currObj->directory = path == NULL ? NULL : strdup(path);
-                }
-                if (currObj->sourceFile == NULL) {
-                    currObj->sourceFile = sourceFileName == NULL ? NULL : strdup(sourceFileName);
-                }
-                break;
-            }
-                
-            case N_FUN: {
-                if (!currFun.has_value) {
-                    va_end(args);
-                    return false;
-                }
-                const char* value = stringBegin + entry.n_strx;
-                if (*value == '\0') {
-                    currFun.value.length = entry.n_value;
-                } else {
-                    currFun.value.linkedName   = strdup(value);
-                    currFun.value.startAddress = entry.n_value;
-                }
-                break;
-            }
-                
-            default:
-                if (funCb != NULL && (entry.n_type & N_TYPE) == N_SECT) {
-                    va_list copy;
-                    va_copy(copy, args);
-                    funCb((pair_funcFile_t) {
-                        (struct function) {
-                            .linkedName = strdup(stringBegin + entry.n_strx),
-                            .startAddress = entry.n_value,
-                            .length = 0x0,
-                            .demangledName.has_value = false,
-                        }, NULL
-                    }, copy);
-                    va_end(copy);
-                }
-                break;
         }
-    }
-    va_end(args);
-    return true;
+        va_end(args);
+        return true;
+    }, CATCH(const char*, message, {
+        va_end(args);
+        if (currFun.has_value) {
+            function_destroy(&currFun.value);
+        }
+        printf("Failed to parse Mach-O: %s\n", message);
+        return false;
+    }))
 }
