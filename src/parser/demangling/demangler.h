@@ -22,6 +22,14 @@
 #ifndef callstack_demangling_demangler_h
 #define callstack_demangling_demangler_h
 
+/**
+ * @brief Attempts to demangle the given name.
+ *
+ * Currently Swift and C++ demangling is supported.
+ *
+ * @param name the name to be demangled
+ * @return an allocated demangled name or the input if not mangled
+ */
 char* callstack_demangle(char* name);
 
 #endif /* callstack_demangling_demangler_h */
