@@ -47,7 +47,12 @@ struct callstack_frame {
      * @since v2.0
      */
     bool  reserved1;
-    bool reserved2;
+    /**
+     * Reserved value.
+     *
+     * @since v2.2
+     */
+    bool  reserved2;
 
     /** The name of the binary file this frame is in.        */
     char * binaryFile;
