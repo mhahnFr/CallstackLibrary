@@ -168,8 +168,6 @@ bool macho_parseSymtab(struct symtab_command* command,
                     break;
             }
         }
-        va_end(args);
-        return true;
     }, CATCH(const char*, message, {
         va_end(args);
         if (currFun.has_value) {
@@ -178,4 +176,6 @@ bool macho_parseSymtab(struct symtab_command* command,
         printf("Failed to parse Mach-O: %s\n", message);
         return false;
     }))
+    va_end(args);
+    return true;
 }
