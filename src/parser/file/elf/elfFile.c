@@ -201,6 +201,12 @@ static inline bool elfFile_parseFile##bits (struct elfFile* self, Elf##bits##_Eh
                 }                                                                                                    \
                 break;                                                                                               \
         }                                                                                                            \
+        if ((current->sh_flags & SHF_WRITE) != 0 && (current->sh_flags & SHF_ALLOC) != 0) {                          \
+            vector_push_back(&self->_.regions, ((pair_ptr_t) {                                                       \
+                self->_.relocationOffset + current->sh_addr,                                                         \
+                self->_.relocationOffset + current->sh_addr + current->sh_size                                       \
+            }));                                                                                                     \
+        }                                                                                                            \
     }                                                                                                                \
     if (symtab == NULL || strtab == NULL) {                                                                          \
         if (dystrtab == NULL || dysymtab == NULL) {                                                                  \
