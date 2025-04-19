@@ -46,6 +46,12 @@ static inline bool callstack_demangle_isCxx(const char* name) {
         && name[10] == '_';
 }
 
+/**
+ * Returns whether the given name is a name mangled in the Swift style.
+ *
+ * @param name the name to be checked
+ * @return whether the name is a mangled one
+ */
 static inline bool callstack_demangle_isSwift(const char* name) {
     return strncmp(name, "_$s", 3) == 0 || strncmp(name, "$s", 2) == 0
         || strncmp(name, "_$e", 3) == 0 || strncmp(name, "$e", 2) == 0

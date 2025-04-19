@@ -55,6 +55,12 @@ struct loadedLibInfo {
 
 #define loadedLibInfo_initializer ((struct loadedLibInfo) { NULL, NULL, 0, NULL, NULL, NULL, false, NULL })
 
+/**
+ * Prepares the associated binary file.
+ *
+ * @param self the loaded library information to prepare
+ * @return whether the preparation was successful
+ */
 bool loadedLibInfo_prepare(struct loadedLibInfo* self);
 
 /**
