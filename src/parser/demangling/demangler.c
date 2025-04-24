@@ -30,7 +30,7 @@
 # include "cxx/demangler.h"
 #endif
 
-bool activateSwiftDemangler = true;
+bool lcs_activateSwiftDemangler = true;
 
 /**
  * Returns whether the given name is a name mangled in the C++ style.
@@ -55,7 +55,7 @@ static inline bool callstack_demangle_isCxx(const char* name) {
  * @return whether the name is a mangled one
  */
 static inline bool callstack_demangle_isSwift(const char* name) {
-    if (!activateSwiftDemangler) return false;
+    if (!lcs_activateSwiftDemangler) return false;
 
     return strncmp(name, "_$s", 3) == 0 || strncmp(name, "$s", 2) == 0
         || strncmp(name, "_$e", 3) == 0 || strncmp(name, "$e", 2) == 0

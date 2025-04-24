@@ -29,7 +29,7 @@ extern "C" {
 #endif
 
 #ifdef LCS_ACTIVATE_SWIFT_DEMANGLER_CONTROL
-extern bool activateSwiftDemangler;
+extern bool lcs_activateSwiftDemangler;
 #endif
 
 /**
