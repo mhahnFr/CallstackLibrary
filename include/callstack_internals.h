@@ -1,7 +1,7 @@
 /*
  * CallstackLibrary - Library creating human-readable call stacks.
  *
- * Copyright (C) 2023 - 2024  mhahnFr
+ * Copyright (C) 2023 - 2025  mhahnFr
  *
  * This file is part of the CallstackLibrary.
  *
@@ -26,6 +26,10 @@
 
 #ifdef __cplusplus
 extern "C" {
+#endif
+
+#ifdef LCS_ACTIVATE_SWIFT_DEMANGLER_CONTROL
+extern bool lcs_activateSwiftDemangler;
 #endif
 
 /**
