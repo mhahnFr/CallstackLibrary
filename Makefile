@@ -55,7 +55,7 @@ endif
 # -------------------------------
 
 # Main sources
-SRCS = $(shell find ./src -type f -name \*.c \! -path $(LINUX_PATH)\* \! -path $(DARWIN_PATH)\* \! -path $(DL_MAPPER_LINUX_PATH)\* \! -path $(DL_MAPPER_DARWIN_PATH)\* \! -path $(UTILS_DARWIN_PATH)\*)
+SRCS = $(shell find ./src -type f -name \*.c \! -path $(LINUX_PATH)\* \! -path $(DARWIN_PATH)\* \! -path $(DL_MAPPER_LINUX_PATH)\* \! -path $(DL_MAPPER_DARWIN_PATH)\* \! -path $(UTILS_DARWIN_PATH)\*) $(shell find ./mh_tryCatch/src -type f -name \*.c)
 OBJS = $(patsubst %.c, %.o, $(SRCS))
 DEPS = $(patsubst %.c, %.d, $(SRCS))
 # ------------
@@ -82,7 +82,7 @@ DARWIN_DEPS  = $(patsubst %.c, %.d, $(DARWIN_SRCS))
 # -----------------------
 
 # Compile and link flags
-COM_FLAGS = -Wall -Wextra -fPIC -I DC4C -I 'include' -I src/utils
+COM_FLAGS = -Wall -Wextra -fPIC -I DC4C -I 'include' -I src/utils -I ./mh_tryCatch/include
 ifeq ($(USE_BUILTINS),true)
 	COM_FLAGS += -DLCS_USE_BUILTINS
 endif
