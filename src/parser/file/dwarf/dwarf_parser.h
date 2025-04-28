@@ -1,7 +1,7 @@
 /*
  * CallstackLibrary - Library creating human-readable call stacks.
  *
- * Copyright (C) 2024  mhahnFr
+ * Copyright (C) 2024 - 2025  mhahnFr
  *
  * This file is part of the CallstackLibrary.
  *
@@ -26,13 +26,13 @@
 #include <stdint.h>
 
 #include "dwarf_lineInfo.h"
-#include "optional_uint64_t.h"
 #include "vector_uint8.h"
 
 #include "v4/parser.h"
 #include "v5/parser.h"
 
 #include "../lcs_section.h"
+#include "../optional_uint64_t.h"
 
 /**
  * @brief This type represents the function called by `dwarf_parseLineProgram`.
