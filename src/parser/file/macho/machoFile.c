@@ -230,8 +230,10 @@ static inline bool machoFile_handleSegment##bits(struct machoFile* self, const v
             case S_THREAD_LOCAL_VARIABLES: if (section->size != 0) { /* TODO: Can have multiple */                 \
                 uintptr_t slide = (uintptr_t) (buffer - segment->vmaddr);                                          \
                 TLVDescriptor* begin = (TLVDescriptor*) (section->addr + slide);                                   \
-                vector_reserve(&self->tlvs, section->size / sizeof(TLVDescriptor));                                \
+                const size_t amount = section->size / sizeof(TLVDescriptor);                                       \
+                vector_reserve(&self->tlvs, amount);                                                               \
                 memcpy(self->tlvs.content, begin, section->size);                                                  \
+                self->tlvs.count = amount;                                                                         \
             }                                                                                                      \
             break;                                                                                                 \
         }                                                                                                          \
