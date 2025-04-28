@@ -228,7 +228,7 @@ static inline bool machoFile_handleSegment##bits(struct machoFile* self, const v
                 break;                                                                                             \
                                                                                                                    \
             case S_THREAD_LOCAL_VARIABLES: if (section->size != 0) { /* TODO: Can have multiple */                 \
-                uintptr_t slide = (uintptr_t) (buffer - segment->vmaddr);                                          \
+                uintptr_t slide = (uintptr_t) (buffer - self->text_vmaddr);                                        \
                 TLVDescriptor* begin = (TLVDescriptor*) (section->addr + slide);                                   \
                 const size_t amount = section->size / sizeof(TLVDescriptor);                                       \
                 vector_reserve(&self->tlvs, amount);                                                               \
