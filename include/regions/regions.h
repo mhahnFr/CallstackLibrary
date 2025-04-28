@@ -42,6 +42,10 @@ struct regionInfo {
 
 struct regionInfo regions_getLoadedRegions(void);
 
+// Important: Gets the TLS (and potentially initializes them) for the calling
+// thread. Cares for callstack_autoClearCaches.
+struct regionInfo regions_getTLSRegions(void);
+
 void regions_destroyInfo(struct regionInfo* info);
 
 #ifdef __cplusplus
