@@ -57,8 +57,7 @@ bool dlMapper_init(void) {
     } else {
         vector_sort(&loadedLibs, dlMapper_sortCompare);
     }
-    dlMapper_inited = result;
-    return result;
+    return dlMapper_inited = result;
 }
 
 /**
