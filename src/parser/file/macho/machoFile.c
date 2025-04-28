@@ -419,6 +419,19 @@ bool machoFile_getFunctionInfo(struct machoFile* self, const char* functionName,
     return false;
 }
 
+vector_pair_ptr_t machoFile_getTLSRegions(struct machoFile* self) {
+    if (!BINARY_FILE_SUPER_1(self, maybeParse)) {
+        return (vector_pair_ptr_t) vector_initializer;
+    }
+
+    vector_pair_ptr_t toReturn = vector_initializer;
+    if (self->tlvs.count > 0) {
+        uintptr_t begin = (uintptr_t) self->tlvs.content->thunk(self->tlvs.content);
+        vector_push_back(&toReturn, ((pair_ptr_t) { begin, begin + self->tlvSize }));
+    }
+    return toReturn;
+}
+
 bool machoFile_addr2String(struct machoFile* self, void* address, struct callstack_frame* frame) {
     if (!BINARY_FILE_SUPER_1(self, maybeParse)) {
         return false;

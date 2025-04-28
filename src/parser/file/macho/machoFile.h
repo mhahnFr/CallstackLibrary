@@ -103,6 +103,8 @@ bool machoFile_addr2String(struct machoFile* self, void* address, struct callsta
  */
 bool machoFile_getFunctionInfo(struct machoFile* self, const char* functionName, struct functionInfo* info);
 
+vector_pair_ptr_t machoFile_getTLSRegions(struct machoFile* self);
+
 /**
  * Loads and parses the Mach-O file represented by the given Mach-O file abstraction object.
  *

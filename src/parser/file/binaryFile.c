@@ -67,6 +67,10 @@ bool binaryFile_getFunctionInfo(struct binaryFile* self, const char* functionNam
     return LCS_FILE(self, getFunctionInfo, functionName, info);
 }
 
+vector_pair_ptr_t binaryFile_getTLSRegions(struct binaryFile* self) {
+    return LCS_FILE_1(self, getTLSRegions);
+}
+
 bool binaryFile_maybeParse(struct binaryFile* self) {
     return self->parsed || (self->parsed = LCS_FILE_1(self, parse));
 }
