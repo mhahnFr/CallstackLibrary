@@ -26,6 +26,7 @@
 #include <stddef.h>
 
 #include "objectFile.h"
+#include "TLVDescriptor.h"
 #include "vector_pair_funcFile.h"
 #include "vector_uint64.h"
 
@@ -48,6 +49,7 @@ struct machoFile {
     uint64_t linkedit_fileoff;
     /** The VM address of the text segment.                                     */
     uint64_t text_vmaddr;
+    uint64_t tlvSize;
     /** Information about the dSYM bundle file.                                 */
     struct {
         /** Whether the file was already tried to be deducted. */
@@ -62,6 +64,7 @@ struct machoFile {
     vector_pairFuncFile_t functions;
     /** The start addresses of the contained functions.                         */
     vector_uint64_t functionStarts;
+    vector_TLVDescriptor_t tlvs;
 };
 
 /**
