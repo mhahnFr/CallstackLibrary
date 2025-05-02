@@ -394,6 +394,12 @@ bool elfFile_getFunctionInfo(struct elfFile* self, const char* functionName, str
     return false;
 }
 
+vector_pair_ptr_t elfFile_getTLSRegions(struct elfFile* self) {
+    // TODO: Properly implement
+    (void) self;
+    return (vector_pair_ptr_t) vector_initializer;
+}
+
 bool elfFile_addr2String(struct elfFile* self, void* address, struct callstack_frame* frame) {
     if (!BINARY_FILE_SUPER_1(self, maybeParse)) {
         return false;

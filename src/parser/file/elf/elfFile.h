@@ -98,6 +98,8 @@ bool elfFile_addr2String(struct elfFile* self, void* address, struct callstack_f
  */
 bool elfFile_getFunctionInfo(struct elfFile* self, const char* functionName, struct functionInfo* info);
 
+vector_pair_ptr_t elfFile_getTLSRegions(struct elfFile* self);
+
 /**
  * Deinitializes the given binary file structure, if it is an ELF file structure.
  *
