@@ -95,6 +95,8 @@ bool binaryFile_addr2String(struct binaryFile* self, void* address, struct calls
  */
 bool binaryFile_getFunctionInfo(struct binaryFile* self, const char* functionName, struct functionInfo* info);
 
+vector_pair_ptr_t binaryFile_getTLSRegions(struct binaryFile* self);
+
 /**
  * @brief Parses this binary file if it has not been (successfully) parsed.
  *

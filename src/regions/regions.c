@@ -32,7 +32,9 @@
 typedef_vector_named(region, struct region);
 
 #define maybeRun(b, func, ...) ({ (b) ? (func)(__VA_ARGS__) : (__VA_ARGS__); })
+#define maybeRunV(b, func) ((b) ? (func)() : (void) NULL)
 #define maybe(func, ...) maybeRun(callstack_autoClearCaches, func, __VA_ARGS__)
+#define maybeV(func) maybeRunV(callstack_autoClearCaches, func)
 
 struct regionInfo regions_getLoadedRegions(void) {
     if (!dlMapper_init()) {
@@ -57,6 +59,31 @@ struct regionInfo regions_getLoadedRegions(void) {
     if (callstack_autoClearCaches) {
         callstack_clearCaches();
     }
+    return (struct regionInfo) { toReturn.content, toReturn.count };
+}
+
+struct regionInfo regions_getTLSRegions(void) {
+    if (!dlMapper_init()) {
+        return (struct regionInfo) { NULL, 0 };
+    }
+
+    vector_region_t toReturn = vector_initializer;
+    vector_forEach(dlMapper_getLoadedLibraries(), outerElement, {
+        if (!loadedLibInfo_prepare(outerElement)) {
+            continue;
+        }
+        vector_pair_ptr_t result = binaryFile_getTLSRegions(outerElement->associated);
+        vector_iterate(&result, {
+            vector_push_back(&toReturn, ((struct region) {
+                element->first, element->second,
+                maybe(strdup, outerElement->absoluteFileName),
+                maybe(strdup, outerElement->relativeFileName),
+            }));
+        });
+        vector_destroy(&result);
+    });
+
+    maybeV(callstack_clearCaches);
     return (struct regionInfo) { toReturn.content, toReturn.count };
 }
 

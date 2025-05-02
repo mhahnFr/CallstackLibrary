@@ -19,37 +19,15 @@
  * CallstackLibrary, see the file LICENSE.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-#ifndef __lcs_regions_regions_h
-#define __lcs_regions_regions_h
+#ifndef TLVDescriptor_h
+#define TLVDescriptor_h
 
-#ifdef __cplusplus
-extern "C" {
-#endif
+#include <mach-o/loader.h>
 
-#include <stddef.h>
-#include <stdint.h>
+#include <DC4C/v2/vector.h>
 
-struct region {
-    uintptr_t begin, end;
+typedef struct tlv_descriptor TLVDescriptor;
 
-    const char* name, *nameRelative;
-};
+typedef_vector(TLVDescriptor);
 
-struct regionInfo {
-    struct region* regions;
-    size_t amount;
-};
-
-struct regionInfo regions_getLoadedRegions(void);
-
-// Important: Gets the TLS (and potentially initializes them) for the calling
-// thread. Cares for callstack_autoClearCaches.
-struct regionInfo regions_getTLSRegions(void);
-
-void regions_destroyInfo(struct regionInfo* info);
-
-#ifdef __cplusplus
-} // extern "C"
-#endif
-
-#endif /* __lcs_regions_regions_h */
+#endif /* TLVDescriptor_h */

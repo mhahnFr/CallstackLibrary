@@ -36,6 +36,7 @@
 
 #include "../bounds.h"
 #include "../loader.h"
+#include "../optional_uint64_t.h"
 #include "../dwarf/leb128.h"
 
 #include "../../callstack_parser.h"
@@ -56,12 +57,14 @@ void machoFile_create(struct machoFile* self) {
     self->linkedit_fileoff = 0;
     self->text_vmaddr      = 0;
     self->linkedit_vmaddr  = 0;
+    self->tlvSize          = 0;
 
     self->dSYMFile.triedParsing = false;
     self->dSYMFile.file         = NULL;
 
     vector_init(&self->functions);
     vector_init(&self->functionStarts);
+    vector_init(&self->tlvs);
 }
 
 /**
@@ -193,8 +196,12 @@ static inline optional_debugInfo_t machoFile_getDebugInfo(struct machoFile* self
     return info;
 }
 
+#define MACHO_SECTION32 section
+#define MACHO_SECTION64 section_64
+
 #define machoFile_handleSegment(type, bits)                                                                        \
-static inline bool machoFile_handleSegment##bits(struct machoFile* self, type* segment, bool bytesSwapped) {       \
+static inline bool machoFile_handleSegment##bits(struct machoFile* self, const void* buffer,                       \
+                                                 type* segment, bool bytesSwapped) {                               \
     if (strcmp(segment->segname, SEG_PAGEZERO) == 0) {                                                             \
         self->addressOffset = macho_maybeSwap(bits, bytesSwapped, segment->vmaddr)                                 \
                             + macho_maybeSwap(bits, bytesSwapped, segment->vmsize);                                \
@@ -207,6 +214,32 @@ static inline bool machoFile_handleSegment##bits(struct machoFile* self, type* s
                                                                                                                    \
     if (segment->initprot & 2 && segment->initprot & 1) {                                                          \
         vector_push_back(&self->_.regions, ((pair_ptr_t) { segment->vmaddr, segment->vmaddr + segment->vmsize })); \
+    }                                                                                                              \
+                                                                                                                   \
+    optional_uint64_t size = { .has_value = false, .value = 0 };                                                   \
+    for (uint64_t i = 0; i < segment->nsects; ++i) {                                                               \
+        struct MACHO_SECTION##bits* section = ((void*) segment) + sizeof(*segment)                                 \
+                                            + i * sizeof(struct MACHO_SECTION##bits);                              \
+        switch (section->flags & SECTION_TYPE) {                                                                   \
+            case S_THREAD_LOCAL_ZEROFILL:                                                                          \
+            case S_THREAD_LOCAL_REGULAR:                                                                           \
+                size.has_value = true;                                                                             \
+                size.value += section->size;                                                                       \
+                break;                                                                                             \
+                                                                                                                   \
+            case S_THREAD_LOCAL_VARIABLES: if (section->size != 0) { /* TODO: Can have multiple */                 \
+                uintptr_t slide = (uintptr_t) (buffer - self->text_vmaddr);                                        \
+                TLVDescriptor* begin = (TLVDescriptor*) (section->addr + slide);                                   \
+                const size_t amount = section->size / sizeof(TLVDescriptor);                                       \
+                vector_reserve(&self->tlvs, amount);                                                               \
+                memcpy(self->tlvs.content, begin, section->size);                                                  \
+                self->tlvs.count = amount;                                                                         \
+            }                                                                                                      \
+            break;                                                                                                 \
+        }                                                                                                          \
+    }                                                                                                              \
+    if (size.has_value) {                                                                                          \
+        self->tlvSize = size.value;                                                                                \
     }                                                                                                              \
                                                                                                                    \
     return true;                                                                                                   \
@@ -290,7 +323,7 @@ static inline bool machoFile_parseFileImpl##bits(struct machoFile* self, const v
         bool result = true;                                                                                            \
         switch (macho_maybeSwap(32, bytesSwapped, lc->cmd)) {                                                          \
             case segMacro:                                                                                             \
-                result = machoFile_handleSegment##bits(self, (void *) lc, bytesSwapped);                               \
+                result = machoFile_handleSegment##bits(self, baseAddress, (void *) lc, bytesSwapped);                  \
                 break;                                                                                                 \
                                                                                                                        \
             case LC_SYMTAB:                                                                                            \
@@ -388,6 +421,19 @@ bool machoFile_getFunctionInfo(struct machoFile* self, const char* functionName,
     return false;
 }
 
+vector_pair_ptr_t machoFile_getTLSRegions(struct machoFile* self) {
+    if (!BINARY_FILE_SUPER_1(self, maybeParse)) {
+        return (vector_pair_ptr_t) vector_initializer;
+    }
+
+    vector_pair_ptr_t toReturn = vector_initializer;
+    if (self->tlvs.count > 0) {
+        uintptr_t begin = (uintptr_t) self->tlvs.content->thunk(self->tlvs.content);
+        vector_push_back(&toReturn, ((pair_ptr_t) { begin, begin + self->tlvSize }));
+    }
+    return toReturn;
+}
+
 bool machoFile_addr2String(struct machoFile* self, void* address, struct callstack_frame* frame) {
     if (!BINARY_FILE_SUPER_1(self, maybeParse)) {
         return false;
@@ -446,6 +492,7 @@ void machoFile_destroy(struct machoFile* self) {
         objectFile_delete(self->dSYMFile.file);
     }
     vector_destroy(&self->functionStarts);
+    vector_destroy(&self->tlvs);
 }
 
 void machoFile_delete(struct machoFile* self) {
