@@ -87,6 +87,11 @@ struct regionInfo regions_getTLSRegions(void) {
     return (struct regionInfo) { toReturn.content, toReturn.count };
 }
 
+/**
+ * Destroys the given region structure.
+ *
+ * @param self the region object to be destructed
+ */
 static inline void regions_destroy(struct region self) {
     maybe(free, (void*) self.name);
     maybe(free, (void*) self.nameRelative);
