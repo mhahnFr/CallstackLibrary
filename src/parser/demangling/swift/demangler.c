@@ -31,8 +31,18 @@
 # define LCS_UNDERSCORE
 #endif
 
+/**
+ * The type of the demangler function provided by the Swift runtime.
+ */
 typedef char* (*SwiftDemanglerFunc)(const char*, size_t, char*, size_t*, uint32_t);
 
+/**
+ * @brief Returns the demangler function provided by the Swift runtime.
+ *
+ * Attempts to load the function the first time it is called.
+ *
+ * @return a pointer to the demangler function or @c NULL if the function was not found
+ */
 static inline SwiftDemanglerFunc callstack_demangle_getSwiftDemangler(void) {
     static struct {
         SwiftDemanglerFunc func;
