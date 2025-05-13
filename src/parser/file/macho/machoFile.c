@@ -51,7 +51,7 @@ struct machoFile* machoFile_new(void)  {
 }
 
 void machoFile_create(struct machoFile* self) {
-    BINARY_FILE_SUPER_1(self, create);
+    BINARY_FILE_SUPER(self, create);
 
     self->addressOffset    = 0;
     self->linkedit_fileoff = 0;
@@ -406,7 +406,7 @@ bool machoFile_parse(struct machoFile* self) {
 }
 
 bool machoFile_getFunctionInfo(struct machoFile* self, const char* functionName, struct functionInfo* info) {
-    if (!BINARY_FILE_SUPER_1(self, maybeParse)) {
+    if (!BINARY_FILE_SUPER(self, maybeParse)) {
         return false;
     }
 
@@ -422,7 +422,7 @@ bool machoFile_getFunctionInfo(struct machoFile* self, const char* functionName,
 }
 
 vector_pair_ptr_t machoFile_getTLSRegions(struct machoFile* self) {
-    if (!BINARY_FILE_SUPER_1(self, maybeParse)) {
+    if (!BINARY_FILE_SUPER(self, maybeParse)) {
         return (vector_pair_ptr_t) vector_initializer;
     }
 
@@ -435,7 +435,7 @@ vector_pair_ptr_t machoFile_getTLSRegions(struct machoFile* self) {
 }
 
 bool machoFile_addr2String(struct machoFile* self, void* address, struct callstack_frame* frame) {
-    if (!BINARY_FILE_SUPER_1(self, maybeParse)) {
+    if (!BINARY_FILE_SUPER(self, maybeParse)) {
         return false;
     }
 

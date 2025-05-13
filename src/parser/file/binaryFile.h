@@ -134,7 +134,6 @@ void binaryFile_destroy(struct binaryFile* self);
  */
 void binaryFile_delete(struct binaryFile* self);
 
-#define BINARY_FILE_SUPER(self, name, ...) binaryFile_##name((struct binaryFile*) (self), __VA_ARGS__)
-#define BINARY_FILE_SUPER_1(self, name) binaryFile_##name((struct binaryFile*) (self))
+#define BINARY_FILE_SUPER(self, name, ...) binaryFile_##name((struct binaryFile*) (self) __VA_OPT__(,) __VA_ARGS__)
 
 #endif /* binaryFile_h */

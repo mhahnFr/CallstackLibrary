@@ -45,7 +45,7 @@ struct elfFile* elfFile_new(void) {
 }
 
 void elfFile_create(struct elfFile* self) {
-    BINARY_FILE_SUPER_1(self, create);
+    BINARY_FILE_SUPER(self, create);
     
     lcs_section_create(&self->debugLine);
     lcs_section_create(&self->debugLineStr);
@@ -380,7 +380,7 @@ static inline optional_debugInfo_t elfFile_getDebugInfo(struct elfFile* self, vo
 }
 
 bool elfFile_getFunctionInfo(struct elfFile* self, const char* functionName, struct functionInfo* info) {
-    if (!BINARY_FILE_SUPER_1(self, maybeParse)) {
+    if (!BINARY_FILE_SUPER(self, maybeParse)) {
         return false;
     }
 
@@ -401,7 +401,7 @@ vector_pair_ptr_t elfFile_getTLSRegions(struct elfFile* self) {
 }
 
 bool elfFile_addr2String(struct elfFile* self, void* address, struct callstack_frame* frame) {
-    if (!BINARY_FILE_SUPER_1(self, maybeParse)) {
+    if (!BINARY_FILE_SUPER(self, maybeParse)) {
         return false;
     }
 
