@@ -45,8 +45,7 @@ typedef struct LCS_FILE_NAME ConcreteFile;
 /** The concrete binary file abstraction structure pointer type. */
 typedef ConcreteFile* Concrete;
 
-#define LCS_FILE(self, NAME, ...) LCS_FILE_RAW(NAME)((Concrete) (self), __VA_ARGS__)
-#define LCS_FILE_1(self, NAME) LCS_FILE_RAW(NAME)((Concrete) (self))
+#define LCS_FILE(self, NAME, ...) LCS_FILE_RAW(NAME)((Concrete) (self) __VA_OPT__(,) __VA_ARGS__)
 
 struct binaryFile* binaryFile_new(const char* fileName, const void* startAddress) {
     Concrete tmp = LCS_FILE_RAW(new)();
@@ -68,11 +67,11 @@ bool binaryFile_getFunctionInfo(struct binaryFile* self, const char* functionNam
 }
 
 vector_pair_ptr_t binaryFile_getTLSRegions(struct binaryFile* self) {
-    return LCS_FILE_1(self, getTLSRegions);
+    return LCS_FILE(self, getTLSRegions);
 }
 
 bool binaryFile_maybeParse(struct binaryFile* self) {
-    return self->parsed || (self->parsed = LCS_FILE_1(self, parse));
+    return self->parsed || (self->parsed = LCS_FILE(self, parse));
 }
 
 void binaryFile_clearCaches(void) {
@@ -99,10 +98,10 @@ bool binaryFile_isOutdated(struct dwarf_sourceFile file) {
 }
 
 void binaryFile_destroy(struct binaryFile* self) {
-    LCS_FILE_1(self, destroy);
+    LCS_FILE(self, destroy);
     vector_destroy(&self->regions);
 }
 
 void binaryFile_delete(struct binaryFile* self) {
-    LCS_FILE_1(self, delete);
+    LCS_FILE(self, delete);
 }
