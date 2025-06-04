@@ -1,7 +1,7 @@
 /*
  * CallstackLibrary - Library creating human-readable call stacks.
  *
- * Copyright (C) 2022 - 2024  mhahnFr
+ * Copyright (C) 2022 - 2025  mhahnFr
  *
  * This file is part of the CallstackLibrary.
  *
@@ -26,7 +26,6 @@
 #include <stdlib.h>
 
 #include <callstack.h>
-#include <callstack_create.h>
 
 /**
  * @brief Allocates an uninitialized callstack object.
