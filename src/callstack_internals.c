@@ -1,7 +1,7 @@
 /*
  * CallstackLibrary - Library creating human-readable call stacks.
  *
- * Copyright (C) 2023 - 2024  mhahnFr
+ * Copyright (C) 2023 - 2025  mhahnFr
  *
  * This file is part of the CallstackLibrary.
  *
@@ -19,12 +19,10 @@
  * CallstackLibrary, see the file LICENSE.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-#include <stddef.h>
-
 #include <callstack_internals.h>
 
-#include "parser/file/binaryFile.h"
 #include "dlMapper/dlMapper.h"
+#include "parser/file/binaryFile.h"
 
 bool callstack_rawNames = false;
 
