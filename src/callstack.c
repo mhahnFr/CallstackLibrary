@@ -31,12 +31,12 @@ struct callstack* callstack_new(void) {
 
 struct callstack * callstack_newWithAddress(void * address) {
     void * trace[CALLSTACK_BACKTRACE_SIZE];
-    int size = callstack_backtrace(trace, CALLSTACK_BACKTRACE_SIZE, address);
+    const int size = callstack_backtrace(trace, CALLSTACK_BACKTRACE_SIZE, address);
     if (size < 0) return NULL;
     
     struct callstack * ret = callstack_allocate();
     if (ret != NULL) {
-        (void) callstack_createWithBacktrace(ret, trace, (size_t) size);
+        callstack_createWithBacktrace(ret, trace, (size_t) size);
     }
     return ret;
 }
@@ -47,12 +47,12 @@ bool callstack_emplace(struct callstack* self) {
 
 bool callstack_emplaceWithAddress(struct callstack * self, void * address) {
     void * trace[CALLSTACK_BACKTRACE_SIZE];
-    int size = callstack_backtrace(trace, CALLSTACK_BACKTRACE_SIZE, address);
+    const int size = callstack_backtrace(trace, CALLSTACK_BACKTRACE_SIZE, address);
     return callstack_emplaceWithBacktrace(self, trace, size);
 }
 
 bool callstack_emplaceWithBacktrace(struct callstack * self,
-                                    void * trace[], int traceLength) {
+                                    void* trace[], const int traceLength) {
     if (traceLength < 0) return false;
     
     callstack_createWithBacktrace(self, trace, (size_t) traceLength);
