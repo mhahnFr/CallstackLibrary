@@ -23,7 +23,7 @@
 
 #include <callstack_frame.h>
 
-struct callstack_frame * callstack_frame_copy(struct callstack_frame * self) {
+struct callstack_frame* callstack_frame_copy(const struct callstack_frame* self) {
     struct callstack_frame * toReturn = callstack_frame_new();
     
     if (toReturn != NULL) {

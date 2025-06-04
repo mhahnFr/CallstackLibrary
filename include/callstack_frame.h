@@ -127,7 +127,7 @@ static inline struct callstack_frame * callstack_frame_new(void) {
  * @return a copy of the given callstack frame or `NULL` if unable to allocate
  * @since v1.1
  */
-struct callstack_frame * callstack_frame_copy(struct callstack_frame * self);
+struct callstack_frame * callstack_frame_copy(const struct callstack_frame * self);
 
 /**
  * Copies the given callstack frame into the given destination.
