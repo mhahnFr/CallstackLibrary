@@ -33,7 +33,7 @@
  * @param copy whether to copy the string
  * @return the copy or the original string if @c copy is @c false or the given string was @c NULL
  */
-static inline char* utils_maybeCopySave(const char* string, bool copy) {
+static inline char* utils_maybeCopySave(const char* string, const bool copy) {
     if (copy && string != NULL) {
         return strdup(string);
     }
