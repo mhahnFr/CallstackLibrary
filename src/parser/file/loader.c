@@ -1,7 +1,7 @@
 /*
  * CallstackLibrary - Library creating human-readable call stacks.
  *
- * Copyright (C) 2024  mhahnFr
+ * Copyright (C) 2024 - 2025  mhahnFr
  *
  * This file is part of the CallstackLibrary.
  *
@@ -25,7 +25,7 @@
 
 #include "loader.h"
 
-bool loader_loadFileAndExecute(const char* fileName, union loader_parserFunction func, bool extended, void* args) {
+bool loader_loadFileAndExecute(const char* fileName, const union loader_parserFunction func, const bool extended, void* args) {
     if (fileName == NULL) {
         return false;
     }
