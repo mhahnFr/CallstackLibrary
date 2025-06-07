@@ -64,8 +64,8 @@ static inline void callstack_parser_destroy(const struct callstack_parser* self)
  * @param callstack The callstack to parse the symbols for.
  * @return The type of the used symbols.
  */
-enum callstack_type callstack_parser_parse(struct callstack_parser * self,
-                                           struct callstack * callstack);
+enum callstack_type callstack_parser_parse(const struct callstack_parser* self,
+                                           struct callstack* callstack);
 
 /**
  * @brief Demangles the given name if possible and enabled.
