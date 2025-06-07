@@ -1,7 +1,7 @@
 /*
  * CallstackLibrary - Library creating human-readable call stacks.
  *
- * Copyright (C) 2024  mhahnFr
+ * Copyright (C) 2024 - 2025  mhahnFr
  *
  * This file is part of the CallstackLibrary.
  *
@@ -26,14 +26,12 @@ const void* upper_bound(const void* const key,
                         const size_t      count,
                         const size_t      size,
                         int (*compare)(const void*, const void*)) {
-    const void* it,
-              * first = begin;
-    size_t step,
-           amount = count;
+    const void* first = begin;
+    size_t amount = count;
 
     while (amount > 0) {
-        it = first;
-        step = amount / 2;
+        const void *it = first;
+        const size_t step = amount / 2;
         it += step * size;
 
         if (compare(key, it) >= 0) {
@@ -57,14 +55,12 @@ const void* lower_bound(const void* const key,
                         const size_t      count,
                         const size_t      size,
                         int (*compare)(const void*, const void*)) {
-    const void* it,
-              * first = begin;
-    size_t step,
-           amount = count;
+    const void* first = begin;
+    size_t amount = count;
 
     while (amount > 0) {
-        it = first;
-        step = amount / 2;
+        const void *it = first;
+        const size_t step = amount / 2;
         it += step * size;
 
         if (compare(it, key) < 0) {
