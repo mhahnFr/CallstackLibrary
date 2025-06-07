@@ -60,7 +60,7 @@ void function_create(struct function * self);
  *
  * @param self the function structure to be deinitialized
  */
-void function_destroy(struct function * self);
+void function_destroy(const struct function* self);
 
 /**
  * Deinitializes and `free`s the given function structure.
