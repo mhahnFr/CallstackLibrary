@@ -92,12 +92,12 @@ struct regionInfo regions_getTLSRegions(void) {
  *
  * @param self the region object to be destructed
  */
-static inline void regions_destroy(struct region self) {
+static inline void regions_destroy(const struct region self) {
     maybe(free, (void*) self.name);
     maybe(free, (void*) self.nameRelative);
 }
 
-void regions_destroyInfo(struct regionInfo* info) {
+void regions_destroyInfo(const struct regionInfo* info) {
     vector_region_t tmp = (vector_region_t) { info->amount, info->amount, info->regions };
     vector_destroyWith(&tmp, regions_destroy);
 }

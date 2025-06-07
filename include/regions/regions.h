@@ -46,7 +46,7 @@ struct regionInfo regions_getLoadedRegions(void);
 // thread. Cares for callstack_autoClearCaches.
 struct regionInfo regions_getTLSRegions(void);
 
-void regions_destroyInfo(struct regionInfo* info);
+void regions_destroyInfo(const struct regionInfo* info);
 
 #ifdef __cplusplus
 } // extern "C"
