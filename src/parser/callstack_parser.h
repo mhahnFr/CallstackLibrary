@@ -25,8 +25,6 @@
 #include <callstack.h>
 #include <callstack_internals.h>
 
-#include "file/binaryFile.h"
-
 /**
  * The structure of a callstack parser.
  */
@@ -49,14 +47,14 @@ static inline void callstack_parser_create(struct callstack_parser* self) {
  *
  * @param self The callstack parser object to destroy.
  */
-static inline void callstack_parser_destroy(struct callstack_parser* self) {
+static inline void callstack_parser_destroy(const struct callstack_parser* self) {
     if (self->clearCaches) {
         callstack_clearCaches();
     }
 }
 
 /**
- * @brief Parses the debug symbols to create a human readable callstack.
+ * @brief Parses the debug symbols to create a human-readable callstack.
  *
  * Tries to parse the debug symbols, if they are not available, the information of the
  * dynamic linker is used to translate the callstack.
