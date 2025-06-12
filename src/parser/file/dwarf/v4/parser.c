@@ -34,36 +34,36 @@
 static inline bool dwarf4_parseLineProgramHeader(struct dwarf_parser* self, size_t* counter) {
     uint64_t headerLength;
     if (self->bit64) {
-        headerLength = *((uint64_t*) (self->debugLine.content + *counter));
+        headerLength = *(uint64_t*) (self->debugLine.content + *counter);
         *counter += 8;
     } else {
-        headerLength = *((uint32_t*) (self->debugLine.content + *counter));
+        headerLength = *(uint32_t*) (self->debugLine.content + *counter);
         *counter += 4;
     }
     (void) headerLength;
 
-    self->minimumInstructionLength = *((uint8_t*) (self->debugLine.content + (*counter)++));
+    self->minimumInstructionLength = *(uint8_t*) (self->debugLine.content + (*counter)++);
     if (self->version == 4) {
-        self->maximumOperationsPerInstruction = *((uint8_t*) (self->debugLine.content + (*counter)++));
+        self->maximumOperationsPerInstruction = *(uint8_t*) (self->debugLine.content + (*counter)++);
     }
-    self->defaultIsStmt = *((uint8_t*) (self->debugLine.content + (*counter)++));
-    self->lineBase      = *((int8_t*)  (self->debugLine.content + (*counter)++));
-    self->lineRange     = *((uint8_t*) (self->debugLine.content + (*counter)++));
-    self->opCodeBase    = *((uint8_t*) (self->debugLine.content + (*counter)++));
+    self->defaultIsStmt = *(uint8_t*) (self->debugLine.content + (*counter)++);
+    self->lineBase      = *(int8_t*)  (self->debugLine.content + (*counter)++);
+    self->lineRange     = *(uint8_t*) (self->debugLine.content + (*counter)++);
+    self->opCodeBase    = *(uint8_t*) (self->debugLine.content + (*counter)++);
 
     vector_reserve(&self->stdOpcodeLengths, self->opCodeBase - 2);
     for (uint8_t i = 1; i < self->opCodeBase; ++i) {
         vector_push_back(&self->stdOpcodeLengths, *((uint8_t*) (self->debugLine.content + (*counter)++)));
     }
 
-    while (*((uint8_t*) (self->debugLine.content + *counter)) != 0x0) {
+    while (*(uint8_t*) (self->debugLine.content + *counter) != 0x0) {
         const char* string = self->debugLine.content + *counter;
         vector_push_back(&self->specific.v4.includeDirectories, string);
         *counter += strlen(string) + 1;
     }
-    ++(*counter);
+    ++*counter;
 
-    while (*((uint8_t*) (self->debugLine.content + *counter)) != 0x0) {
+    while (*(uint8_t*) (self->debugLine.content + *counter) != 0x0) {
         const char* string = self->debugLine.content + *counter;
         *counter += strlen(string) + 1;
 
@@ -74,7 +74,7 @@ static inline bool dwarf4_parseLineProgramHeader(struct dwarf_parser* self, size
             string, dirIndex, modification, size
         }));
     }
-    ++(*counter);
+    ++*counter;
     return true;
 }
 
@@ -86,7 +86,7 @@ static inline bool dwarf4_parseLineProgramHeader(struct dwarf_parser* self, size
  * @param defaultDirectory the compilation directory
  * @return an allocated full path string of the given file or `NULL` if the allocation failed or the main source file was referred
  */
-static inline char* dwarf4_stringFrom(struct dwarf_fileNameEntry* file, struct vector_string* directories, const char* defaultDirectory) {
+static inline char* dwarf4_stringFrom(const struct dwarf_fileNameEntry* file, const struct vector_string* directories, const char* defaultDirectory) {
     if (*file->name == '/') {
         return strdup(file->name);
     }
@@ -118,8 +118,8 @@ static inline char* dwarf4_stringFrom(struct dwarf_fileNameEntry* file, struct v
  * @param file the index of the desired file
  * @return the source file reference
  */
-static inline struct dwarf_sourceFile dwarf4_parser_getFileName(struct dwarf_parser* self, uint64_t file) {
-    struct dwarf_fileNameEntry* filePtr = file == 0 ? NULL : &self->specific.v4.fileNames.content[file - 1];
+static inline struct dwarf_sourceFile dwarf4_parser_getFileName(const struct dwarf_parser* self, const uint64_t file) {
+    const struct dwarf_fileNameEntry* filePtr = file == 0 ? NULL : &self->specific.v4.fileNames.content[file - 1];
     return (struct dwarf_sourceFile) {
         filePtr == NULL ? NULL : dwarf4_stringFrom(filePtr, &self->specific.v4.includeDirectories, self->compilationDirectory),
         NULL, NULL,
@@ -133,7 +133,7 @@ static inline struct dwarf_sourceFile dwarf4_parser_getFileName(struct dwarf_par
  *
  * @param self the generified parser object
  */
-static inline void dwarf4_parser_destroy(struct dwarf_parser* self) {
+static inline void dwarf4_parser_destroy(const struct dwarf_parser* self) {
     vector_destroy(&self->specific.v4.includeDirectories);
     vector_destroy(&self->specific.v4.fileNames);
 }
