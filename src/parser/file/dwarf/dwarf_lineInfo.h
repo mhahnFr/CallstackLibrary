@@ -79,7 +79,7 @@ struct dwarf_lineInfo {
  *
  * @param self the line info to be destroyed
  */
-static inline void dwarf_lineInfo_destroyValue(struct dwarf_lineInfo self) {
+static inline void dwarf_lineInfo_destroyValue(const struct dwarf_lineInfo self) {
     free((void*) self.sourceFile.fileName);
     free((void*) self.sourceFile.fileNameRelative);
     free((void*) self.sourceFile.fileNameAbsolute);
@@ -90,7 +90,7 @@ static inline void dwarf_lineInfo_destroyValue(struct dwarf_lineInfo self) {
  *
  * @param self the line info to be destroyed
  */
-static inline void dwarf_lineInfo_destroy(struct dwarf_lineInfo* self) {
+static inline void dwarf_lineInfo_destroy(const struct dwarf_lineInfo* self) {
     dwarf_lineInfo_destroyValue(*self);
 }
 
