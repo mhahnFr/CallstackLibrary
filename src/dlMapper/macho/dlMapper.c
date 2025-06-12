@@ -29,8 +29,8 @@
 #include <macho/fat_handler.h>
 #include <macho/macho_utils.h>
 
-#include "../pair_address.h"
 #include "../dlMapper_platform.h"
+#include "../pair_address.h"
 
 #define dlMapper_platform_loadMachOFunc(bits, suffix)                                                 \
 static inline const void* dlMapper_platform_loadMachO##bits(const struct mach_header##suffix* header, \
@@ -77,6 +77,8 @@ static inline pair_address_t dlMapper_platform_loadMachO(const struct mach_heade
 
         case FAT_CIGAM:
         case FAT_CIGAM_64: return dlMapper_platform_loadMachO(macho_parseFat((void*) header, true, fileName), fileName);
+
+        default: break;
     }
 
     return (struct pair_address) { header, end };
@@ -120,7 +122,7 @@ bool dlMapper_platform_loadLoadedLibraries(vector_loadedLibInfo_t* libs) {
     struct task_dyld_info dyldInfo;
     mach_msg_type_number_t infoCount = TASK_DYLD_INFO_COUNT;
     if (task_info(mach_task_self_, TASK_DYLD_INFO, (task_info_t) &dyldInfo, &infoCount) == KERN_SUCCESS) {
-        struct dyld_all_image_infos* infos = (void*) dyldInfo.all_image_info_addr;
+        const struct dyld_all_image_infos* infos = (void*) dyldInfo.all_image_info_addr;
         dlMapper_platform_pushLoadedLib(libs, infos->dyldPath, infos->dyldImageLoadAddress, (void*) inside);
     } else {
         printf("LCS: Warning: Failed to load the dynamic loader. Callstacks might be truncated.\n");
