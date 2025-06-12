@@ -72,7 +72,7 @@ bool dlMapper_init(void) {
 static inline int dlMapper_searchCompare(const void* key, const void* element) {
     // IMPORTANT: key is the searched address, element the array element
 
-    struct loadedLibInfo* e = (struct loadedLibInfo*) element;
+    const struct loadedLibInfo* e = (struct loadedLibInfo*) element;
     if (key >= e->begin && key < e->end) {
         return 0;
     }
