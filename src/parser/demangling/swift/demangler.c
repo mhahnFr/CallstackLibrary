@@ -51,7 +51,7 @@ static inline SwiftDemanglerFunc callstack_demangle_getSwiftDemangler(void) {
 
     if (!loadingState.searched) {
         loadingState.searched = true;
-        struct functionInfo info = functionInfo_load(LCS_UNDERSCORE "swift_demangle");
+        const struct functionInfo info = functionInfo_load(LCS_UNDERSCORE "swift_demangle");
         if (info.found) {
             loadingState.func = (void*) info.begin;
         }
@@ -62,7 +62,7 @@ static inline SwiftDemanglerFunc callstack_demangle_getSwiftDemangler(void) {
 char* callstack_demangle_swift(char* name) {
     char* toReturn = name;
 
-    SwiftDemanglerFunc swift_demangle = callstack_demangle_getSwiftDemangler();
+    const SwiftDemanglerFunc swift_demangle = callstack_demangle_getSwiftDemangler();
     if (swift_demangle != NULL) {
         char* demangled = swift_demangle(name, strlen(name), NULL, NULL, 0);
         if (demangled != NULL) {
