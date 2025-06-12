@@ -50,7 +50,7 @@ char* dwarf_pathConcatenate(const char* string1, const char* string2) {
  * @param actualSize the size of the line number program including the header, as read from the header
  * @return whether the parsing was successful
  */
-static inline bool dwarf_parser_parse(struct dwarf_parser* self, size_t counter, size_t actualSize) {
+static inline bool dwarf_parser_parse(struct dwarf_parser* self, size_t counter, const size_t actualSize) {
     if (!self->parseHeader(self, &counter)) {
         return false;
     }
@@ -70,10 +70,10 @@ static inline bool dwarf_parser_parse(struct dwarf_parser* self, size_t counter,
           epilogueBegin = false;
 
     while (counter - (self->bit64 ? 12 : 4) < actualSize) {
-        const uint8_t opCode = *((uint8_t*) (self->debugLine.content + counter++));
+        const uint8_t opCode = *(uint8_t*) (self->debugLine.content + counter++);
         if (opCode == 0) {
             const uint64_t length = getULEB128(self->debugLine.content, &counter);
-            const uint8_t  actualOpCode = *((uint8_t*) (self->debugLine.content + counter++));
+            const uint8_t  actualOpCode = *(uint8_t*) (self->debugLine.content + counter++);
             switch (actualOpCode) {
                 case DW_LNE_end_sequence: {
                     endSequence = true;
@@ -91,7 +91,7 @@ static inline bool dwarf_parser_parse(struct dwarf_parser* self, size_t counter,
                 }
                     
                 case DW_LNE_set_address: {
-                    const size_t newAddress = *((size_t*) (self->debugLine.content + counter));
+                    const size_t newAddress = *(size_t*) (self->debugLine.content + counter);
                     counter += sizeof(size_t);
                     address = newAddress;
                     opIndex = 0;
@@ -160,14 +160,14 @@ static inline bool dwarf_parser_parse(struct dwarf_parser* self, size_t counter,
                         address += self->minimumInstructionLength * ((opIndex + operationAdvance) / self->maximumOperationsPerInstruction);
                         opIndex  = (opIndex + operationAdvance) % self->maximumOperationsPerInstruction;
                     } else {
-                        address += (adjustedOpCode / self->lineRange) * self->minimumInstructionLength;
+                        address += adjustedOpCode / self->lineRange * self->minimumInstructionLength;
                     }
                     break;
                 }
 
                 case DW_LNS_fixed_advance_pc: {
                     opIndex = 0;
-                    address += *((uint16_t*) (self->debugLine.content + counter));
+                    address += *(uint16_t*) (self->debugLine.content + counter);
                     counter += 2;
                     break;
                 }
@@ -200,16 +200,16 @@ static inline bool dwarf_parser_parse(struct dwarf_parser* self, size_t counter,
                     break;
             }
         } else {
-            uint8_t adjustedOpCode = opCode - self->opCodeBase;
+            const uint8_t adjustedOpCode = opCode - self->opCodeBase;
             if (self->version > 3) {
-                uint8_t operationAdvance = adjustedOpCode / self->lineRange;
+                const uint8_t operationAdvance = adjustedOpCode / self->lineRange;
 
                 address += self->minimumInstructionLength * ((opIndex + operationAdvance) / self->maximumOperationsPerInstruction);
                 opIndex  = (opIndex + operationAdvance) % self->maximumOperationsPerInstruction;
             } else {
-                address += (adjustedOpCode / self->lineRange) * self->minimumInstructionLength;
+                address += adjustedOpCode / self->lineRange * self->minimumInstructionLength;
             }
-            line += self->lineBase + (adjustedOpCode % self->lineRange);
+            line += self->lineBase + adjustedOpCode % self->lineRange;
 
             self->cb((struct dwarf_lineInfo) {
                 address, line, column, isa, discriminator,
@@ -247,10 +247,10 @@ static inline bool dwarf_parser_parse(struct dwarf_parser* self, size_t counter,
  * @param version the DWARF version to be used
  * @return a vector with the type descriptions
  */
-static inline vector_pair_uint64_t dwarf_getAbbreviationTable(struct lcs_section section,
-                                                              uint64_t abbreviationCode,
-                                                              uint64_t offset,
-                                                              uint16_t version) {
+static inline vector_pair_uint64_t dwarf_getAbbreviationTable(const struct lcs_section section,
+                                                              const uint64_t abbreviationCode,
+                                                              const uint64_t offset,
+                                                              const uint16_t version) {
     vector_pair_uint64_t toReturn = vector_initializer;
     size_t counter = (size_t) offset;
 
@@ -260,7 +260,7 @@ static inline vector_pair_uint64_t dwarf_getAbbreviationTable(struct lcs_section
         if (code == 0) continue;
 
         const uint64_t tag = getULEB128(section.content, &counter);
-        const uint8_t children = *((uint8_t*) (section.content + counter++));
+        const uint8_t children = *(uint8_t*) (section.content + counter++);
         (void) tag;
         (void) children;
 
@@ -283,12 +283,12 @@ static inline vector_pair_uint64_t dwarf_getAbbreviationTable(struct lcs_section
 }
 
 uint64_t dwarf_parseInitialSize(void* buffer, size_t* counter, bool* bit64) {
-    const uint32_t size = *((uint32_t*) (buffer + *counter));
+    const uint32_t size = *(uint32_t*) (buffer + *counter);
     *counter += 4;
 
     uint64_t toReturn;
     if (size == 0xffffffff) {
-        toReturn = *((uint64_t*) (buffer + *counter));
+        toReturn = *(uint64_t*) (buffer + *counter);
         *bit64 = true;
         *counter += 8;
     } else {
@@ -298,7 +298,7 @@ uint64_t dwarf_parseInitialSize(void* buffer, size_t* counter, bool* bit64) {
     return toReturn;
 }
 
-bool dwarf_consumeSome(struct dwarf_parser* self, void* buffer, size_t* counter, uint64_t type) {
+bool dwarf_consumeSome(const struct dwarf_parser* self, void* buffer, size_t* counter, const uint64_t type) {
     switch (type) {
         case DW_FORM_block: {
             const uint64_t length = getULEB128(buffer, counter);
@@ -307,26 +307,26 @@ bool dwarf_consumeSome(struct dwarf_parser* self, void* buffer, size_t* counter,
         }
 
         case DW_FORM_block1: {
-            uint8_t length = *((uint8_t*) (buffer + (*counter)++));
+            const uint8_t length = *(uint8_t*) (buffer + (*counter)++);
             *counter += length;
             break;
         }
 
         case DW_FORM_block2: {
-            uint16_t length = *((uint16_t*) (buffer + *counter));
+            const uint16_t length = *(uint16_t*) (buffer + *counter);
             *counter += 2 + length;
             break;
         }
 
         case DW_FORM_block4: {
-            uint32_t length = *((uint32_t*) (buffer + *counter));
+            const uint32_t length = *(uint32_t*) (buffer + *counter);
             *counter += 4 + length;
             break;
         }
 
         case DW_FORM_flag:
         case DW_FORM_strx1:
-        case DW_FORM_data1:  ++(*counter);   break;
+        case DW_FORM_data1:  ++*counter;     break;
         case DW_FORM_strx2:
         case DW_FORM_data2:  *counter += 2;  break;
         case DW_FORM_strx3:  *counter += 3;  break;
@@ -362,14 +362,16 @@ bool dwarf_consumeSome(struct dwarf_parser* self, void* buffer, size_t* counter,
  * @param debugStr the section corresponding to the .debug_str section
  * @return a pointer to the string in either section or `NULL` if the given type specifies neither section
  */
-static inline char* dwarf_stringFromSection(uint64_t offset,
-                                            uint64_t type,
-                                            struct lcs_section debugLineStr,
-                                            struct lcs_section debugStr) {
+static inline char* dwarf_stringFromSection(const uint64_t offset,
+                                            const uint64_t type,
+                                            const struct lcs_section debugLineStr,
+                                            const struct lcs_section debugStr) {
     char* toReturn = NULL;
     switch (type) {
         case DW_FORM_line_strp: toReturn = debugLineStr.content + offset; break;
         case DW_FORM_strp:      toReturn = debugStr.content + offset;     break;
+
+        default: break;
     }
     return toReturn;
 }
@@ -385,7 +387,7 @@ static inline char* dwarf_stringFromSection(uint64_t offset,
  * @param offset the optional offset into the debug string offsets table
  * @return the optionally deducted string table offset
  */
-static inline optional_uint64_t dwarf_loadStringOffset(uint64_t index, struct lcs_section debugStrOffsets, optional_uint64_t offset) {
+static inline optional_uint64_t dwarf_loadStringOffset(const uint64_t index, const struct lcs_section debugStrOffsets, const optional_uint64_t offset) {
     bool bit64;
     size_t counter = 0;
     const uint64_t size = dwarf_parseInitialSize(debugStrOffsets.content, &counter, &bit64);
@@ -406,9 +408,9 @@ static inline optional_uint64_t dwarf_loadStringOffset(uint64_t index, struct lc
     return (optional_uint64_t) { true, ((uint32_t*) (debugStrOffsets.content + counter))[index] };
 }
 
-char* dwarf_readString(struct dwarf_parser* self, void* buffer, size_t* counter, uint64_t type) {
+char* dwarf_readString(const struct dwarf_parser* self, void* buffer, size_t* counter, uint64_t type) {
     if (type == DW_FORM_string) {
-        char* toReturn = (buffer + *counter);
+        char* toReturn = buffer + *counter;
         *counter += strlen(toReturn) + 1;
         return toReturn;
     }
@@ -420,42 +422,42 @@ char* dwarf_readString(struct dwarf_parser* self, void* buffer, size_t* counter,
     uint64_t offset;
     if (type == DW_FORM_strp || type == DW_FORM_line_strp || type == DW_FORM_strp_sup) {
         if (self->bit64) {
-            offset = *((uint64_t*) (buffer + *counter));
+            offset = *(uint64_t*) (buffer + *counter);
             *counter += 8;
         } else {
-            offset = *((uint32_t*) (buffer + *counter));
+            offset = *(uint32_t*) (buffer + *counter);
             *counter += 4;
         }
     } else {
         uint64_t index;
         switch (type) {
             case DW_FORM_strx:  index = getULEB128(buffer, counter);         break;
-            case DW_FORM_strx1: index = *((uint8_t*) (buffer + *counter++)); break;
+            case DW_FORM_strx1: index = *(uint8_t*) (buffer + *counter++); break;
 
             case DW_FORM_strx2:
-                index = *((uint16_t*) (buffer + *counter));
+                index = *(uint16_t*) (buffer + *counter);
                 *counter += 2;
                 break;
 
             case DW_FORM_strx3: {
                 uint8_t bytes[3];
-                bytes[0] = *((uint8_t*) (buffer + *counter++));
-                bytes[1] = *((uint8_t*) (buffer + *counter++));
-                bytes[2] = *((uint8_t*) (buffer + *counter++));
+                bytes[0] = *(uint8_t*) (buffer + *counter++);
+                bytes[1] = *(uint8_t*) (buffer + *counter++);
+                bytes[2] = *(uint8_t*) (buffer + *counter++);
 
                 index = bytes[0] + (bytes[1] << 8) + (bytes[2] << 16);
                 break;
             }
 
             case DW_FORM_strx4:
-                index = *((uint32_t*) (buffer + *counter));
+                index = *(uint32_t*) (buffer + *counter);
                 *counter += 4;
                 break;
 
             default: return NULL;
         }
         type = DW_FORM_strp;
-        optional_uint64_t value = dwarf_loadStringOffset(index, self->debugStrOffsets, self->debugStrOffset);
+        const optional_uint64_t value = dwarf_loadStringOffset(index, self->debugStrOffsets, self->debugStrOffset);
         if (!value.has_value) {
             return NULL;
         }
@@ -474,19 +476,19 @@ static inline bool dwarf_parseCompDir(struct dwarf_parser* self) {
     bool bit64;
     size_t counter = 0;
     const uint64_t size = dwarf_parseInitialSize(self->debugInfo.content, &counter, &bit64);
-    const uint16_t version = *((uint16_t*) (self->debugInfo.content + counter));
+    const uint16_t version = *(uint16_t*) (self->debugInfo.content + counter);
     counter += 2;
 
     uint8_t addressSize;
     uint64_t abbrevOffset;
     if (version == 5) {
-        const uint8_t unitType = *((uint8_t*) (self->debugInfo.content + counter++));
-        addressSize = *((uint8_t*) (self->debugInfo.content + counter++));
+        const uint8_t unitType = *(uint8_t*) (self->debugInfo.content + counter++);
+        addressSize = *(uint8_t*) (self->debugInfo.content + counter++);
         if (bit64) {
-            abbrevOffset = *((uint64_t*) (self->debugInfo.content + counter));
+            abbrevOffset = *(uint64_t*) (self->debugInfo.content + counter);
             counter += 8;
         } else {
-            abbrevOffset = *((uint32_t*) (self->debugInfo.content + counter));
+            abbrevOffset = *(uint32_t*) (self->debugInfo.content + counter);
             counter += 4;
         }
         switch (unitType) {
@@ -500,13 +502,13 @@ static inline bool dwarf_parseCompDir(struct dwarf_parser* self) {
         }
     } else {
         if (bit64) {
-            abbrevOffset = *((uint64_t*) (self->debugInfo.content + counter));
+            abbrevOffset = *(uint64_t*) (self->debugInfo.content + counter);
             counter += 8;
         } else {
-            abbrevOffset = *((uint32_t*) (self->debugInfo.content + counter));
+            abbrevOffset = *(uint32_t*) (self->debugInfo.content + counter);
             counter += 4;
         }
-        addressSize = *((uint8_t*) (self->debugInfo.content + counter++));
+        addressSize = *(uint8_t*) (self->debugInfo.content + counter++);
     }
     (void) size;
     (void) addressSize;
@@ -522,10 +524,10 @@ static inline bool dwarf_parseCompDir(struct dwarf_parser* self) {
             break;
         } else if (version >= 5 && element->first == DW_AT_str_offsets_base) {
             if (self->bit64) {
-                self->debugStrOffset.value = *((uint64_t*) (self->debugInfo.content + counter));
+                self->debugStrOffset.value = *(uint64_t*) (self->debugInfo.content + counter);
                 counter += 8;
             } else {
-                self->debugStrOffset.value = *((uint32_t*) (self->debugInfo.content + counter));
+                self->debugStrOffset.value = *(uint32_t*) (self->debugInfo.content + counter);
                 counter += 4;
             }
             self->debugStrOffset.has_value = true;
@@ -544,17 +546,17 @@ static inline bool dwarf_parseCompDir(struct dwarf_parser* self) {
     return self->compilationDirectory != NULL;
 }
 
-bool dwarf_parseLineProgram(struct lcs_section debugLine,
-                            struct lcs_section debugLineStr,
-                            struct lcs_section debugStr,
-                            struct lcs_section debugInfo,
-                            struct lcs_section debugAbbrev,
-                            struct lcs_section debugStrOffsets,
-                            dwarf_line_callback cb, void* args) {
+bool dwarf_parseLineProgram(const struct lcs_section debugLine,
+                            const struct lcs_section debugLineStr,
+                            const struct lcs_section debugStr,
+                            const struct lcs_section debugInfo,
+                            const struct lcs_section debugAbbrev,
+                            const struct lcs_section debugStrOffsets,
+                            const dwarf_line_callback cb, void* args) {
     bool bit64;
     size_t counter = 0;
     const uint64_t size = dwarf_parseInitialSize(debugLine.content, &counter, &bit64);
-    const uint16_t version = *((uint16_t*) (debugLine.content + counter));
+    const uint16_t version = *(uint16_t*) (debugLine.content + counter);
     counter += 2;
     
     struct dwarf_parser parser = {
