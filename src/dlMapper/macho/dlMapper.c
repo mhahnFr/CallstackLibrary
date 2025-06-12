@@ -32,57 +32,29 @@
 #include "../pair_address.h"
 #include "../dlMapper_platform.h"
 
-/**
- * Parses the given 64 bit Mach-O file.
- *
- * @param header the start pointer of the Mach-O file
- * @param bytesSwapped whether the bytes need to be swapped to match the host byte order
- * @return the end address of the Mach-O file
- */
-static inline const void* dlMapper_platform_loadMachO64(const struct mach_header_64* header, const bool bytesSwapped) {
-    uint64_t vmsize = 0;
-    struct load_command* lc = (void*) header + sizeof(struct mach_header_64);
-    for (uint32_t i = 0; i < macho_maybeSwap(32, bytesSwapped, header->ncmds); ++i) {
-        switch (macho_maybeSwap(32, bytesSwapped, lc->cmd)) {
-            case LC_SEGMENT_64: {
-                struct segment_command_64* cmd = (void*) lc;
-                if (strcmp(cmd->segname, SEG_TEXT) == 0) {
-                    vmsize = macho_maybeSwap(64, bytesSwapped, cmd->vmsize);
-                }
-                break;
-            }
-        }
-
-        lc = (void*) lc + macho_maybeSwap(32, bytesSwapped, lc->cmdsize);
-    }
-    return (void*) header + vmsize;
+#define dlMapper_platform_loadMachOFunc(bits, suffix)                                                 \
+static inline const void* dlMapper_platform_loadMachO##bits(const struct mach_header##suffix* header, \
+                                                            const bool bytesSwapped) {                \
+    uint##bits##_t vmsize = 0;                                                                        \
+    struct load_command* lc = (void*) header + sizeof(struct mach_header##suffix);                    \
+    for (uint32_t i = 0; i < macho_maybeSwap(32, bytesSwapped, header->ncmds); ++i) {                 \
+        switch (macho_maybeSwap(32, bytesSwapped, lc->cmd)) {                                         \
+            case LC_SEGMENT##suffix: {                                                                \
+                struct segment_command##suffix* cmd = (void*) lc;                                     \
+                if (strcmp(cmd->segname, SEG_TEXT) == 0) {                                            \
+                    vmsize = macho_maybeSwap(bits, bytesSwapped, cmd->vmsize);                        \
+                }                                                                                     \
+                break;                                                                                \
+            }                                                                                         \
+        }                                                                                             \
+                                                                                                      \
+        lc = (void*) lc + macho_maybeSwap(32, bytesSwapped, lc->cmdsize);                             \
+    }                                                                                                 \
+    return (void*) header + vmsize;                                                                   \
 }
 
-/**
- * Parses the given 32 bit Mach-O file.
- *
- * @param header the start pointer of the Mach-O file
- * @param bytesSwapped whether the bytes need to be swapped to match the host byte order
- * @return the end address of the Mach-O file
- */
-static inline const void* dlMapper_platform_loadMachO32(const struct mach_header* header, const bool bytesSwapped) {
-    uint32_t vmsize = 0;
-    struct load_command* lc = (void*) header + sizeof(struct mach_header);
-    for (uint32_t i = 0; i < macho_maybeSwap(32, bytesSwapped, header->ncmds); ++i) {
-        switch (macho_maybeSwap(32, bytesSwapped, lc->cmd)) {
-            case LC_SEGMENT: {
-                struct segment_command* cmd = (void*) lc;
-                if (strcmp(cmd->segname, SEG_TEXT) == 0) {
-                    vmsize = macho_maybeSwap(32, bytesSwapped, cmd->vmsize);
-                }
-                break;
-            }
-        }
-
-        lc = (void*) lc + macho_maybeSwap(32, bytesSwapped, lc->cmdsize);
-    }
-    return (void*) header + vmsize;
-}
+dlMapper_platform_loadMachOFunc(32,)
+dlMapper_platform_loadMachOFunc(64, _64)
 
 /**
  * Loads the given Mach-O file.
