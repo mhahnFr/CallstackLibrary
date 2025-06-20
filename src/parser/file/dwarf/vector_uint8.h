@@ -24,7 +24,7 @@
 
 #include <stdint.h>
 
-#include <DC4C/v2/vector.h>
+#include <DC4C/vector.h>
 
 typedef_vector_named(uint8, uint8_t);
 

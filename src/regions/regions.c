@@ -25,7 +25,7 @@
 #include <callstack_internals.h>
 #include <regions/regions.h>
 
-#include <DC4C/v2/vector.h>
+#include <DC4C/vector.h>
 
 #include "../dlMapper/dlMapper.h"
 

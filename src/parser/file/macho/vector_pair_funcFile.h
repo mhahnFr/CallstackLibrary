@@ -22,7 +22,7 @@
 #ifndef vector_pair_funcFile_h
 #define vector_pair_funcFile_h
 
-#include <DC4C/v2/vector.h>
+#include <DC4C/vector.h>
 
 #include "optional_pair_funcFile.h"
 
