@@ -1,7 +1,7 @@
 /*
  * CallstackLibrary - Library creating human-readable call stacks.
  *
- * Copyright (C) 2024  mhahnFr
+ * Copyright (C) 2024 - 2025  mhahnFr
  *
  * This file is part of the CallstackLibrary.
  *
@@ -28,9 +28,9 @@
 #else
  #include <mach-o/arch.h>
  #include <sys/sysctl.h>
-#endif
 
-#include <macho/macho_utils.h>
+ #include <macho/macho_utils.h>
+#endif
 
 #include "fat_handler.h"
 
