@@ -1,7 +1,7 @@
 /*
  * CallstackLibrary - Library creating human-readable call stacks.
  *
- * Copyright (C) 2024  mhahnFr
+ * Copyright (C) 2024 - 2025  mhahnFr
  *
  * This file is part of the CallstackLibrary.
  *
@@ -22,6 +22,13 @@
 #ifndef macho_utils_h
 #define macho_utils_h
 
+/**
+ * Changes the endianness of the given value if requested.
+ *
+ * @param bits the amount of bits of the given value
+ * @param swap whether to swap the bytes
+ * @param value the value in question
+ */
 #define macho_maybeSwap(bits, swap, value) ((swap) ? OSSwapInt##bits(value) : (value))
 
 #endif /* macho_utils_h */
