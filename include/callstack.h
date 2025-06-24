@@ -1,7 +1,7 @@
 /*
  * CallstackLibrary - Library creating human-readable call stacks.
  *
- * Copyright (C) 2022 - 2024  mhahnFr
+ * Copyright (C) 2022 - 2025  mhahnFr
  *
  * This file is part of the CallstackLibrary.
  *
@@ -185,7 +185,7 @@ struct callstack_frame* callstack_getBinariesCached(struct callstack* self);
  * @param self The callstack object.
  * @return The number of frames in the given callstack.
  */
-static inline size_t callstack_getFrameCount(struct callstack * self) {
+static inline size_t callstack_getFrameCount(const struct callstack* self) {
     return self->backtraceSize;
 }
 
@@ -195,7 +195,7 @@ static inline size_t callstack_getFrameCount(struct callstack * self) {
  * @param self The callstack object.
  * @return The type of the callstack.
  */
-static inline enum callstack_type callstack_getType(struct callstack * self) {
+static inline enum callstack_type callstack_getType(const struct callstack* self) {
     return self->translationStatus;
 }
 
@@ -205,7 +205,7 @@ static inline enum callstack_type callstack_getType(struct callstack * self) {
  * @param self The callstack object.
  * @return Whether the callstack is already translated.
  */
-static inline bool callstack_isTranslated(struct callstack * self) {
+static inline bool callstack_isTranslated(const struct callstack* self) {
     return self->translationStatus != NONE && self->translationStatus != FAILED;
 }
 

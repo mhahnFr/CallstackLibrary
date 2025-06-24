@@ -157,7 +157,8 @@ char * callstack_frame_getShortestName(const struct callstack_frame * self);
  * @return the shortest binary file name or the given fallback
  * @since v1.2
  */
-static inline const char* callstack_frame_getShortestNameOr(const struct callstack_frame* self, const char* fallback) {
+static inline const char* callstack_frame_getShortestNameOr(const struct callstack_frame* self,
+                                                            const char* fallback) {
     const char* shortest = callstack_frame_getShortestName(self);
     return shortest == NULL ? fallback : shortest;
 }
@@ -181,7 +182,8 @@ char * callstack_frame_getShortestSourceFile(const struct callstack_frame * self
  * @return the shortest source file name or the given fallback
  * @since v1.2
  */
-static inline const char* callstack_frame_getShortestSourceFileOr(const struct callstack_frame* self, const char* fallback) {
+static inline const char* callstack_frame_getShortestSourceFileOr(const struct callstack_frame* self,
+                                                                  const char* fallback) {
     const char* shortest = callstack_frame_getShortestSourceFile(self);
     return shortest == NULL ? fallback : shortest;
 }
@@ -192,7 +194,7 @@ static inline const char* callstack_frame_getShortestSourceFileOr(const struct c
  * @param self the callstack frame to be destructed
  * @since v1.1
  */
-static inline void callstack_frame_destroy(struct callstack_frame * self) {
+static inline void callstack_frame_destroy(const struct callstack_frame* self) {
     if (!self->reserved1) {
         free(self->binaryFile);
         free(self->binaryFileRelative);

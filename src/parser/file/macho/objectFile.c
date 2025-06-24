@@ -19,7 +19,6 @@
  * CallstackLibrary, see the file LICENSE.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-#include <stdarg.h>
 #include <stdio.h>
 #include <stdlib.h>
 #include <mach-o/loader.h>
@@ -293,7 +292,7 @@ static inline bool objectFile_handleSegment(struct objectFile*      self,
  * @param f the function / object file pair
  * @param args the arguments - should contain as first argument the object file object ot add the pair to
  */
-static inline void objectFile_addFunctionCallback(struct pair_funcFile f, const va_list args) {
+static inline void objectFile_addFunctionCallback(struct pair_funcFile f, va_list args) {
     struct objectFile* self = va_arg(args, void*);
 
     vector_push_back(&self->ownFunctions, f.first);

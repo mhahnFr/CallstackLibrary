@@ -86,7 +86,9 @@ static inline bool dwarf4_parseLineProgramHeader(struct dwarf_parser* self, size
  * @param defaultDirectory the compilation directory
  * @return an allocated full path string of the given file or `NULL` if the allocation failed or the main source file was referred
  */
-static inline char* dwarf4_stringFrom(const struct dwarf_fileNameEntry* file, const struct vector_string* directories, const char* defaultDirectory) {
+static inline char* dwarf4_stringFrom(const struct dwarf_fileNameEntry* file,
+                                      const struct vector_string* directories,
+                                      const char* defaultDirectory) {
     if (*file->name == '/') {
         return strdup(file->name);
     }

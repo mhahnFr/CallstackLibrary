@@ -34,8 +34,11 @@
  * @param functionInfo the function info structure to be filled
  * @return whether the structure was filled, e. g. whether the function was found in the runtime image
  */
-static inline bool functionInfo_getFrom(struct loadedLibInfo* info, const char* functionName, struct functionInfo* functionInfo) {
-    return functionInfo->found = loadedLibInfo_prepare(info) && binaryFile_getFunctionInfo(info->associated, functionName, functionInfo);
+static inline bool functionInfo_getFrom(struct loadedLibInfo* info,
+                                        const char*           functionName,
+                                        struct functionInfo*  functionInfo) {
+    return functionInfo->found = loadedLibInfo_prepare(info)
+        && binaryFile_getFunctionInfo(info->associated, functionName, functionInfo);
 }
 
 struct functionInfo functionInfo_loadHint(const char* functionName, const char* libraryName) {

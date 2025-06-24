@@ -269,7 +269,7 @@ machoFile_handleSegment(struct segment_command_64, 64)
  * @param function the function / object file object pair
  * @param args the argument list
  */
-static inline void machoFile_addFunction(struct pair_funcFile function, const va_list args) {
+static inline void machoFile_addFunction(struct pair_funcFile function, va_list args) {
     struct machoFile* self = va_arg(args, void*);
 
     vector_push_back(&self->functions, function);

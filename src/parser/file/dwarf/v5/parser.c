@@ -20,13 +20,12 @@
  */
 
 #include "parser.h"
+
 #include "definitions.h"
 #include "optional_vector_fileAttribute.h"
-
 #include "../dwarf_parser.h"
 #include "../leb128.h"
 #include "../vector_pair_uint64.h"
-
 #include "../../optional_uint64_t.h"
 
 /**
@@ -154,7 +153,7 @@ static inline uint8_t* dwarf5_readMD5(void* buffer, size_t* counter) {
  * @param counter the reading index
  * @return the parsed file attributes or an empty optional if the parsing failed
  */
-static inline optional_vector_fileAttribute_t dwarf5_parseFileAttributes(struct dwarf_parser* self, size_t* counter) {
+static inline optional_vector_fileAttribute_t dwarf5_parseFileAttributes(const struct dwarf_parser* self, size_t* counter) {
     const uint8_t entryFormatCount = *(uint8_t*) (self->debugLine.content + (*counter)++);
     vector_pair_uint64_t entryFormats = vector_initializer;
     vector_reserve(&entryFormats, entryFormatCount);
