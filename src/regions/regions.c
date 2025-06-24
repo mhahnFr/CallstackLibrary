@@ -31,9 +31,41 @@
 
 typedef_vector_named(region, struct region);
 
+/**
+ * Executes the given function, passing the given arguments if the given
+ * condition evaluates to @c true .
+ *
+ * @param b the condition
+ * @param func the function to possibly execute
+ * @param ... the arguments to pass to the given function
+ * @return the return value of the given function or the given arguments
+ */
 #define maybeRun(b, func, ...) ({ (b) ? (func)(__VA_ARGS__) : (__VA_ARGS__); })
+
+/**
+ * Executes the given function if the given condition evaluates to @c true .
+ *
+ * @param b the condition
+ * @param func the function to possibly execute
+ * @return the return value of the given function or @c NULL
+ */
 #define maybeRunV(b, func) ((b) ? (func)() : (void) NULL)
+
+/**
+ * Executes the given function if @c callstack_autoClearCaches is @c true .
+ *
+ * @param func the function to possibly execute
+ * @param ... the arguments to pass to the given function
+ * @return the return value of the function or the given arguments
+ */
 #define maybe(func, ...) maybeRun(callstack_autoClearCaches, func, __VA_ARGS__)
+
+/**
+ * Executes the given function if @c callstack_autoClearCaches is @c true .
+ *
+ * @param func the function to possibly execute
+ * @return the return value of the given function or @c NULL
+ */
 #define maybeV(func) maybeRunV(callstack_autoClearCaches, func)
 
 struct regionInfo regions_getLoadedRegions(void) {
