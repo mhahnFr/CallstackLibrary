@@ -1,7 +1,7 @@
 /*
  * CallstackLibrary - Library creating human-readable call stacks.
  *
- * Copyright (C) 2024  mhahnFr
+ * Copyright (C) 2024 - 2025  mhahnFr
  *
  * This file is part of the CallstackLibrary.
  *
@@ -30,7 +30,7 @@
 #include <macho/macho_utils.h>
 
 /**
- * Represents a unified version of the `nlist` structure.
+ * Represents a unified version of the @c nlist structure.
  */
 struct macho_parser_nlist {
     /** The index into the string table.           */
@@ -50,10 +50,11 @@ struct macho_parser_nlist {
  *
  * @param pointer the pointer to the real nlist entry
  * @param bit64 whether the binary is 64 bit encoded
- * @param bytesSwapped whether the byte order needs to be swapped to match the host byte order
+ * @param bytesSwapped whether the byte order needs to be swapped to match the
+ * host byte order
  * @return the translated and unified nlist entry
  */
-static inline struct macho_parser_nlist macho_parser_nlist_from(const void* pointer, bool bit64, bool bytesSwapped) {
+static inline struct macho_parser_nlist macho_parser_nlist_from(const void* pointer, const bool bit64, const bool bytesSwapped) {
     struct macho_parser_nlist toReturn;
     if (bit64) {
         const struct nlist_64* real = pointer;
@@ -85,7 +86,7 @@ static inline struct macho_parser_nlist macho_parser_nlist_from(const void* poin
  * @param bit64 whether the 64 bit version is used
  * @return the size in bytes of the real nlist structure used
  */
-static inline size_t macho_parser_nlist_sizeof(bool bit64) {
+static inline size_t macho_parser_nlist_sizeof(const bool bit64) {
     return bit64 ? sizeof(struct nlist_64) : sizeof(struct nlist);
 }
 
