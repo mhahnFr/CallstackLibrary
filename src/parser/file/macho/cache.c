@@ -19,12 +19,12 @@
  * CallstackLibrary, see the file LICENSE.  If not, see <https://www.gnu.org/licenses/>.
  */
 
+#include "cache.h"
+
 #include <stdbool.h>
 #include <string.h>
 
 #include "archive.h"
-#include "cache.h"
-
 #include "../vector_string.h"
 
 /**
@@ -42,16 +42,16 @@ static struct macho_cache {
 /**
  * @brief Returns whether the given file name is inside an archive.
  *
- * If `NULL` is passed, `false` is returned.
+ * If @c NULL is passed, @c false is returned.
  *
  * @param fileName the file name to be checked
  * @return whether the file name is inside an archive
  */
 static inline bool macho_cache_isInArchive(const char* fileName) {
     if (fileName == NULL) return false;
-    
-    char* lp = strrchr(fileName, '(');
-    char* rp = strrchr(fileName, ')');
+
+    const char* lp = strrchr(fileName, '(');
+    const char* rp = strrchr(fileName, ')');
     
     return lp != NULL && rp != NULL && lp < rp;
 }
@@ -59,10 +59,11 @@ static inline bool macho_cache_isInArchive(const char* fileName) {
 /**
  * @brief Returns the archive name of the given file name.
  *
- * The returned string is allocated and needs to be `free`d.
+ * The returned string is allocated and needs to be freed.
  *
  * @param fileName the full file name
- * @return the archive name or `NULL` if the allocation failed or the given file name is not inside an archive
+ * @return the archive name or @c NULL if the allocation failed or the given
+ * file name is not inside an archive
  */
 static inline char* macho_cache_getArchiveName(const char* fileName) {
     if (fileName == NULL) return NULL;
@@ -80,7 +81,8 @@ static inline char* macho_cache_getArchiveName(const char* fileName) {
 }
 
 /**
- * The callback function for the archive parser adds the given object file object to the cache.
+ * The callback function for the archive parser adds the given object file
+ * object to the cache.
  *
  * @param file the object file object to be added
  */
@@ -92,7 +94,7 @@ static inline void macho_cache_archiveCallback(struct objectFile* file) {
 /**
  * @brief Loads the archive of the given file name.
  *
- * When `NULL` is passed, `false` is returned.
+ * When @c NULL is passed, @c false is returned.
  *
  * @param archiveName the file name of the archive to be loaded
  * @return whether the archive was loaded successfully
@@ -118,7 +120,7 @@ static inline bool macho_cache_archiveLoaded(const char* archiveName) {
     return false;
 }
 
-struct objectFile* macho_cache_findOrAdd(const char* fileName, uint64_t lastModified) {
+struct objectFile* macho_cache_findOrAdd(const char* fileName, const uint64_t lastModified) {
     struct objectFile* it;
     for (it = cache.objectFiles; it != NULL && strcmp(it->name, fileName) != 0; it = it->next);
     
@@ -138,7 +140,7 @@ struct objectFile* macho_cache_findOrAdd(const char* fileName, uint64_t lastModi
             return NULL;
         }
         it->name          = strdup(fileName);
-        it->lastModified  = lastModified;
+        it->lastModified  = (time_t) lastModified;
         it->next          = cache.objectFiles;
         cache.objectFiles = it;
     }
