@@ -23,16 +23,12 @@
 #define machoFile_h
 
 #include <stdbool.h>
-#include <stddef.h>
 
 #include "objectFile.h"
 #include "TLVDescriptor.h"
 #include "vector_pair_funcFile.h"
 #include "vector_uint64.h"
-
 #include "../binaryFile.h"
-#include "../debugInfo.h"
-#include "../vector_function.h"
 
 /**
  * This structure represents a Mach-O binary file.
@@ -64,6 +60,7 @@ struct machoFile {
     vector_pairFuncFile_t functions;
     /** The start addresses of the contained functions.                         */
     vector_uint64_t functionStarts;
+    /** The contained thread-local value descriptors.                           */
     vector_TLVDescriptor_t tlvs;
 };
 
@@ -82,15 +79,15 @@ struct machoFile* machoFile_new(void);
 void machoFile_create(struct machoFile* self);
 
 /**
- * Stores all debug information that is possible to deduct about the given address 
- * into the given callstack frame object.
+ * Stores all debug information that is possible to deduct about the given
+ * address into the given callstack frame object.
  *
  * @param self the binary file the given address is in
  * @param address the address about which to find debug information
  * @param frame the callstack frame object to store the debug information in
  * @return whether it was possible to deduct some debug information
  */
-bool machoFile_addr2String(struct machoFile* self, void* address, struct callstack_frame* frame);
+bool machoFile_addr2String(struct machoFile* self, const void* address, struct callstack_frame* frame);
 
 /**
  * Tries to fill the given function info structure with the information for the
@@ -103,10 +100,17 @@ bool machoFile_addr2String(struct machoFile* self, void* address, struct callsta
  */
 bool machoFile_getFunctionInfo(struct machoFile* self, const char* functionName, struct functionInfo* info);
 
+/**
+ * Returns the contained thread-local storage regions.
+ *
+ * @param self the Mach-O file abstraction structure
+ * @return the contained thread-local storage regions
+ */
 vector_pair_ptr_t machoFile_getTLSRegions(struct machoFile* self);
 
 /**
- * Loads and parses the Mach-O file represented by the given Mach-O file abstraction object.
+ * Loads and parses the Mach-O file represented by the given Mach-O file
+ * abstraction object.
  *
  * @param self the Mach-O file abstraction object
  * @return whether the file was parsed successfully
@@ -114,15 +118,16 @@ vector_pair_ptr_t machoFile_getTLSRegions(struct machoFile* self);
 bool machoFile_parse(struct machoFile* self);
 
 /**
- * Deinitializes the given binary file structure if it is a Mach-O file structure.
+ * Deinitializes the given binary file structure if it is a Mach-O file
+ * structure.
  *
  * @param self the binary file structure to be deinitialized
  */
 void machoFile_destroy(struct machoFile* self);
 
 /**
- * Deinitializes and `free`s the given binary file structure if it is a
- * Mach-O file structure.
+ * Deinitializes and `free`s the given binary file structure if it is a Mach-O
+ * file structure.
  *
  * @param self the binary file structure to be deleted
  */

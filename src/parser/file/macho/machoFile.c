@@ -19,19 +19,19 @@
  * CallstackLibrary, see the file LICENSE.  If not, see <https://www.gnu.org/licenses/>.
  */
 
+#include <stdarg.h>
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
-#include <sys/stat.h>
-
 #include <mach-o/loader.h>
+#include <sys/stat.h>
 
 #include <macho/fat_handler.h>
 #include <macho/macho_utils.h>
 #include <misc/string_utils.h>
 
-#include "cache.h"
 #include "machoFile.h"
+#include "cache.h"
 #include "macho_parser.h"
 
 #include "../bounds.h"
@@ -68,12 +68,14 @@ void machoFile_create(struct machoFile* self) {
 }
 
 /**
- * Returns an object file abstraction object representing the dSYM DWARF file of the given Mach-O file.
+ * Returns an object file abstraction object representing the dSYM DWARF file
+ * of the given Mach-O file.
  *
  * @param self the Mach-O file abstraction object
- * @return the object file object or `NULL` if either no dSYM bundle was found or the allocation failed
+ * @return the object file object or @c NULL if either no dSYM bundle was found
+ * or the allocation failed
  */
-static inline struct objectFile* machoFile_findDSYMBundle(struct machoFile* self) {
+static inline struct objectFile* machoFile_findDSYMBundle(const struct machoFile* self) {
     const char* const dsymAmendment = ".dSYM/Contents/Resources/DWARF/";
     const char* rawName = strrchr(self->_.fileName, '/');
     if (rawName == NULL) return NULL;
@@ -101,10 +103,12 @@ static inline struct objectFile* machoFile_findDSYMBundle(struct machoFile* self
 }
 
 /**
- * Returns the associated debug symbol bundle of the given Mach-O file abstraction object.
+ * Returns the associated debug symbol bundle of the given Mach-O file
+ * abstraction object.
  *
  * @param self the Mach-O file whose debug symbol bundle to be returned
- * @return the debug symbol bundle as object file abstraction object or `NULL` if not found or unable to allocate
+ * @return the debug symbol bundle as object file abstraction object or @c NULL
+ * if not found or unable to allocate
  */
 static inline struct objectFile* machoFile_getDSYMBundle(struct machoFile* self) {
     if (!self->dSYMFile.triedParsing) {
@@ -121,7 +125,8 @@ static inline struct objectFile* machoFile_getDSYMBundle(struct machoFile* self)
  *
  * @param lhs the left-hand side value
  * @param rhs the right-hand side value
- * @return `0` if the two values compare equal, a value smaller or greater than `0` according to the sorting order
+ * @return @c 0 if the two values compare equal, a value smaller or greater
+ * than @c 0 according to the sorting order
  */
 static inline int machoFile_functionSortCompare(const void* lhs, const void* rhs) {
     const pair_funcFile_t* a = lhs;
@@ -137,13 +142,14 @@ static inline int machoFile_functionSortCompare(const void* lhs, const void* rhs
 }
 
 /**
- * Tries to deduct the debugging information available for the given address in the given Mach-O file.
+ * Tries to deduct the debugging information available for the given address in
+ * the given Mach-O file.
  *
  * @param self the Mach-O file to search the debug information in
  * @param address the address to be translated
  * @return the optionally deducted debug information
  */
-static inline optional_debugInfo_t machoFile_getDebugInfo(struct machoFile* self, void* address) {
+static inline optional_debugInfo_t machoFile_getDebugInfo(struct machoFile* self, const void* address) {
     const uint64_t searchAddress = (uintptr_t) (address - self->_.startAddress)
                                  + (self->_.inMemory ? self->text_vmaddr : self->addressOffset);
 
@@ -154,11 +160,11 @@ static inline optional_debugInfo_t machoFile_getDebugInfo(struct machoFile* self
                                                  sizeof(pair_funcFile_t),
                                                  machoFile_functionSortCompare);
 
+    optional_debugInfo_t info = { .has_value = false };
     if (closest == NULL
         || (closest->first.length != 0 && closest->first.startAddress + closest->first.length < searchAddress)) {
-        return (optional_debugInfo_t) { .has_value = false };
+        return info;
     }
-    optional_debugInfo_t info = { .has_value = false };
     if (!closest->first.demangledName.has_value) {
         pair_funcFile_t* mutableClosest = (struct pair_funcFile*) closest;
         char* toDemangle = closest->first.linkedName;
@@ -196,9 +202,17 @@ static inline optional_debugInfo_t machoFile_getDebugInfo(struct machoFile* self
     return info;
 }
 
+/** Represents the 32 bit version of the Mach-O section type. */
 #define MACHO_SECTION32 section
+/** Represents the 64 bit version of the Mach-O section type. */
 #define MACHO_SECTION64 section_64
 
+/**
+ * Generates an implementation for the segment handling of the Mach-O files.
+ *
+ * @param type the segment type to be used
+ * @param bits the amount of bits the implementation should be generated for
+ */
 #define machoFile_handleSegment(type, bits)                                                                        \
 static inline bool machoFile_handleSegment##bits(struct machoFile* self, const void* buffer,                       \
                                                  type* segment, bool bytesSwapped) {                               \
@@ -249,12 +263,13 @@ machoFile_handleSegment(struct segment_command,    32)
 machoFile_handleSegment(struct segment_command_64, 64)
 
 /**
- * Adds the given function / object file pair to the Mach-O file abstraction object passed via the `va_list`.
+ * Adds the given function / object file pair to the Mach-O file abstraction
+ * object passed via the @c va_list .
  *
  * @param function the function / object file object pair
  * @param args the argument list
  */
-static inline void machoFile_addFunction(struct pair_funcFile function, va_list args) {
+static inline void machoFile_addFunction(struct pair_funcFile function, const va_list args) {
     struct machoFile* self = va_arg(args, void*);
 
     vector_push_back(&self->functions, function);
@@ -265,9 +280,9 @@ static inline void machoFile_addFunction(struct pair_funcFile function, va_list 
  *
  * @param lhs the left hand side number
  * @param rhs the right hand side number
- * @return the comparasion result, that is, `lhs - rhs`
+ * @return the comparison result
  */
-static inline int machoFile_uint64Compare(uint64_t* lhs, uint64_t* rhs) {
+static inline int machoFile_uint64Compare(const uint64_t* lhs, const uint64_t* rhs) {
     if (*lhs == *rhs) return 0;
 
     return *lhs < *rhs ? -1 : +1;
@@ -279,13 +294,13 @@ static inline int machoFile_uint64Compare(uint64_t* lhs, uint64_t* rhs) {
  * @param self the Mach-O file abstraction structure
  * @param command the Mach-O data command
  * @param baseAddress the start address of the runtime image
- * @param bitsReversed whether to swap the endianess of read numbers
+ * @param bitsReversed whether to swap the endianness of read numbers
  * @return whether the parsing was successful
  */
 static inline bool machoFile_handleFunctionStarts(struct machoFile* self, struct linkedit_data_command* command,
-                                                  const void* baseAddress, bool bitsReversed) {
-    uint32_t offset = macho_maybeSwap(32, bitsReversed, command->dataoff);
-    uint32_t size   = macho_maybeSwap(32, bitsReversed, command->datasize);
+                                                  const void* baseAddress, const bool bitsReversed) {
+    const uint32_t offset = macho_maybeSwap(32, bitsReversed, command->dataoff);
+    const uint32_t size   = macho_maybeSwap(32, bitsReversed, command->datasize);
 
     const void* bytes = baseAddress + offset + (self->_.inMemory ? (self->linkedit_vmaddr - self->text_vmaddr) - self->linkedit_fileoff : 0);
     uint64_t funcAddr = self->text_vmaddr; // <--- TODO: What is the appropriate start when read from disk?
@@ -306,13 +321,20 @@ static inline void machoFile_fixupFunctions(struct machoFile* self) {
     vector_iterate(&self->functions, {
         if (element->first.length != 0) continue;
 
-        uint64_t* address = vector_search(&self->functionStarts, &element->first.startAddress, &machoFile_uint64Compare);
+        const uint64_t* address = vector_search(&self->functionStarts, &element->first.startAddress, &machoFile_uint64Compare);
         if (address != NULL && (size_t) (address - self->functionStarts.content) < self->functionStarts.count - 2) {
             element->first.length = *++address - element->first.startAddress;
         }
     });
 }
 
+/**
+ * Generates an implementation to parse Mach-O files.
+ *
+ * @param bits the amount of bits the implementation should handle
+ * @param type the Mach-O header type
+ * @param segMacro the macro for segments
+ */
 #define machoFile_parseFileImpl(bits, type, segMacro)                                                                  \
 static inline bool machoFile_parseFileImpl##bits(struct machoFile* self, const void* baseAddress, bool bytesSwapped) { \
     const struct type*   header = baseAddress;                                                                         \
@@ -364,7 +386,8 @@ machoFile_parseFileImpl(32, mach_header,    LC_SEGMENT)
 machoFile_parseFileImpl(64, mach_header_64, LC_SEGMENT_64)
 
 /**
- * Parses the given Mach-O file buffer into the given Mach-O file abstraction object.
+ * Parses the given Mach-O file buffer into the given Mach-O file abstraction
+ * object.
  *
  * @param self the Mach-O file abstraction object
  * @param baseAddress the Mach-O file buffer
@@ -385,6 +408,8 @@ static inline bool machoFile_parseFile(struct machoFile* self, const void* baseA
 
         case FAT_CIGAM:
         case FAT_CIGAM_64: return machoFile_parseFile(self, macho_parseFat(baseAddress, true, self->_.fileName));
+
+        default: break;
     }
     return false;
 }
@@ -428,18 +453,18 @@ vector_pair_ptr_t machoFile_getTLSRegions(struct machoFile* self) {
 
     vector_pair_ptr_t toReturn = vector_initializer;
     if (self->tlvs.count > 0) {
-        uintptr_t begin = (uintptr_t) self->tlvs.content->thunk(self->tlvs.content);
+        const uintptr_t begin = (uintptr_t) self->tlvs.content->thunk(self->tlvs.content);
         vector_push_back(&toReturn, ((pair_ptr_t) { begin, begin + self->tlvSize }));
     }
     return toReturn;
 }
 
-bool machoFile_addr2String(struct machoFile* self, void* address, struct callstack_frame* frame) {
+bool machoFile_addr2String(struct machoFile* self, const void* address, struct callstack_frame* frame) {
     if (!BINARY_FILE_SUPER(self, maybeParse)) {
         return false;
     }
 
-    optional_debugInfo_t result = machoFile_getDebugInfo(self, address);
+    const optional_debugInfo_t result = machoFile_getDebugInfo(self, address);
     if (result.has_value) {
         if (result.value.function.linkedName == NULL) {
             return false;
