@@ -1,7 +1,7 @@
 /*
  * CallstackLibrary - Library creating human-readable call stacks.
  *
- * Copyright (C) 2024  mhahnFr
+ * Copyright (C) 2024 - 2025  mhahnFr
  *
  * This file is part of the CallstackLibrary.
  *
@@ -29,7 +29,7 @@ uint64_t getULEB128(const void* begin, size_t* counter) {
 
     bool more = true;
     do {
-        uint8_t b = *((const uint8_t*) (begin + *counter));
+        const uint8_t b = *(const uint8_t*) (begin + *counter);
         *counter += 1;
         result |= (b & 0x7f) << shift;
         shift += 7;
@@ -46,13 +46,13 @@ int64_t getLEB128(const void* begin, size_t* counter) {
 
     bool more = true;
     do {
-        uint8_t b = *((const uint8_t*) (begin + *counter));
+        const uint8_t b = *(const uint8_t*) (begin + *counter);
         *counter += 1;
         result |= (b & 0x7f) << shift;
         shift += 7;
         if ((0x80 & b) == 0) {
             if (shift < 32 && (b & 0x40) != 0) {
-                result |= ((uint64_t) ~0 << shift);
+                result |= (int64_t) ((uint64_t) ~0 << shift);
             }
             more = false;
         }

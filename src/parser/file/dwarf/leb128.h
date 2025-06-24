@@ -1,7 +1,7 @@
 /*
  * CallstackLibrary - Library creating human-readable call stacks.
  *
- * Copyright (C) 2024  mhahnFr
+ * Copyright (C) 2024 - 2025  mhahnFr
  *
  * This file is part of the CallstackLibrary.
  *
@@ -26,9 +26,11 @@
 #include <stdint.h>
 
 /**
- * @brief Reads an unsigned LEB128 integer from the given memory at the given position.
+ * @brief Reads an unsigned LEB128 integer from the given memory at the given
+ * position.
  *
- * The given memory position points to the first byte after the read number once this function returns.
+ * The given memory position points to the first byte after the read number
+ * once this function returns.
  *
  * @param begin the memory pointer
  * @param counter the memory position
@@ -37,16 +39,16 @@
 uint64_t getULEB128(const void* begin, size_t* counter);
 
 /**
- * @brief Reads a signed LEB128 integer from the given memory at the given position.
+ * @brief Reads a signed LEB128 integer from the given memory at the given
+ * position.
  *
- * The given memory position points to the first byte after the read number once this function returns.
+ * The given memory position points to the first byte after the read number
+ * once this function returns.
  *
  * @param begin the memory pointer
  * @param counter the memory position
  * @return the deducted number
  */
 int64_t getLEB128(const void* begin, size_t* counter);
-
-
 
 #endif /* leb128_h */
