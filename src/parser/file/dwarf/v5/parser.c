@@ -34,7 +34,8 @@
  * @param buffer the data buffer
  * @param counter the reading index
  * @param type the requested data type
- * @return the read index or an empty optional if the requested data type was not allowed
+ * @return the read index or an empty optional if the requested data type was
+ * not allowed
  */
 static inline optional_uint64_t dwarf5_readIndex(void* buffer, size_t* counter, const uint64_t type) {
     uint64_t toReturn;
@@ -63,7 +64,8 @@ static inline optional_uint64_t dwarf5_readIndex(void* buffer, size_t* counter, 
  * @param buffer the data buffer
  * @param counter the reading index
  * @param type the requested data type
- * @return the read timestamp or an empty optional if the given data type was not allowed
+ * @return the read timestamp or an empty optional if the given data type was
+ * not allowed
  */
 static inline optional_uint64_t dwarf5_readTimestamp(void* buffer, size_t* counter, const uint64_t type) {
     uint64_t toReturn;
@@ -100,7 +102,8 @@ static inline optional_uint64_t dwarf5_readTimestamp(void* buffer, size_t* count
  * @param buffer the data buffer
  * @param counter the reading index
  * @param type the requested data type
- * @return the read size value or an empty optional if the given data type was not allowed
+ * @return the read size value or an empty optional if the given data type was
+ * not allowed
  */
 static inline optional_uint64_t dwarf5_readSize(void* buffer, size_t* counter, const uint64_t type) {
     uint64_t toReturn;
@@ -225,12 +228,13 @@ fail:
 }
 
 /**
- * Constructs the full file name for the given source file attribute using the given include directory attributes.
+ * Constructs the full file name for the given source file attribute using the
+ * given include directory attributes.
  *
  * @param file the source file attribute to construct the full file name for
  * @param directories the include directory file attributes
  * @param defaultDirectory the compilation directory
- * @return the allocated full source file path or `NULL` if the allocation failed
+ * @return the allocated full source file path or @c NULL if the allocation failed
  */
 static inline char* dwarf5_constructFileName(const struct fileAttribute*   file,
                                              const vector_fileAttribute_t* directories,

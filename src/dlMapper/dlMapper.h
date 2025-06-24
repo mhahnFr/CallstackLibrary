@@ -1,7 +1,7 @@
 /*
  * CallstackLibrary - Library creating human-readable call stacks.
  *
- * Copyright (C) 2024  mhahnFr
+ * Copyright (C) 2024 - 2025  mhahnFr
  *
  * This file is part of the CallstackLibrary.
  *
@@ -30,7 +30,7 @@
  * @brief Initializes the dlMapper.
  *
  * Does nothing if it has already been initialized; if that is the case,
- * `true` will be returned.
+ * @c true will be returned.
  *
  * @return whether the dlMapper has been successfully initialized
  */
@@ -47,7 +47,8 @@ bool dlMapper_isInited(void);
  * Returns the loaded library info the given pointer is associated with.
  *
  * @param address the address whose runtime image to find
- * @return the associated loaded library info object or `NULL` if not in any loaded library
+ * @return the associated loaded library info object or @c NULL if not in any
+ * loaded library
  */
 struct loadedLibInfo* dlMapper_libInfoForAddress(const void* address);
 
@@ -55,7 +56,7 @@ struct loadedLibInfo* dlMapper_libInfoForAddress(const void* address);
  * Returns the runtime image info for the runtime image of the given name.
  *
  * @param fileName the file name of the runtime image
- * @return the associated runtime image info or `NULL` if not found
+ * @return the associated runtime image info or @c NULL if not found
  */
 struct loadedLibInfo* dlMapper_libInfoForFileName(const char* fileName);
 

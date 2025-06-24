@@ -36,7 +36,8 @@ static bool dlMapper_inited = false;
  *
  * @param lhs the left-hand side value
  * @param rhs the right-hand side value
- * @return `0` if the two values compare equal or a value less than or greater than `0` according to the sorting order
+ * @return @c 0 if the two values compare equal or a value less than or greater
+ * than @c 0 according to the sorting order
  */
 static inline int dlMapper_sortCompare(const void* lhs, const void* rhs) {
     const struct loadedLibInfo* a = lhs,
@@ -63,11 +64,13 @@ bool dlMapper_init(void) {
 /**
  * @brief Returns how the given key compares to the given loaded library info.
  *
- * The given key is the searched address, the given element is a loaded library info object.
+ * The given key is the searched address, the given element is a loaded library
+ * info object.
  *
  * @param key the searched key
  * @param element the element to be checked
- * @return `0` if the key is in the loaded library or a value smaller or greater than `0` according to the sorting order
+ * @return @c 0 if the key is in the loaded library or a value smaller or
+ * greater than @c 0 according to the sorting order
  */
 static inline int dlMapper_searchCompare(const void* key, const void* element) {
     // IMPORTANT: key is the searched address, element the array element

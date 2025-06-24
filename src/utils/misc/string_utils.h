@@ -27,7 +27,7 @@
 #include <string.h>
 
 /**
- * Copies the given string if it is not `NULL` and requested.
+ * Copies the given string if it is not @c NULL and requested.
  *
  * @param string the string to maybe copy
  * @param copy whether to copy the string

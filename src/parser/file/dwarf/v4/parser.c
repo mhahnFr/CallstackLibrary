@@ -79,12 +79,14 @@ static inline bool dwarf4_parseLineProgramHeader(struct dwarf_parser* self, size
 }
 
 /**
- * Constructs the full file name for the given file name entry using the given include directories.
+ * Constructs the full file name for the given file name entry using the given
+ * include directories.
  *
  * @param file the file name entry whose full path to construct
  * @param directories the included directories
  * @param defaultDirectory the compilation directory
- * @return an allocated full path string of the given file or `NULL` if the allocation failed or the main source file was referred
+ * @return an allocated full path string of the given file or @c NULL if the
+ * allocation failed or the main source file was referred
  */
 static inline char* dwarf4_stringFrom(const struct dwarf_fileNameEntry* file,
                                       const struct vector_string* directories,
@@ -116,7 +118,8 @@ static inline char* dwarf4_stringFrom(const struct dwarf_fileNameEntry* file,
 /**
  * Constructs a file reference for the given file index.
  *
- * @param self the generified parser object, the specific part for version 4 and earlier is used
+ * @param self the generified parser object, the specific part for version 4
+ * and earlier is used
  * @param file the index of the desired file
  * @return the source file reference
  */

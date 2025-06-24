@@ -29,7 +29,7 @@
 /**
  * @brief This structure represents a source file reference.
  *
- * Unavailable fields are set to `0` and `NULL`, respectively.
+ * Unavailable fields are set to @c 0 and @c NULL, respectively.
  */
 struct dwarf_sourceFile {
     /** The allocated source file name.          */

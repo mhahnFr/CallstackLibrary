@@ -27,12 +27,14 @@
 #include "../dlMapper/dlMapper.h"
 
 /**
- * Fills the given function info structure using the given loaded runtime image info.
+ * Fills the given function info structure using the given loaded runtime image
+ * info.
  *
  * @param info the runtime image info to be examined
  * @param functionName the name of the function to be found
  * @param functionInfo the function info structure to be filled
- * @return whether the structure was filled, e. g. whether the function was found in the runtime image
+ * @return whether the structure was filled, e.g. whether the function was
+ * found in the runtime image
  */
 static inline bool functionInfo_getFrom(struct loadedLibInfo* info,
                                         const char*           functionName,

@@ -1,7 +1,7 @@
 /*
  * CallstackLibrary - Library creating human-readable call stacks.
  *
- * Copyright (C) 2024  mhahnFr
+ * Copyright (C) 2024 - 2025  mhahnFr
  *
  * This file is part of the CallstackLibrary.
  *
@@ -27,7 +27,7 @@
 /**
  * @brief This structure represents a DWARF 5 file attribute.
  *
- * Unavailable fields are set to `0` and `NULL`, respectively.
+ * Unavailable fields are set to @c 0 and @c NULL, respectively.
  */
 struct fileAttribute {
     /** The path name.                          */

@@ -1,7 +1,7 @@
 /*
  * CallstackLibrary - Library creating human-readable call stacks.
  *
- * Copyright (C) 2024  mhahnFr
+ * Copyright (C) 2024 - 2025  mhahnFr
  *
  * This file is part of the CallstackLibrary.
  *
@@ -32,7 +32,7 @@
  * @param fatHeader the header of the fat archive
  * @param bitsReversed whether the bytes need to be reversed to match the host byte order
  * @param fileName the name of the represented Mach-O file
- * @return the slice the system would load or `NULL` if no appropriate slice is found
+ * @return the slice the system would load or @c NULL if no appropriate slice is found
  */
 void* macho_parseFat(const struct fat_header* fatHeader, bool bitsReversed, const char* fileName);
 
