@@ -27,15 +27,13 @@
 
 #include "dwarf_lineInfo.h"
 #include "vector_uint8.h"
-
+#include "../lcs_section.h"
+#include "../optional_uint64_t.h"
 #include "v4/parser.h"
 #include "v5/parser.h"
 
-#include "../lcs_section.h"
-#include "../optional_uint64_t.h"
-
 /**
- * @brief This type represents the function called by `dwarf_parseLineProgram`.
+ * @brief This type represents the function called by @c dwarf_parseLineProgram .
  *
  * It takes a DWARF line info structure and the additionally passed arguments.
  */
@@ -49,7 +47,7 @@ struct dwarf_parser {
     uint16_t version;
     /** Whether the 64 Bit format is used.                                              */
     bool bit64;
-    /** Whether the stmt value is `true` by default.                                    */
+    /** Whether the stmt value is @c true by default.                                   */
     bool defaultIsStmt;
 
     /** The base value for the op codes.                                                */
@@ -66,13 +64,13 @@ struct dwarf_parser {
     /** Vector with the argument count of the standard op codes.                        */
     vector_uint8_t stdOpcodeLengths;
 
-    /** The `.debug_line` section.                                                      */
+    /** The @c .debug_line section.                                                     */
     struct lcs_section debugLine,
-    /** The `.debug_str` section.                                                       */
+    /** The @c .debug_str section.                                                      */
                        debugStr,
-    /** The `.debug_line_str` section.                                                  */
+    /** The @c .debug_line_str section.                                                 */
                        debugLineStr,
-    /** The `.debug_info` section.                                                      */
+    /** The @c .debug_info section.                                                     */
                        debugInfo,
     /** The @c .debug_abbrev section.                                                   */
                        debugAbbrev,
@@ -146,8 +144,8 @@ char* dwarf_pathConcatenate(const char* string1, const char* string2);
 uint64_t dwarf_parseInitialSize(void* buffer, size_t* counter, bool* bit64);
 
 /**
- * Consumes the following data block of different possible types, according to the
- * formats available for additional vendor specific data.
+ * Consumes the following data block of different possible types, according to
+ * the formats available for additional vendor specific data.
  *
  * @param self the dwarf parser structure
  * @param buffer the data buffer
@@ -160,15 +158,17 @@ bool dwarf_consumeSome(const struct dwarf_parser* self, void* buffer, size_t* co
 /**
  * @brief Reads a string.
  *
- * The string may follow in the given data buffer or may come from one of the debug string sections.
+ * The string may follow in the given data buffer or may come from one of the
+ * debug string sections.<br>
  * The returned string is not allocated.
  *
  * @param self the dwarf parser structure
  * @param buffer the data buffer
  * @param counter the reading index into the given data buffer
  * @param type the type of string to load
- * @return a pointer to the string which points into either the given data buffer or into one of the given sections;
- * `NULL` is returned if the given data type was not allowed
+ * @return a pointer to the string which points into either the given data
+ * buffer or into one of the given sections; @c NULL is returned if the given
+ * data type was not allowed
  */
 char* dwarf_readString(const struct dwarf_parser* self, void* buffer, size_t* counter, uint64_t type);
 

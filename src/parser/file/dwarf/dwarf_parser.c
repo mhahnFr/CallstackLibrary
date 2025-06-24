@@ -20,9 +20,9 @@
  */
 
 #include "dwarf_parser.h"
+
 #include "leb128.h"
 #include "vector_pair_uint64.h"
-
 #include "v4/definitions.h"
 #include "v5/definitions.h"
 
@@ -43,11 +43,13 @@ char* dwarf_pathConcatenate(const char* string1, const char* string2) {
 /**
  * @brief This function parses the actual DWARF line program.
  *
- * The registered callback function is called for each line number table row that is emitted.
+ * The registered callback function is called for each line number table row
+ * that is emitted.
  *
  * @param self the DWARF parser object
  * @param counter the counter of already read bytes (offset)
- * @param actualSize the size of the line number program including the header, as read from the header
+ * @param actualSize the size of the line number program including the header,
+ * as read from the header
  * @return whether the parsing was successful
  */
 static inline bool dwarf_parser_parse(struct dwarf_parser* self, size_t counter, const size_t actualSize) {
@@ -234,8 +236,8 @@ static inline bool dwarf_parser_parse(struct dwarf_parser* self, size_t counter,
 }
 
 /**
- * @brief Parses the abbreviation table and returns the description found for the given
- * abbreviation code.
+ * @brief Parses the abbreviation table and returns the description found for
+ * the given abbreviation code.
  *
  * Implicitly constants of DWARF in version 5 are handled but discarded.
  *
@@ -358,9 +360,10 @@ bool dwarf_consumeSome(const struct dwarf_parser* self, void* buffer, size_t* co
  *
  * @param offset the string offset
  * @param type the type of string to load
- * @param debugLineStr the section corresponding to the .debug_line_str section
- * @param debugStr the section corresponding to the .debug_str section
- * @return a pointer to the string in either section or `NULL` if the given type specifies neither section
+ * @param debugLineStr the section corresponding to the @c .debug_line_str section
+ * @param debugStr the section corresponding to the @c .debug_str section
+ * @return a pointer to the string in either section or @c NULL if the given
+ * type specifies neither section
  */
 static inline char* dwarf_stringFromSection(const uint64_t offset,
                                             const uint64_t type,
@@ -387,7 +390,9 @@ static inline char* dwarf_stringFromSection(const uint64_t offset,
  * @param offset the optional offset into the debug string offsets table
  * @return the optionally deducted string table offset
  */
-static inline optional_uint64_t dwarf_loadStringOffset(const uint64_t index, const struct lcs_section debugStrOffsets, const optional_uint64_t offset) {
+static inline optional_uint64_t dwarf_loadStringOffset(const uint64_t index,
+                                                       const struct lcs_section debugStrOffsets,
+                                                       const optional_uint64_t offset) {
     bool bit64;
     size_t counter = 0;
     const uint64_t size = dwarf_parseInitialSize(debugStrOffsets.content, &counter, &bit64);
@@ -431,7 +436,7 @@ char* dwarf_readString(const struct dwarf_parser* self, void* buffer, size_t* co
     } else {
         uint64_t index;
         switch (type) {
-            case DW_FORM_strx:  index = getULEB128(buffer, counter);         break;
+            case DW_FORM_strx:  index = getULEB128(buffer, counter);       break;
             case DW_FORM_strx1: index = *(uint8_t*) (buffer + *counter++); break;
 
             case DW_FORM_strx2:
