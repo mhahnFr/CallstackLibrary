@@ -71,6 +71,11 @@ static inline void elfFile_lineProgramCallback(struct dwarf_lineInfo info, void*
     vector_push_back(&self->lineInfos, info);
 }
 
+/**
+ * Generates an implementation for parsing the string table section.
+ *
+ * @param bits the amount of bits the implementation shall handle
+ */
 #define elfFile_loadSectionStrtab(bits)                                                                                         \
 static inline char* elfFile_loadSectionStrtab##bits(Elf##bits##_Ehdr* header, bool littleEndian) {                              \
     uint16_t index = ELF_TO_HOST(16, header->e_shstrndx, littleEndian);                                                         \
@@ -93,6 +98,11 @@ static inline char* elfFile_loadSectionStrtab##bits(Elf##bits##_Ehdr* header, bo
 elfFile_loadSectionStrtab(32)
 elfFile_loadSectionStrtab(64)
 
+/**
+ * Generates an implementation for parsing the symbol table.
+ *
+ * @param bits the amount of bits the implementation shall handle
+ */
 #define elfFile_parseSymtab(bits)                                                                                       \
 static inline bool elfFile_parseSymtab##bits(struct elfFile*   self,                                                    \
                                              Elf##bits##_Shdr* symtab,                                                  \
@@ -119,6 +129,11 @@ static inline bool elfFile_parseSymtab##bits(struct elfFile*   self,            
 elfFile_parseSymtab(32)
 elfFile_parseSymtab(64)
 
+/**
+ * Generates an implementation for converting an ELF section to an LCS one.
+ *
+ * @param bits the amount of bits the implementation shall handle
+ */
 #define elfFile_sectionToLCSSection(bits)                                                            \
 static inline struct lcs_section elfFile_sectionToLCSSection##bits(void*             buffer,         \
                                                                    Elf##bits##_Shdr* section,        \
@@ -132,6 +147,11 @@ static inline struct lcs_section elfFile_sectionToLCSSection##bits(void*        
 elfFile_sectionToLCSSection(32)
 elfFile_sectionToLCSSection(64)
 
+/**
+ * Generates an implementation for loading the number of section headers.
+ *
+ * @param bits the amount of bits the implementation shall handle
+ */
 #define elfFile_loadShnum(bits) \
 static inline uint64_t elfFile_loadShnum##bits(Elf##bits##_Ehdr* buffer, bool littleEndian) {                                   \
     uint64_t shnum = ELF_TO_HOST(16, buffer->e_shnum, littleEndian);                                                            \
@@ -150,6 +170,11 @@ static inline uint64_t elfFile_loadShnum##bits(Elf##bits##_Ehdr* buffer, bool li
 elfFile_loadShnum(32)
 elfFile_loadShnum(64)
 
+/**
+ * Generates an implementation for parsing an ELF file.
+ *
+ * @param bits the amount of bits the implementation shall handle
+ */
 #define elfFile_parseFileImpl(bits)                                                                                  \
 static inline bool elfFile_parseFile##bits (struct elfFile* self, Elf##bits##_Ehdr* buffer, bool littleEndian) {     \
     if (ELF_TO_HOST(bits, buffer->e_shoff, littleEndian) == 0) return false;                                         \
@@ -261,7 +286,8 @@ static inline bool elfFile_parseFile(struct elfFile* self, void* buffer) {
  *
  * @param lhs the left-hand side value
  * @param rhs the right-hand side value
- * @return `0` if the two functions compare equal or a value smaller or greater than `0` according to the sorting order
+ * @return @c 0 if the two functions compare equal or a value smaller or
+ * greater than @c 0 according to the sorting order
  */
 static inline int elfFile_functionCompare(const void* lhs, const void* rhs) {
     const struct function* a = lhs,
@@ -279,7 +305,8 @@ static inline int elfFile_functionCompare(const void* lhs, const void* rhs) {
  *
  * @param lhs the left-hand side value
  * @param rhs the right-hand side value
- * @return `0` if the two infos compare equal or a value smaller or greater than `0` according to the sorting order
+ * @return @c 0 if the two infos compare equal or a value smaller or greater
+ * than @c 0 according to the sorting order
  */
 static inline int elfFile_lineInfoCompare(const void* lhs, const void* rhs) {
     const struct dwarf_lineInfo* a = lhs,
@@ -312,8 +339,8 @@ bool elfFile_parse(struct elfFile* self) {
 }
 
 /**
- * Deducts the debugging information available for the given address in the given
- * ELF file abstraction object.
+ * Deducts the debugging information available for the given address in the
+ * given ELF file abstraction object.
  *
  * @param self the ELF file abstraction object to be searched
  * @param address the address to be translated
@@ -323,7 +350,7 @@ static inline optional_debugInfo_t elfFile_getDebugInfo(struct elfFile* self, vo
     optional_debugInfo_t toReturn = { .has_value = false };
 
     const uint64_t translated = (uintptr_t) address - self->_.relocationOffset;
-    struct function tmp = (struct function) { .startAddress = translated };
+    const struct function tmp = (struct function) { .startAddress = translated };
     const struct function* closest = lower_bound(&tmp,
                                                  self->functions.content,
                                                  self->functions.count,
@@ -348,8 +375,8 @@ static inline optional_debugInfo_t elfFile_getDebugInfo(struct elfFile* self, vo
             .sourceFileInfo = { .has_value = false }
         }
     };
-    
-    struct dwarf_lineInfo tmpInfo = (struct dwarf_lineInfo) { .address = translated };
+
+    const struct dwarf_lineInfo tmpInfo = (struct dwarf_lineInfo) { .address = translated };
     const struct dwarf_lineInfo* closestInfo = upper_bound(&tmpInfo,
                                                            self->lineInfos.content,
                                                            self->lineInfos.count,
