@@ -19,7 +19,6 @@
  * CallstackLibrary, see the file LICENSE.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-#include <stdarg.h>
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
@@ -302,7 +301,7 @@ static inline bool machoFile_handleFunctionStarts(struct machoFile* self, struct
     const uint32_t offset = macho_maybeSwap(32, bitsReversed, command->dataoff);
     const uint32_t size   = macho_maybeSwap(32, bitsReversed, command->datasize);
 
-    const void* bytes = baseAddress + offset + (self->_.inMemory ? (self->linkedit_vmaddr - self->text_vmaddr) - self->linkedit_fileoff : 0);
+    const void* bytes = baseAddress + offset + (self->_.inMemory ? self->linkedit_vmaddr - self->text_vmaddr - self->linkedit_fileoff : 0);
     uint64_t funcAddr = self->text_vmaddr; // <--- TODO: What is the appropriate start when read from disk?
     for (size_t i = 0; i < size;) {
         funcAddr += getULEB128(bytes, &i);
