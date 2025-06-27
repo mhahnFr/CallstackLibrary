@@ -101,7 +101,7 @@ endif
 endif
 
 ifeq ($(shell uname -s),Darwin)
-	LDFLAGS   += -current_version 2.1 -compatibility_version 1 $(MACOS_ARCH_FLAGS)
+	LDFLAGS   += -current_version 2.2 -compatibility_version 1 $(MACOS_ARCH_FLAGS)
 	COM_FLAGS += $(MACOS_ARCH_FLAGS) -O3 -ffast-math
 	OBJS      += $(DARWIN_OBJS)
 	DEPS      += $(DARWIN_DEPS)
