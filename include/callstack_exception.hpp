@@ -1,7 +1,7 @@
 /*
  * CallstackLibrary - Library creating human-readable call stacks.
  *
- * Copyright (C) 2023 - 2024  mhahnFr
+ * Copyright (C) 2023 - 2025  mhahnFr
  *
  * This file is part of the CallstackLibrary.
  *
@@ -24,19 +24,15 @@
 
 #include <cxxabi.h>
 #include <exception>
-#include <ostream>
 #include <sstream>
 #include <string>
 #include <typeinfo>
 
 #include "callstack.h"
-
 #include "callstack_cxx_compat.hpp"
 
 /**
- * @brief The namespace all C++ classes of the CallstackLibrary can be found in.
- *
- * The name stands for: **l**ib**c**all**s**tack.
+ * The namespace all C++ classes of the CallstackLibrary can be found in.
  */
 namespace lcs {
 /**
@@ -83,8 +79,7 @@ class exception: public std::exception {
         
         const char * rawName = typeid(*this).name();
         int status;
-        char * dName = abi::__cxa_demangle(rawName, LCS_NULL, LCS_NULL, &status);
-        if (dName != LCS_NULL) {
+        if (char* dName = abi::__cxa_demangle(rawName, LCS_NULL, LCS_NULL, &status); dName != LCS_NULL) {
             toReturn = dName;
             std::free(dName);
         } else {
@@ -100,7 +95,7 @@ public:
      * @param printStacktrace whether to automatically append the stacktrace to the exception message
      */
     explicit inline exception(const bool printStacktrace = true) LCS_NOEXCEPT
-        : std::exception(), shouldPrintStacktrace(printStacktrace) {}
+        : shouldPrintStacktrace(printStacktrace) {}
 
     /**
      * @brief Constructs an exception with the given message.
@@ -111,7 +106,7 @@ public:
      * @param printStacktrace whether to automatically append the stacktrace
      */
     explicit inline exception(const char * message, const bool printStacktrace = true) LCS_NOEXCEPT
-        : std::exception(), message(message), shouldPrintStacktrace(printStacktrace) {}
+        : message(message), shouldPrintStacktrace(printStacktrace) {}
 
     /**
      * Constructs an exception with the given message.
@@ -120,18 +115,18 @@ public:
      * @param printStacktrace whether to automatically append the stacktrace
      */
     explicit inline exception(const std::string & message, const bool printStacktrace = true) LCS_NOEXCEPT
-        : std::exception(), message(message), shouldPrintStacktrace(printStacktrace) {}
+        : message(message), shouldPrintStacktrace(printStacktrace) {}
     
     inline exception(const exception & other)
         : std::exception(other), message(other.message), shouldPrintStacktrace(other.shouldPrintStacktrace), cs(other.cs) {}
     
-    inline virtual ~exception() LCS_NOEXCEPT {};
-    
+    inline ~exception() LCS_NOEXCEPT LCS_OVERRIDE {}
+
 #ifdef LCS_CXX11
     inline exception(exception &&) = default;
 #endif
     
-    inline virtual const char * what() const LCS_NOEXCEPT LCS_OVERRIDE {
+    inline const char* what() const LCS_NOEXCEPT LCS_OVERRIDE {
         if (!messageBuffer.empty()) {
             return messageBuffer.c_str();
         }
@@ -141,14 +136,14 @@ public:
             printStacktrace(stream, true);
             messageBuffer = stream.str();
         } else {
-            messageBuffer = getName() + (message.empty() ? "" : (": \"" + message + "\""));
+            messageBuffer = getName() + (message.empty() ? "" : ": \"" + message + "\"");
         }
         return messageBuffer.c_str();
     }
     
     /**
-     * Prints the stacktrace where this exception has been constructed to the given output
-     * stream.
+     * Prints the stacktrace where this exception has been constructed to the
+     * given output stream.
      *
      * @param out the output stream to print to
      * @param printMessage whether to print the message text as well
@@ -164,7 +159,7 @@ public:
                 << "(" << callstack_frame_getShortestNameOr(&frames[i], "<< Unknown >>") << ") "
                 << (frames[i].function == LCS_NULL ? "<< Unknown >>" : frames[i].function)
                 << (frames[i].sourceFile == LCS_NULL ? ""
-                    : (" (" + std::string(callstack_frame_getShortestSourceFile(&frames[i])) + ":" + toString(frames[i].sourceLine) + ")"))
+                    : " (" + std::string(callstack_frame_getShortestSourceFile(&frames[i])) + ":" + toString(frames[i].sourceLine) + ")")
                 << std::endl;
         }
     }
