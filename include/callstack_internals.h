@@ -31,6 +31,8 @@ extern "C" {
 #ifdef LCS_ACTIVATE_SWIFT_DEMANGLER_CONTROL
 /**
  * Whether to use the Swift demangler if necessary and available.
+ *
+ * @since v2.2
  */
 extern bool lcs_activateSwiftDemangler;
 #endif
