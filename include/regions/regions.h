@@ -29,23 +29,73 @@ extern "C" {
 #include <stddef.h>
 #include <stdint.h>
 
+/**
+ * @brief Defines a memory region.
+ *
+ * Contains the beginning and ending pointers as well as the name of the binary
+ * file to which the memory region belongs to.
+ */
 struct region {
-    uintptr_t begin, end;
+    /** The beginning of the memory region.   */
+    uintptr_t begin,
+    /** The end of the memory region.         */
+              end;
 
-    const char* name, *nameRelative;
+    /** The raw name of the binary file.      */
+    const char* name,
+    /** The relative name of the binary file. */
+              * nameRelative;
 };
 
+/**
+ * Defines an array of multiple region information.
+ */
 struct regionInfo {
+    /** The array of memory region structures.               */
     struct region* regions;
+    /** The amount of memory region structures in the array. */
     size_t amount;
 };
 
+/**
+ * @brief Returns an array containing the memory region information structures
+ * of all currently loaded runtime images.
+ *
+ * These memory regions represent the locations global storage is possibly
+ * found in.<br>
+ * The returned array must be destructed after use with the function
+ * @code regions_destroyInfo(const struct regionInfo* info)@endcode.
+ * <br><br>
+ * According to @c callstack_autoClearCaches cache pointers are used.
+ *
+ * @return an array with global storage regions
+ */
 struct regionInfo regions_getLoadedRegions(void);
 
-// Important: Gets the TLS (and potentially initializes them) for the calling
-// thread. Cares for callstack_autoClearCaches.
+/**
+ * @brief Returns an array containing the thread-local memory region
+ * information structures of all currently loaded runtime images.
+ *
+ * They represent the locations thread-local storage is found in for the
+ * calling thread.<br>
+ * The returned array must be destructed after use with the function
+ * @code regions_destroyInfo(const struct regionInfo* info)@endcode.
+ * <br><br>
+ * According to @c callstack_autoClearCaches cache pointers are used.
+ *
+ * @note Since thread-local storage is generally initialized on demand, calling
+ * this function may result in initializing all thread-local variables for the
+ * calling thread.
+ *
+ * @return an array with thread-local storage memory regions
+ */
 struct regionInfo regions_getTLSRegions(void);
 
+/**
+ * Destructs the given region information.
+ *
+ * @param info the region information to be destructed
+ */
 void regions_destroyInfo(const struct regionInfo* info);
 
 #ifdef __cplusplus
