@@ -346,7 +346,7 @@ bool elfFile_parse(struct elfFile* self) {
  * @param address the address to be translated
  * @return the optionally available debug information
  */
-static inline optional_debugInfo_t elfFile_getDebugInfo(struct elfFile* self, void* address) {
+static inline optional_debugInfo_t elfFile_getDebugInfo(struct elfFile* self, const void* address) {
     optional_debugInfo_t toReturn = { .has_value = false };
 
     const uint64_t translated = (uintptr_t) address - self->_.relocationOffset;
@@ -427,7 +427,7 @@ vector_pair_ptr_t elfFile_getTLSRegions(struct elfFile* self) {
     return (vector_pair_ptr_t) vector_initializer;
 }
 
-bool elfFile_addr2String(struct elfFile* self, void* address, struct callstack_frame* frame) {
+bool elfFile_addr2String(struct elfFile* self, const void* address, struct callstack_frame* frame) {
     if (!BINARY_FILE_SUPER(self, maybeParse)) {
         return false;
     }

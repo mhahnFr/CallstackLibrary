@@ -86,7 +86,7 @@ bool elfFile_parse(struct elfFile* self);
  * @param frame the callstack frame object to store the information in
  * @return whether the callstack frame object was filled successfully
  */
-bool elfFile_addr2String(struct elfFile* self, void* address, struct callstack_frame* frame);
+bool elfFile_addr2String(struct elfFile* self, const void* address, struct callstack_frame* frame);
 
 /**
  * Loads the function information for the function of the given name.
