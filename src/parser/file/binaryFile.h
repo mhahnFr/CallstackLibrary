@@ -83,7 +83,7 @@ static inline void binaryFile_create(struct binaryFile* self) {
  * @param frame the callstack frame structure to store the information in
  * @return whether debug information was deducted successfully
  */
-bool binaryFile_addr2String(struct binaryFile* self, void* address, struct callstack_frame* frame);
+bool binaryFile_addr2String(struct binaryFile* self, const void* address, struct callstack_frame* frame);
 
 /**
  * Retrieves the function information available in the given binary file object.

@@ -65,7 +65,7 @@ struct binaryFile* binaryFile_new(const char* fileName, const void* startAddress
     return toReturn;
 }
 
-bool binaryFile_addr2String(struct binaryFile* self, void* address, struct callstack_frame* frame) {
+bool binaryFile_addr2String(struct binaryFile* self, const void* address, struct callstack_frame* frame) {
     return LCS_FILE(self, addr2String, address, frame);
 }
 
