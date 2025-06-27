@@ -115,10 +115,11 @@ void printCallstack(void) {
 
     printf("The current callstack:\n");
     for (size_t i = 0; i < callstack_getFrameCount(callstack); ++i) {
-        printf("In: (%s) %s (%s:%ld)\n", callstack_frame_getShortestName(&frames[i]), 
-                                         (frames[i].function == NULL ? "???" : frames[i].function),
-                                         callstack_frame_getShortestSourceFileOr(&frames[i], "???"),
-                                         frames[i].sourceLine);
+        printf("# %zu: (%s) %s (%s:%ld)\n", i + 1,
+                                            callstack_frame_getShortestName(&frames[i]), 
+                                            (frames[i].function == NULL ? "???" : frames[i].function),
+                                            callstack_frame_getShortestSourceFileOr(&frames[i], "???"),
+                                            frames[i].sourceLine);
     }
     callstack_delete(callstack);
 }
@@ -137,13 +138,13 @@ Compiled and linked on macOS with `cc -g main.c -I<path/to/library>/include -L<p
 creates the following output:
 ```
 The current callstack:
-In: (a.out) printCallstack (main.c:8)
-In: (a.out) bar (main.c:21)
-In: (a.out) foo (main.c:23)
-In: (a.out) bar2 (main.c:24)
-In: (a.out) foo2 (main.c:25)
-In: (a.out) main (main.c:28)
-In: (/usr/lib/dyld) start + 1942 (???:0)
+# 1: (a.out) printCallstack (main.c:8)
+# 2: (a.out) bar (main.c:22)
+# 3: (a.out) foo (main.c:24)
+# 4: (a.out) bar2 (main.c:25)
+# 5: (a.out) foo2 (main.c:26)
+# 6: (a.out) main (main.c:29)
+# 7: (/usr/lib/dyld) start + 3056 (???:0)
 ```
 
 #### C++
@@ -159,12 +160,13 @@ void printCallstack() {
     lcs::callstack callstack;
     
     std::cout << "The current callstack:" << std::endl;
+    std::size_t i = 1;
     for (const auto& frame : callstack.translate()) {
-        std::cout << "In: (" << callstack_frame_getShortestName(&frame)
-                  << ") "    << (frame.function == NULL ? "???" : frame.function)
-                  << " ("    << callstack_frame_getShortestSourceFileOr(&frame, "???")
-                  << ":"     << frame.sourceLine
-                  << ")"     << std::endl;
+        std::cout << "# " << i++ << ": (" << callstack_frame_getShortestName(&frame)
+                  << ") " << (frame.function == NULL ? "???" : frame.function)
+                  << " (" << callstack_frame_getShortestSourceFileOr(&frame, "???")
+                  << ":"  << frame.sourceLine
+                  << ")"  << std::endl;
     }   
 }
 
@@ -178,20 +180,20 @@ int main() {
     foo2();
 }
 ```
-Compiled and linked on Debian with `g++ -g -std=c++11 main.cpp -I<path/to/library>/include -L<path/to/library> -lcallstack`
+Compiled and linked on Fedora 42 with `g++ -g -std=c++11 main.cpp -I<path/to/library>/include -L<path/to/library> -lcallstack`
 and after [enabling **C++** functions][6] of the library the following output is produced:
 ```
 The current callstack:
-In: (a.out) lcs::callstack::callstack(bool) (include/callstack.hpp:81)
-In: (a.out) printCallstack() (main.cpp:8)
-In: (a.out) bar() (main.cpp:21)
-In: (a.out) foo() (main.cpp:23)
-In: (a.out) bar2() (main.cpp:24)
-In: (a.out) foo2() (main.cpp:25)
-In: (a.out) main (main.cpp:28)
-In: (/usr/lib/x86_64-linux-gnu/libc.so.6) ??? (???:0)
-In: (/usr/lib/x86_64-linux-gnu/libc.so.6) __libc_start_main + 133 (???:0)
-In: (a.out) _start + 33 (???:0)
+# 1: (a.out) lcs::callstack::callstack(bool) (include/callstack.hpp:83)
+# 2: (a.out) printCallstack() (main.cpp:8)
+# 3: (a.out) bar() (main.cpp:21)
+# 4: (a.out) foo() (main.cpp:23)
+# 5: (a.out) bar2() (main.cpp:24)
+# 6: (a.out) foo2() (main.cpp:25)
+# 7: (a.out) main (main.cpp:28)
+# 8: (/usr/lib64/libc.so.6) __libc_start_call_main + 117 (???:0)
+# 9: (/usr/lib64/libc.so.6) __libc_start_main_alias_2 + 136 (???:0)
+# 10: (a.out) _start + 37 (???:0)
 ```
 
 > [!TIP]
