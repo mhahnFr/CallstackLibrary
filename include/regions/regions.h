@@ -34,6 +34,8 @@ extern "C" {
  *
  * Contains the beginning and ending pointers as well as the name of the binary
  * file to which the memory region belongs to.
+ *
+ * @since v2.2
  */
 struct region {
     /** The beginning of the memory region.   */
@@ -49,6 +51,8 @@ struct region {
 
 /**
  * Defines an array of multiple region information.
+ *
+ * @since v2.2
  */
 struct regionInfo {
     /** The array of memory region structures.               */
@@ -69,6 +73,7 @@ struct regionInfo {
  * According to @c callstack_autoClearCaches cache pointers are used.
  *
  * @return an array with global storage regions
+ * @since v2.2
  */
 struct regionInfo regions_getLoadedRegions(void);
 
@@ -88,6 +93,7 @@ struct regionInfo regions_getLoadedRegions(void);
  * calling thread.
  *
  * @return an array with thread-local storage memory regions
+ * @since v2.2
  */
 struct regionInfo regions_getTLSRegions(void);
 
@@ -95,6 +101,7 @@ struct regionInfo regions_getTLSRegions(void);
  * Destructs the given region information.
  *
  * @param info the region information to be destructed
+ * @since v2.2
  */
 void regions_destroyInfo(const struct regionInfo* info);
 
