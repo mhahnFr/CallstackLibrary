@@ -29,11 +29,11 @@ extern "C" {
 /**
  * @brief Demangles the given name.
  *
- * If the given name is demangled, the given string is not freed.
+ * If the given name is demangled, the given string is not freed.<br>
  * If the name has not been demangled, the given string is returned.
  *
  * @param name The name to be demangled.
- * @return The demangled name or the given name, if it could not be demangled.
+ * @return the demangled name or the given name, if it could not be demangled
  */
 char* callstack_demangle_cxx(char* name);
 

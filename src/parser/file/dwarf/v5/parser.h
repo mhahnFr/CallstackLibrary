@@ -1,7 +1,7 @@
 /*
  * CallstackLibrary - Library creating human-readable call stacks.
  *
- * Copyright (C) 2024  mhahnFr
+ * Copyright (C) 2024 - 2025  mhahnFr
  *
  * This file is part of the CallstackLibrary.
  *
@@ -22,12 +22,7 @@
 #ifndef dwarf_v5_parser_h
 #define dwarf_v5_parser_h
 
-#include <stdbool.h>
-#include <stdint.h>
-
 #include "vector_fileAttribute.h"
-
-#include "../../lcs_section.h"
 
 struct dwarf_parser;
 

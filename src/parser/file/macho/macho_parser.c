@@ -19,15 +19,14 @@
  * CallstackLibrary, see the file LICENSE.  If not, see <https://www.gnu.org/licenses/>.
  */
 
+#include "macho_parser.h"
+
 #include <stdio.h>
 #include <string.h>
-
 #include <mach-o/nlist.h>
 #include <mach-o/stab.h>
 
 #include <try_catch.h>
-
-#include "macho_parser.h"
 
 #include "cache.h"
 #include "macho_parser_nlist.h"
@@ -47,13 +46,13 @@
  ENSYM: <function address>
  */
 
-bool macho_parseSymtab(struct symtab_command* command,
-                       const void*            baseAddress,
-                       uint64_t               offset,
-                       bool                   bytesSwapped,
-                       bool                   bit64,
-                       macho_addObjectFile    objCb,
-                       macho_addFunction      funCb,
+bool macho_parseSymtab(struct symtab_command*    command,
+                       const void*               baseAddress,
+                       const uint64_t            offset,
+                       const bool                bytesSwapped,
+                       const bool                bit64,
+                       const macho_addObjectFile objCb,
+                       const macho_addFunction   funCb,
                        ...) {
     if (objCb == NULL && funCb == NULL) return false;
     
@@ -73,7 +72,7 @@ bool macho_parseSymtab(struct symtab_command* command,
 
     TRY({
         for (uint32_t i = 0; i < nsyms; ++i) {
-            struct macho_parser_nlist entry = macho_parser_nlist_from(baseAddress + symoff + offset + i * macho_parser_nlist_sizeof(bit64), bit64, bytesSwapped);
+            const struct macho_parser_nlist entry = macho_parser_nlist_from(baseAddress + symoff + offset + i * macho_parser_nlist_sizeof(bit64), bit64, bytesSwapped);
             switch (entry.n_type) {
                 case N_BNSYM:
                     ENSURE(!currFun.has_value, "N_BNSYM with active function");

@@ -25,7 +25,7 @@
 /**
  * @brief Attempts to demangle the given name.
  *
- * Currently Swift and C++ demangling is supported.
+ * Currently, Swift and C++ demangling is supported.
  *
  * @param name the name to be demangled
  * @return an allocated demangled name or the input if not mangled

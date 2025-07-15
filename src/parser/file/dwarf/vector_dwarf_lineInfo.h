@@ -22,7 +22,7 @@
 #ifndef vector_dwarf_lineInfo_h
 #define vector_dwarf_lineInfo_h
 
-#include <DC4C/v2/vector.h>
+#include <DC4C/vector.h>
 
 #include "dwarf_lineInfo.h"
 

@@ -36,11 +36,11 @@ struct elfFile {
     /** The super part of this structure.                            */
     struct binaryFile _;
 
-    /** The section corresponding to the .debug_line section.        */
+    /** The section corresponding to the @c .debug_line section.     */
     struct lcs_section debugLine,
-    /** The section corresponding to the .debug_line_str section.    */
+    /** The section corresponding to the @c .debug_line_str section. */
                        debugLineStr,
-    /** The section corresponding to the .debug_str section.         */
+    /** The section corresponding to the @c .debug_str section.      */
                        debugStr,
     /** The section corresponding to the @c .debug_info section.     */
                        debugInfo,
@@ -58,7 +58,7 @@ struct elfFile {
 /**
  * Allocates a new ELF file structure.
  *
- * @return the allocated structure or `NULL` on error
+ * @return the allocated structure or @c NULL on error
  */
 struct elfFile * elfFile_new(void);
 
@@ -86,7 +86,7 @@ bool elfFile_parse(struct elfFile* self);
  * @param frame the callstack frame object to store the information in
  * @return whether the callstack frame object was filled successfully
  */
-bool elfFile_addr2String(struct elfFile* self, void* address, struct callstack_frame* frame);
+bool elfFile_addr2String(struct elfFile* self, const void* address, struct callstack_frame* frame);
 
 /**
  * Loads the function information for the function of the given name.
@@ -98,17 +98,25 @@ bool elfFile_addr2String(struct elfFile* self, void* address, struct callstack_f
  */
 bool elfFile_getFunctionInfo(struct elfFile* self, const char* functionName, struct functionInfo* info);
 
+/**
+ * Returns the thread-local storage regions in the given ELF file.
+ *
+ * @param self the ELF file abstraction structure
+ * @return the thread-local storage regions
+ */
 vector_pair_ptr_t elfFile_getTLSRegions(struct elfFile* self);
 
 /**
- * Deinitializes the given binary file structure, if it is an ELF file structure.
+ * Deinitializes the given binary file structure, if it is an ELF file
+ * structure.
  *
  * @param self the binary file structure to be deinitialized
  */
 void elfFile_destroy(struct elfFile* self);
 
 /**
- * Deinitializes and `free`s the given binary file, if it is an ELF file structure.
+ * Deinitializes and frees the given binary file, if it is an ELF file
+ * structure.
  *
  * @param self the binary file structure to be deleted
  */

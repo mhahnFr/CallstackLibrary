@@ -22,7 +22,7 @@
 #ifndef vector_function_h
 #define vector_function_h
 
-#include <DC4C/v2/vector.h>
+#include <DC4C/vector.h>
 
 #include "function.h"
 

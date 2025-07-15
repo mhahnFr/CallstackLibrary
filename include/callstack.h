@@ -1,7 +1,7 @@
 /*
  * CallstackLibrary - Library creating human-readable call stacks.
  *
- * Copyright (C) 2022 - 2024  mhahnFr
+ * Copyright (C) 2022 - 2025  mhahnFr
  *
  * This file is part of the CallstackLibrary.
  *
@@ -61,19 +61,22 @@ struct callstack {
 /**
  * @brief Creates a callstack of the calling function.
  *
- * The backtrace of the calling function is created.
- * The struct is allocated and needs to be freed using the function `callstack_delete(struct callstack *)`.
- * Returns `NULL` if an error occurs.
+ * The backtrace of the calling function is created.<br>
+ * The returned structure is allocated and needs to be freed using the function
+ * @code callstack_delete(struct callstack *)@endcode.<br>
+ * Returns @c NULL if an error occurs.
  *
  * @return A newly allocated callstack object.
  */
 struct callstack * callstack_new(void);
 
 /**
- * @brief Creates a new callstack object, ignoring all frames after the given address.
+ * @brief Creates a new callstack object, ignoring all frames after the given
+ * address.
  *
- * The struct is allocated and needs to be freed using the function `callstack_delete(struct callstack *)`.
- * Returns `NULL` if an error occurs.
+ * The returned structure is allocated and needs to be freed using the function
+ * @code callstack_delete(struct callstack *)@endcode.<br>
+ * Returns @c NULL if an error occurs.
  *
  * @param address The stack address after which frames are ignored.
  * @return A newly allocated callstack object.
@@ -83,10 +86,12 @@ struct callstack * callstack_newWithAddress(void * address);
 /**
  * @brief Constructs the given callstack object.
  *
- * Stores the backtrace of the calling function.
- * The callstack object needs to be destructed using the function `callstack_destroy(struct callstack *)`
- * upon successful construction and use.
- * If an error occurs during the initialization of the given callstack object, `false` is returned.
+ * Stores the backtrace of the calling function.<br>
+ * The callstack object needs to be destructed using the function
+ * @code callstack_destroy(struct callstack *)@endcode upon successful
+ * construction and use.<br>
+ * If an error occurs during the initialization of the given callstack object,
+ * @c false is returned.
  *
  * @param self A pointer to the callstack object to be constructed.
  * @return Whether the given callstack object was constructed successfully.
@@ -96,9 +101,11 @@ bool callstack_emplace(struct callstack * self);
 /**
  * @brief Constructs the given callstack object.
  *
- * Stores the backtrace of the calling function, ignoring all frames after the given address.
- * The callstack object needs to be destructed using the function `callstack_destroy(struct callstack *)`
- * upon successful construction and use.
+ * Stores the backtrace of the calling function, ignoring all frames after the
+ * given address.<br>
+ * The callstack object needs to be destructed using the function
+ * @code callstack_destroy(struct callstack *)@endcode upon successful
+ * construction and use.
  *
  * @param self A pointer to the callstack object to be constructed.
  * @param address The stack address after which frames are ignored.
@@ -109,12 +116,12 @@ bool callstack_emplaceWithAddress(struct callstack * self, void * address);
 /**
  * @brief Constructs the given callstack object.
  *
- * Copies the given callstack into the given object. If the trace is longer than
- * `CALLSTACK_BACKTRACE_SIZE`, only the first addresses are copied.
- * The callstack object needs to be destructed using the function `callstack_destroy(struct callstack *)`
- * after use.
- * If the given trace length is smaller than zero, `false` is returned and the given callstack
- * is not modified.
+ * Copies the given callstack into the given object. If the trace is longer
+ * than @c CALLSTACK_BACKTRACE_SIZE, only the first addresses are copied.<br>
+ * The callstack object needs to be destructed using the function
+ * @code callstack_destroy(struct callstack *)@endcode after use.<br>
+ * If the given trace length is smaller than zero, @c false is returned and the
+ * given callstack is not modified.
  *
  * @param self A pointer to the callstack object to be constructed.
  * @param trace The backtrace to be copied.
@@ -129,7 +136,7 @@ bool callstack_emplaceWithBacktrace(struct callstack * self,
  *
  * The given callstack is destroyed before the contents of the other one are copied.
  *
- * @param self A pointer to the the callstack to be replaced.
+ * @param self A pointer to the callstack to be replaced.
  * @param other The callstack object to be copied.
  */
 void callstack_copy(struct callstack * self, const struct callstack * other);
@@ -137,8 +144,8 @@ void callstack_copy(struct callstack * self, const struct callstack * other);
 /**
  * @brief Translates the given callstack and returns an array of the translated frames.
  *
- * Returns `NULL` if an error happens.
- * Since version `1.1` a `callstack_frame` array is returned.
+ * Returns @c NULL if an error happens.<br>
+ * Since version @c 1.1 a @c callstack_frame array is returned.
  *
  * @param self The callstack object.
  * @return An array of translated callstack frames.
@@ -148,10 +155,10 @@ struct callstack_frame * callstack_toArray(struct callstack * self);
 /**
  * @brief Translates the given callstack and returns an array of the translated frames.
  *
- * If the given callstack has not been translated before, only the binary file information
- * is deducted.
- *
- * Returns `NULL` if an error happens.
+ * If the given callstack has not been translated before, only the binary file
+ * information is deducted.
+ * <br><br>
+ * Returns @c NULL if an error happens.
  *
  * @param self The callstack object.
  * @return An array of translated callstack frames.
@@ -163,14 +170,15 @@ struct callstack_frame * callstack_getBinaries(struct callstack * self);
 /**
  * @brief Translates the given callstack and returns an array of the translated frames.
  *
- * If the given has not been translated before, only the binary file information
- * is deducted.
+ * If the given has not been translated before, only the binary file
+ * information is deducted.
  *
- * The deducted binary information is located in the cache of the library and becomes
- * invalid after a call to `callstack_clearCaches()` or after the callstack has
- * been translated entirely if `callstack_autoClearCaches` is `true`.
- *
- * Returns `NULL` if an error happens.
+ * The deducted binary information is located in the cache of the library and
+ * becomes invalid after a call to @c callstack_clearCaches() or after the
+ * callstack has been translated entirely if @c callstack_autoClearCaches is
+ * @c true .
+ * <br><br>
+ * Returns @c NULL if an error happens.
  *
  * @param self the callstack object
  * @return an array of translated callstack frames
@@ -185,7 +193,7 @@ struct callstack_frame* callstack_getBinariesCached(struct callstack* self);
  * @param self The callstack object.
  * @return The number of frames in the given callstack.
  */
-static inline size_t callstack_getFrameCount(struct callstack * self) {
+static inline size_t callstack_getFrameCount(const struct callstack* self) {
     return self->backtraceSize;
 }
 
@@ -195,7 +203,7 @@ static inline size_t callstack_getFrameCount(struct callstack * self) {
  * @param self The callstack object.
  * @return The type of the callstack.
  */
-static inline enum callstack_type callstack_getType(struct callstack * self) {
+static inline enum callstack_type callstack_getType(const struct callstack* self) {
     return self->translationStatus;
 }
 
@@ -205,7 +213,7 @@ static inline enum callstack_type callstack_getType(struct callstack * self) {
  * @param self The callstack object.
  * @return Whether the callstack is already translated.
  */
-static inline bool callstack_isTranslated(struct callstack * self) {
+static inline bool callstack_isTranslated(const struct callstack* self) {
     return self->translationStatus != NONE && self->translationStatus != FAILED;
 }
 

@@ -22,7 +22,7 @@
 #ifndef vector_string_h
 #define vector_string_h
 
-#include <DC4C/v2/vector.h>
+#include <DC4C/vector.h>
 
 typedef_vector_named(string, const char*);
 

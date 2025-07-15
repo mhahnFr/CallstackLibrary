@@ -25,15 +25,47 @@
 #include <callstack_internals.h>
 #include <regions/regions.h>
 
-#include <DC4C/v2/vector.h>
+#include <DC4C/vector.h>
 
 #include "../dlMapper/dlMapper.h"
 
 typedef_vector_named(region, struct region);
 
+/**
+ * Executes the given function, passing the given arguments if the given
+ * condition evaluates to @c true .
+ *
+ * @param b the condition
+ * @param func the function to possibly execute
+ * @param ... the arguments to pass to the given function
+ * @return the return value of the given function or the given arguments
+ */
 #define maybeRun(b, func, ...) ({ (b) ? (func)(__VA_ARGS__) : (__VA_ARGS__); })
+
+/**
+ * Executes the given function if the given condition evaluates to @c true .
+ *
+ * @param b the condition
+ * @param func the function to possibly execute
+ * @return the return value of the given function or @c NULL
+ */
 #define maybeRunV(b, func) ((b) ? (func)() : (void) NULL)
+
+/**
+ * Executes the given function if @c callstack_autoClearCaches is @c true .
+ *
+ * @param func the function to possibly execute
+ * @param ... the arguments to pass to the given function
+ * @return the return value of the function or the given arguments
+ */
 #define maybe(func, ...) maybeRun(callstack_autoClearCaches, func, __VA_ARGS__)
+
+/**
+ * Executes the given function if @c callstack_autoClearCaches is @c true .
+ *
+ * @param func the function to possibly execute
+ * @return the return value of the given function or @c NULL
+ */
 #define maybeV(func) maybeRunV(callstack_autoClearCaches, func)
 
 struct regionInfo regions_getLoadedRegions(void) {
@@ -87,12 +119,17 @@ struct regionInfo regions_getTLSRegions(void) {
     return (struct regionInfo) { toReturn.content, toReturn.count };
 }
 
-static inline void regions_destroy(struct region self) {
+/**
+ * Destroys the given region structure.
+ *
+ * @param self the region object to be destructed
+ */
+static inline void regions_destroy(const struct region self) {
     maybe(free, (void*) self.name);
     maybe(free, (void*) self.nameRelative);
 }
 
-void regions_destroyInfo(struct regionInfo* info) {
+void regions_destroyInfo(const struct regionInfo* info) {
     vector_region_t tmp = (vector_region_t) { info->amount, info->amount, info->regions };
     vector_destroyWith(&tmp, regions_destroy);
 }

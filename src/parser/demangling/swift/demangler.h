@@ -22,6 +22,12 @@
 #ifndef callstack_demangling_swift_demangler_h
 #define callstack_demangling_swift_demangler_h
 
+/**
+ * Attempts to demangle the given name.
+ *
+ * @param name the name to be demangled
+ * @return the demangled name or the given name
+ */
 char* callstack_demangle_swift(char* name);
 
 #endif /* callstack_demangling_swift_demangler_h */

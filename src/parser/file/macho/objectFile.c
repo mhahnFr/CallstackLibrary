@@ -21,21 +21,17 @@
 
 #include <stdio.h>
 #include <stdlib.h>
+#include <mach-o/loader.h>
 #include <sys/stat.h>
 
-#include <mach-o/loader.h>
-
+#include <file/pathUtils.h>
 #include <macho/fat_handler.h>
 #include <macho/macho_utils.h>
 
-#include <file/pathUtils.h>
-
 #include "objectFile.h"
 #include "macho_parser.h"
-
 #include "../binaryFile.h"
 #include "../bounds.h"
-
 #include "../dwarf/dwarf_parser.h"
 
 struct objectFile* objectFile_new(void) {
@@ -60,13 +56,14 @@ static inline void objectFile_dwarfLineCallback(struct dwarf_lineInfo info, void
 }
 
 /**
- * @brief Returns how the the two given DWARF line infos compare.
+ * @brief Returns how the two given DWARF line infos compare.
  *
  * Sorted descendingly.
  *
  * @param lhs the left-hand side value
  * @param rhs the right-hand side value
- * @return `0` if the two infos compare equal, a value smaller or bigger than `0` according to the sort order
+ * @return @c 0 if the two infos compare equal, a value smaller or bigger than
+ * @c 0 according to the sort order
  */
 static inline int objectFile_dwarfLineInfoSortCompare(const void* lhs, const void* rhs) {
     const struct dwarf_lineInfo* a = lhs;
@@ -95,7 +92,8 @@ static inline int objectFile_functionCompare(const void* lhs, const void* rhs) {
 }
 
 /**
- * Finds and returns the function with the given name deducted from the represented object file.
+ * Finds and returns the function with the given name deducted from the
+ * represented object file.
  *
  * @param self the object file object
  * @param name the name of the desired function
@@ -103,9 +101,9 @@ static inline int objectFile_functionCompare(const void* lhs, const void* rhs) {
  */
 static inline optional_function_t objectFile_findOwnFunction(struct objectFile* self, const char* name) {
     optional_function_t toReturn = { .has_value = false };
-    
-    struct function searched = (struct function) { .linkedName = (char*) name };
-    struct function* it = vector_search(&self->ownFunctions, &searched, objectFile_functionCompare);
+
+    const struct function searched = (struct function) { .linkedName = (char*) name };
+    const struct function* it = vector_search(&self->ownFunctions, &searched, objectFile_functionCompare);
     if (it != NULL) {
         toReturn = (struct optional_function) { true, *it };
     }
@@ -114,12 +112,13 @@ static inline optional_function_t objectFile_findOwnFunction(struct objectFile* 
 }
 
 /**
- * @brief Returns the full source file name found in the referencing Mach-O executable / library file.
+ * @brief Returns the full source file name found in the referencing Mach-O
+ * executable / library file.
  *
  * @note Do not free the returned string.
  *
  * @param self the object file object
- * @return the full source file name or `NULL` if the allocation failed
+ * @return the full source file name or @c NULL if the allocation failed
  */
 static inline const char* objectFile_getSourceFileName(struct objectFile* self) {
     if (self->mainSourceFileCache != NULL) return self->mainSourceFileCache;
@@ -140,11 +139,11 @@ static inline const char* objectFile_getSourceFileName(struct objectFile* self) 
     return self->mainSourceFileCache = toReturn;
 }
 
-optional_debugInfo_t objectFile_getDebugInfo(struct objectFile* self, uint64_t address, struct function function) {
-    optional_debugInfo_t toReturn = { .has_value = false };
+optional_debugInfo_t objectFile_getDebugInfo(struct objectFile* self, const uint64_t address, const struct function function) {
+    const optional_debugInfo_t toReturn = { .has_value = false };
     
     if (!self->parsed) {
-        if (!(self->parsed = objectFile_parse(self))) {
+        if (!((self->parsed = objectFile_parse(self)))) {
             return toReturn;
         }
     }
@@ -154,7 +153,7 @@ optional_debugInfo_t objectFile_getDebugInfo(struct objectFile* self, uint64_t a
         lineAddress = address;
         functionBegin = function.startAddress;
     } else {
-        optional_function_t ownFunction = objectFile_findOwnFunction(self, function.linkedName);
+        const optional_function_t ownFunction = objectFile_findOwnFunction(self, function.linkedName);
         if (!ownFunction.has_value) {
             return toReturn;
         }
@@ -162,7 +161,7 @@ optional_debugInfo_t objectFile_getDebugInfo(struct objectFile* self, uint64_t a
         functionBegin = ownFunction.value.startAddress;
     }
 
-    struct dwarf_lineInfo tmp = (struct dwarf_lineInfo) { .address = lineAddress };
+    const struct dwarf_lineInfo tmp = (struct dwarf_lineInfo) { .address = lineAddress };
     const struct dwarf_lineInfo* closest = upper_bound(&tmp, 
                                                        self->lineInfos.content,
                                                        self->lineInfos.count,
@@ -206,25 +205,25 @@ uint8_t* objectFile_getUUID(struct objectFile* self) {
  *
  * @param self the object file object
  * @param section the translated section to handle
- * @param segname the segment name the section is found in
- * @param sectname the section's name
+ * @param segmentName the segment name the section is found in
+ * @param sectionName the section's name
  */
 static inline void objectFile_handleSection(struct objectFile* self,
-                                            struct lcs_section section,
-                                            const char*        segname,
-                                            const char*        sectname) {
-    if (strcmp("__DWARF", segname) == 0) {
-        if (strcmp("__debug_line", sectname) == 0) {
+                                            const struct lcs_section section,
+                                            const char* segmentName,
+                                            const char* sectionName) {
+    if (strcmp("__DWARF", segmentName) == 0) {
+        if (strcmp("__debug_line", sectionName) == 0) {
             self->debugLine = section;
-        } else if (strncmp("__debug_line_str", sectname, 16) == 0) {
+        } else if (strncmp("__debug_line_str", sectionName, 16) == 0) {
             self->debugLineStr = section;
-        } else if (strcmp("__debug_str", sectname) == 0) {
+        } else if (strcmp("__debug_str", sectionName) == 0) {
             self->debugStr = section;
-        } else if (strcmp("__debug_info", sectname) == 0) {
+        } else if (strcmp("__debug_info", sectionName) == 0) {
             self->debugInfo = section;
-        } else if (strcmp("__debug_abbrev", sectname) == 0) {
+        } else if (strcmp("__debug_abbrev", sectionName) == 0) {
             self->debugAbbrev = section;
-        } else if (strncmp("__debug_str_offsets", sectname, 16) == 0) {
+        } else if (strncmp("__debug_str_offsets", sectionName, 16) == 0) {
             self->debugStrOffsets = section;
         }
     }
@@ -233,8 +232,8 @@ static inline void objectFile_handleSection(struct objectFile* self,
 /**
  * @brief Handles the given 64 bit segment command.
  *
- * If the given segment contains the DWARF debug line information, it is parsed using the given
- * DWARF line callback and the given additional arguments.
+ * If the given segment contains the DWARF debug line information, it is parsed
+ * using the given DWARF line callback and the given additional arguments.
  *
  * @param self the object file object
  * @param command the command to process
@@ -245,7 +244,7 @@ static inline void objectFile_handleSection(struct objectFile* self,
 static inline bool objectFile_handleSegment64(struct objectFile*         self,
                                               struct segment_command_64* command,
                                               void*                      baseAddress,
-                                              bool                       bytesSwapped) {
+                                              const bool                 bytesSwapped) {
     const uint32_t nsects = macho_maybeSwap(32, bytesSwapped, command->nsects);
 
     for (size_t i = 0; i < nsects; ++i) {
@@ -261,8 +260,8 @@ static inline bool objectFile_handleSegment64(struct objectFile*         self,
 /**
  * @brief Handles the given 32 bit segment command.
  *
- * If the given segment contains the DWARF debug line information, it is parsed using the given
- * DWARF line callback and the given additional arguments.
+ * If the given segment contains the DWARF debug line information, it is parsed
+ * using the given DWARF line callback and the given additional arguments.
  *
  * @param self the object file object
  * @param command the command to process
@@ -273,7 +272,7 @@ static inline bool objectFile_handleSegment64(struct objectFile*         self,
 static inline bool objectFile_handleSegment(struct objectFile*      self,
                                             struct segment_command* command,
                                             void*                   baseAddress,
-                                            bool                    bytesSwapped) {
+                                            const bool              bytesSwapped) {
     const uint32_t nsects = macho_maybeSwap(32, bytesSwapped, command->nsects);
 
     for (size_t i = 0; i < nsects; ++i) {
@@ -287,7 +286,8 @@ static inline bool objectFile_handleSegment(struct objectFile*      self,
 }
 
 /**
- * The callback adding the function / object file pair to the object file object passed via the variadic argument list.
+ * The callback adding the function / object file pair to the object file
+ * object passed via the variadic argument list.
  *
  * @param f the function / object file pair
  * @param args the arguments - should contain as first argument the object file object ot add the pair to
@@ -308,7 +308,7 @@ static inline void objectFile_addFunctionCallback(struct pair_funcFile f, va_lis
  */
 static inline bool objectFile_parseMachOImpl64(struct objectFile* self,
                                                void*              baseAddress,
-                                               bool               bytesSwapped) {
+                                               const bool         bytesSwapped) {
     struct mach_header_64* header = baseAddress;
     struct load_command*   lc     = (void*) header + sizeof(struct mach_header_64);
     const  uint32_t        ncmds  = macho_maybeSwap(32, bytesSwapped, header->ncmds);
@@ -325,9 +325,11 @@ static inline bool objectFile_parseMachOImpl64(struct objectFile* self,
                 break;
 
             case LC_UUID:
-                memcpy(&self->uuid, &((struct uuid_command*) ((void*) lc))->uuid, 16);
+                memcpy(&self->uuid, &((struct uuid_command*) (void*) lc)->uuid, 16);
                 result = true;
                 break;
+
+            default: break;
         }
         if (!result) {
             return false;
@@ -347,7 +349,7 @@ static inline bool objectFile_parseMachOImpl64(struct objectFile* self,
  */
 static inline bool objectFile_parseMachOImpl(struct objectFile* self,
                                              void*              baseAddress,
-                                             bool               bytesSwapped) {
+                                             const bool         bytesSwapped) {
     struct mach_header*  header = baseAddress;
     struct load_command* lc     = (void*) header + sizeof(struct mach_header);
     const  uint32_t      ncmds  = macho_maybeSwap(32, bytesSwapped, header->ncmds);
@@ -364,9 +366,11 @@ static inline bool objectFile_parseMachOImpl(struct objectFile* self,
                 break;
 
             case LC_UUID:
-                memcpy(&self->uuid, &((struct uuid_command*) ((void*) lc))->uuid, 16);
+                memcpy(&self->uuid, &((struct uuid_command*) (void*) lc)->uuid, 16);
                 result = true;
                 break;
+
+            default: break;
         }
         if (!result) {
             return false;
@@ -379,8 +383,8 @@ static inline bool objectFile_parseMachOImpl(struct objectFile* self,
 /**
  * @brief Parses the Mach-O file into the given object file object.
  *
- * The Mach-O file needs to be an object file or a dSYM companion file to be parsed.
- * Optionally, it may be in a fat archive.
+ * The Mach-O file needs to be an object file or a dSYM companion file to be
+ * parsed. Optionally, it may be in a fat archive.
  *
  * @param self the object file object
  * @param buffer the buffer of the Mach-O file
@@ -413,6 +417,8 @@ static inline bool objectFile_parseMachO(struct objectFile* self,
 
         case FAT_CIGAM:
         case FAT_CIGAM_64: return objectFile_parseMachO(self, macho_parseFat(buffer, true, self->name));
+
+        default: break;
     }
 
     if (success && self->debugLine.size > 0) {

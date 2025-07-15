@@ -57,7 +57,7 @@ static inline char* dlMapper_platform_loadExecutableName(void) {
     if (buffer == NULL) {
         return NULL;
     }
-    ssize_t count = readlink("/proc/self/exe", buffer, PATH_MAX - 1);
+    const ssize_t count = readlink("/proc/self/exe", buffer, PATH_MAX - 1);
     if (count == -1) {
         free(buffer);
         return NULL;
@@ -66,6 +66,11 @@ static inline char* dlMapper_platform_loadExecutableName(void) {
     return buffer;
 }
 
+/**
+ * Generates an implementation for loading the ELF program header number.
+ *
+ * @param bits the amount of bits the implementation shall handle
+ */
 #define dlMapper_platform_loadEPHNum(bits)                                                                     \
 static inline uint32_t dlMapper_platform_loadEPHNum##bits(const Elf##bits##_Ehdr* header, bool littleEndian) { \
     const uint16_t e_phnum = ELF_TO_HOST(16, header->e_phnum, littleEndian);                                   \
@@ -80,6 +85,11 @@ static inline uint32_t dlMapper_platform_loadEPHNum##bits(const Elf##bits##_Ehdr
 dlMapper_platform_loadEPHNum(32)
 dlMapper_platform_loadEPHNum(64)
 
+/**
+ * Generates an implementation for loading a given ELF file.
+ *
+ * @param bits the amount of bits the implementation shall handle
+ */
 #define dlMapper_platform_loadELF_impl(bits)                                                        \
 static inline pair_address_t dlMapper_platform_loadELF##bits(const void* base, bool littleEndian) { \
     const Elf##bits##_Ehdr* header = base;                                                          \
@@ -134,14 +144,14 @@ static inline void* dlMapper_platform_loadELFLoadedAddress(struct dl_phdr_info* 
 
 /**
  * Creates a loaded library information from the given info and stores it in
- * the passed payload.
+ * the given payload.
  *
  * @param info the system info
  * @param size the size of the passed info structure
  * @param d the payload
  * @return whether to continue iterating
  */
-static inline int dlMapper_platform_iterateCallback(struct dl_phdr_info* info, size_t size, void* d) {
+static inline int dlMapper_platform_iterateCallback(struct dl_phdr_info* info, const size_t size, void* d) {
     (void) size;
 
     struct dlMapper_platform_data* data = d;

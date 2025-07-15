@@ -1,7 +1,7 @@
 /*
  * CallstackLibrary - Library creating human-readable call stacks.
  *
- * Copyright (C) 2022 - 2024  mhahnFr
+ * Copyright (C) 2022 - 2025  mhahnFr
  *
  * This file is part of the CallstackLibrary.
  *
@@ -22,13 +22,13 @@
 #include <execinfo.h>
 #include <string.h>
 
+#include <callstack_create.h>
 #include <callstack_defs.h>
 
 #include "callstackInternal.h"
-#include "lcs_builtins.h"
 
-#include "parser/callstack_parser.h"
 #include "dlMapper/dlMapper.h"
+#include "parser/callstack_parser.h"
 
 void callstack_createWithBacktrace(struct callstack * self,
                                    void * trace[], size_t traceLength) {
@@ -38,10 +38,10 @@ void callstack_createWithBacktrace(struct callstack * self,
     self->backtraceSize = traceLength;
 }
 
-int callstack_backtrace(void* buffer[], int bufferSize, void* address) {
-    int i      = 0,
-        frames = backtrace(buffer, bufferSize);
-    
+int callstack_backtrace(void* buffer[], const int bufferSize, void* address) {
+    const int frames = backtrace(buffer, bufferSize);
+    int i = 0;
+
     if (frames < 0) return frames;
     
 #ifdef LCS_USE_BUILTINS
@@ -65,7 +65,7 @@ enum callstack_type callstack_translate(struct callstack * self) {
     return self->translationStatus;
 }
 
-enum callstack_type callstack_translateBinaries(struct callstack* self, bool useCache) {
+enum callstack_type callstack_translateBinaries(struct callstack* self, const bool useCache) {
     self->frames = malloc(sizeof(struct callstack_frame) * self->backtraceSize);
     if (self->frames == NULL) {
         return FAILED;
@@ -79,8 +79,8 @@ enum callstack_type callstack_translateBinaries(struct callstack* self, bool use
         callstack_frame_create(element);
 
         struct loadedLibInfo* info = dlMapper_libInfoForAddress(self->backtrace[i]);
-        element->binaryFile = info == NULL ? NULL : (useCache ? info->absoluteFileName : strdup(info->absoluteFileName));
-        element->binaryFileRelative = info == NULL ? NULL : (useCache ? info->relativeFileName : strdup(info->relativeFileName));
+        element->binaryFile = info == NULL ? NULL : useCache ? info->absoluteFileName : strdup(info->absoluteFileName);
+        element->binaryFileRelative = info == NULL ? NULL : useCache ? info->relativeFileName : strdup(info->relativeFileName);
         element->binaryFileIsSelf = info == NULL ? false : info->isSelf;
         element->reserved = info;
         element->reserved1 = useCache;

@@ -1,7 +1,7 @@
 /*
  * CallstackLibrary - Library creating human-readable call stacks.
  *
- * Copyright (C) 2024  mhahnFr
+ * Copyright (C) 2024 - 2025  mhahnFr
  *
  * This file is part of the CallstackLibrary.
  *
@@ -24,6 +24,13 @@
 
 #include <endian.h>
 
+/**
+ * Converts the given number to the host endianness.
+ *
+ * @param bits the amount of bits of the given value
+ * @param number the value in question
+ * @param littleEndian whether the given number uses little endianness
+ */
 #define ELF_TO_HOST(bits, number, littleEndian) (littleEndian ? le##bits##toh(number) : be##bits##toh(number))
 
 #endif /* __utils_elf_elfUtils_h */

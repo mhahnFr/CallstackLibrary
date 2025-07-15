@@ -45,8 +45,14 @@ typedef struct LCS_FILE_NAME ConcreteFile;
 /** The concrete binary file abstraction structure pointer type. */
 typedef ConcreteFile* Concrete;
 
-#define LCS_FILE(self, NAME, ...) LCS_FILE_RAW(NAME)((Concrete) (self), __VA_ARGS__)
-#define LCS_FILE_1(self, NAME) LCS_FILE_RAW(NAME)((Concrete) (self))
+/**
+ * Calls the concrete implementation of the named function.
+ *
+ * @param self the instance object
+ * @param NAME the name of the requested function
+ * @param ... the arguments to be passed to the requested function
+ */
+#define LCS_FILE(self, NAME, ...) LCS_FILE_RAW(NAME)((Concrete) (self) __VA_OPT__(,) __VA_ARGS__)
 
 struct binaryFile* binaryFile_new(const char* fileName, const void* startAddress) {
     Concrete tmp = LCS_FILE_RAW(new)();
@@ -59,7 +65,7 @@ struct binaryFile* binaryFile_new(const char* fileName, const void* startAddress
     return toReturn;
 }
 
-bool binaryFile_addr2String(struct binaryFile* self, void* address, struct callstack_frame* frame) {
+bool binaryFile_addr2String(struct binaryFile* self, const void* address, struct callstack_frame* frame) {
     return LCS_FILE(self, addr2String, address, frame);
 }
 
@@ -68,11 +74,11 @@ bool binaryFile_getFunctionInfo(struct binaryFile* self, const char* functionNam
 }
 
 vector_pair_ptr_t binaryFile_getTLSRegions(struct binaryFile* self) {
-    return LCS_FILE_1(self, getTLSRegions);
+    return LCS_FILE(self, getTLSRegions);
 }
 
 bool binaryFile_maybeParse(struct binaryFile* self) {
-    return self->parsed || (self->parsed = LCS_FILE_1(self, parse));
+    return self->parsed || ((self->parsed = LCS_FILE(self, parse)));
 }
 
 void binaryFile_clearCaches(void) {
@@ -81,7 +87,7 @@ void binaryFile_clearCaches(void) {
 #endif
 }
 
-bool binaryFile_isOutdated(struct dwarf_sourceFile file) {
+bool binaryFile_isOutdated(const struct dwarf_sourceFile file) {
     if (file.fileName == NULL || file.timestamp == 0) {
         return false;
     }
@@ -99,10 +105,10 @@ bool binaryFile_isOutdated(struct dwarf_sourceFile file) {
 }
 
 void binaryFile_destroy(struct binaryFile* self) {
-    LCS_FILE_1(self, destroy);
+    LCS_FILE(self, destroy);
     vector_destroy(&self->regions);
 }
 
 void binaryFile_delete(struct binaryFile* self) {
-    LCS_FILE_1(self, delete);
+    LCS_FILE(self, delete);
 }

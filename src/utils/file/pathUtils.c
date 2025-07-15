@@ -1,7 +1,7 @@
 /*
  * CallstackLibrary - Library creating human-readable call stacks.
  *
- * Copyright (C) 2024  mhahnFr
+ * Copyright (C) 2024 - 2025  mhahnFr
  *
  * This file is part of the CallstackLibrary.
  *
@@ -23,7 +23,9 @@
 #include <stdlib.h>
 #include <string.h>
 
-#include "fileHelper.h"
+#ifdef CXX_FUNCTIONS
+# include "fileHelper.h"
+#endif
 
 /**
  * Duplicates or converts the given path to an absolute path.
@@ -32,7 +34,7 @@
  * @param f whether to free the given path name
  * @return the allocated, converted path name
  */
-static inline char* path_toAbsolutePathIntern(char* path, bool f) {
+static inline char* path_toAbsolutePathIntern(char* path, const bool f) {
     char* toReturn;
 #ifdef CXX_FUNCTIONS
     toReturn = lcs_toCanonicalPath(path);
@@ -52,7 +54,7 @@ static inline char* path_toAbsolutePathIntern(char* path, bool f) {
  * @param f whether to free the given path name
  * @return the allocated, converted path name
  */
-static inline char* path_toRelativePathIntern(char* path, bool f) {
+static inline char* path_toRelativePathIntern(char* path, const bool f) {
     char* toReturn;
 #ifdef CXX_FUNCTIONS
     toReturn = lcs_toRelativePath(path);

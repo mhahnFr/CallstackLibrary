@@ -1,7 +1,7 @@
 /*
  * CallstackLibrary - Library creating human-readable call stacks.
  *
- * Copyright (C) 2022 - 2024  mhahnFr
+ * Copyright (C) 2022 - 2025  mhahnFr
  *
  * This file is part of the CallstackLibrary.
  *
@@ -19,17 +19,16 @@
  * CallstackLibrary, see the file LICENSE.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-#ifndef callstackinternal_h
-#define callstackinternal_h
+#ifndef callstackInternal_h
+#define callstackInternal_h
 
 #include <stdbool.h>
 #include <stdlib.h>
 
 #include <callstack.h>
-#include <callstack_create.h>
 
 /**
- * @brief Allocates an uninitialized callstack object.
+ * Allocates an uninitialized callstack object.
  *
  * @return A newly allocated callstack object.
  */
@@ -62,7 +61,7 @@ void callstack_createWithBacktrace(struct callstack * self,
 int callstack_backtrace(void * buffer[], int bufferSize, void * address);
 
 /**
- * @brief Translates the given callstack object into a human readable format.
+ * @brief Translates the given callstack object into a human-readable format.
  *
  * Returns the status of the translation, which is also set into the given callstack object.
  *
@@ -87,4 +86,4 @@ enum callstack_type callstack_translateBinaries(struct callstack* self, bool use
  */
 void callstack_reset(struct callstack * self);
 
-#endif /* callstackinternal_h */
+#endif /* callstackInternal_h */

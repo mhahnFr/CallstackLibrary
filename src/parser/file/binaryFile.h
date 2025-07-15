@@ -83,7 +83,7 @@ static inline void binaryFile_create(struct binaryFile* self) {
  * @param frame the callstack frame structure to store the information in
  * @return whether debug information was deducted successfully
  */
-bool binaryFile_addr2String(struct binaryFile* self, void* address, struct callstack_frame* frame);
+bool binaryFile_addr2String(struct binaryFile* self, const void* address, struct callstack_frame* frame);
 
 /**
  * Retrieves the function information available in the given binary file object.
@@ -95,6 +95,12 @@ bool binaryFile_addr2String(struct binaryFile* self, void* address, struct calls
  */
 bool binaryFile_getFunctionInfo(struct binaryFile* self, const char* functionName, struct functionInfo* info);
 
+/**
+ * Returns the thread-local storage regions of the given binary file.
+ *
+ * @param self the binary file abstraction object
+ * @return the thread-local storage regions in the given binary file
+ */
 vector_pair_ptr_t binaryFile_getTLSRegions(struct binaryFile* self);
 
 /**
@@ -113,7 +119,8 @@ bool binaryFile_maybeParse(struct binaryFile* self);
 void binaryFile_clearCaches(void);
 
 /**
- * Returns whether the given source file is outdated, that is, whether it has been edited since being referred.
+ * Returns whether the given source file is outdated, that is, whether it has
+ * been edited since being referred.
  *
  * @param file the file information to be checked
  * @return whether the file is outdated
@@ -134,7 +141,13 @@ void binaryFile_destroy(struct binaryFile* self);
  */
 void binaryFile_delete(struct binaryFile* self);
 
-#define BINARY_FILE_SUPER(self, name, ...) binaryFile_##name((struct binaryFile*) (self), __VA_ARGS__)
-#define BINARY_FILE_SUPER_1(self, name) binaryFile_##name((struct binaryFile*) (self))
+/**
+ * Executes the named function of the binary file class.
+ *
+ * @param self the binary file abstraction structure
+ * @param name the name of the function to execute
+ * @param ... the arguments to pass to the requested function
+ */
+#define BINARY_FILE_SUPER(self, name, ...) binaryFile_##name((struct binaryFile*) (self) __VA_OPT__(,) __VA_ARGS__)
 
 #endif /* binaryFile_h */

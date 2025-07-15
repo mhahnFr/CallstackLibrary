@@ -31,8 +31,18 @@
 # define LCS_UNDERSCORE
 #endif
 
+/**
+ * The type of the demangler function provided by the Swift runtime.
+ */
 typedef char* (*SwiftDemanglerFunc)(const char*, size_t, char*, size_t*, uint32_t);
 
+/**
+ * @brief Returns the demangler function provided by the Swift runtime.
+ *
+ * Attempts to load the function the first time it is called.
+ *
+ * @return a pointer to the demangler function or @c NULL if the function was not found
+ */
 static inline SwiftDemanglerFunc callstack_demangle_getSwiftDemangler(void) {
     static struct {
         SwiftDemanglerFunc func;
@@ -41,7 +51,7 @@ static inline SwiftDemanglerFunc callstack_demangle_getSwiftDemangler(void) {
 
     if (!loadingState.searched) {
         loadingState.searched = true;
-        struct functionInfo info = functionInfo_load(LCS_UNDERSCORE "swift_demangle");
+        const struct functionInfo info = functionInfo_load(LCS_UNDERSCORE "swift_demangle");
         if (info.found) {
             loadingState.func = (void*) info.begin;
         }
@@ -52,7 +62,7 @@ static inline SwiftDemanglerFunc callstack_demangle_getSwiftDemangler(void) {
 char* callstack_demangle_swift(char* name) {
     char* toReturn = name;
 
-    SwiftDemanglerFunc swift_demangle = callstack_demangle_getSwiftDemangler();
+    const SwiftDemanglerFunc swift_demangle = callstack_demangle_getSwiftDemangler();
     if (swift_demangle != NULL) {
         char* demangled = swift_demangle(name, strlen(name), NULL, NULL, 0);
         if (demangled != NULL) {

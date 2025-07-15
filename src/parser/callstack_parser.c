@@ -34,8 +34,8 @@
  * @param callstack the callstack to be translated
  * @return whether the translation was successful
  */
-static inline bool callstack_parser_parseImpl(struct callstack_parser* self,
-                                              struct callstack*        callstack) {
+static inline bool callstack_parser_parseImpl(const struct callstack_parser* self,
+                                              const struct callstack*        callstack) {
     (void) self;
     
     for (size_t i = 0; i < callstack->backtraceSize; ++i) {
@@ -50,7 +50,7 @@ static inline bool callstack_parser_parseImpl(struct callstack_parser* self,
     return true;
 }
 
-char* callstack_parser_demangleCopy(char* name, bool copy) {
+char* callstack_parser_demangleCopy(char* name, const bool copy) {
     char* result   = name;
     bool needsCopy = true;
 
@@ -62,8 +62,8 @@ char* callstack_parser_demangleCopy(char* name, bool copy) {
     return needsCopy ? (copy ? strdup(result) : NULL) : result;
 }
 
-enum callstack_type callstack_parser_parse(struct callstack_parser * self,
-                                           struct callstack *        callstack) {
+enum callstack_type callstack_parser_parse(const struct callstack_parser* self,
+                                           struct callstack* callstack) {
     if (!callstack_parser_parseImpl(self, callstack)) {
         callstack_reset(callstack);
         return FAILED;

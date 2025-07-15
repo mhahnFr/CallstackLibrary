@@ -23,7 +23,9 @@
 
 #include <callstack_frame.h>
 
-struct callstack_frame * callstack_frame_copy(struct callstack_frame * self) {
+#include "misc/string_utils.h"
+
+struct callstack_frame* callstack_frame_copy(const struct callstack_frame* self) {
     struct callstack_frame * toReturn = callstack_frame_new();
     
     if (toReturn != NULL) {
@@ -33,26 +35,16 @@ struct callstack_frame * callstack_frame_copy(struct callstack_frame * self) {
     return toReturn;
 }
 
-/**
- * Creates a copy of the given string if it is not `NULL`.
- *
- * @param str the string to be copied
- * @return the copy or `NULL` if `NULL` was passed or unable to allocate
- */
-static inline char * maybeStrdup(const char * str) {
-    return str == NULL ? NULL : strdup(str);
-}
-
 void callstack_frame_copyHere(struct callstack_frame * destination, const struct callstack_frame * source) {
     *destination = (struct callstack_frame) {
         source->reserved,
         source->reserved1,
         source->reserved2,
-        source->reserved1 ? source->binaryFile : maybeStrdup(source->binaryFile),
-        source->reserved1 ? source->binaryFileRelative : maybeStrdup(source->binaryFileRelative),
-        source->reserved2 ? source->function : maybeStrdup(source->function),
-        source->reserved1 ? source->sourceFile : maybeStrdup(source->sourceFile),
-        source->reserved1 ? source->sourceFileRelative : maybeStrdup(source->sourceFileRelative),
+        source->reserved1 ? source->binaryFile : utils_maybeCopySave(source->binaryFile, true),
+        source->reserved1 ? source->binaryFileRelative : utils_maybeCopySave(source->binaryFileRelative, true),
+        source->reserved2 ? source->function : utils_maybeCopySave(source->function, true),
+        source->reserved1 ? source->sourceFile : utils_maybeCopySave(source->sourceFile, true),
+        source->reserved1 ? source->sourceFileRelative : utils_maybeCopySave(source->sourceFileRelative, true),
         source->sourceFileOutdated,
         source->binaryFileIsSelf,
         source->sourceLine,

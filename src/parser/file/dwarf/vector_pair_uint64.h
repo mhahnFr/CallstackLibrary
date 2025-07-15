@@ -22,7 +22,7 @@
 #ifndef vector_pair_uint64_h
 #define vector_pair_uint64_h
 
-#include <DC4C/v2/vector.h>
+#include <DC4C/vector.h>
 
 #include "pair_uint64.h"
 

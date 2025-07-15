@@ -38,7 +38,7 @@ void function_create(struct function * self) {
     self->demangledName = (optional_string_t) { .has_value = false };
 }
 
-void function_destroy(struct function * self) {
+void function_destroy(const struct function* self) {
     free(self->linkedName);
     if (self->demangledName.has_value) {
         free(self->demangledName.value);

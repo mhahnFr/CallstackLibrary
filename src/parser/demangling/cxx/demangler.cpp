@@ -25,8 +25,7 @@
 
 char* callstack_demangle_cxx(char* name) {
     int status;
-    char* demangled = abi::__cxa_demangle(name, nullptr, nullptr, &status);
-    if (demangled != nullptr) {
+    if (char* demangled = abi::__cxa_demangle(name, nullptr, nullptr, &status); demangled != nullptr) {
         name = demangled;
     }
     return name;

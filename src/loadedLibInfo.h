@@ -53,6 +53,9 @@ struct loadedLibInfo {
     struct binaryFile* associated;
 };
 
+/**
+ * The initializing values for the @c loadedLibInfo .
+ */
 #define loadedLibInfo_initializer ((struct loadedLibInfo) { NULL, NULL, 0, NULL, NULL, NULL, false, NULL })
 
 /**
@@ -68,6 +71,6 @@ bool loadedLibInfo_prepare(struct loadedLibInfo* self);
  *
  * @param self the library info to be destroyed
  */
-void loadedLibInfo_destroy(struct loadedLibInfo* self);
+void loadedLibInfo_destroy(const struct loadedLibInfo* self);
 
 #endif /* loadedLibInfo_h */

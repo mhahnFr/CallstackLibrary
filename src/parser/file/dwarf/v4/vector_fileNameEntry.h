@@ -22,7 +22,7 @@
 #ifndef vector_fileNameEntry_h
 #define vector_fileNameEntry_h
 
-#include <DC4C/v2/vector.h>
+#include <DC4C/vector.h>
 
 #include "fileNameEntry.h"
 

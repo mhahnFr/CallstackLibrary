@@ -79,7 +79,7 @@ struct callstack_frame {
     bool binaryFileIsSelf;
     /** The line number in the source file this frame is on. */
     unsigned long sourceLine;
-    /** The line column number in the source file.  */
+    /** The line column number in the source file.           */
     unsigned long sourceLineColumn;
 };
 
@@ -107,7 +107,7 @@ static inline void callstack_frame_create(struct callstack_frame * self) {
 /**
  * Allocates a new and initialized callstack frame.
  *
- * @return the allocated callstack frame or `NULL` if unable to allocate
+ * @return the allocated callstack frame or @c NULL if unable to allocate
  * @since v1.1
  */
 static inline struct callstack_frame * callstack_frame_new(void) {
@@ -124,10 +124,10 @@ static inline struct callstack_frame * callstack_frame_new(void) {
  * Allocates a new callstack frame and deeply copies the given callstack frame.
  *
  * @param self the callstack frame to be copied
- * @return a copy of the given callstack frame or `NULL` if unable to allocate
+ * @return a copy of the given callstack frame or @c NULL if unable to allocate
  * @since v1.1
  */
-struct callstack_frame * callstack_frame_copy(struct callstack_frame * self);
+struct callstack_frame * callstack_frame_copy(const struct callstack_frame * self);
 
 /**
  * Copies the given callstack frame into the given destination.
@@ -150,14 +150,16 @@ char * callstack_frame_getShortestName(const struct callstack_frame * self);
 /**
  * @brief Returns the shortest binary file name of the given callstack frame.
  *
- * If the given callstack frame does not have a binary file name the given fallback is returned.
+ * If the given callstack frame does not have a binary file name the given
+ * fallback is returned.
  *
  * @param self the callstack frame
  * @param fallback the fallback string to be returned
  * @return the shortest binary file name or the given fallback
  * @since v1.2
  */
-static inline const char* callstack_frame_getShortestNameOr(const struct callstack_frame* self, const char* fallback) {
+static inline const char* callstack_frame_getShortestNameOr(const struct callstack_frame* self,
+                                                            const char* fallback) {
     const char* shortest = callstack_frame_getShortestName(self);
     return shortest == NULL ? fallback : shortest;
 }
@@ -174,14 +176,16 @@ char * callstack_frame_getShortestSourceFile(const struct callstack_frame * self
 /**
  * @brief Returns the shortest source file name of the given callstack frame.
  *
- * If the given callstack frame does not have a source file name the given fallback is returned.
+ * If the given callstack frame does not have a source file name the given
+ * fallback is returned.
  *
  * @param self the callstack frame
  * @param fallback the fallback string to be returned
  * @return the shortest source file name or the given fallback
  * @since v1.2
  */
-static inline const char* callstack_frame_getShortestSourceFileOr(const struct callstack_frame* self, const char* fallback) {
+static inline const char* callstack_frame_getShortestSourceFileOr(const struct callstack_frame* self,
+                                                                  const char* fallback) {
     const char* shortest = callstack_frame_getShortestSourceFile(self);
     return shortest == NULL ? fallback : shortest;
 }
@@ -192,7 +196,7 @@ static inline const char* callstack_frame_getShortestSourceFileOr(const struct c
  * @param self the callstack frame to be destructed
  * @since v1.1
  */
-static inline void callstack_frame_destroy(struct callstack_frame * self) {
+static inline void callstack_frame_destroy(const struct callstack_frame* self) {
     if (!self->reserved1) {
         free(self->binaryFile);
         free(self->binaryFileRelative);

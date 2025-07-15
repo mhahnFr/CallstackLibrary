@@ -24,7 +24,7 @@
 
 #include <mach-o/loader.h>
 
-#include <DC4C/v2/vector.h>
+#include <DC4C/vector.h>
 
 typedef struct tlv_descriptor TLVDescriptor;
 

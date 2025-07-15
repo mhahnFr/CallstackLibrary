@@ -23,23 +23,23 @@
 
 #include "loadedLibInfo.h"
 
-bool loadedLibInfo_prepare(struct loadedLibInfo* info) {
-    if (info == NULL) {
+bool loadedLibInfo_prepare(struct loadedLibInfo* self) {
+    if (self == NULL) {
         return false;
     }
-    if (info->associated == NULL) {
-        info->associated = binaryFile_new(info->fileName, info->begin);
+    if (self->associated == NULL) {
+        self->associated = binaryFile_new(self->fileName, self->begin);
     }
-    struct binaryFile* file = info->associated;
+    struct binaryFile* file = self->associated;
     if (file == NULL) {
         return false;
     }
-    file->relocationOffset = info->relocationOffset;
+    file->relocationOffset = self->relocationOffset;
     file->inMemory = true;
     return true;
 }
 
-void loadedLibInfo_destroy(struct loadedLibInfo* self) {
+void loadedLibInfo_destroy(const struct loadedLibInfo* self) {
     free(self->fileName);
     free(self->absoluteFileName);
     free(self->relativeFileName);

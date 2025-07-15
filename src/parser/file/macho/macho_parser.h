@@ -1,7 +1,7 @@
 /*
  * CallstackLibrary - Library creating human-readable call stacks.
  *
- * Copyright (C) 2024  mhahnFr
+ * Copyright (C) 2024 - 2025  mhahnFr
  *
  * This file is part of the CallstackLibrary.
  *
@@ -22,14 +22,12 @@
 #ifndef macho_parser_h
 #define macho_parser_h
 
+#include <stdarg.h>
 #include <stdbool.h>
-
 #include <mach-o/loader.h>
 
 #include "objectFile.h"
 #include "optional_pair_funcFile.h"
-
-#include "../function.h"
 
 /**
  * @brief The function prototype for the callback called with a new object file object.
@@ -47,23 +45,27 @@ typedef void (*macho_addFunction)(pair_funcFile_t, va_list);
 /**
  * @brief Parses the given Mach-O symbol table.
  *
- * At least one callback function needs to be provided (the other one 
- * may be `NULL`) or both. If none ise passed, the given symbol table
- * is not parsed and `false` is returned.
- *
- * The object file callback is called when all information associated
- * with an object file is read.
- * The function / object file callback is called for every symbol that
- * is not external.
- * Both functions are passed the additional arguments passed to this function.
+ * At least one callback function needs to be provided (the other one may be
+ * @c NULL) or both. If none is given, the given symbol table is not parsed and
+ * @c false is returned.
+ * <br><br>
+ * The object file callback will be called when all information associated with
+ * an object file is read.<br>
+ * The function / object file callback is called for every symbol that is not
+ * external.<br>
+ * Both functions will be passed the additional arguments passed to this
+ * function.
  *
  * @param command the Mach-O symbol table load command
- * @param baseAddress the start address of the Mach-O file the given symbol table is in
+ * @param baseAddress the start address of the Mach-O file the given symbol
+ * table is in
  * @param offset the additional parsing offset
- * @param bytesSwapped whether the bytes need to be swapped to be in host byte order
+ * @param bytesSwapped whether the bytes need to be swapped to be in host byte
+ * order
  * @param bit64 whether a 64 bit Mach-O file is parsed
  * @param objCb the object file callback function
  * @param funCb the function / object file pair callback function
+ * @param ... the additional parameters to pass to the given functions
  * @return whether the symbol table was parsed successfully
  */
 bool macho_parseSymtab(struct symtab_command* command, 

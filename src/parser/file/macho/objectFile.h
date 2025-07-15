@@ -22,7 +22,6 @@
 #ifndef objectFile_h
 #define objectFile_h
 
-#include <stdarg.h>
 #include <stdbool.h>
 #include <string.h>
 #include <time.h>
@@ -51,11 +50,11 @@ struct objectFile {
     /** The UUID of the represented Mach-O object file.         */
     uint8_t uuid[16];
     
-    /** The `__debug_line` section of the object file.          */
+    /** The @c __debug_line section of the object file.         */
     struct lcs_section debugLine;
-    /** The `__debug_line_str` section of the object file.      */
+    /** The @c __debug_line_str section of the object file.     */
     struct lcs_section debugLineStr;
-    /** The `__debug_str` section of the object file.           */
+    /** The @c __debug_str section of the object file.          */
     struct lcs_section debugStr;
     /** The @c __debug_info section of the object file.         */
     struct lcs_section debugInfo;
@@ -87,7 +86,7 @@ struct objectFile {
 /**
  * Allocates and initializes a new object file structure.
  *
- * @return the allocated object or `NULL` on error
+ * @return the allocated object or @c NULL on error
  */
 struct objectFile * objectFile_new(void);
 
@@ -155,8 +154,8 @@ bool objectFile_parse(struct objectFile* self);
 uint8_t* objectFile_getUUID(struct objectFile* self);
 
 /**
- * @brief Extracts the debug information for the given address inside the given function
- * from the given object file object.
+ * @brief Extracts the debug information for the given address inside the
+ * given function from the given object file object.
  *
  * If no information could be deducted, an empty optional is returned.
  *
@@ -175,7 +174,7 @@ optional_debugInfo_t objectFile_getDebugInfo(struct objectFile* self, uint64_t a
 void objectFile_destroy(struct objectFile * self);
 
 /**
- * Deinitializes and `free`s the given object file structure.
+ * Deinitializes and frees the given object file structure.
  *
  * @param self the object file structure to be deleted
  */
