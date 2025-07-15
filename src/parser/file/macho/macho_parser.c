@@ -68,7 +68,7 @@ bool macho_parseSymtab(struct symtab_command*    command,
     struct optional_function currFun        = { .has_value = false };
     struct objectFile*       currObj        = NULL;
 
-#define ENSURE(condition, message) if (!(condition)) THROW(message)
+#define ENSURE(condition, message) if (!(condition)) THROW1(char*, message)
 
     TRY({
         for (uint32_t i = 0; i < nsyms; ++i) {
@@ -167,7 +167,7 @@ bool macho_parseSymtab(struct symtab_command*    command,
                     break;
             }
         }
-    }, CATCH(const char*, message, {
+    }, CATCH(char*, message, {
         va_end(args);
         if (currFun.has_value) {
             function_destroy(&currFun.value);

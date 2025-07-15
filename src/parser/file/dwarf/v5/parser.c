@@ -189,36 +189,36 @@ static inline optional_vector_fileAttribute_t dwarf5_parseFileAttributes(const s
 
                 case DW_LNCT_directory_index: {
                     const optional_uint64_t value = dwarf5_readIndex(self->debugLine.content, counter, element->second);
-                    if (!value.has_value) THROW("Failed to read DW_LNCT_directory_index");
+                    if (!value.has_value) THROW1(char*, "Failed to read DW_LNCT_directory_index");
                     attribute.index = value.value;
                     break;
                 }
 
                 case DW_LNCT_timestamp: {
                     const optional_uint64_t value = dwarf5_readTimestamp(self->debugLine.content, counter, element->second);
-                    if (!value.has_value) THROW("Failed to read DW_LNCT_timestamp");
+                    if (!value.has_value) THROW1(char*, "Failed to read DW_LNCT_timestamp");
                     attribute.timestamp = value.value;
                     break;
                 }
 
                 case DW_LNCT_size: {
                     const optional_uint64_t value = dwarf5_readSize(self->debugLine.content, counter, element->second);
-                    if (!value.has_value) THROW("Failed to read DW_LNCT_size");
+                    if (!value.has_value) THROW1(char*, "Failed to read DW_LNCT_size");
                     attribute.size = value.value;
                     break;
                 }
 
                 case DW_LNCT_MD5:
-                    if (element->second != DW_FORM_data16) THROW("Shall read DW_LNCT_MD5 but format is not DW_FORM_data16");
+                    if (element->second != DW_FORM_data16) THROW1(char*, "Shall read DW_LNCT_MD5 but format is not DW_FORM_data16");
                     attribute.md5 = dwarf5_readMD5(self->debugLine.content, counter);
                     break;
 
                 default:
                     if (!dwarf_consumeSome(self, self->debugLine.content, counter, element->second)) {
-                        THROW("Failed to skip unknown value");
+                        THROW1(char*, "Failed to skip unknown value");
                     }
                     break;
-            }, CATCH(const char*, message, {
+            }, CATCH(char*, message, {
                 printf("LCS: Failed to parse DWARF 5: %s\n", message);
                 vector_destroy(&entryFormats);
                 vector_destroy(&attributes);
