@@ -29,7 +29,6 @@
 #include "../debugInfo.h"
 #include "../lcs_section.h"
 #include "../function.h"
-#include "../vector_function.h"
 
 #include "../dwarf/vector_dwarf_lineInfo.h"
 

@@ -25,6 +25,7 @@
 #include <stdint.h>
 
 #include <DC4C/optional.h>
+#include <DC4C/vector.h>
 
 #include "optional_string.h"
 
@@ -58,5 +59,6 @@ void function_create(struct function * self);
 void function_destroy(const struct function* self);
 
 typedef_optional_named(function, struct function);
+typedef_vector_named(function, struct function);
 
 #endif /* function_h */
