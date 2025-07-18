@@ -27,10 +27,9 @@
 #include <time.h>
 
 #include "../debugInfo.h"
-#include "../lcs_section.h"
 #include "../function.h"
-
-#include "../dwarf/vector_dwarf_lineInfo.h"
+#include "../lcs_section.h"
+#include "../dwarf/dwarf_lineInfo.h"
 
 /**
  * This structure represents an object file.
