@@ -27,7 +27,6 @@
 #include "optional_vector_fileAttribute.h"
 #include "../dwarf_parser.h"
 #include "../leb128.h"
-#include "../vector_pair_uint64.h"
 
 /**
  * Reads an index that follows in the given data buffer.
