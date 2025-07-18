@@ -1,7 +1,7 @@
 /*
  * CallstackLibrary - Library creating human-readable call stacks.
  *
- * Copyright (C) 2024  mhahnFr
+ * Copyright (C) 2024 - 2025  mhahnFr
  *
  * This file is part of the CallstackLibrary.
  *
@@ -22,7 +22,7 @@
 #ifndef dlMapper_platform_h
 #define dlMapper_platform_h
 
-#include "vector_loadedLibInfo.h"
+#include "dlMapper.h"
 
 /**
  * Loads the loaded runtime images into the given loaded library information vector.

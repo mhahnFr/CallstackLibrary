@@ -24,7 +24,11 @@
 
 #include <stdbool.h>
 
-#include "vector_loadedLibInfo.h"
+#include <DC4C/vector.h>
+
+#include "../loadedLibInfo.h"
+
+typedef_vector_named(loadedLibInfo, struct loadedLibInfo);
 
 /**
  * @brief Initializes the dlMapper.
