@@ -24,6 +24,8 @@
 
 #include <stdint.h>
 
+#include <DC4C/optional.h>
+
 #include "optional_string.h"
 
 /**
@@ -54,5 +56,7 @@ void function_create(struct function * self);
  * @param self the function structure to be deinitialized
  */
 void function_destroy(const struct function* self);
+
+typedef_optional_named(function, struct function);
 
 #endif /* function_h */
