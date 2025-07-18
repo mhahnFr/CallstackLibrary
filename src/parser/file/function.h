@@ -42,13 +42,6 @@ struct function {
 };
 
 /**
- * Allocates a new function structure.
- *
- * @return the allocated function structure or @c NULL on error
- */
-struct function * function_new(void);
-
-/**
  * Initializes the given function structure.
  *
  * @param self the function structure to be initialized
@@ -61,12 +54,5 @@ void function_create(struct function * self);
  * @param self the function structure to be deinitialized
  */
 void function_destroy(const struct function* self);
-
-/**
- * Deinitializes and frees the given function structure.
- *
- * @param self the function structure to be deleted
- */
-void function_delete(struct function * self);
 
 #endif /* function_h */

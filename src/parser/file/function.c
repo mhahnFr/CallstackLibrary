@@ -7,8 +7,8 @@
  *
  * The CallstackLibrary is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
- *  the Free Software Foundation, either version 3 of the License, or
- *  (at your option) any later version.
+ * the Free Software Foundation, either version 3 of the License, or
+ * (at your option) any later version.
  *
  * The CallstackLibrary is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
@@ -23,14 +23,6 @@
 
 #include "function.h"
 
-struct function * function_new(void) {
-    struct function * toReturn = malloc(sizeof(struct function));
-    if (toReturn != NULL) {
-        function_create(toReturn);
-    }
-    return toReturn;
-}
-
 void function_create(struct function * self) {
     self->startAddress  = 0x0;
     self->length        = 0x0;
@@ -43,9 +35,4 @@ void function_destroy(const struct function* self) {
     if (self->demangledName.has_value) {
         free(self->demangledName.value);
     }
-}
-
-void function_delete(struct function * self) {
-    function_destroy(self);
-    free(self);
 }
