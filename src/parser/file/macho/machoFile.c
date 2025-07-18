@@ -27,6 +27,7 @@
 
 #include <macho/fat_handler.h>
 #include <macho/macho_utils.h>
+#include <misc/numberContainers.h>
 #include <misc/string_utils.h>
 
 #include "machoFile.h"
@@ -35,7 +36,6 @@
 
 #include "../bounds.h"
 #include "../loader.h"
-#include "../optional_uint64_t.h"
 #include "../dwarf/leb128.h"
 
 #include "../../callstack_parser.h"

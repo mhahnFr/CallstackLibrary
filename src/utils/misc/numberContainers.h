@@ -1,7 +1,7 @@
 /*
- * Callstack Library - Library creating human-readable call stacks.
+* CallstackLibrary - Library creating human-readable call stacks.
  *
- * Copyright (C) 2024  mhahnFr
+ * Copyright (C) 2025  mhahnFr
  *
  * This file is part of the CallstackLibrary.
  *
@@ -19,13 +19,15 @@
  * CallstackLibrary, see the file LICENSE.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-#ifndef optional_uint64_t_h
-#define optional_uint64_t_h
+#ifndef utils_misc_numberContainers_h
+#define utils_misc_numberContainers_h
 
 #include <stdint.h>
 
 #include <DC4C/optional.h>
+#include <DC4C/pair.h>
+#include <DC4C/vector.h>
 
 typedef_optional_named(uint64, uint64_t);
 
-#endif /* optional_uint64_t_h */
+#endif /* utils_misc_numberContainers_h */

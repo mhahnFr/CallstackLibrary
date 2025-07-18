@@ -21,12 +21,13 @@
 
 #include "parser.h"
 
+#include <misc/numberContainers.h>
+
 #include "definitions.h"
 #include "optional_vector_fileAttribute.h"
 #include "../dwarf_parser.h"
 #include "../leb128.h"
 #include "../vector_pair_uint64.h"
-#include "../../optional_uint64_t.h"
 
 /**
  * Reads an index that follows in the given data buffer.
