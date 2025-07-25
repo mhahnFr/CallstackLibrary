@@ -24,10 +24,10 @@
 
 #include "../binaryFile.h"
 #include "../debugInfo.h"
+#include "../function.h"
 #include "../lcs_section.h"
-#include "../vector_function.h"
 
-#include "../dwarf/vector_dwarf_lineInfo.h"
+#include "../dwarf/dwarf_lineInfo.h"
 
 /**
  * This structure represents an ELF binary file.
