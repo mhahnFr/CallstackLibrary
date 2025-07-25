@@ -38,13 +38,6 @@ STATIC_N  = $(CORE_NAME).a
 
 LD = $(CC)
 
-# Assert submodules are available
-ifeq ($(shell ls DC4C),)
-	_  = $(shell git submodule init)
-	_ += $(shell git submodule update)
-endif
-# -------------------------------
-
 # Main sources
 SRCS = \
 	src/loadedLibInfo.c \
@@ -117,9 +110,9 @@ NAME = $(STATIC_N)
 
 ifdef MACOS_ARCH_FLAGS2
 ifeq ($(CXX_FUNCTIONS),true)
-MACOS_ARCH_FLAGS += -mmacosx-version-min=10.15
+	MACOS_ARCH_FLAGS += -mmacosx-version-min=10.15
 else
-MACOS_ARCH_FLAGS += -mmacosx-version-min=10.6
+	MACOS_ARCH_FLAGS += -mmacosx-version-min=10.6
 endif
 endif
 
