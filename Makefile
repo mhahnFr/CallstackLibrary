@@ -19,8 +19,9 @@
 # CallstackLibrary, see the file LICENSE.  If not, see <https://www.gnu.org/licenses/>.
 #
 
-CXX_FUNCTIONS = false
-USE_BUILTINS  = true
+CXX_FUNCTIONS ?= false
+USE_BUILTINS  ?= true
+INSTALL_PATH  ?= /usr/local
 
 MACOS_ARCH_FLAGS =
 
@@ -126,8 +127,6 @@ ifeq ($(CXX_FUNCTIONS),true)
 	CFLAGS += -DCXX_FUNCTIONS
 	DEPS   += $(CXX_DEPS)
 endif
-
-INSTALL_PATH ?= /usr/local
 
 default: $(NAME)
 
