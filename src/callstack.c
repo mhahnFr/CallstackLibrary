@@ -80,6 +80,10 @@ void callstack_copy(struct callstack * self, const struct callstack * other) {
     }
 }
 
+bool callstack_relativize(struct callstack* self, const char** binaryNames) {
+    return false;
+}
+
 struct callstack_frame * callstack_toArray(struct callstack * self) {
     if (self == NULL) return NULL;
 
