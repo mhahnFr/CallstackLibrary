@@ -19,12 +19,15 @@
  * CallstackLibrary, see the file LICENSE.  If not, see <https://www.gnu.org/licenses/>.
  */
 
+#include <dlfcn.h>
+
 #include <stdlib.h>
 #include <string.h>
 
 #include "callstackInternal.h"
 #include "lcs_builtins.h"
 #include "dlMapper/dlMapper.h"
+#include "parser/file/vector_string.h"
 
 struct callstack* callstack_new(void) {
     return callstack_newWithAddress(lcs_returnAddress(0));
@@ -94,6 +97,19 @@ bool callstack_relativize(struct callstack* self, const char** binaryNames) {
         binaryNames[i] = info.first->absoluteFileName;
     }
     return true;
+}
+
+struct callstack_frame* callstack_translateRelative(struct callstack* self, const char** binaryNames) {
+    if (self == NULL) return NULL;
+
+    vector_string_t handles;
+    vector_reserve(&handles, self->backtraceSize);
+    for (size_t i = 0; i < self->backtraceSize; ++i) {
+        vector_push_back(&handles, dlopen(binaryNames[i], RTLD_NOW));
+    }
+    self->frames = callstack_toArray(self); // TODO: Care for the relativization!
+    vector_iterate(&handles, dlclose(element););
+    return self->frames;
 }
 
 struct callstack_frame * callstack_toArray(struct callstack * self) {
