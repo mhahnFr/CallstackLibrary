@@ -207,3 +207,7 @@ bool dlMapper_platform_loadLoadedLibraries(vector_loadedLibInfo_t* libs) {
 uintptr_t dlMapper_platform_relativize(const struct loadedLibInfo* info, const void* address) {
     return (uintptr_t) address - info->relocationOffset;
 }
+
+uintptr_t dlMapper_platform_absolutize(const struct loadedLibInfo* info, const uintptr_t address) {
+    return address + info->relocationOffset;
+}

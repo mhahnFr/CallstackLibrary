@@ -33,5 +33,6 @@
 bool dlMapper_platform_loadLoadedLibraries(vector_loadedLibInfo_t* libs);
 
 uintptr_t dlMapper_platform_relativize(const struct loadedLibInfo* info, const void* address);
+uintptr_t dlMapper_platform_absolutize(const struct loadedLibInfo* info, uintptr_t address);
 
 #endif /* dlMapper_platform_h */
