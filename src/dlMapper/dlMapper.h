@@ -29,6 +29,7 @@
 #include "../loadedLibInfo.h"
 
 typedef_vector_named(loadedLibInfo, struct loadedLibInfo);
+typedef_pair_named(relativeInfo, struct loadedLibInfo*, uintptr_t);
 
 /**
  * @brief Initializes the dlMapper.
@@ -63,6 +64,8 @@ struct loadedLibInfo* dlMapper_libInfoForAddress(const void* address);
  * @return the associated runtime image info or @c NULL if not found
  */
 struct loadedLibInfo* dlMapper_libInfoForFileName(const char* fileName);
+
+pair_relativeInfo_t dlMapper_relativize(const void* address);
 
 /**
  * Returns the loaded runtime image infos.

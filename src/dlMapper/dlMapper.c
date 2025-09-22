@@ -101,6 +101,13 @@ struct loadedLibInfo* dlMapper_libInfoForFileName(const char* fileName) {
     return NULL;
 }
 
+pair_relativeInfo_t dlMapper_relativize(const void* address) {
+    pair_relativeInfo_t toReturn;
+    toReturn.first = dlMapper_libInfoForAddress(address);
+    toReturn.second = toReturn.first == NULL ? 0 : dlMapper_platform_relativize(toReturn.first, address);
+    return toReturn;
+}
+
 const vector_loadedLibInfo_t* dlMapper_getLoadedLibraries(void) {
     return &loadedLibs;
 }
