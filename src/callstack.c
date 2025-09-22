@@ -24,6 +24,7 @@
 
 #include "callstackInternal.h"
 #include "lcs_builtins.h"
+#include "dlMapper/dlMapper.h"
 
 struct callstack* callstack_new(void) {
     return callstack_newWithAddress(lcs_returnAddress(0));
@@ -81,7 +82,16 @@ void callstack_copy(struct callstack * self, const struct callstack * other) {
 }
 
 bool callstack_relativize(struct callstack* self, const char** binaryNames) {
-    return false;
+    dlMapper_init();
+    for (size_t i = 0; i < self->backtraceSize; ++i) {
+        const pair_relativeInfo_t info = dlMapper_relativize(self->backtrace[i]);
+        if (info.first == NULL) {
+            return false;
+        }
+        self->backtrace[i] = (void*) info.second;
+        binaryNames[i] = info.first->absoluteFileName;
+    }
+    return true;
 }
 
 struct callstack_frame * callstack_toArray(struct callstack * self) {
