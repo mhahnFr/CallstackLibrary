@@ -82,6 +82,8 @@ void callstack_copy(struct callstack * self, const struct callstack * other) {
 }
 
 bool callstack_relativize(struct callstack* self, const char** binaryNames) {
+    if (self == NULL) return false;
+
     dlMapper_init();
     for (size_t i = 0; i < self->backtraceSize; ++i) {
         const pair_relativeInfo_t info = dlMapper_relativize(self->backtrace[i]);
