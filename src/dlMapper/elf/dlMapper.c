@@ -203,3 +203,7 @@ bool dlMapper_platform_loadLoadedLibraries(vector_loadedLibInfo_t* libs) {
 
     return dl_iterate_phdr(dlMapper_platform_iterateCallback, &data) == 0;
 }
+
+uintptr_t dlMapper_platform_relativize(const struct loadedLibInfo* info, const void* address) {
+    return (uintptr_t) address - info->relocationOffset;
+}
