@@ -108,6 +108,14 @@ pair_relativeInfo_t dlMapper_relativize(const void* address) {
     return toReturn;
 }
 
+void* dlMapper_absolutize(const void* address, const char* binaryName) {
+    const struct loadedLibInfo* info = dlMapper_libInfoForFileName(binaryName);
+    if (info == NULL) {
+        return NULL;
+    }
+    return (void*) dlMapper_platform_absolutize(info, (uintptr_t) address);
+}
+
 const vector_loadedLibInfo_t* dlMapper_getLoadedLibraries(void) {
     return &loadedLibs;
 }

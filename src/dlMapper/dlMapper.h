@@ -66,6 +66,7 @@ struct loadedLibInfo* dlMapper_libInfoForAddress(const void* address);
 struct loadedLibInfo* dlMapper_libInfoForFileName(const char* fileName);
 
 pair_relativeInfo_t dlMapper_relativize(const void* address);
+void* dlMapper_absolutize(const void* address, const char* binaryName);
 
 /**
  * Returns the loaded runtime image infos.
