@@ -34,7 +34,6 @@
  #endif
 
  #include "callstack_create.h"
-
  #include "callstack_cxx_compat.hpp"
 
 /**
@@ -148,14 +147,13 @@ public:
     }
 
 #if __cplusplus >= 201103
-    inline callstack(callstack&& other) noexcept
-        : self(std::move(other.self)) {
+    inline callstack(callstack&& other) noexcept: self(other.self) {
         callstack_create(other);
     }
 
     inline auto operator=(callstack&& other) noexcept -> callstack& {
         callstack_destroy(*this);
-        self = std::move(other.self);
+        self = other.self;
         callstack_create(other);
         return *this;
     }
