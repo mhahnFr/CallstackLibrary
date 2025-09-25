@@ -102,7 +102,7 @@ bool callstack_relativize(struct callstack* self, const char** binaryNames) {
 struct callstack_frame* callstack_translateRelative(struct callstack* self, const char** binaryNames) {
     if (self == NULL) return NULL;
 
-    vector_string_t handles;
+    vector_string_t handles = vector_initializer;
     vector_reserve(&handles, self->backtraceSize);
     for (size_t i = 0; i < self->backtraceSize; ++i) {
         vector_push_back(&handles, dlopen(binaryNames[i], RTLD_NOW));
