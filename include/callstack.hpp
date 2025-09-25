@@ -28,6 +28,7 @@
  #define __lcs_callstack_hpp
 
  #if __cplusplus >= 201103
+  #include <array>
   #include <system_error>
  #else
   #include <stdexcept>
@@ -157,7 +158,23 @@ public:
         callstack_create(other);
         return *this;
     }
+
+    inline auto relativize() -> std::array<const char*, CALLSTACK_BACKTRACE_SIZE> {
+        auto toReturn = std::array<const char*, CALLSTACK_BACKTRACE_SIZE>();
+        relativize(toReturn.data());
+        return toReturn;
+    }
 #endif
+
+    inline void relativize(const char* binaryNames[CALLSTACK_BACKTRACE_SIZE]) {
+        if (!callstack_relativize(*this, binaryNames)) {
+            throw std::runtime_error("Failed to relativize the callstack!");
+        }
+    }
+
+    inline callstack_frame* absolutize(const char** binaryNames) {
+        return callstack_translateRelative(*this, binaryNames);
+    }
 
     /**
      * Translates this callstack object.
