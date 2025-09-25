@@ -19,18 +19,16 @@
  * CallstackLibrary, see the file LICENSE.  If not, see <https://www.gnu.org/licenses/>.
  */
 
+#include "demangler.h"
+
 #include <stdbool.h>
 #include <string.h>
-
-#include "demangler.h"
 
 #include "swift/demangler.h"
 
 #ifdef CXX_FUNCTIONS
 # include "cxx/demangler.h"
 #endif
-
-bool lcs_activateSwiftDemangler = true;
 
 /**
  * Returns whether the given name is a name mangled in the C++ style.
@@ -55,8 +53,6 @@ static inline bool callstack_demangle_isCxx(const char* name) {
  * @return whether the name is a mangled one
  */
 static inline bool callstack_demangle_isSwift(const char* name) {
-    if (!lcs_activateSwiftDemangler) return false;
-
     return strncmp(name, "_$s", 3) == 0 || strncmp(name, "$s", 2) == 0
         || strncmp(name, "_$e", 3) == 0 || strncmp(name, "$e", 2) == 0
         || strncmp(name, "_$S", 3) == 0 || strncmp(name, "$S", 2) == 0

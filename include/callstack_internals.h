@@ -28,15 +28,6 @@
 extern "C" {
 #endif
 
-#ifdef LCS_ACTIVATE_SWIFT_DEMANGLER_CONTROL
-/**
- * Whether to use the Swift demangler if necessary and available.
- *
- * @since v2.2
- */
-extern bool lcs_activateSwiftDemangler;
-#endif
-
 /**
  * Indicates to the symbolizer whether to make function names human-readable.
  *
