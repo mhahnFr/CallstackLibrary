@@ -520,7 +520,7 @@ void machoFile_destroy(struct machoFile* self) {
 }
 
 void machoFile_delete(struct machoFile* self) {
-    machoFile_destroy(self);
+    BINARY_FILE_SUPER(self, destroy);
     free(self);
 }
 
