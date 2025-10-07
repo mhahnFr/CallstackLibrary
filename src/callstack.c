@@ -112,7 +112,9 @@ struct callstack_frame* callstack_translateRelative(struct callstack* self, cons
         self->backtrace[i] = dlMapper_absolutize(self->backtrace[i], binaryNames[i]);
     }
     self->frames = callstack_toArray(self);
-    vector_iterate(&handles, dlclose((void*) *element););
+    vector_iterate(&handles, if (*element != NULL) {
+        dlclose((void*) *element);
+    });
     return self->frames;
 }
 
