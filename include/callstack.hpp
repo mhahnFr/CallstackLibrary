@@ -79,7 +79,7 @@ public:
      * @param emplace Whether to call @c callstack_emplace().
      * @throws std::system_error if the backtrace could not be created
      */
-    inline explicit callstack(const bool emplace = true) {
+    inline explicit callstack(const bool emplace = true): self() {
         if (emplace) {
             if (!callstack_emplace(*this)) {
                 error();
@@ -99,7 +99,7 @@ public:
      * @param address The stack address after which frames are ignored.
      * @throws std::system_error if the backtrace could not be created
      */
-    inline explicit callstack(void* address) {
+    inline explicit callstack(void* address): self() {
         if (!callstack_emplaceWithAddress(*this, address)) {
             error();
         }
@@ -115,13 +115,13 @@ public:
      * @param length The length of the given backtrace.
      * @throws std::system_error if the trace length is smaller than @c 0
      */
-    inline callstack(void** trace, const int length) {
+    inline callstack(void** trace, const int length): self() {
         if (!callstack_emplaceWithBacktrace(*this, trace, length)) {
             error();
         }
     }
 
-    inline callstack(const callstack& other) LCS_NOEXCEPT {
+    inline callstack(const callstack& other) LCS_NOEXCEPT: self() {
         callstack_create(*this);
         callstack_copy(*this, other);
     }
@@ -131,7 +131,7 @@ public:
      *
      * @param cCallstack The C structure to be copied.
      */
-    inline explicit callstack(const struct_callstack* cCallstack) LCS_NOEXCEPT {
+    inline explicit callstack(const struct_callstack* cCallstack) LCS_NOEXCEPT: self() {
         callstack_create(*this);
         callstack_copy(*this, cCallstack);
     }
