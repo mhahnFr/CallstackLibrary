@@ -464,6 +464,6 @@ void elfFile_destroy(struct elfFile* self) {
 }
 
 void elfFile_delete(struct elfFile* self) {
-    elfFile_destroy(self);
+    BINARY_FILE_SUPER(self, destroy);
     free(self);
 }
