@@ -141,7 +141,7 @@ bool callstack_emplaceWithBacktrace(struct callstack * self,
  */
 void callstack_copy(struct callstack * self, const struct callstack * other);
 
-bool callstack_relativize(struct callstack* self, const char* binaryNames[CALLSTACK_BACKTRACE_SIZE]);
+bool callstack_relativize(struct callstack* self, const char** binaryNames);
 
 struct callstack_frame* callstack_translateRelative(struct callstack* self, const char** binaryNames);
 
