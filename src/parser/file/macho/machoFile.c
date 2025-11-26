@@ -153,7 +153,7 @@ static inline optional_debugInfo_t machoFile_getDebugInfo(struct machoFile* self
                                  + (self->_.inMemory ? self->text_vmaddr : self->addressOffset);
 
     const pair_funcFile_t tmp = (pair_funcFile_t) { .first.startAddress = searchAddress };
-    const pair_funcFile_t* closest = lower_bound(&tmp,
+    const pair_funcFile_t* closest = upper_bound(&tmp,
                                                  self->functions.content,
                                                  self->functions.count,
                                                  sizeof(pair_funcFile_t),
