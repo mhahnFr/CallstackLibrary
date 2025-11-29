@@ -140,8 +140,33 @@ bool callstack_emplaceWithBacktrace(struct callstack * self,
  */
 void callstack_copy(struct callstack * self, const struct callstack * other);
 
+/**
+ * @brief Relativizes the given callstack object.
+ *
+ * Upon successful return of the function, the address within the callstack
+ * object have become offsets into the runtime image they belong to. The names
+ * of these runtime images ares stored within the given string array.
+ *
+ * @param self the callstack to be relativized
+ * @param binaryNames an array capable to hold the same number of strings as
+ * the amount of entries within the given callstack object
+ * @return whether the given callstack was relativized successfully
+ * @since v2.3
+ */
 bool callstack_relativize(struct callstack* self, const char** binaryNames);
 
+/**
+ * @brief Translates the given relativized callstack object, using the provided array
+ * of binary file names.
+ *
+ * The given string array must hold at least the same amount of binary file
+ * names as the amount of entries within the given callstack object.
+ *
+ * @param self the relativized callstack to be translated
+ * @param binaryNames the names of the binary images the offsets are pointing into
+ * @return the translated callstack frames
+ * @since v2.3
+ */
 struct callstack_frame* callstack_translateRelative(struct callstack* self, const char** binaryNames);
 
 /**
