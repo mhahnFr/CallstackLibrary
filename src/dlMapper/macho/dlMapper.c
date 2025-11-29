@@ -35,10 +35,15 @@
 typedef_pair_named(machoInfo, const void*, uintptr_t);
 typedef_pair_named(machoDef, pair_address_t, uintptr_t);
 
+/**
+ * Generates an implementation for a Mach-O function loader.
+ *
+ * @param bits the amount of bits the implementation should be generated for
+ * @param suffix the optional suffix for the native data structures
+ */
 #define dlMapper_platform_loadMachOFunc(bits, suffix)                                 \
 static inline pair_machoInfo_t dlMapper_platform_loadMachO##bits(                     \
-    const struct mach_header##suffix* header, const bool bytesSwapped)                \
-{                                                                                     \
+    const struct mach_header##suffix* header, const bool bytesSwapped) {              \
     uint##bits##_t vmsize = 0, vmaddr = 0;                                            \
     struct load_command* lc = (void*) header + sizeof(struct mach_header##suffix);    \
     for (uint32_t i = 0; i < macho_maybeSwap(32, bytesSwapped, header->ncmds); ++i) { \
