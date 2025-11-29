@@ -122,6 +122,8 @@ static inline pair_address_t dlMapper_platform_loadELF(const void* baseAddress) 
     switch (header->e_ident[EI_CLASS]) {
         case ELFCLASS32: return dlMapper_platform_loadELF32(baseAddress, header->e_ident[EI_DATA] == ELFDATA2LSB);
         case ELFCLASS64: return dlMapper_platform_loadELF64(baseAddress, header->e_ident[EI_DATA] == ELFDATA2LSB);
+
+        default: break;
     }
 
     return (pair_address_t) { NULL, NULL };

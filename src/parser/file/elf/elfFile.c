@@ -265,6 +265,8 @@ static inline bool elfFile_parseFile(struct elfFile* self, void* buffer) {
     switch (e_ident[EI_CLASS]) {
         case ELFCLASS32: success = elfFile_parseFile32(self, buffer, e_ident[EI_DATA] == ELFDATA2LSB); break;
         case ELFCLASS64: success = elfFile_parseFile64(self, buffer, e_ident[EI_DATA] == ELFDATA2LSB); break;
+
+        default: break;
     }
 
     if (success && self->debugLine.size > 0) {
