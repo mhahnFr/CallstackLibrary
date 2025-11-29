@@ -23,7 +23,6 @@
 #define elfFile_h
 
 #include "../binaryFile.h"
-#include "../debugInfo.h"
 #include "../function.h"
 #include "../lcs_section.h"
 

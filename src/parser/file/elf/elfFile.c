@@ -29,6 +29,7 @@
 #include "elfFile.h"
 
 #include "../bounds.h"
+#include "../debugInfo.h"
 #include "../loader.h"
 #include "../dwarf/dwarf_parser.h"
 
