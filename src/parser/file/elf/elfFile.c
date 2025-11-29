@@ -349,7 +349,7 @@ bool elfFile_parse(struct elfFile* self) {
  * @param address the address to be translated
  * @return the optionally available debug information
  */
-static inline optional_debugInfo_t elfFile_getDebugInfo(struct elfFile* self, const void* address) {
+static inline optional_debugInfo_t elfFile_getDebugInfo(const struct elfFile* self, const void* address) {
     optional_debugInfo_t toReturn = { .has_value = false };
 
     const uint64_t translated = (uintptr_t) address - self->_.relocationOffset;

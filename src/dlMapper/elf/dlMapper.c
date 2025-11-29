@@ -135,7 +135,7 @@ static inline pair_address_t dlMapper_platform_loadELF(const void* baseAddress) 
  * @param info the runtime image info
  * @return the address the runtime image starts at
  */
-static inline void* dlMapper_platform_loadELFLoadedAddress(struct dl_phdr_info* info) {
+static inline void* dlMapper_platform_loadELFLoadedAddress(const struct dl_phdr_info* info) {
     for (unsigned i = 0; i < info->dlpi_phnum; ++i) {
         if (info->dlpi_phdr[i].p_type == PT_LOAD) {
             return ((void*) info->dlpi_addr) + info->dlpi_phdr[i].p_vaddr;

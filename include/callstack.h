@@ -80,7 +80,7 @@ struct callstack * callstack_new(void);
  * @param address The stack address after which frames are ignored.
  * @return A newly allocated callstack object.
  */
-struct callstack * callstack_newWithAddress(void * address);
+struct callstack* callstack_newWithAddress(const void* address);
 
 /**
  * @brief Constructs the given callstack object.
@@ -110,7 +110,7 @@ bool callstack_emplace(struct callstack * self);
  * @param address The stack address after which frames are ignored.
  * @return Whether the given callstack object was constructed successfully.
  */
-bool callstack_emplaceWithAddress(struct callstack * self, void * address);
+bool callstack_emplaceWithAddress(struct callstack* self, const void* address);
 
 /**
  * @brief Constructs the given callstack object.

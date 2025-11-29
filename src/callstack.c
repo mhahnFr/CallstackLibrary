@@ -29,7 +29,7 @@ struct callstack* callstack_new(void) {
     return callstack_newWithAddress(lcs_returnAddress(0));
 }
 
-struct callstack * callstack_newWithAddress(void * address) {
+struct callstack* callstack_newWithAddress(const void* address) {
     void * trace[CALLSTACK_BACKTRACE_SIZE];
     const int size = callstack_backtrace(trace, CALLSTACK_BACKTRACE_SIZE, address);
     if (size < 0) return NULL;
@@ -45,7 +45,7 @@ bool callstack_emplace(struct callstack* self) {
     return callstack_emplaceWithAddress(self, lcs_returnAddress(0));
 }
 
-bool callstack_emplaceWithAddress(struct callstack * self, void * address) {
+bool callstack_emplaceWithAddress(struct callstack* self, const void* address) {
     void * trace[CALLSTACK_BACKTRACE_SIZE];
     const int size = callstack_backtrace(trace, CALLSTACK_BACKTRACE_SIZE, address);
     return callstack_emplaceWithBacktrace(self, trace, size);
