@@ -351,7 +351,7 @@ static inline optional_debugInfo_t elfFile_getDebugInfo(struct elfFile* self, co
 
     const uint64_t translated = (uintptr_t) address - self->_.relocationOffset;
     const struct function tmp = (struct function) { .startAddress = translated };
-    const struct function* closest = lower_bound(&tmp,
+    const struct function* closest = upper_bound(&tmp,
                                                  self->functions.content,
                                                  self->functions.count,
                                                  sizeof(struct function),
