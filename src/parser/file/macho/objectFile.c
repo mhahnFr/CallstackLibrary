@@ -229,6 +229,12 @@ static inline void objectFile_handleSection(struct objectFile* self,
     }
 }
 
+/**
+ * Generates an implementation for an object file segment handling parsing function.
+ *
+ * @param bits the amount of bits the implementation should be generated for
+ * @param suffix the optional suffix for the native data structures
+ */
 #define objectFile_handleSegmentFunc(bits, suffix)                                                 \
 static inline bool objectFile_handleSegment##bits(struct objectFile*         self,                 \
                                                   struct segment_command##suffix* command,         \
@@ -263,7 +269,13 @@ static inline void objectFile_addFunctionCallback(struct pair_funcFile f, va_lis
     vector_push_back(&self->ownFunctions, f.first);
 }
 
-#define objectFile_parseMachOImplFunc(bits, suffix)\
+/**
+ * Generates an implementation for actually parsing Mach-O object files.
+ *
+ * @param bits the amount of bits the implementation should be generated for
+ * @param suffix the optional suffix for the native data structures
+ */
+#define objectFile_parseMachOImplFunc(bits, suffix)                                                   \
 static inline bool objectFile_parseMachOImpl##bits(struct objectFile* self,                           \
                                                    void*              baseAddress,                    \
                                                    const bool         bytesSwapped) {                 \
