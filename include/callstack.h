@@ -23,7 +23,6 @@
 #define __lcs_callstack_h
 
 #include <stdbool.h>
-#include <stddef.h>
 
 #include "callstack_defs.h"
 #include "callstack_frame.h"

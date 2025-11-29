@@ -23,7 +23,6 @@
 #define loadedLibInfo_h
 
 #include <stdbool.h>
-#include <stddef.h>
 
 #include "parser/file/binaryFile.h"
 
