@@ -32,7 +32,26 @@
  */
 bool dlMapper_platform_loadLoadedLibraries(vector_loadedLibInfo_t* libs);
 
+/**
+ * @brief Relativizes the given address to the given runtime image info.
+ *
+ * The return value is the offset into the represented runtime image.
+ *
+ * @param info the runtime image info to which the given address should be found in
+ * @param address the address to be relativized
+ * @return the offset into the given runtime image
+ */
 uintptr_t dlMapper_platform_relativize(const struct loadedLibInfo* info, const void* address);
+
+/**
+ * @brief Absolutizes the given address offset.
+ *
+ * The address offset is interpreted as relative to the given runtime image.
+ *
+ * @param info the runtime image info used as reference point
+ * @param address the address offset into the given runtime image
+ * @return the global address within the represented runtime image
+ */
 uintptr_t dlMapper_platform_absolutize(const struct loadedLibInfo* info, uintptr_t address);
 
 #endif /* dlMapper_platform_h */
