@@ -38,7 +38,7 @@ void callstack_createWithBacktrace(struct callstack * self,
     self->backtraceSize = traceLength;
 }
 
-int callstack_backtrace(void* buffer[], const int bufferSize, void* address) {
+int callstack_backtrace(void* buffer[], const int bufferSize, const void* address) {
     const int frames = backtrace(buffer, bufferSize);
     int i = 0;
 

@@ -19,7 +19,6 @@
  * CallstackLibrary, see the file LICENSE.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-#include <stddef.h>
 #include <sys/stat.h>
 
 #include "binaryFile.h"

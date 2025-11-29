@@ -122,6 +122,8 @@ static inline pair_address_t dlMapper_platform_loadELF(const void* baseAddress) 
     switch (header->e_ident[EI_CLASS]) {
         case ELFCLASS32: return dlMapper_platform_loadELF32(baseAddress, header->e_ident[EI_DATA] == ELFDATA2LSB);
         case ELFCLASS64: return dlMapper_platform_loadELF64(baseAddress, header->e_ident[EI_DATA] == ELFDATA2LSB);
+
+        default: break;
     }
 
     return (pair_address_t) { NULL, NULL };
@@ -133,7 +135,7 @@ static inline pair_address_t dlMapper_platform_loadELF(const void* baseAddress) 
  * @param info the runtime image info
  * @return the address the runtime image starts at
  */
-static inline void* dlMapper_platform_loadELFLoadedAddress(struct dl_phdr_info* info) {
+static inline void* dlMapper_platform_loadELFLoadedAddress(const struct dl_phdr_info* info) {
     for (unsigned i = 0; i < info->dlpi_phnum; ++i) {
         if (info->dlpi_phdr[i].p_type == PT_LOAD) {
             return ((void*) info->dlpi_addr) + info->dlpi_phdr[i].p_vaddr;
@@ -159,18 +161,18 @@ static inline int dlMapper_platform_iterateCallback(struct dl_phdr_info* info, c
     const char* fileName = info->dlpi_name;
     bool empty = *fileName == '\0';
     if (empty) {
-        char* newFileName = dlMapper_platform_loadExecutableName();
+        const char* newFileName = dlMapper_platform_loadExecutableName();
         if (newFileName != NULL) {
             fileName = newFileName;
         } else {
             empty = false;
         }
     }
-    void* loadedAddress = dlMapper_platform_loadELFLoadedAddress(info);
+    const void* loadedAddress = dlMapper_platform_loadELFLoadedAddress(info);
     if (loadedAddress == NULL) {
         return 0;
     }
-    pair_address_t addresses = dlMapper_platform_loadELF(loadedAddress);
+    const pair_address_t addresses = dlMapper_platform_loadELF(loadedAddress);
     vector_push_back(data->libs, ((struct loadedLibInfo) {
         addresses.first,
         addresses.second,
