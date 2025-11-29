@@ -143,9 +143,9 @@ void callstack_copy(struct callstack * self, const struct callstack * other);
 /**
  * @brief Relativizes the given callstack object.
  *
- * Upon successful return of the function, the address within the callstack
+ * Upon successful return of the function, the addresses within the callstack
  * object have become offsets into the runtime image they belong to. The names
- * of these runtime images ares stored within the given string array.
+ * of these runtime images are stored within the given string array.
  *
  * @param self the callstack to be relativized
  * @param binaryNames an array capable to hold the same number of strings as
