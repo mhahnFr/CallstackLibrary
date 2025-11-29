@@ -22,7 +22,6 @@
 #include <dlfcn.h>
 
 #include <stdlib.h>
-#include <string.h>
 
 #include "callstackInternal.h"
 #include "lcs_builtins.h"
