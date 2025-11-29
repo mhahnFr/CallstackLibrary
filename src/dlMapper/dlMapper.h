@@ -65,7 +65,22 @@ struct loadedLibInfo* dlMapper_libInfoForAddress(const void* address);
  */
 struct loadedLibInfo* dlMapper_libInfoForFileName(const char* fileName);
 
+/**
+ * Relativizes the given address.
+ *
+ * @param address the global address to be relativized
+ * @return the runtime image info to which the address belongs to and the offset into that image
+ */
 pair_relativeInfo_t dlMapper_relativize(const void* address);
+
+/**
+ * Absolutizes the given address, interpreting it as offset into the runtime image
+ * of the given name.
+ *
+ * @param address the address offset to be absolutized
+ * @param binaryName the name of the runtime image the address offset belongs to
+ * @return the absolute address into the represented runtime image
+ */
 void* dlMapper_absolutize(const void* address, const char* binaryName);
 
 /**
