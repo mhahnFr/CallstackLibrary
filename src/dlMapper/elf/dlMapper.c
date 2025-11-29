@@ -161,18 +161,18 @@ static inline int dlMapper_platform_iterateCallback(struct dl_phdr_info* info, c
     const char* fileName = info->dlpi_name;
     bool empty = *fileName == '\0';
     if (empty) {
-        char* newFileName = dlMapper_platform_loadExecutableName();
+        const char* newFileName = dlMapper_platform_loadExecutableName();
         if (newFileName != NULL) {
             fileName = newFileName;
         } else {
             empty = false;
         }
     }
-    void* loadedAddress = dlMapper_platform_loadELFLoadedAddress(info);
+    const void* loadedAddress = dlMapper_platform_loadELFLoadedAddress(info);
     if (loadedAddress == NULL) {
         return 0;
     }
-    pair_address_t addresses = dlMapper_platform_loadELF(loadedAddress);
+    const pair_address_t addresses = dlMapper_platform_loadELF(loadedAddress);
     vector_push_back(data->libs, ((struct loadedLibInfo) {
         addresses.first,
         addresses.second,

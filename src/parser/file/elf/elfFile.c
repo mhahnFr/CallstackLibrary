@@ -261,7 +261,7 @@ elfFile_parseFileImpl(64)
  */
 static inline bool elfFile_parseFile(struct elfFile* self, void* buffer) {
     bool success = false;
-    unsigned char* e_ident = buffer;
+    const unsigned char* e_ident = buffer;
     switch (e_ident[EI_CLASS]) {
         case ELFCLASS32: success = elfFile_parseFile32(self, buffer, e_ident[EI_DATA] == ELFDATA2LSB); break;
         case ELFCLASS64: success = elfFile_parseFile64(self, buffer, e_ident[EI_DATA] == ELFDATA2LSB); break;
@@ -435,7 +435,7 @@ bool elfFile_addr2String(struct elfFile* self, const void* address, struct calls
         return false;
     }
 
-    optional_debugInfo_t result = elfFile_getDebugInfo(self, address);
+    const optional_debugInfo_t result = elfFile_getDebugInfo(self, address);
     if (result.has_value) {
         if (result.value.function.linkedName == NULL) {
             return false;
