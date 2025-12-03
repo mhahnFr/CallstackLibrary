@@ -204,8 +204,8 @@ static inline optional_debugInfo_t machoFile_getDebugInfo(struct machoFile* self
 /**
  * Generates an implementation for the segment handling of the Mach-O files.
  *
- * @param type the segment type to be used
  * @param bits the amount of bits the implementation should be generated for
+ * @param suffix the optional suffix to be used for the native types
  */
 #define machoFile_handleSegment(bits, suffix)                                                                      \
 static inline bool machoFile_handleSegment##bits(struct machoFile* self, const void* buffer,                       \
@@ -326,8 +326,7 @@ static inline void machoFile_fixupFunctions(struct machoFile* self) {
  * Generates an implementation to parse Mach-O files.
  *
  * @param bits the amount of bits the implementation should handle
- * @param type the Mach-O header type
- * @param segMacro the macro for segments
+ * @param suffix the optional suffix to be used for the native data structures
  */
 #define machoFile_parseFileImpl(bits, suffix)                                                                          \
 static inline bool machoFile_parseFileImpl##bits(struct machoFile* self, const void* baseAddress, bool bytesSwapped) { \
