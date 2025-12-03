@@ -19,11 +19,8 @@
  * CallstackLibrary, see the file LICENSE.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-#include <string.h>
-
 #include <callstack_frame.h>
-
-#include "misc/string_utils.h"
+#include <misc/string_utils.h>
 
 struct callstack_frame* callstack_frame_copy(const struct callstack_frame* self) {
     struct callstack_frame * toReturn = callstack_frame_new();

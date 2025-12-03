@@ -43,7 +43,7 @@ SRCS = \
 	src/loadedLibInfo.c \
 	src/callstackInternal.c \
 	src/callstack_internals.c \
-	src/callstack_frame.c \
+	src/callstackFrame/callstack_frame.c \
 	src/callstack.c \
 	src/utils/file/pathUtils.c \
 	src/regions/regions.c \
