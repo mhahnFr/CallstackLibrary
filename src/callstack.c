@@ -126,24 +126,22 @@ struct callstack_frame * callstack_toArray(struct callstack * self) {
     return self->frames;
 }
 
-struct callstack_frame * callstack_getBinaries(struct callstack * self) {
+static inline struct callstack_frame* callstack_getBinariesShared(struct callstack* self, const bool useCache) {
     if (self == NULL) return NULL;
-    
+
     if ((self->translationStatus == NONE || self->translationStatus == FAILED)
-        && callstack_translateBinaries(self, false) == FAILED) {
+        && callstack_translateBinaries(self, useCache) == FAILED) {
         return NULL;
     }
     return self->frames;
 }
 
-struct callstack_frame* callstack_getBinariesCached(struct callstack* self) {
-    if (self == NULL) return NULL;
+struct callstack_frame* callstack_getBinaries(struct callstack* self) {
+    return callstack_getBinariesShared(self, false);
+}
 
-    if ((self->translationStatus == NONE || self->translationStatus == FAILED)
-        && callstack_translateBinaries(self, true) == FAILED) {
-        return NULL;
-    }
-    return self->frames;
+struct callstack_frame* callstack_getBinariesCached(struct callstack* self) {
+    return callstack_getBinariesShared(self, true);
 }
 
 void callstack_destroy(struct callstack * self) {
