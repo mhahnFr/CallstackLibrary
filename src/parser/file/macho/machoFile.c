@@ -201,20 +201,15 @@ static inline optional_debugInfo_t machoFile_getDebugInfo(struct machoFile* self
     return info;
 }
 
-/** Represents the 32 bit version of the Mach-O section type. */
-#define MACHO_SECTION32 section
-/** Represents the 64 bit version of the Mach-O section type. */
-#define MACHO_SECTION64 section_64
-
 /**
  * Generates an implementation for the segment handling of the Mach-O files.
  *
  * @param type the segment type to be used
  * @param bits the amount of bits the implementation should be generated for
  */
-#define machoFile_handleSegment(type, bits)                                                                        \
+#define machoFile_handleSegment(bits, suffix)                                                                      \
 static inline bool machoFile_handleSegment##bits(struct machoFile* self, const void* buffer,                       \
-                                                 type* segment, bool bytesSwapped) {                               \
+                                                 struct segment_command##suffix* segment, bool bytesSwapped) {     \
     if (strcmp(segment->segname, SEG_PAGEZERO) == 0) {                                                             \
         self->addressOffset = macho_maybeSwap(bits, bytesSwapped, segment->vmaddr)                                 \
                             + macho_maybeSwap(bits, bytesSwapped, segment->vmsize);                                \
@@ -231,8 +226,8 @@ static inline bool machoFile_handleSegment##bits(struct machoFile* self, const v
                                                                                                                    \
     optional_uint64_t size = { .has_value = false, .value = 0 };                                                   \
     for (uint64_t i = 0; i < segment->nsects; ++i) {                                                               \
-        struct MACHO_SECTION##bits* section = ((void*) segment) + sizeof(*segment)                                 \
-                                            + i * sizeof(struct MACHO_SECTION##bits);                              \
+        struct section##suffix* section = ((void*) segment) + sizeof(*segment)                                     \
+                                            + i * sizeof(struct section##suffix);                                  \
         switch (section->flags & SECTION_TYPE) {                                                                   \
             case S_THREAD_LOCAL_ZEROFILL:                                                                          \
             case S_THREAD_LOCAL_REGULAR:                                                                           \
@@ -258,8 +253,8 @@ static inline bool machoFile_handleSegment##bits(struct machoFile* self, const v
     return true;                                                                                                   \
 }
 
-machoFile_handleSegment(struct segment_command,    32)
-machoFile_handleSegment(struct segment_command_64, 64)
+machoFile_handleSegment(32,)
+machoFile_handleSegment(64, _64)
 
 /**
  * Adds the given function / object file pair to the Mach-O file abstraction
@@ -334,16 +329,16 @@ static inline void machoFile_fixupFunctions(struct machoFile* self) {
  * @param type the Mach-O header type
  * @param segMacro the macro for segments
  */
-#define machoFile_parseFileImpl(bits, type, segMacro)                                                                  \
+#define machoFile_parseFileImpl(bits, suffix)                                                                          \
 static inline bool machoFile_parseFileImpl##bits(struct machoFile* self, const void* baseAddress, bool bytesSwapped) { \
-    const struct type*   header = baseAddress;                                                                         \
-    struct load_command* lc     = (void *) header + sizeof(struct type);                                               \
+    const struct mach_header##suffix*   header = baseAddress;                                                          \
+    struct load_command* lc     = (void *) header + sizeof(*header);                                                   \
     const  uint32_t      ncmds  = macho_maybeSwap(32, bytesSwapped, header->ncmds);                                    \
                                                                                                                        \
     for (size_t i = 0; i < ncmds; ++i) {                                                                               \
         bool result = true;                                                                                            \
         switch (macho_maybeSwap(32, bytesSwapped, lc->cmd)) {                                                          \
-            case segMacro:                                                                                             \
+            case LC_SEGMENT##suffix:                                                                                   \
                 result = machoFile_handleSegment##bits(self, baseAddress, (void *) lc, bytesSwapped);                  \
                 break;                                                                                                 \
                                                                                                                        \
@@ -381,8 +376,8 @@ static inline bool machoFile_parseFileImpl##bits(struct machoFile* self, const v
     return true;                                                                                                       \
 }
 
-machoFile_parseFileImpl(32, mach_header,    LC_SEGMENT)
-machoFile_parseFileImpl(64, mach_header_64, LC_SEGMENT_64)
+machoFile_parseFileImpl(32,)
+machoFile_parseFileImpl(64, _64)
 
 /**
  * Parses the given Mach-O file buffer into the given Mach-O file abstraction
