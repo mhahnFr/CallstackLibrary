@@ -24,14 +24,21 @@
 #include "../callstackFrame/callstackFrameInternal.h"
 #include "../dlMapper/dlMapper.h"
 
-struct callstack_frame symbols_getInfo(const void* address) {
+static inline struct callstack_frame symbols_getInfoShared(const void* address, const bool useCache) {
     struct callstack_frame toReturn;
     dlMapper_init();
-    callstackFrame_translateBinary(&toReturn, address, false);
+    callstackFrame_translateBinary(&toReturn, address, useCache);
     struct loadedLibInfo* info = toReturn.reserved;
     if (loadedLibInfo_prepare(info)) {
         binaryFile_addr2String(info->associated, address, &toReturn);
     }
-
     return toReturn;
+}
+
+struct callstack_frame symbols_getInfo(const void* address) {
+    return symbols_getInfoShared(address, false);
+}
+
+struct callstack_frame symbols_getInfoCached(const void* address) {
+    return symbols_getInfoShared(address, true);
 }
