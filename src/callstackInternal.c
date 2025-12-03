@@ -27,6 +27,7 @@
 
 #include "callstackInternal.h"
 
+#include "callstackFrame/callstackFrameInternal.h"
 #include "dlMapper/dlMapper.h"
 #include "parser/callstack_parser.h"
 
@@ -74,16 +75,7 @@ enum callstack_type callstack_translateBinaries(struct callstack* self, const bo
 
     dlMapper_init();
     for (size_t i = 0; i < self->backtraceSize; ++i) {
-        struct callstack_frame* element = &self->frames[i];
-
-        callstack_frame_create(element);
-
-        struct loadedLibInfo* info = dlMapper_libInfoForAddress(self->backtrace[i]);
-        element->binaryFile = info == NULL ? NULL : useCache ? info->absoluteFileName : strdup(info->absoluteFileName);
-        element->binaryFileRelative = info == NULL ? NULL : useCache ? info->relativeFileName : strdup(info->relativeFileName);
-        element->binaryFileIsSelf = info == NULL ? false : info->isSelf;
-        element->reserved = info;
-        element->reserved1 = useCache;
+        callstackFrame_translateBinary(&self->frames[i], self->backtrace[i], useCache);
     }
     return TRANSLATED;
 }
