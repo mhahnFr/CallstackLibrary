@@ -60,7 +60,8 @@ SRCS = \
 	src/parser/demangling/demangler.c \
 	src/parser/demangling/swift/demangler.c \
 	src/functionInfo/functionInfo.c \
-	src/dlMapper/dlMapper.c
+	src/dlMapper/dlMapper.c \
+	src/symbols/symbolInfo.c
 
 OBJS = $(patsubst %.c, %.o, $(SRCS))
 DEPS = $(patsubst %.c, %.d, $(SRCS))
