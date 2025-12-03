@@ -107,6 +107,7 @@ static inline void dlMapper_platform_pushLoadedLib(vector_loadedLibInfo_t*   lib
                                                    const struct mach_header* header,
                                                    const void*               inside) {
     const pair_machoDef_t addresses = dlMapper_platform_loadMachO(header, fileName);
+    // TODO: Support multiple slices for each loaded library
     vector_push_back(libs, ((struct loadedLibInfo) {
         addresses.first.first,
         addresses.first.second,
