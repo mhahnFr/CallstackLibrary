@@ -20,13 +20,12 @@
  */
 
 #include <dlfcn.h>
-
 #include <stdlib.h>
+#include <misc/string_utils.h>
 
 #include "callstackInternal.h"
 #include "lcs_builtins.h"
 #include "dlMapper/dlMapper.h"
-#include "parser/file/vector_string.h"
 
 struct callstack* callstack_new(void) {
     return callstack_newWithAddress(lcs_returnAddress(0));
