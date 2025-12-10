@@ -28,8 +28,11 @@
 #include <DC4C/pair.h>
 #include <DC4C/vector.h>
 
+// uint64_t containers
 typedef_optional_named(uint64, uint64_t);
 typedef_pair_named(uint64, uint64_t, uint64_t);
+
+typedef_vector_named(uint64, uint64_t);
 typedef_vector_named(pair_uint64, struct pair_uint64);
 
 #endif /* utils_misc_numberContainers_h */
