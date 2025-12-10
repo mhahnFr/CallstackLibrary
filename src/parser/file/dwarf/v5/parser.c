@@ -24,7 +24,6 @@
 #include <misc/numberContainers.h>
 
 #include "definitions.h"
-#include "optional_vector_fileAttribute.h"
 #include "../dwarf_parser.h"
 #include "../leb128.h"
 

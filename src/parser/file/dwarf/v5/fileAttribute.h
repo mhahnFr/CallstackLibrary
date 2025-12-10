@@ -23,6 +23,7 @@
 #define fileAttribute_h
 
 #include <stdint.h>
+#include <DC4C/optional.h>
 #include <DC4C/vector.h>
 
 /**
@@ -44,5 +45,6 @@ struct fileAttribute {
 };
 
 typedef_vector_named(fileAttribute, struct fileAttribute);
+typedef_optional_named(vector_fileAttribute, struct vector_fileAttribute);
 
 #endif /* fileAttribute_h */
