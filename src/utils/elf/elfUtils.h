@@ -19,8 +19,8 @@
  * CallstackLibrary, see the file LICENSE.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-#ifndef __utils_elf_elfUtils_h
-#define __utils_elf_elfUtils_h
+#ifndef utils_elf_elfUtils_h
+#define utils_elf_elfUtils_h
 
 #include <endian.h>
 
@@ -33,4 +33,4 @@
  */
 #define ELF_TO_HOST(bits, number, littleEndian) (littleEndian ? le##bits##toh(number) : be##bits##toh(number))
 
-#endif /* __utils_elf_elfUtils_h */
+#endif /* utils_elf_elfUtils_h */
