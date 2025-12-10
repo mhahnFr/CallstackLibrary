@@ -35,4 +35,7 @@ typedef_pair_named(uint64, uint64_t, uint64_t);
 typedef_vector_named(uint64, uint64_t);
 typedef_vector_named(pair_uint64, struct pair_uint64);
 
+// uint8_t containers
+typedef_vector_named(uint8, uint8_t);
+
 #endif /* utils_misc_numberContainers_h */

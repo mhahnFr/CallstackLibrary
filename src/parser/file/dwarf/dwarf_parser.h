@@ -24,11 +24,9 @@
 
 #include <stdbool.h>
 #include <stdint.h>
-
 #include <misc/numberContainers.h>
 
 #include "dwarf_lineInfo.h"
-#include "vector_uint8.h"
 #include "../lcs_section.h"
 #include "v4/parser.h"
 #include "v5/parser.h"
