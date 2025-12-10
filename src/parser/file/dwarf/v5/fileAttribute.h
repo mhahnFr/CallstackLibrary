@@ -23,6 +23,7 @@
 #define fileAttribute_h
 
 #include <stdint.h>
+#include <DC4C/vector.h>
 
 /**
  * @brief This structure represents a DWARF 5 file attribute.
@@ -41,5 +42,7 @@ struct fileAttribute {
     /** The MD5 hash of the file entity.        */
     uint8_t* md5;
 };
+
+typedef_vector_named(fileAttribute, struct fileAttribute);
 
 #endif /* fileAttribute_h */
