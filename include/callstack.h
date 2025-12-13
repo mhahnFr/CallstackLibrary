@@ -24,13 +24,14 @@
 
 #include <stdbool.h>
 
-#include "callstack_defs.h"
 #include "callstack_frame.h"
 #include "callstack_type.h"
 
 #ifdef __cplusplus
 extern "C" {
 #endif
+
+#define CALLSTACK_BACKTRACE_SIZE 128
 
 /**
  * A structure representing a callstack.
