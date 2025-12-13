@@ -57,6 +57,8 @@ struct callstack {
     void *  backtrace[CALLSTACK_BACKTRACE_SIZE];
 };
 
+#define CALLSTACK_INITIALIZER { NONE, 0, NULL, 0, {} }
+
 /**
  * @brief Creates a callstack of the calling function.
  *
