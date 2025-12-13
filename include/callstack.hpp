@@ -20,19 +20,19 @@
  */
 
 #ifndef __lcs_callstack_h
- #warning Wrong inclusion of "callstack.hpp" redirected to '#include "callstack.h"'!
- #include "callstack.h"
+# warning Wrong inclusion of "callstack.hpp" redirected to '#include "callstack.h"'!
+# include "callstack.h"
 
 #else
- #ifndef __lcs_callstack_hpp
- #define __lcs_callstack_hpp
+# ifndef __lcs_callstack_hpp
+# define __lcs_callstack_hpp
 
- #if __cplusplus >= 201103
-  #include <array>
-  #include <system_error>
- #else
-  #include <stdexcept>
- #endif
+# if __cplusplus >= 201103
+#  include <array>
+#  include <system_error>
+# else
+#  include <stdexcept>
+# endif
 
 # include "callstack_cxx_compat.hpp"
 
@@ -96,7 +96,7 @@ public:
      * @param address The stack address after which frames are ignored.
      * @throws std::system_error if the backtrace could not be created
      */
-    inline explicit callstack(void* address): self(CALLSTACK_INITIALIZER) {
+    inline explicit callstack(const void* address): self(CALLSTACK_INITIALIZER) {
         if (!callstack_emplaceWithAddress(*this, address)) {
             error();
         }
