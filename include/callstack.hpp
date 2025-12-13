@@ -34,8 +34,7 @@
   #include <stdexcept>
  #endif
 
- #include "callstack_create.h"
- #include "callstack_cxx_compat.hpp"
+# include "callstack_cxx_compat.hpp"
 
 /**
  * This namespace contains a wrapper class for the @code struct callstack@endcode.
@@ -79,13 +78,11 @@ public:
      * @param emplace Whether to call @c callstack_emplace().
      * @throws std::system_error if the backtrace could not be created
      */
-    inline explicit callstack(const bool emplace = true): self() {
+    inline explicit callstack(const bool emplace = true): self(CALLSTACK_INITIALIZER) {
         if (emplace) {
             if (!callstack_emplace(*this)) {
                 error();
             }
-        } else {
-            callstack_create(*this);
         }
     }
 
@@ -99,7 +96,7 @@ public:
      * @param address The stack address after which frames are ignored.
      * @throws std::system_error if the backtrace could not be created
      */
-    inline explicit callstack(void* address): self() {
+    inline explicit callstack(void* address): self(CALLSTACK_INITIALIZER) {
         if (!callstack_emplaceWithAddress(*this, address)) {
             error();
         }
@@ -115,14 +112,13 @@ public:
      * @param length The length of the given backtrace.
      * @throws std::system_error if the trace length is smaller than @c 0
      */
-    inline callstack(void** trace, const int length): self() {
+    inline callstack(void** trace, const int length): self(CALLSTACK_INITIALIZER) {
         if (!callstack_emplaceWithBacktrace(*this, trace, length)) {
             error();
         }
     }
 
-    inline callstack(const callstack& other) LCS_NOEXCEPT: self() {
-        callstack_create(*this);
+    inline callstack(const callstack& other) LCS_NOEXCEPT: self(CALLSTACK_INITIALIZER) {
         callstack_copy(*this, other);
     }
 
@@ -131,8 +127,7 @@ public:
      *
      * @param cCallstack The C structure to be copied.
      */
-    inline explicit callstack(const struct_callstack* cCallstack) LCS_NOEXCEPT: self() {
-        callstack_create(*this);
+    inline explicit callstack(const struct_callstack* cCallstack) LCS_NOEXCEPT: self(CALLSTACK_INITIALIZER) {
         callstack_copy(*this, cCallstack);
     }
 
@@ -149,13 +144,13 @@ public:
 
 #if __cplusplus >= 201103
     inline callstack(callstack&& other) noexcept: self(other.self) {
-        callstack_create(other);
+        other.self = CALLSTACK_INITIALIZER;
     }
 
     inline auto operator=(callstack&& other) noexcept -> callstack& {
         callstack_destroy(*this);
         self = other.self;
-        callstack_create(other);
+        other.self = CALLSTACK_INITIALIZER;
         return *this;
     }
 
