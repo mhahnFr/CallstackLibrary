@@ -21,7 +21,6 @@
 
 #include "callstackInternal.h"
 
-#include <callstack_defs.h>
 #include <execinfo.h>
 #include <string.h>
 
