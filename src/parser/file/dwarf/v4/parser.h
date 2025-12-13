@@ -24,7 +24,7 @@
 
 #include <misc/string_utils.h>
 
-#include "vector_fileNameEntry.h"
+#include "fileNameEntry.h"
 
 struct dwarf_parser;
 
