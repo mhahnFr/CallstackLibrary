@@ -20,7 +20,6 @@
  */
 
 #include <stdio.h>
-#include <string.h>
 
 #include <mach-o/dyld.h>
 #include <mach-o/dyld_images.h>
