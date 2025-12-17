@@ -78,8 +78,7 @@ struct regionInfo regions_getLoadedRegions(void) {
         if (!loadedLibInfo_prepare(outerElement)) {
             continue;
         }
-        binaryFile_maybeParse(outerElement->associated);
-        vector_iterate(&outerElement->associated->regions, {
+        vector_iterate(&outerElement->regions, {
             vector_push_back(&toReturn, ((struct region) {
                 element->first, element->second,
                 maybe(strdup, outerElement->absoluteFileName),
