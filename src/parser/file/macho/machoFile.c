@@ -220,10 +220,6 @@ static inline bool machoFile_handleSegment##bits(struct machoFile* self, const v
         self->text_vmaddr = macho_maybeSwap(bits, bytesSwapped, segment->vmaddr);                                  \
     }                                                                                                              \
                                                                                                                    \
-    if (segment->initprot & 2 && segment->initprot & 1) {                                                          \
-        vector_push_back(&self->_.regions, ((pair_ptr_t) { segment->vmaddr, segment->vmaddr + segment->vmsize })); \
-    }                                                                                                              \
-                                                                                                                   \
     optional_uint64_t size = { .has_value = false, .value = 0 };                                                   \
     for (uint64_t i = 0; i < segment->nsects; ++i) {                                                               \
         struct section##suffix* section = ((void*) segment) + sizeof(*segment)                                     \
