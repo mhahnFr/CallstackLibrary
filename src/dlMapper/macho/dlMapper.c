@@ -54,7 +54,11 @@ static inline pair_machoInfo_t dlMapper_platform_loadMachO##bits(               
                     vmaddr = macho_maybeSwap(bits, bytesSwapped, cmd->vmaddr);        \
                 }                                                                     \
                 if (cmd->initprot & 2 && cmd->initprot & 1) {                                                          \
-                    vector_push_back(vec, ((pair_ptr_t) { cmd->vmaddr, cmd->vmaddr + cmd->vmsize })); \
+                    const uint##bits##_t begin = macho_maybeSwap(bits, bytesSwapped, cmd->vmaddr);\
+                    vector_push_back(vec, ((pair_ptr_t) {\
+                        begin, \
+                        begin + macho_maybeSwap(bits, bytesSwapped, cmd->vmsize)\
+                    })); \
                 }                                                                                                              \
                 break;                                                                \
             }                                                                         \
