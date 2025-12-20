@@ -162,7 +162,7 @@ optional_debugInfo_t objectFile_getDebugInfo(struct objectFile* self, const uint
     }
 
     const struct dwarf_lineInfo tmp = (struct dwarf_lineInfo) { .address = lineAddress };
-    const struct dwarf_lineInfo* closest = upper_bound(&tmp, 
+    const struct dwarf_lineInfo* closest = upper_bound(&tmp,
                                                        self->lineInfos.content,
                                                        self->lineInfos.count,
                                                        sizeof(struct dwarf_lineInfo),
