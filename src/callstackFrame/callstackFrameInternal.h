@@ -24,6 +24,14 @@
 
 #include <callstack_frame.h>
 
+/**
+ * Deducts the binary file information for the given address and stores the
+ * information in the given callstack frame.
+ *
+ * @param self the callstack frame object to fill
+ * @param address the address whose binary file information to deduct
+ * @param useCache whether fill in cached values
+ */
 void callstackFrame_translateBinary(struct callstack_frame* self, const void* address, bool useCache);
 
 #endif //CALLSTACKLIBRARY_CALLSTACKFRAMEINTERNAL_H
