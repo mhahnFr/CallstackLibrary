@@ -43,7 +43,7 @@ typedef_pair_named(machoDef, pair_address_t, uintptr_t);
 #define dlMapper_platform_loadMachOFunc(bits, suffix)                                 \
 static inline pair_machoInfo_t dlMapper_platform_loadMachO##bits(                     \
     const struct mach_header##suffix* header, const bool bytesSwapped, vector_pair_ptr_t* vec) {              \
-    uint##bits##_t vmsize = 0, vmaddr = 0;                                            \
+    uint##bits##_t vmsize = 0, vmaddr = 0, totalSize = 0;                                            \
     struct load_command* lc = (void*) header + sizeof(struct mach_header##suffix);    \
     for (uint32_t i = 0; i < macho_maybeSwap(32, bytesSwapped, header->ncmds); ++i) { \
         switch (macho_maybeSwap(32, bytesSwapped, lc->cmd)) {                         \
@@ -55,6 +55,7 @@ static inline pair_machoInfo_t dlMapper_platform_loadMachO##bits(               
                 }                                                                     \
                 if (cmd->initprot & 2 && cmd->initprot & 1) {                                                          \
                     const uint##bits##_t begin = macho_maybeSwap(bits, bytesSwapped, cmd->vmaddr);\
+                    totalSize += macho_maybeSwap(bits, bytesSwapped, cmd->vmsize);\
                     vector_push_back(vec, ((pair_ptr_t) {\
                         begin, \
                         begin + macho_maybeSwap(bits, bytesSwapped, cmd->vmsize)\
@@ -66,7 +67,7 @@ static inline pair_machoInfo_t dlMapper_platform_loadMachO##bits(               
                                                                                       \
         lc = (void*) lc + macho_maybeSwap(32, bytesSwapped, lc->cmdsize);             \
     }                                                                                 \
-    return make_pair_machoInfo((void*) header + vmsize, vmaddr);                      \
+    return make_pair_machoInfo((void*) header + vmsize + totalSize, vmaddr);                      \
 }
 
 dlMapper_platform_loadMachOFunc(32,)
