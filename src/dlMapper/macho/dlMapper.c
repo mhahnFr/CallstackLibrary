@@ -78,6 +78,7 @@ dlMapper_platform_loadMachOFunc(64, _64)
  *
  * @param header the start pointer of the Mach-O file
  * @param fileName the file name of the Mach-O file
+ * @param vec the vector to be filled with the deducted region information
  * @return the start and the end address of the Mach-O file
  */
 static inline pair_machoDef_t dlMapper_platform_loadMachO(const struct mach_header* header, const char* fileName, vector_pair_ptr_t* vec) {
