@@ -19,22 +19,20 @@
  * CallstackLibrary, see the file LICENSE.  If not, see <https://www.gnu.org/licenses/>.
  */
 
+#include "elfFile.h"
+
 #include <elf.h>
 #include <stdlib.h>
-
 #include <elf/elfUtils.h>
 #include <file/pathUtils.h>
 #include <misc/string_utils.h>
 
-#include "elfFile.h"
-
+#include "lcs_stdio.h"
 #include "../bounds.h"
 #include "../debugInfo.h"
 #include "../loader.h"
-#include "../dwarf/dwarf_parser.h"
-
-#include "../../lcs_stdio.h"
 #include "../../callstack_parser.h"
+#include "../dwarf/dwarf_parser.h"
 
 struct elfFile* elfFile_new(void) {
     struct elfFile* toReturn = malloc(sizeof(struct elfFile));
@@ -46,7 +44,7 @@ struct elfFile* elfFile_new(void) {
 }
 
 void elfFile_create(struct elfFile* self) {
-    BINARY_FILE_SUPER(self, create);
+    self->_ = binaryFile_initializer;
     
     lcs_section_create(&self->debugLine);
     lcs_section_create(&self->debugLineStr);

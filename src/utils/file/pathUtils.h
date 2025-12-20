@@ -19,8 +19,8 @@
  * CallstackLibrary, see the file LICENSE.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-#ifndef __utils_file_pathUtils_h
-#define __utils_file_pathUtils_h
+#ifndef utils_file_pathUtils_h
+#define utils_file_pathUtils_h
 
 /**
  * @brief Returns the absolute path of the given path name.
@@ -74,4 +74,4 @@ char* path_toRelativePath(const char* path);
  */
 char* path_toRelativePathFree(char* path);
 
-#endif /* __utils_file_pathUtils_h */
+#endif /* utils_file_pathUtils_h */

@@ -25,6 +25,11 @@
 #include <stdbool.h>
 #include <stddef.h>
 #include <string.h>
+#include <DC4C/optional.h>
+#include <DC4C/vector.h>
+
+typedef_optional_named(string, char*);
+typedef_vector_named(string, const char*);
 
 /**
  * Copies the given string if it is not @c NULL and requested.

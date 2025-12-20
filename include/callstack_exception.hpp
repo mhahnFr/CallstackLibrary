@@ -59,7 +59,7 @@ class exception: public std::exception {
      * @param number the number to be converted
      * @return the string representation of the given number
      */
-    static inline std::string toString(unsigned long number) {
+    static inline std::string toString(const unsigned long number) {
 #ifdef LCS_CXX11
         return std::to_string(number);
 #else

@@ -19,13 +19,10 @@
  * CallstackLibrary, see the file LICENSE.  If not, see <https://www.gnu.org/licenses/>.
  */
 
+#include "callstackInternal.h"
+
 #include <execinfo.h>
 #include <string.h>
-
-#include <callstack_create.h>
-#include <callstack_defs.h>
-
-#include "callstackInternal.h"
 
 #include "callstackFrame/callstackFrameInternal.h"
 #include "dlMapper/dlMapper.h"
@@ -33,7 +30,7 @@
 
 void callstack_createWithBacktrace(struct callstack * self,
                                    void * trace[], size_t traceLength) {
-    callstack_create(self);
+    *self = (struct callstack) CALLSTACK_INITIALIZER;
     traceLength = traceLength <= CALLSTACK_BACKTRACE_SIZE ? traceLength : CALLSTACK_BACKTRACE_SIZE;
     memcpy(self->backtrace, trace, traceLength * sizeof(void *));
     self->backtraceSize = traceLength;

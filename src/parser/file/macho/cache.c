@@ -25,7 +25,6 @@
 #include <string.h>
 
 #include "archive.h"
-#include "../vector_string.h"
 
 /**
  * This structure represents the cache for the Mach-O implementation.

@@ -23,11 +23,9 @@
 #define function_h
 
 #include <stdint.h>
-
 #include <DC4C/optional.h>
 #include <DC4C/vector.h>
-
-#include "optional_string.h"
+#include <misc/string_utils.h>
 
 /**
  * This structure represents a function in a Mach-O symbol table.

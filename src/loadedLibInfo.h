@@ -50,12 +50,13 @@ struct loadedLibInfo {
 
     /** The associated binary file abstraction object.                    */
     struct binaryFile* associated;
+    vector_pair_ptr_t regions;
 };
 
 /**
  * The initializing values for the @c loadedLibInfo .
  */
-#define loadedLibInfo_initializer ((struct loadedLibInfo) { NULL, NULL, 0, NULL, NULL, NULL, false, NULL })
+#define loadedLibInfo_initializer ((struct loadedLibInfo) { NULL, NULL, 0, NULL, NULL, NULL, false, NULL, vector_initializer })
 
 /**
  * Prepares the associated binary file.

@@ -20,7 +20,6 @@
  */
 
 #include <stdio.h>
-#include <string.h>
 
 #include <mach-o/dyld.h>
 #include <mach-o/dyld_images.h>
@@ -43,7 +42,7 @@ typedef_pair_named(machoDef, pair_address_t, uintptr_t);
  */
 #define dlMapper_platform_loadMachOFunc(bits, suffix)                                 \
 static inline pair_machoInfo_t dlMapper_platform_loadMachO##bits(                     \
-    const struct mach_header##suffix* header, const bool bytesSwapped) {              \
+    const struct mach_header##suffix* header, const bool bytesSwapped, vector_pair_ptr_t* vec) {              \
     uint##bits##_t vmsize = 0, vmaddr = 0;                                            \
     struct load_command* lc = (void*) header + sizeof(struct mach_header##suffix);    \
     for (uint32_t i = 0; i < macho_maybeSwap(32, bytesSwapped, header->ncmds); ++i) { \
@@ -54,6 +53,9 @@ static inline pair_machoInfo_t dlMapper_platform_loadMachO##bits(               
                     vmsize = macho_maybeSwap(bits, bytesSwapped, cmd->vmsize);        \
                     vmaddr = macho_maybeSwap(bits, bytesSwapped, cmd->vmaddr);        \
                 }                                                                     \
+                if (cmd->initprot & 2 && cmd->initprot & 1) {                                                          \
+                    vector_push_back(vec, ((pair_ptr_t) { cmd->vmaddr, cmd->vmaddr + cmd->vmsize })); \
+                }                                                                                                              \
                 break;                                                                \
             }                                                                         \
         }                                                                             \
@@ -73,20 +75,20 @@ dlMapper_platform_loadMachOFunc(64, _64)
  * @param fileName the file name of the Mach-O file
  * @return the start and the end address of the Mach-O file
  */
-static inline pair_machoDef_t dlMapper_platform_loadMachO(const struct mach_header* header, const char* fileName) {
+static inline pair_machoDef_t dlMapper_platform_loadMachO(const struct mach_header* header, const char* fileName, vector_pair_ptr_t* vec) {
     pair_machoInfo_t info = { NULL, 0 };
     switch (header->magic) {
         case MH_MAGIC_64:
-        case MH_CIGAM_64: info = dlMapper_platform_loadMachO64((void*) header, header->magic == MH_CIGAM_64); break;
+        case MH_CIGAM_64: info = dlMapper_platform_loadMachO64((void*) header, header->magic == MH_CIGAM_64, vec); break;
 
         case MH_MAGIC:
-        case MH_CIGAM: info = dlMapper_platform_loadMachO32(header, header->magic == MH_CIGAM); break;
+        case MH_CIGAM: info = dlMapper_platform_loadMachO32(header, header->magic == MH_CIGAM, vec); break;
 
         case FAT_MAGIC:
-        case FAT_MAGIC_64: return dlMapper_platform_loadMachO(macho_parseFat((void*) header, false, fileName), fileName);
+        case FAT_MAGIC_64: return dlMapper_platform_loadMachO(macho_parseFat((void*) header, false, fileName), fileName, vec);
 
         case FAT_CIGAM:
-        case FAT_CIGAM_64: return dlMapper_platform_loadMachO(macho_parseFat((void*) header, true, fileName), fileName);
+        case FAT_CIGAM_64: return dlMapper_platform_loadMachO(macho_parseFat((void*) header, true, fileName), fileName, vec);
 
         default: break;
     }
@@ -106,7 +108,8 @@ static inline void dlMapper_platform_pushLoadedLib(vector_loadedLibInfo_t*   lib
                                                    const char*               fileName,
                                                    const struct mach_header* header,
                                                    const void*               inside) {
-    const pair_machoDef_t addresses = dlMapper_platform_loadMachO(header, fileName);
+    vector_pair_ptr_t vec = vector_initializer;
+    const pair_machoDef_t addresses = dlMapper_platform_loadMachO(header, fileName, &vec);
     // TODO: Support multiple slices for each loaded library
     vector_push_back(libs, ((struct loadedLibInfo) {
         addresses.first.first,
@@ -116,7 +119,8 @@ static inline void dlMapper_platform_pushLoadedLib(vector_loadedLibInfo_t*   lib
         path_toAbsolutePath(fileName),
         path_toRelativePath(fileName),
         inside >= addresses.first.first && inside <= addresses.first.second,
-        NULL
+        NULL,
+        vec
     }));
 }
 
