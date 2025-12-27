@@ -77,6 +77,16 @@ vector_pair_ptr_t* binaryFile_getRegions(struct binaryFile* self) {
     return &self->regions;
 }
 
+static inline int binaryFile_regionsCompare(const pair_ptr_t* lhs, const pair_ptr_t* rhs) {
+    if (lhs->first < rhs->first) return -1;
+    if (lhs->first > rhs->first) return +1;
+    return 0;
+}
+
+void binaryFile_sortRegions(struct binaryFile* self) {
+    vector_sort(&self->regions, binaryFile_regionsCompare);
+}
+
 vector_pair_ptr_t binaryFile_getTLSRegions(struct binaryFile* self) {
     return LCS_FILE(self, getTLSRegions);
 }

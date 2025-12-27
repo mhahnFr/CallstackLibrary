@@ -82,6 +82,7 @@ bool binaryFile_addr2String(struct binaryFile* self, const void* address, struct
 bool binaryFile_getFunctionInfo(struct binaryFile* self, const char* functionName, struct functionInfo* info);
 
 vector_pair_ptr_t* binaryFile_getRegions(struct binaryFile* self);
+void binaryFile_sortRegions(struct binaryFile* self);
 
 /**
  * Returns the thread-local storage regions of the given binary file.

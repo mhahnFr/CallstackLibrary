@@ -368,6 +368,7 @@ static inline bool machoFile_parseFileImpl##bits(struct machoFile* self, const v
         element->first += diff;                                                                                        \
         element->second += diff;                                                                                       \
     });                                                                                                                \
+    BINARY_FILE_SUPER(self, sortRegions);                                                                              \
                                                                                                                        \
     return true;                                                                                                       \
 }
