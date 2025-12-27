@@ -100,7 +100,11 @@ struct loadedLibInfo* dlMapper_libInfoForAddress(const void* address, const bool
             if (!loadedLibInfo_prepare(outerElement)) {
                 continue;
             }
-            vector_search(binaryFile_getRegions(outerElement->associated), address, dlMapper_searchCompareRegion);
+            const pair_ptr_t* result = vector_search(binaryFile_getRegions(outerElement->associated),
+                                                     address, dlMapper_searchCompareRegion);
+            if (result != NULL) {
+                return outerElement;
+            }
         });
     }
     return toReturn;
