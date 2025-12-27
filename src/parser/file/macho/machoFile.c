@@ -19,26 +19,24 @@
  * CallstackLibrary, see the file LICENSE.  If not, see <https://www.gnu.org/licenses/>.
  */
 
+#include "machoFile.h"
+
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
 #include <mach-o/loader.h>
-#include <sys/stat.h>
-
 #include <macho/fat_handler.h>
 #include <macho/macho_utils.h>
 #include <misc/numberContainers.h>
 #include <misc/string_utils.h>
+#include <sys/stat.h>
 
-#include "machoFile.h"
 #include "cache.h"
 #include "macho_parser.h"
-
 #include "../bounds.h"
 #include "../loader.h"
-#include "../dwarf/leb128.h"
-
 #include "../../callstack_parser.h"
+#include "../dwarf/leb128.h"
 
 struct machoFile* machoFile_new(void)  {
     struct machoFile* toReturn = malloc(sizeof(struct machoFile));
@@ -220,6 +218,9 @@ static inline bool machoFile_handleSegment##bits(struct machoFile* self, const v
         self->text_vmaddr = macho_maybeSwap(bits, bytesSwapped, segment->vmaddr);                                  \
     }                                                                                                              \
                                                                                                                    \
+    if (segment->initprot & 2 && segment->initprot & 1) {                                                          \
+        vector_push_back(&self->_.regions, ((pair_ptr_t) { segment->vmaddr, segment->vmaddr + segment->vmsize })); \
+    }                                                                                                              \
     optional_uint64_t size = { .has_value = false, .value = 0 };                                                   \
     for (uint64_t i = 0; i < segment->nsects; ++i) {                                                               \
         struct section##suffix* section = ((void*) segment) + sizeof(*segment)                                     \
