@@ -39,13 +39,9 @@ static bool dlMapper_inited = false;
  * @return @c 0 if the two values compare equal or a value less than or greater
  * than @c 0 according to the sorting order
  */
-static inline int dlMapper_sortCompare(const void* lhs, const void* rhs) {
-    const struct loadedLibInfo* a = lhs,
-                              * b = rhs;
-
-    if (a->begin < b->begin) return -1;
-    if (a->begin > b->begin) return +1;
-
+static inline int dlMapper_sortCompare(const struct loadedLibInfo* lhs, const struct loadedLibInfo* rhs) {
+    if (lhs->begin < rhs->begin) return -1;
+    if (lhs->begin > rhs->begin) return +1;
     return 0;
 }
 
@@ -72,23 +68,21 @@ bool dlMapper_init(void) {
  * @return @c 0 if the key is in the loaded library or a value smaller or
  * greater than @c 0 according to the sorting order
  */
-static inline int dlMapper_searchCompare(const void* key, const void* element) {
+static inline int dlMapper_searchCompare(const void* key, const struct loadedLibInfo* element) {
     // IMPORTANT: key is the searched address, element the array element
 
-    const struct loadedLibInfo* e = (struct loadedLibInfo*) element;
-    if (key >= e->begin && key < e->end) {
+    if (key >= element->begin && key < element->end) {
         return 0;
     }
-    return key > e->begin ? +1 : -1;
+    return key > element->begin ? +1 : -1;
 }
 
-static inline int dlMapper_searchCompareRegion(const void* key, const void* element) {
-    const pair_ptr_t* e = element;
+static inline int dlMapper_searchCompareRegion(const void* key, const pair_ptr_t* element) {
     const uintptr_t k = (uintptr_t) key;
-    if (k >= e->first && k < e->second) {
+    if (k >= element->first && k < element->second) {
         return 0;
     }
-    return k > e->first ? +1 : -1;
+    return k > element->first ? +1 : -1;
 }
 
 struct loadedLibInfo* dlMapper_libInfoForAddress(const void* address, const bool includeRegions) {
