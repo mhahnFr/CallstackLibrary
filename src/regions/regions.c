@@ -87,9 +87,7 @@ struct regionInfo regions_getLoadedRegions(void) {
         });
     });
 
-    if (callstack_autoClearCaches) {
-        callstack_clearCaches();
-    }
+    maybeV(callstack_clearCaches);
     return (struct regionInfo) { toReturn.content, toReturn.count };
 }
 
