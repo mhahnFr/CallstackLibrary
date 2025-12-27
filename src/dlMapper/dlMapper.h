@@ -55,7 +55,7 @@ bool dlMapper_isInited(void);
  * @return the associated loaded library info object or @c NULL if not in any
  * loaded library
  */
-struct loadedLibInfo* dlMapper_libInfoForAddress(const void* address);
+struct loadedLibInfo* dlMapper_libInfoForAddress(const void* address, bool includeRegions);
 
 /**
  * Returns the runtime image info for the runtime image of the given name.

@@ -82,10 +82,28 @@ static inline int dlMapper_searchCompare(const void* key, const void* element) {
     return key > e->begin ? +1 : -1;
 }
 
-struct loadedLibInfo* dlMapper_libInfoForAddress(const void* address) {
+static inline int dlMapper_searchCompareRegion(const void* key, const void* element) {
+    const pair_ptr_t* e = element;
+    const uintptr_t k = (uintptr_t) key;
+    if (k >= e->first && k < e->second) {
+        return 0;
+    }
+    return k > e->first ? +1 : -1;
+}
+
+struct loadedLibInfo* dlMapper_libInfoForAddress(const void* address, const bool includeRegions) {
     if (!dlMapper_inited) return NULL;
 
-    return vector_search(&loadedLibs, address, dlMapper_searchCompare);
+    struct loadedLibInfo* toReturn = vector_search(&loadedLibs, address, dlMapper_searchCompare);
+    if (toReturn == NULL && includeRegions) {
+        vector_forEach(&loadedLibs, outerElement, {
+            if (!loadedLibInfo_prepare(outerElement)) {
+                continue;
+            }
+            vector_search(binaryFile_getRegions(outerElement->associated), address, dlMapper_searchCompareRegion);
+        });
+    }
+    return toReturn;
 }
 
 struct loadedLibInfo* dlMapper_libInfoForFileName(const char* fileName) {
@@ -103,7 +121,7 @@ struct loadedLibInfo* dlMapper_libInfoForFileName(const char* fileName) {
 
 pair_relativeInfo_t dlMapper_relativize(const void* address) {
     pair_relativeInfo_t toReturn;
-    toReturn.first = dlMapper_libInfoForAddress(address);
+    toReturn.first = dlMapper_libInfoForAddress(address, false);
     toReturn.second = toReturn.first == NULL ? 0 : dlMapper_platform_relativize(toReturn.first, address);
     return toReturn;
 }

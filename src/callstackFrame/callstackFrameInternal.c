@@ -27,7 +27,7 @@ void callstackFrame_translateBinary(struct callstack_frame* self, const void* ad
                                     const bool useCache, const bool includeRegions) {
     callstack_frame_create(self);
 
-    struct loadedLibInfo* info = dlMapper_libInfoForAddress(address);
+    struct loadedLibInfo* info = dlMapper_libInfoForAddress(address, includeRegions);
     if (info != NULL) {
         self->binaryFile = useCache ? info->absoluteFileName : strdup(info->absoluteFileName);
         self->binaryFileRelative = useCache ? info->relativeFileName : strdup(info->relativeFileName);
