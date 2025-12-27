@@ -78,7 +78,7 @@ struct regionInfo regions_getLoadedRegions(void) {
         if (!loadedLibInfo_prepare(outerElement)) {
             continue;
         }
-        vector_iterate(&outerElement->regions, {
+        vector_iterate(binaryFile_getRegions(outerElement->associated), {
             vector_push_back(&toReturn, ((struct region) {
                 element->first, element->second,
                 maybe(strdup, outerElement->absoluteFileName),
