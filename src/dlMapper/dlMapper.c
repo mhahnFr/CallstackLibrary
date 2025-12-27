@@ -85,19 +85,7 @@ static inline int dlMapper_searchCompare(const void* key, const void* element) {
 struct loadedLibInfo* dlMapper_libInfoForAddress(const void* address) {
     if (!dlMapper_inited) return NULL;
 
-    // return vector_search(&loadedLibs, address, dlMapper_searchCompare);
-    vector_forEach(&loadedLibs, outerElement, {
-        if (address >= outerElement->begin && address < outerElement->end) {
-            return outerElement;
-        }
-        vector_iterate(&outerElement->regions, {
-            const uintptr_t addr = (uintptr_t) address;
-            if (addr >= element->first && addr < element->second) {
-                return outerElement;
-            }
-        });
-    });
-    return NULL;
+    return vector_search(&loadedLibs, address, dlMapper_searchCompare);
 }
 
 struct loadedLibInfo* dlMapper_libInfoForFileName(const char* fileName) {
