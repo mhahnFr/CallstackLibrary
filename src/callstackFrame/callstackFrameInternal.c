@@ -23,7 +23,8 @@
 
 #include "../dlMapper/dlMapper.h"
 
-void callstackFrame_translateBinary(struct callstack_frame* self, const void* address, const bool useCache) {
+void callstackFrame_translateBinary(struct callstack_frame* self, const void* address,
+                                    const bool useCache, const bool includeRegions) {
     callstack_frame_create(self);
 
     struct loadedLibInfo* info = dlMapper_libInfoForAddress(address);

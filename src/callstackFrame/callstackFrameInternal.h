@@ -32,6 +32,6 @@
  * @param address the address whose binary file information to deduct
  * @param useCache whether fill in cached values
  */
-void callstackFrame_translateBinary(struct callstack_frame* self, const void* address, bool useCache);
+void callstackFrame_translateBinary(struct callstack_frame* self, const void* address, bool useCache, bool includeRegions);
 
 #endif //CALLSTACKLIBRARY_CALLSTACKFRAMEINTERNAL_H

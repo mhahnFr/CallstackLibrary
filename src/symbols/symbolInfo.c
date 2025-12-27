@@ -27,7 +27,7 @@
 static inline struct callstack_frame symbols_getInfoShared(const void* address, const bool useCache) {
     struct callstack_frame toReturn;
     dlMapper_init();
-    callstackFrame_translateBinary(&toReturn, address, useCache);
+    callstackFrame_translateBinary(&toReturn, address, useCache, true);
     struct loadedLibInfo* info = toReturn.reserved;
     if (loadedLibInfo_prepare(info)) {
         binaryFile_addr2String(info->associated, address, &toReturn);

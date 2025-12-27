@@ -72,7 +72,7 @@ enum callstack_type callstack_translateBinaries(struct callstack* self, const bo
 
     dlMapper_init();
     for (size_t i = 0; i < self->backtraceSize; ++i) {
-        callstackFrame_translateBinary(&self->frames[i], self->backtrace[i], useCache);
+        callstackFrame_translateBinary(&self->frames[i], self->backtrace[i], useCache, false);
     }
     return TRANSLATED;
 }
