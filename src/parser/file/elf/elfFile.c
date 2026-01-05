@@ -1,7 +1,7 @@
 /*
  * CallstackLibrary - Library creating human-readable call stacks.
  *
- * Copyright (C) 2023 - 2025  mhahnFr
+ * Copyright (C) 2023 - 2026  mhahnFr
  *
  * This file is part of the CallstackLibrary.
  *
@@ -102,27 +102,28 @@ elfFile_loadSectionStrtab(64)
  *
  * @param bits the amount of bits the implementation shall handle
  */
-#define elfFile_parseSymtab(bits)                                                                                       \
-static inline bool elfFile_parseSymtab##bits(struct elfFile*   self,                                                    \
-                                             Elf##bits##_Shdr* symtab,                                                  \
-                                             char*             strBegin,                                                \
-                                             void*             begin,                                                   \
-                                             bool              littleEndian) {                                          \
-    void* symtabBegin = begin + ELF_TO_HOST(bits, symtab->sh_offset, littleEndian);                                     \
-    uint64_t count = ELF_TO_HOST(bits, symtab->sh_size, littleEndian) / sizeof(Elf##bits##_Sym);                        \
-    Elf##bits##_Sym* entry = symtabBegin;                                                                               \
-    for (uint64_t i = 0; i < count; ++i, ++entry) {                                                                     \
-        if (ELF##bits##_ST_TYPE(entry->st_info) == STT_FUNC && ELF_TO_HOST(bits, entry->st_value, littleEndian) != 0) { \
-            struct function f = {                                                                                       \
-                .startAddress = ELF_TO_HOST(bits, entry->st_value, littleEndian),                                       \
-                .linkedName   = strdup(strBegin + ELF_TO_HOST(32, entry->st_name, littleEndian)),                       \
-                .length       = ELF_TO_HOST(bits, entry->st_size, littleEndian),                                        \
-                .demangledName.has_value = false,                                                                       \
-            };                                                                                                          \
-            vector_push_back(&self->functions, f);                                                                      \
-        }                                                                                                               \
-    }                                                                                                                   \
-    return true;                                                                                                        \
+#define elfFile_parseSymtab(bits)                                                                                \
+static inline bool elfFile_parseSymtab##bits(struct elfFile*   self,                                             \
+                                             Elf##bits##_Shdr* symtab,                                           \
+                                             char*             strBegin,                                         \
+                                             void*             begin,                                            \
+                                             bool              littleEndian) {                                   \
+    void* symtabBegin = begin + ELF_TO_HOST(bits, symtab->sh_offset, littleEndian);                              \
+    uint64_t count = ELF_TO_HOST(bits, symtab->sh_size, littleEndian) / sizeof(Elf##bits##_Sym);                 \
+    Elf##bits##_Sym* entry = symtabBegin;                                                                        \
+    for (uint64_t i = 0; i < count; ++i, ++entry) {                                                              \
+        const unsigned char type = ELF##bits##_ST_TYPE(entry->st_info);                                          \
+        if ((type == STT_FUNC || type == STT_OBJECT) && ELF_TO_HOST(bits, entry->st_value, littleEndian) != 0) { \
+            struct function f = {                                                                                \
+                .startAddress = ELF_TO_HOST(bits, entry->st_value, littleEndian),                                \
+                .linkedName   = strdup(strBegin + ELF_TO_HOST(32, entry->st_name, littleEndian)),                \
+                .length       = ELF_TO_HOST(bits, entry->st_size, littleEndian),                                 \
+                .demangledName.has_value = false,                                                                \
+            };                                                                                                   \
+            vector_push_back(&self->functions, f);                                                               \
+        }                                                                                                        \
+    }                                                                                                            \
+    return true;                                                                                                 \
 }
 
 elfFile_parseSymtab(32)
@@ -326,12 +327,13 @@ static inline int elfFile_lineInfoCompare(const void* lhs, const void* rhs) {
  * @return whether the ELF file was loaded successfully
  */
 bool elfFile_parse(struct elfFile* self) {
-    const bool success =  loader_loadFileAndExecute(self->_.fileName, (union loader_parserFunction) {
+    const bool success = loader_loadFileAndExecute(self->_.fileName, (union loader_parserFunction) {
         .parseFunc = (loader_parser) elfFile_parseFile
     }, false, self);
     if (success) {
         vector_sort(&self->functions, elfFile_functionCompare);
         vector_sort(&self->lineInfos, elfFile_lineInfoCompare);
+        vector_iterate(&self->functions, __builtin_printf("%s: %s 0x%lx\n", self->_.fileName, element->linkedName, element->startAddress););
     } else {
         vector_destroyWithPtr(&self->functions, function_destroy);
         vector_init(&self->functions);
