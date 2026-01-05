@@ -1,7 +1,7 @@
 /*
  * CallstackLibrary - Library creating human-readable call stacks.
  *
- * Copyright (C) 2023 - 2025  mhahnFr
+ * Copyright (C) 2023 - 2026  mhahnFr
  *
  * This file is part of the CallstackLibrary.
  *
@@ -83,26 +83,19 @@ struct callstack_frame {
     unsigned long sourceLineColumn;
 };
 
+#define callstack_frame_initializer \
+    (struct callstack_frame) { NULL, false, false, NULL, NULL, NULL, NULL, NULL, false, false, 0, 0 }
+
 /**
- * Constructs the given callstack frame.
+ * @brief Constructs the given callstack frame.
+ *
+ * @details Since version 2.X this function has been replaced by a macro.
  *
  * @param self the callstack frame to be initialized
  * @since v1.1
+ * @deprecated Prefer using the macro @c callstack_frame_initializer .
  */
-static inline void callstack_frame_create(struct callstack_frame * self) {
-    self->binaryFile         = NULL;
-    self->binaryFileRelative = NULL;
-    self->function           = NULL;
-    self->sourceFile         = NULL;
-    self->sourceFileRelative = NULL;
-    self->reserved           = NULL;
-    self->sourceLine         = 0;
-    self->sourceLineColumn   = 0;
-    self->sourceFileOutdated = false;
-    self->binaryFileIsSelf   = false;
-    self->reserved1          = false;
-    self->reserved2          = false;
-}
+#define callstack_frame_create(self) (*(struct callstack_frame*) self = callstack_frame_initializer)
 
 /**
  * Allocates a new and initialized callstack frame.
