@@ -83,8 +83,14 @@ struct callstack_frame {
     unsigned long sourceLineColumn;
 };
 
+#ifdef __cplusplus
+# define callstack_frame_initializer_prefix
+#else
+# define callstack_frame_initializer_prefix (struct callstack_frame)
+#endif
+
 #define callstack_frame_initializer \
-    (struct callstack_frame) { NULL, false, false, false, false, NULL, NULL, NULL, NULL, NULL, 0, 0 }
+    callstack_frame_initializer_prefix { NULL, false, false, false, false, NULL, NULL, NULL, NULL, NULL, 0, 0 }
 
 /**
  * @brief Constructs the given callstack frame.
