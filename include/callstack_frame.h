@@ -107,7 +107,7 @@ static inline struct callstack_frame * callstack_frame_new(void) {
     struct callstack_frame * toReturn = (struct callstack_frame *) malloc(sizeof(struct callstack_frame));
     
     if (toReturn != NULL) {
-        callstack_frame_create(toReturn);
+        *toReturn = callstack_frame_initializer;
     }
     
     return toReturn;

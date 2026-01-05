@@ -1,7 +1,7 @@
 /*
  * CallstackLibrary - Library creating human-readable call stacks.
  *
- * Copyright (C) 2025  mhahnFr
+ * Copyright (C) 2025 - 2026  mhahnFr
  *
  * This file is part of the CallstackLibrary.
  *
@@ -25,7 +25,7 @@
 
 void callstackFrame_translateBinary(struct callstack_frame* self, const void* address,
                                     const bool useCache, const bool includeRegions) {
-    callstack_frame_create(self);
+    *self = callstack_frame_initializer;
 
     struct loadedLibInfo* info = dlMapper_libInfoForAddress(address, includeRegions);
     if (info != NULL) {
