@@ -54,16 +54,6 @@ struct callstack_frame {
      */
     bool  reserved2;
 
-    /** The name of the binary file this frame is in.        */
-    char * binaryFile;
-    /** The relative path of the name of the binary file.    */
-    char * binaryFileRelative;
-    /** The name of the function this frame is in.           */
-    char * function;
-    /** The name of the source file this frame is in.        */
-    char * sourceFile;
-    /** The relative path of the name of the source file.    */
-    char * sourceFileRelative;
     /**
      * Indicates whether the source file was detected to be changed after it has
      * been used as source file for this callstack frame.
@@ -77,6 +67,16 @@ struct callstack_frame {
      * @since v2.0
      */
     bool binaryFileIsSelf;
+    /** The name of the binary file this frame is in.        */
+    char * binaryFile;
+    /** The relative path of the name of the binary file.    */
+    char * binaryFileRelative;
+    /** The name of the function this frame is in.           */
+    char * function;
+    /** The name of the source file this frame is in.        */
+    char * sourceFile;
+    /** The relative path of the name of the source file.    */
+    char * sourceFileRelative;
     /** The line number in the source file this frame is on. */
     unsigned long sourceLine;
     /** The line column number in the source file.           */
@@ -84,7 +84,7 @@ struct callstack_frame {
 };
 
 #define callstack_frame_initializer \
-    (struct callstack_frame) { NULL, false, false, NULL, NULL, NULL, NULL, NULL, false, false, 0, 0 }
+    (struct callstack_frame) { NULL, false, false, false, false, NULL, NULL, NULL, NULL, NULL, 0, 0 }
 
 /**
  * @brief Constructs the given callstack frame.

@@ -1,9 +1,9 @@
 /*
  * CallstackLibrary - Library creating human-readable call stacks.
  *
- * Copyright (C) 2023 - 2025  mhahnFr
+ * Copyright (C) 2023 - 2026  mhahnFr
  *
- * This file is part of the CallstackLibrary. 
+ * This file is part of the CallstackLibrary.
  *
  * The CallstackLibrary is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -37,13 +37,13 @@ void callstack_frame_copyHere(struct callstack_frame * destination, const struct
         source->reserved,
         source->reserved1,
         source->reserved2,
+        source->sourceFileOutdated,
+        source->binaryFileIsSelf,
         source->reserved1 ? source->binaryFile : utils_maybeCopySave(source->binaryFile, true),
         source->reserved1 ? source->binaryFileRelative : utils_maybeCopySave(source->binaryFileRelative, true),
         source->reserved2 ? source->function : utils_maybeCopySave(source->function, true),
         source->reserved1 ? source->sourceFile : utils_maybeCopySave(source->sourceFile, true),
         source->reserved1 ? source->sourceFileRelative : utils_maybeCopySave(source->sourceFileRelative, true),
-        source->sourceFileOutdated,
-        source->binaryFileIsSelf,
         source->sourceLine,
         source->sourceLineColumn
     };
