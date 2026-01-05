@@ -22,6 +22,14 @@
 #include <callstack_frame.h>
 #include <misc/string_utils.h>
 
+struct callstack_frame* callstack_frame_new() {
+    struct callstack_frame* toReturn = malloc(sizeof(struct callstack_frame));
+    if (toReturn != NULL) {
+        *toReturn = callstack_frame_initializer;
+    }
+    return toReturn;
+}
+
 struct callstack_frame* callstack_frame_copy(const struct callstack_frame* self) {
     struct callstack_frame * toReturn = callstack_frame_new();
     
@@ -71,4 +79,21 @@ char * callstack_frame_getShortestSourceFile(const struct callstack_frame * self
     const size_t s1 = strlen(self->sourceFile),
                  s2 = strlen(self->sourceFileRelative);
     return s2 < s1 ? self->sourceFileRelative : self->sourceFile;
+}
+
+void callstack_frame_destroy(const struct callstack_frame* self) {
+    if (!self->reserved1) {
+        free(self->binaryFile);
+        free(self->binaryFileRelative);
+        free(self->sourceFile);
+        free(self->sourceFileRelative);
+    }
+    if (!self->reserved2) {
+        free(self->function);
+    }
+}
+
+void callstack_frame_delete(struct callstack_frame* self) {
+    callstack_frame_destroy(self);
+    free(self);
 }

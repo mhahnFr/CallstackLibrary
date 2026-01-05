@@ -27,7 +27,7 @@ extern "C" {
 #endif
 
 #include <stdbool.h>
-#include <stdlib.h>
+#include <stddef.h>
 
 /**
  * This structure represents a translated callstack frame.
@@ -103,15 +103,7 @@ struct callstack_frame {
  * @return the allocated callstack frame or @c NULL if unable to allocate
  * @since v1.1
  */
-static inline struct callstack_frame * callstack_frame_new(void) {
-    struct callstack_frame * toReturn = (struct callstack_frame *) malloc(sizeof(struct callstack_frame));
-    
-    if (toReturn != NULL) {
-        *toReturn = callstack_frame_initializer;
-    }
-    
-    return toReturn;
-}
+struct callstack_frame* callstack_frame_new(void);
 
 /**
  * Allocates a new callstack frame and deeply copies the given callstack frame.
@@ -189,17 +181,7 @@ static inline const char* callstack_frame_getShortestSourceFileOr(const struct c
  * @param self the callstack frame to be destructed
  * @since v1.1
  */
-static inline void callstack_frame_destroy(const struct callstack_frame* self) {
-    if (!self->reserved1) {
-        free(self->binaryFile);
-        free(self->binaryFileRelative);
-        free(self->sourceFile);
-        free(self->sourceFileRelative);
-    }
-    if (!self->reserved2) {
-        free(self->function);
-    }
-}
+void callstack_frame_destroy(const struct callstack_frame* self);
 
 /**
  * Destroys and deallocates the given callstack frame.
@@ -207,10 +189,7 @@ static inline void callstack_frame_destroy(const struct callstack_frame* self) {
  * @param self the callstack frame to be deleted
  * @since v1.1
  */
-static inline void callstack_frame_delete(struct callstack_frame * self) {
-    callstack_frame_destroy(self);
-    free(self);
-}
+void callstack_frame_delete(struct callstack_frame* self);
 
 #ifdef __cplusplus
 } // extern "C"
