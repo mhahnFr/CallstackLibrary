@@ -1,7 +1,7 @@
 /*
  * CallstackLibrary - Library creating human-readable call stacks.
  *
- * Copyright (C) 2023 - 2025  mhahnFr
+ * Copyright (C) 2023 - 2026  mhahnFr
  *
  * This file is part of the CallstackLibrary.
  *
@@ -38,7 +38,7 @@
 #include "../../callstack_parser.h"
 #include "../dwarf/leb128.h"
 
-struct machoFile* machoFile_new(void)  {
+struct machoFile* machoFile_new(void) {
     struct machoFile* toReturn = malloc(sizeof(struct machoFile));
     
     if (toReturn != NULL) {
