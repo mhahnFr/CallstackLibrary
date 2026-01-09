@@ -1,7 +1,7 @@
 /*
  * CallstackLibrary - Library creating human-readable call stacks.
  *
- * Copyright (C) 2023 - 2025  mhahnFr
+ * Copyright (C) 2023 - 2026  mhahnFr
  *
  * This file is part of the CallstackLibrary.
  *
@@ -19,16 +19,7 @@
  * CallstackLibrary, see the file LICENSE.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-#include <stdlib.h>
-
 #include "function.h"
-
-void function_create(struct function * self) {
-    self->startAddress  = 0x0;
-    self->length        = 0x0;
-    self->linkedName    = NULL;
-    self->demangledName = (optional_string_t) { .has_value = false };
-}
 
 void function_destroy(const struct function* self) {
     free(self->linkedName);

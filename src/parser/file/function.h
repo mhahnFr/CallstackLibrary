@@ -1,7 +1,7 @@
 /*
  * CallstackLibrary - Library creating human-readable call stacks.
  *
- * Copyright (C) 2023 - 2025  mhahnFr
+ * Copyright (C) 2023 - 2026  mhahnFr
  *
  * This file is part of the CallstackLibrary.
  *
@@ -42,12 +42,7 @@ struct function {
     optional_string_t demangledName;
 };
 
-/**
- * Initializes the given function structure.
- *
- * @param self the function structure to be initialized
- */
-void function_create(struct function * self);
+#define function_initializer (struct function) { 0, 0, NULL, { .has_value = false }}
 
 /**
  * Deinitializes the given function structure.
