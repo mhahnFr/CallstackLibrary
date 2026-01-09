@@ -253,17 +253,8 @@ static inline bool machoFile_handleSegment##bits(struct machoFile* self, const v
 machoFile_handleSegment(32,)
 machoFile_handleSegment(64, _64)
 
-/**
- * Adds the given function / object file pair to the Mach-O file abstraction
- * object passed via the @c va_list .
- *
- * @param function the function / object file object pair
- * @param args the argument list
- */
-static inline void machoFile_addFunction(struct pair_funcFile function, va_list args) {
-    struct machoFile* self = va_arg(args, void*);
-
-    vector_push_back(&self->functions, function);
+static inline void machoFile_addFunction(struct machoFile* self, pair_funcFile_t pair) {
+    vector_push_back(&self->functions, pair);
 }
 
 /**
@@ -325,52 +316,56 @@ static inline void machoFile_fixupFunctions(struct machoFile* self) {
  * @param bits the amount of bits the implementation should handle
  * @param suffix the optional suffix to be used for the native data structures
  */
-#define machoFile_parseFileImpl(bits, suffix)                                                                          \
-static inline bool machoFile_parseFileImpl##bits(struct machoFile* self, const void* baseAddress, bool bytesSwapped) { \
-    const struct mach_header##suffix*   header = baseAddress;                                                          \
-    struct load_command* lc     = (void *) header + sizeof(*header);                                                   \
-    const  uint32_t      ncmds  = macho_maybeSwap(32, bytesSwapped, header->ncmds);                                    \
-                                                                                                                       \
-    for (size_t i = 0; i < ncmds; ++i) {                                                                               \
-        bool result = true;                                                                                            \
-        switch (macho_maybeSwap(32, bytesSwapped, lc->cmd)) {                                                          \
-            case LC_SEGMENT##suffix:                                                                                   \
-                result = machoFile_handleSegment##bits(self, baseAddress, (void *) lc, bytesSwapped);                  \
-                break;                                                                                                 \
-                                                                                                                       \
-            case LC_SYMTAB:                                                                                            \
-                result = macho_parseSymtab((void*) lc, baseAddress,                                                    \
-                                           self->_.inMemory ? (self->linkedit_vmaddr - self->text_vmaddr)              \
-                                                              - self->linkedit_fileoff                                 \
-                                                            : 0,                                                       \
-                                           bytesSwapped, bits == 64, NULL, machoFile_addFunction, self);               \
-                break;                                                                                                 \
-                                                                                                                       \
-            case LC_UUID:                                                                                              \
-                memcpy(&self->uuid, &((struct uuid_command*) ((void*) lc))->uuid, 16);                                 \
-                result = true;                                                                                         \
-                break;                                                                                                 \
-                                                                                                                       \
-            case LC_FUNCTION_STARTS:                                                                                   \
-                result = machoFile_handleFunctionStarts(self, (void*) lc, baseAddress, bytesSwapped);                  \
-                break;                                                                                                 \
-        }                                                                                                              \
-        if (!result) {                                                                                                 \
-            return false;                                                                                              \
-        }                                                                                                              \
-        lc = (void *) lc + macho_maybeSwap(32, bytesSwapped, lc->cmdsize);                                             \
-    }                                                                                                                  \
-                                                                                                                       \
-    machoFile_fixupFunctions(self);                                                                                    \
-                                                                                                                       \
-    intptr_t diff = (uintptr_t) header - self->text_vmaddr;                                                            \
-    vector_iterate(&self->_.regions, {                                                                                 \
-        element->first += diff;                                                                                        \
-        element->second += diff;                                                                                       \
-    });                                                                                                                \
-    BINARY_FILE_SUPER(self, sortRegions);                                                                              \
-                                                                                                                       \
-    return true;                                                                                                       \
+#define machoFile_parseFileImpl(bits, suffix)                                                         \
+static inline bool machoFile_parseFileImpl##bits(struct machoFile* self, const void* baseAddress,     \
+                                                 bool bytesSwapped) {                                 \
+    const struct mach_header##suffix*   header = baseAddress;                                         \
+    struct load_command* lc     = (void *) header + sizeof(*header);                                  \
+    const  uint32_t      ncmds  = macho_maybeSwap(32, bytesSwapped, header->ncmds);                   \
+                                                                                                      \
+    for (size_t i = 0; i < ncmds; ++i) {                                                              \
+        bool result = true;                                                                           \
+        switch (macho_maybeSwap(32, bytesSwapped, lc->cmd)) {                                         \
+            case LC_SEGMENT##suffix:                                                                  \
+                result = machoFile_handleSegment##bits(self, baseAddress, (void *) lc, bytesSwapped); \
+                break;                                                                                \
+                                                                                                      \
+            case LC_SYMTAB: {                                                                         \
+                struct machoParser parser = machoParser_create(                                       \
+                    (void*) lc, baseAddress, self->_.inMemory ?                                       \
+                        (self->linkedit_vmaddr - self->text_vmaddr) - self->linkedit_fileoff : 0,     \
+                    bytesSwapped, bits == 64, (machoParser_addFunction) machoFile_addFunction, self   \
+                );                                                                                    \
+                result = machoParser_parseSymbolTable(&parser);                                       \
+                machoParser_destroy(&parser);                                                         \
+                break;                                                                                \
+            }                                                                                         \
+                                                                                                      \
+            case LC_UUID:                                                                             \
+                memcpy(&self->uuid, &((struct uuid_command*) ((void*) lc))->uuid, 16);                \
+                result = true;                                                                        \
+                break;                                                                                \
+                                                                                                      \
+            case LC_FUNCTION_STARTS:                                                                  \
+                result = machoFile_handleFunctionStarts(self, (void*) lc, baseAddress, bytesSwapped); \
+                break;                                                                                \
+        }                                                                                             \
+        if (!result) {                                                                                \
+            return false;                                                                             \
+        }                                                                                             \
+        lc = (void *) lc + macho_maybeSwap(32, bytesSwapped, lc->cmdsize);                            \
+    }                                                                                                 \
+                                                                                                      \
+    machoFile_fixupFunctions(self);                                                                   \
+                                                                                                      \
+    intptr_t diff = (uintptr_t) header - self->text_vmaddr;                                           \
+    vector_iterate(&self->_.regions, {                                                                \
+        element->first += diff;                                                                       \
+        element->second += diff;                                                                      \
+    });                                                                                               \
+    BINARY_FILE_SUPER(self, sortRegions);                                                             \
+                                                                                                      \
+    return true;                                                                                      \
 }
 
 machoFile_parseFileImpl(32,)
