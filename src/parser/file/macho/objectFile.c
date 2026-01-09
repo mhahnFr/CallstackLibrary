@@ -1,7 +1,7 @@
 /*
  * CallstackLibrary - Library creating human-readable call stacks.
  *
- * Copyright (C) 2023 - 2025  mhahnFr
+ * Copyright (C) 2023 - 2026  mhahnFr
  *
  * This file is part of the CallstackLibrary.
  *
@@ -256,17 +256,8 @@ static inline bool objectFile_handleSegment##bits(struct objectFile*         sel
 objectFile_handleSegmentFunc(32,)
 objectFile_handleSegmentFunc(64, _64)
 
-/**
- * The callback adding the function / object file pair to the object file
- * object passed via the variadic argument list.
- *
- * @param f the function / object file pair
- * @param args the arguments - should contain as first argument the object file object ot add the pair to
- */
-static inline void objectFile_addFunctionCallback(struct pair_funcFile f, va_list args) {
-    struct objectFile* self = va_arg(args, void*);
-
-    vector_push_back(&self->ownFunctions, f.first);
+static inline void objectFile_addFunctionCallback(struct objectFile* self, pair_funcFile_t pair) {
+    vector_push_back(&self->ownFunctions, pair.first);
 }
 
 /**
@@ -290,10 +281,16 @@ static inline bool objectFile_parseMachOImpl##bits(struct objectFile* self,     
                 result = objectFile_handleSegment##bits(self, (void*) lc, baseAddress, bytesSwapped); \
                 break;                                                                                \
                                                                                                       \
-            case LC_SYMTAB:                                                                           \
-                result = macho_parseSymtab((void*) lc, baseAddress, 0, bytesSwapped, true, NULL,      \
-                                           objectFile_addFunctionCallback, self);                     \
+            case LC_SYMTAB: {                                                                         \
+                struct machoParser parser = machoParser_create(                                       \
+                    (void*) lc, baseAddress, 0,                                                       \
+                    bytesSwapped, bits == 64,                                                         \
+                    (machoParser_addFunction) objectFile_addFunctionCallback, self                    \
+                );                                                                                    \
+                result = machoParser_parseSymbolTable(&parser);                                       \
+                machoParser_destroy(&parser);                                                         \
                 break;                                                                                \
+            }                                                                                         \
                                                                                                       \
             case LC_UUID:                                                                             \
                 memcpy(&self->uuid, &((struct uuid_command*) (void*) lc)->uuid, 16);                  \
