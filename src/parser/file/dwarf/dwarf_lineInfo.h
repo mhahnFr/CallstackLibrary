@@ -26,6 +26,8 @@
 #include <stdint.h>
 #include <stdlib.h>
 
+#include <DC4C/vector.h>
+
 /**
  * @brief This structure represents a source file reference.
  *
@@ -93,5 +95,7 @@ static inline void dwarf_lineInfo_destroyValue(const struct dwarf_lineInfo self)
 static inline void dwarf_lineInfo_destroy(const struct dwarf_lineInfo* self) {
     dwarf_lineInfo_destroyValue(*self);
 }
+
+typedef_vector_named(dwarfLineInfo, struct dwarf_lineInfo);
 
 #endif /* dwarfLineInfo_h */

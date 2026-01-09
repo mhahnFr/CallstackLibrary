@@ -1,7 +1,7 @@
 /*
  * CallstackLibrary - Library creating human-readable call stacks.
  *
- * Copyright (C) 2024 - 2025  mhahnFr
+ * Copyright (C) 2023 - 2025  mhahnFr
  *
  * This file is part of the CallstackLibrary.
  *
@@ -19,13 +19,18 @@
  * CallstackLibrary, see the file LICENSE.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-#ifndef vector_uint64_h
-#define vector_uint64_h
+#ifndef optional_pair_funcFile_h
+#define optional_pair_funcFile_h
 
-#include <stdint.h>
-
+#include <DC4C/optional.h>
+#include <DC4C/pair.h>
 #include <DC4C/vector.h>
 
-typedef_vector_named(uint64, uint64_t);
+#include "objectFile.h"
+#include "../function.h"
 
-#endif /* vector_uint64_h */
+typedef_pair_named(funcFile, struct function, struct objectFile *);
+typedef_optional_named(funcFile, struct pair_funcFile);
+typedef_vector_named(pairFuncFile, pair_funcFile_t);
+
+#endif /* optional_pair_funcFile_h */

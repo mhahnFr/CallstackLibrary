@@ -1,7 +1,7 @@
 #
 # CallstackLibrary - Library creating human-readable call stacks.
 #
-# Copyright (C) 2022 - 2025  mhahnFr
+# Copyright (C) 2022 - 2026  mhahnFr
 #
 # This file is part of the CallstackLibrary.
 #
@@ -19,8 +19,9 @@
 # CallstackLibrary, see the file LICENSE.  If not, see <https://www.gnu.org/licenses/>.
 #
 
-CXX_FUNCTIONS = false
-USE_BUILTINS  = true
+CXX_FUNCTIONS ?= false
+USE_BUILTINS  ?= true
+INSTALL_PATH  ?= /usr/local
 
 MACOS_ARCH_FLAGS =
 
@@ -37,46 +38,64 @@ STATIC_N  = $(CORE_NAME).a
 
 LD = $(CC)
 
-# Paths
-LINUX_PATH     = ./src/parser/file/elf
-DARWIN_PATH    = ./src/parser/file/macho
-
-DL_MAPPER_LINUX_PATH  = ./src/dlMapper/elf
-DL_MAPPER_DARWIN_PATH = ./src/dlMapper/macho
-
-UTILS_DARWIN_PATH = ./src/utils/macho
-# -----
-
-# Assert submodules are available
-ifeq ($(shell ls DC4C),)
-	_  = $(shell git submodule init)
-	_ += $(shell git submodule update)
-endif
-# -------------------------------
-
 # Main sources
-SRCS = $(shell find ./src -type f -name \*.c \! -path $(LINUX_PATH)\* \! -path $(DARWIN_PATH)\* \! -path $(DL_MAPPER_LINUX_PATH)\* \! -path $(DL_MAPPER_DARWIN_PATH)\* \! -path $(UTILS_DARWIN_PATH)\*) $(shell find ./mh_tryCatch/src -type f -name \*.c)
+SRCS = \
+	src/loadedLibInfo.c \
+	src/callstackInternal.c \
+	src/callstack_internals.c \
+	src/callstackFrame/callstack_frame.c \
+	src/callstackFrame/callstackFrameInternal.c \
+	src/callstack.c \
+	src/utils/file/pathUtils.c \
+	src/regions/regions.c \
+	src/parser/callstack_parser.c \
+	src/parser/file/loader.c \
+	src/parser/file/function.c \
+	src/parser/file/bounds.c \
+	src/parser/file/binaryFile.c \
+	src/parser/file/dwarf/leb128.c \
+	src/parser/file/dwarf/dwarf_parser.c \
+	src/parser/file/dwarf/v5/parser.c \
+	src/parser/file/dwarf/v4/parser.c \
+	src/parser/demangling/demangler.c \
+	src/parser/demangling/swift/demangler.c \
+	src/functionInfo/functionInfo.c \
+	src/dlMapper/dlMapper.c \
+	src/symbols/symbolInfo.c \
+	mh_tryCatch/src/try_catch.c
+
 OBJS = $(patsubst %.c, %.o, $(SRCS))
 DEPS = $(patsubst %.c, %.d, $(SRCS))
 # ------------
 
 # C++ sources
-CXX_SRCS = $(shell find ./src -type f -name \*.cpp)
+CXX_SRCS = \
+	src/parser/demangling/cxx/demangler.cpp \
+	src/utils/file/fileHelper.cpp
+
 CXX_OBJS = $(patsubst %.cpp, %.o, $(CXX_SRCS))
 CXX_DEPS = $(patsubst %.cpp, %.d, $(CXX_SRCS))
 # -----------
 
 # Linux specific sources
-LINUX_SRCS  = $(shell find $(LINUX_PATH) -type f -name \*.c)
-LINUX_SRCS += $(shell find $(DL_MAPPER_LINUX_PATH) -type f -name \*.c)
+LINUX_SRCS = \
+	src/parser/file/elf/elfFile.c \
+	src/dlMapper/elf/dlMapper.c
+
 LINUX_OBJS  = $(patsubst %.c, %.o, $(LINUX_SRCS))
 LINUX_DEPS  = $(patsubst %.c, %.d, $(LINUX_SRCS))
 # ----------------------
 
 # Darwin specific sources
-DARWIN_SRCS  = $(shell find $(DARWIN_PATH) -type f -name \*.c)
-DARWIN_SRCS += $(shell find $(DL_MAPPER_DARWIN_PATH) -type f -name \*.c)
-DARWIN_SRCS += $(shell find $(UTILS_DARWIN_PATH) -type f -name \*.c)
+DARWIN_SRCS = \
+	src/utils/macho/fat_handler.c \
+	src/parser/file/macho/archive.c \
+	src/parser/file/macho/cache.c \
+	src/parser/file/macho/macho_parser.c \
+	src/parser/file/macho/machoFile.c \
+	src/parser/file/macho/objectFile.c \
+	src/dlMapper/macho/dlMapper.c
+
 DARWIN_OBJS  = $(patsubst %.c, %.o, $(DARWIN_SRCS))
 DARWIN_DEPS  = $(patsubst %.c, %.d, $(DARWIN_SRCS))
 # -----------------------
@@ -94,9 +113,9 @@ NAME = $(STATIC_N)
 
 ifdef MACOS_ARCH_FLAGS2
 ifeq ($(CXX_FUNCTIONS),true)
-MACOS_ARCH_FLAGS += -mmacosx-version-min=10.15
+	MACOS_ARCH_FLAGS += -mmacosx-version-min=10.15
 else
-MACOS_ARCH_FLAGS += -mmacosx-version-min=10.6
+	MACOS_ARCH_FLAGS += -mmacosx-version-min=10.6
 endif
 endif
 
@@ -126,8 +145,6 @@ ifeq ($(CXX_FUNCTIONS),true)
 	CFLAGS += -DCXX_FUNCTIONS
 	DEPS   += $(CXX_DEPS)
 endif
-
-INSTALL_PATH ?= /usr/local
 
 default: $(NAME)
 

@@ -40,6 +40,7 @@ struct callstack_parser {
  */
 static inline void callstack_parser_create(struct callstack_parser* self) {
     self->clearCaches = callstack_autoClearCaches;
+    callstack_autoClearCaches = false;
 }
 
 /**
@@ -51,6 +52,7 @@ static inline void callstack_parser_destroy(const struct callstack_parser* self)
     if (self->clearCaches) {
         callstack_clearCaches();
     }
+    callstack_autoClearCaches = self->clearCaches;
 }
 
 /**

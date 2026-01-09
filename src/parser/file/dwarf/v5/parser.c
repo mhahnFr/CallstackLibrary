@@ -1,7 +1,7 @@
 /*
  * CallstackLibrary - Library creating human-readable call stacks.
  *
- * Copyright (C) 2024 - 2025  mhahnFr
+ * Copyright (C) 2024 - 2026  mhahnFr
  *
  * This file is part of the CallstackLibrary.
  *
@@ -22,15 +22,12 @@
 #include "parser.h"
 
 #include <stdio.h>
-
 #include <try_catch.h>
+#include <misc/numberContainers.h>
 
 #include "definitions.h"
-#include "optional_vector_fileAttribute.h"
 #include "../dwarf_parser.h"
 #include "../leb128.h"
-#include "../vector_pair_uint64.h"
-#include "../../optional_uint64_t.h"
 
 /**
  * Reads an index that follows in the given data buffer.

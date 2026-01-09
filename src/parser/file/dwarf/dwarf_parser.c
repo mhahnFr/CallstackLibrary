@@ -21,8 +21,9 @@
 
 #include "dwarf_parser.h"
 
+#include <misc/numberContainers.h>
+
 #include "leb128.h"
-#include "vector_pair_uint64.h"
 #include "v4/definitions.h"
 #include "v5/definitions.h"
 

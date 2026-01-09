@@ -19,26 +19,24 @@
  * CallstackLibrary, see the file LICENSE.  If not, see <https://www.gnu.org/licenses/>.
  */
 
+#include "callstackInternal.h"
+
 #include <execinfo.h>
 #include <string.h>
 
-#include <callstack_create.h>
-#include <callstack_defs.h>
-
-#include "callstackInternal.h"
-
+#include "callstackFrame/callstackFrameInternal.h"
 #include "dlMapper/dlMapper.h"
 #include "parser/callstack_parser.h"
 
 void callstack_createWithBacktrace(struct callstack * self,
                                    void * trace[], size_t traceLength) {
-    callstack_create(self);
+    *self = (struct callstack) CALLSTACK_INITIALIZER;
     traceLength = traceLength <= CALLSTACK_BACKTRACE_SIZE ? traceLength : CALLSTACK_BACKTRACE_SIZE;
     memcpy(self->backtrace, trace, traceLength * sizeof(void *));
     self->backtraceSize = traceLength;
 }
 
-int callstack_backtrace(void* buffer[], const int bufferSize, void* address) {
+int callstack_backtrace(void* buffer[], const int bufferSize, const void* address) {
     const int frames = backtrace(buffer, bufferSize);
     int i = 0;
 
@@ -74,16 +72,7 @@ enum callstack_type callstack_translateBinaries(struct callstack* self, const bo
 
     dlMapper_init();
     for (size_t i = 0; i < self->backtraceSize; ++i) {
-        struct callstack_frame* element = &self->frames[i];
-
-        callstack_frame_create(element);
-
-        struct loadedLibInfo* info = dlMapper_libInfoForAddress(self->backtrace[i]);
-        element->binaryFile = info == NULL ? NULL : useCache ? info->absoluteFileName : strdup(info->absoluteFileName);
-        element->binaryFileRelative = info == NULL ? NULL : useCache ? info->relativeFileName : strdup(info->relativeFileName);
-        element->binaryFileIsSelf = info == NULL ? false : info->isSelf;
-        element->reserved = info;
-        element->reserved1 = useCache;
+        callstackFrame_translateBinary(&self->frames[i], self->backtrace[i], useCache, false);
     }
     return TRANSLATED;
 }

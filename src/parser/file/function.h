@@ -23,8 +23,9 @@
 #define function_h
 
 #include <stdint.h>
-
-#include "optional_string.h"
+#include <DC4C/optional.h>
+#include <DC4C/vector.h>
+#include <misc/string_utils.h>
 
 /**
  * This structure represents a function in a Mach-O symbol table.
@@ -42,13 +43,6 @@ struct function {
 };
 
 /**
- * Allocates a new function structure.
- *
- * @return the allocated function structure or @c NULL on error
- */
-struct function * function_new(void);
-
-/**
  * Initializes the given function structure.
  *
  * @param self the function structure to be initialized
@@ -62,11 +56,7 @@ void function_create(struct function * self);
  */
 void function_destroy(const struct function* self);
 
-/**
- * Deinitializes and frees the given function structure.
- *
- * @param self the function structure to be deleted
- */
-void function_delete(struct function * self);
+typedef_optional_named(function, struct function);
+typedef_vector_named(function, struct function);
 
 #endif /* function_h */

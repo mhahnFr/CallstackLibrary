@@ -19,7 +19,6 @@
  * CallstackLibrary, see the file LICENSE.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-#include <stddef.h>
 #include <sys/stat.h>
 
 #include "binaryFile.h"
@@ -71,6 +70,21 @@ bool binaryFile_addr2String(struct binaryFile* self, const void* address, struct
 
 bool binaryFile_getFunctionInfo(struct binaryFile* self, const char* functionName, struct functionInfo* info) {
     return LCS_FILE(self, getFunctionInfo, functionName, info);
+}
+
+vector_pair_ptr_t* binaryFile_getRegions(struct binaryFile* self) {
+    binaryFile_maybeParse(self);
+    return &self->regions;
+}
+
+static inline int binaryFile_regionsCompare(const pair_ptr_t* lhs, const pair_ptr_t* rhs) {
+    if (lhs->first < rhs->first) return -1;
+    if (lhs->first > rhs->first) return +1;
+    return 0;
+}
+
+void binaryFile_sortRegions(struct binaryFile* self) {
+    vector_sort(&self->regions, binaryFile_regionsCompare);
 }
 
 vector_pair_ptr_t binaryFile_getTLSRegions(struct binaryFile* self) {

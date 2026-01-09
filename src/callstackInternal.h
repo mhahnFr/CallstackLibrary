@@ -58,7 +58,7 @@ void callstack_createWithBacktrace(struct callstack * self,
  * @param address the address upon which frames are removed from the backtrace
  * @return the count of frame addresses stored in the given buffer
  */
-int callstack_backtrace(void * buffer[], int bufferSize, void * address);
+int callstack_backtrace(void* buffer[], int bufferSize, const void* address);
 
 /**
  * @brief Translates the given callstack object into a human-readable format.

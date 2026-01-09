@@ -1,7 +1,7 @@
 /*
  * Callstack Library - Library creating human-readable call stacks.
  *
- * Copyright (C) 2024  mhahnFr
+ * Copyright (C) 2024 - 2025  mhahnFr
  *
  * This file is part of the CallstackLibrary.
  *
@@ -24,6 +24,8 @@
 
 #include <stdint.h>
 
+#include <DC4C/vector.h>
+
 /**
  * This structure represents a line entry in the DWARF line program.
  */
@@ -38,5 +40,7 @@ struct dwarf_fileNameEntry {
     /** The size in bytes of the file.              */
     uint64_t size;
 };
+
+typedef_vector_named(dwarfFileEntry, struct dwarf_fileNameEntry);
 
 #endif /* fileNameEntry_h */

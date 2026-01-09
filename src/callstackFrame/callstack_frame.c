@@ -1,9 +1,9 @@
 /*
  * CallstackLibrary - Library creating human-readable call stacks.
  *
- * Copyright (C) 2023 - 2025  mhahnFr
+ * Copyright (C) 2023 - 2026  mhahnFr
  *
- * This file is part of the CallstackLibrary. 
+ * This file is part of the CallstackLibrary.
  *
  * The CallstackLibrary is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -19,11 +19,16 @@
  * CallstackLibrary, see the file LICENSE.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-#include <string.h>
-
 #include <callstack_frame.h>
+#include <misc/string_utils.h>
 
-#include "misc/string_utils.h"
+struct callstack_frame* callstack_frame_new() {
+    struct callstack_frame* toReturn = malloc(sizeof(struct callstack_frame));
+    if (toReturn != NULL) {
+        *toReturn = callstack_frame_initializer;
+    }
+    return toReturn;
+}
 
 struct callstack_frame* callstack_frame_copy(const struct callstack_frame* self) {
     struct callstack_frame * toReturn = callstack_frame_new();
@@ -40,13 +45,13 @@ void callstack_frame_copyHere(struct callstack_frame * destination, const struct
         source->reserved,
         source->reserved1,
         source->reserved2,
+        source->sourceFileOutdated,
+        source->binaryFileIsSelf,
         source->reserved1 ? source->binaryFile : utils_maybeCopySave(source->binaryFile, true),
         source->reserved1 ? source->binaryFileRelative : utils_maybeCopySave(source->binaryFileRelative, true),
         source->reserved2 ? source->function : utils_maybeCopySave(source->function, true),
         source->reserved1 ? source->sourceFile : utils_maybeCopySave(source->sourceFile, true),
         source->reserved1 ? source->sourceFileRelative : utils_maybeCopySave(source->sourceFileRelative, true),
-        source->sourceFileOutdated,
-        source->binaryFileIsSelf,
         source->sourceLine,
         source->sourceLineColumn
     };
@@ -74,4 +79,21 @@ char * callstack_frame_getShortestSourceFile(const struct callstack_frame * self
     const size_t s1 = strlen(self->sourceFile),
                  s2 = strlen(self->sourceFileRelative);
     return s2 < s1 ? self->sourceFileRelative : self->sourceFile;
+}
+
+void callstack_frame_destroy(const struct callstack_frame* self) {
+    if (!self->reserved1) {
+        free(self->binaryFile);
+        free(self->binaryFileRelative);
+        free(self->sourceFile);
+        free(self->sourceFileRelative);
+    }
+    if (!self->reserved2) {
+        free(self->function);
+    }
+}
+
+void callstack_frame_delete(struct callstack_frame* self) {
+    callstack_frame_destroy(self);
+    free(self);
 }

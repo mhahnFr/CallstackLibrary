@@ -22,13 +22,11 @@
 #ifndef binaryFile_h
 #define binaryFile_h
 
-#include <stdbool.h>
-
 #include <callstack_frame.h>
+#include <stdbool.h>
 #include <functionInfo/functionInfo.h>
 
 #include "vector_pair_ptr.h"
-
 #include "dwarf/dwarf_lineInfo.h"
 
 /**
@@ -60,19 +58,7 @@ struct binaryFile {
  */
 struct binaryFile* binaryFile_new(const char* fileName, const void* startAddress);
 
-/**
- * Initializes the given binary file structure.
- *
- * @param self the binary file structure to be initialized
- */
-static inline void binaryFile_create(struct binaryFile* self) {
-    self->fileName = NULL;
-    self->parsed   = false;
-    self->inMemory = false;
-    self->startAddress = NULL;
-    self->relocationOffset = 0;
-    vector_init(&self->regions);
-}
+#define binaryFile_initializer (struct binaryFile) { false, false, NULL, NULL, 0, vector_initializer }
 
 /**
  * Deducts the debug information available for the given address and stores it
@@ -94,6 +80,9 @@ bool binaryFile_addr2String(struct binaryFile* self, const void* address, struct
  * @return whether the function was found
  */
 bool binaryFile_getFunctionInfo(struct binaryFile* self, const char* functionName, struct functionInfo* info);
+
+vector_pair_ptr_t* binaryFile_getRegions(struct binaryFile* self);
+void binaryFile_sortRegions(struct binaryFile* self);
 
 /**
  * Returns the thread-local storage regions of the given binary file.

@@ -19,17 +19,19 @@
  * CallstackLibrary, see the file LICENSE.  If not, see <https://www.gnu.org/licenses/>.
  */
 
+#include <dlfcn.h>
 #include <stdlib.h>
-#include <string.h>
+#include <misc/string_utils.h>
 
 #include "callstackInternal.h"
 #include "lcs_builtins.h"
+#include "dlMapper/dlMapper.h"
 
 struct callstack* callstack_new(void) {
     return callstack_newWithAddress(lcs_returnAddress(0));
 }
 
-struct callstack * callstack_newWithAddress(void * address) {
+struct callstack* callstack_newWithAddress(const void* address) {
     void * trace[CALLSTACK_BACKTRACE_SIZE];
     const int size = callstack_backtrace(trace, CALLSTACK_BACKTRACE_SIZE, address);
     if (size < 0) return NULL;
@@ -45,7 +47,7 @@ bool callstack_emplace(struct callstack* self) {
     return callstack_emplaceWithAddress(self, lcs_returnAddress(0));
 }
 
-bool callstack_emplaceWithAddress(struct callstack * self, void * address) {
+bool callstack_emplaceWithAddress(struct callstack* self, const void* address) {
     void * trace[CALLSTACK_BACKTRACE_SIZE];
     const int size = callstack_backtrace(trace, CALLSTACK_BACKTRACE_SIZE, address);
     return callstack_emplaceWithBacktrace(self, trace, size);
@@ -80,6 +82,40 @@ void callstack_copy(struct callstack * self, const struct callstack * other) {
     }
 }
 
+bool callstack_relativize(struct callstack* self, const char** binaryNames) {
+    if (self == NULL) return false;
+
+    dlMapper_init();
+    for (size_t i = 0; i < self->backtraceSize; ++i) {
+        const pair_relativeInfo_t info = dlMapper_relativize(self->backtrace[i]);
+        if (info.first == NULL) {
+            return false;
+        }
+        self->backtrace[i] = (void*) info.second;
+        binaryNames[i] = info.first->absoluteFileName;
+    }
+    return true;
+}
+
+struct callstack_frame* callstack_translateRelative(struct callstack* self, const char** binaryNames) {
+    if (self == NULL) return NULL;
+
+    vector_string_t handles = vector_initializer;
+    vector_reserve(&handles, self->backtraceSize);
+    for (size_t i = 0; i < self->backtraceSize; ++i) {
+        vector_push_back(&handles, dlopen(binaryNames[i], RTLD_NOW));
+    }
+    dlMapper_init();
+    for (size_t i = 0; i < self->backtraceSize; ++i) {
+        self->backtrace[i] = dlMapper_absolutize(self->backtrace[i], binaryNames[i]);
+    }
+    self->frames = callstack_toArray(self);
+    vector_iterate(&handles, if (*element != NULL) {
+        dlclose((void*) *element);
+    });
+    return self->frames;
+}
+
 struct callstack_frame * callstack_toArray(struct callstack * self) {
     if (self == NULL) return NULL;
 
@@ -89,24 +125,22 @@ struct callstack_frame * callstack_toArray(struct callstack * self) {
     return self->frames;
 }
 
-struct callstack_frame * callstack_getBinaries(struct callstack * self) {
+static inline struct callstack_frame* callstack_getBinariesShared(struct callstack* self, const bool useCache) {
     if (self == NULL) return NULL;
-    
+
     if ((self->translationStatus == NONE || self->translationStatus == FAILED)
-        && callstack_translateBinaries(self, false) == FAILED) {
+        && callstack_translateBinaries(self, useCache) == FAILED) {
         return NULL;
     }
     return self->frames;
 }
 
-struct callstack_frame* callstack_getBinariesCached(struct callstack* self) {
-    if (self == NULL) return NULL;
+struct callstack_frame* callstack_getBinaries(struct callstack* self) {
+    return callstack_getBinariesShared(self, false);
+}
 
-    if ((self->translationStatus == NONE || self->translationStatus == FAILED)
-        && callstack_translateBinaries(self, true) == FAILED) {
-        return NULL;
-    }
-    return self->frames;
+struct callstack_frame* callstack_getBinariesCached(struct callstack* self) {
+    return callstack_getBinariesShared(self, true);
 }
 
 void callstack_destroy(struct callstack * self) {

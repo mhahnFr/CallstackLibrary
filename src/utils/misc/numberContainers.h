@@ -1,7 +1,7 @@
 /*
- * CallstackLibrary - Library creating human-readable call stacks.
+* CallstackLibrary - Library creating human-readable call stacks.
  *
- * Copyright (C) 2023 - 2024  mhahnFr
+ * Copyright (C) 2025  mhahnFr
  *
  * This file is part of the CallstackLibrary.
  *
@@ -19,13 +19,23 @@
  * CallstackLibrary, see the file LICENSE.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-#ifndef optional_function_h
-#define optional_function_h
+#ifndef utils_misc_numberContainers_h
+#define utils_misc_numberContainers_h
+
+#include <stdint.h>
 
 #include <DC4C/optional.h>
+#include <DC4C/pair.h>
+#include <DC4C/vector.h>
 
-#include "function.h"
+// uint64_t containers
+typedef_optional_named(uint64, uint64_t);
+typedef_pair_named(uint64, uint64_t, uint64_t);
 
-typedef_optional_named(function, struct function);
+typedef_vector_named(uint64, uint64_t);
+typedef_vector_named(pair_uint64, struct pair_uint64);
 
-#endif /* optional_function_h */
+// uint8_t containers
+typedef_vector_named(uint8, uint8_t);
+
+#endif /* utils_misc_numberContainers_h */

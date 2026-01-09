@@ -1,7 +1,7 @@
 /*
  * CallstackLibrary - Library creating human-readable call stacks.
  *
- * Copyright (C) 2024 - 2025  mhahnFr
+ * Copyright (C) 2025  mhahnFr
  *
  * This file is part of the CallstackLibrary.
  *
@@ -19,13 +19,19 @@
  * CallstackLibrary, see the file LICENSE.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-#ifndef vector_pair_uint64_h
-#define vector_pair_uint64_h
+#ifndef CALLSTACKLIBRARY_CALLSTACKFRAMEINTERNAL_H
+#define CALLSTACKLIBRARY_CALLSTACKFRAMEINTERNAL_H
 
-#include <DC4C/vector.h>
+#include <callstack_frame.h>
 
-#include "pair_uint64.h"
+/**
+ * Deducts the binary file information for the given address and stores the
+ * information in the given callstack frame.
+ *
+ * @param self the callstack frame object to fill
+ * @param address the address whose binary file information to deduct
+ * @param useCache whether fill in cached values
+ */
+void callstackFrame_translateBinary(struct callstack_frame* self, const void* address, bool useCache, bool includeRegions);
 
-typedef_vector_named(pair_uint64, pair_uint64_t);
-
-#endif /* vector_pair_uint64_h */
+#endif //CALLSTACKLIBRARY_CALLSTACKFRAMEINTERNAL_H

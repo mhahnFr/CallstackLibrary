@@ -1,7 +1,7 @@
 /*
  * CallstackLibrary - Library creating human-readable call stacks.
  *
- * Copyright (C) 2023 - 2025  mhahnFr
+ * Copyright (C) 2023 - 2026  mhahnFr
  *
  * This file is part of the CallstackLibrary.
  *
@@ -59,7 +59,7 @@ class exception: public std::exception {
      * @param number the number to be converted
      * @return the string representation of the given number
      */
-    static inline std::string toString(unsigned long number) {
+    static inline std::string toString(const unsigned long number) {
 #ifdef LCS_CXX11
         return std::to_string(number);
 #else
@@ -79,7 +79,8 @@ class exception: public std::exception {
         
         const char * rawName = typeid(*this).name();
         int status;
-        if (char* dName = abi::__cxa_demangle(rawName, LCS_NULL, LCS_NULL, &status); dName != LCS_NULL) {
+        char* dName = abi::__cxa_demangle(rawName, LCS_NULL, LCS_NULL, &status);
+        if (dName != LCS_NULL) {
             toReturn = dName;
             std::free(dName);
         } else {

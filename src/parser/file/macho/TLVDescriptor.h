@@ -26,6 +26,9 @@
 
 #include <DC4C/vector.h>
 
+/**
+ * The type of the native thread-local value descriptors.
+ */
 typedef struct tlv_descriptor TLVDescriptor;
 
 typedef_vector(TLVDescriptor);

@@ -1,7 +1,7 @@
 /*
  * CallstackLibrary - Library creating human-readable call stacks.
  *
- * Copyright (C) 2025  mhahnFr
+ * Copyright (C) 2025 - 2026  mhahnFr
  *
  * This file is part of the CallstackLibrary.
  *
@@ -19,11 +19,20 @@
  * CallstackLibrary, see the file LICENSE.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-#ifndef optional_string_h
-#define optional_string_h
+#include "callstackFrameInternal.h"
 
-#include <DC4C/optional.h>
+#include "../dlMapper/dlMapper.h"
 
-typedef_optional_named(string, char*);
+void callstackFrame_translateBinary(struct callstack_frame* self, const void* address,
+                                    const bool useCache, const bool includeRegions) {
+    *self = callstack_frame_initializer;
 
-#endif /* optional_string_h */
+    struct loadedLibInfo* info = dlMapper_libInfoForAddress(address, includeRegions);
+    if (info != NULL) {
+        self->binaryFile = useCache ? info->absoluteFileName : strdup(info->absoluteFileName);
+        self->binaryFileRelative = useCache ? info->relativeFileName : strdup(info->relativeFileName);
+        self->binaryFileIsSelf = info->isSelf;
+    }
+    self->reserved = info;
+    self->reserved1 = useCache;
+}

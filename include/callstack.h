@@ -23,15 +23,15 @@
 #define __lcs_callstack_h
 
 #include <stdbool.h>
-#include <stddef.h>
 
-#include "callstack_defs.h"
 #include "callstack_frame.h"
 #include "callstack_type.h"
 
 #ifdef __cplusplus
 extern "C" {
 #endif
+
+#define CALLSTACK_BACKTRACE_SIZE 128
 
 /**
  * A structure representing a callstack.
@@ -58,6 +58,8 @@ struct callstack {
     void *  backtrace[CALLSTACK_BACKTRACE_SIZE];
 };
 
+#define CALLSTACK_INITIALIZER { NONE, 0, NULL, 0, {} }
+
 /**
  * @brief Creates a callstack of the calling function.
  *
@@ -81,7 +83,7 @@ struct callstack * callstack_new(void);
  * @param address The stack address after which frames are ignored.
  * @return A newly allocated callstack object.
  */
-struct callstack * callstack_newWithAddress(void * address);
+struct callstack* callstack_newWithAddress(const void* address);
 
 /**
  * @brief Constructs the given callstack object.
@@ -111,7 +113,7 @@ bool callstack_emplace(struct callstack * self);
  * @param address The stack address after which frames are ignored.
  * @return Whether the given callstack object was constructed successfully.
  */
-bool callstack_emplaceWithAddress(struct callstack * self, void * address);
+bool callstack_emplaceWithAddress(struct callstack* self, const void* address);
 
 /**
  * @brief Constructs the given callstack object.
@@ -140,6 +142,35 @@ bool callstack_emplaceWithBacktrace(struct callstack * self,
  * @param other The callstack object to be copied.
  */
 void callstack_copy(struct callstack * self, const struct callstack * other);
+
+/**
+ * @brief Relativizes the given callstack object.
+ *
+ * Upon successful return of the function, the addresses within the callstack
+ * object have become offsets into the runtime image they belong to. The names
+ * of these runtime images are stored within the given string array.
+ *
+ * @param self the callstack to be relativized
+ * @param binaryNames an array capable to hold the same number of strings as
+ * the amount of entries within the given callstack object
+ * @return whether the given callstack was relativized successfully
+ * @since v2.3
+ */
+bool callstack_relativize(struct callstack* self, const char** binaryNames);
+
+/**
+ * @brief Translates the given relativized callstack object, using the provided array
+ * of binary file names.
+ *
+ * The given string array must hold at least the same amount of binary file
+ * names as the amount of entries within the given callstack object.
+ *
+ * @param self the relativized callstack to be translated
+ * @param binaryNames the names of the binary images the offsets are pointing into
+ * @return the translated callstack frames
+ * @since v2.3
+ */
+struct callstack_frame* callstack_translateRelative(struct callstack* self, const char** binaryNames);
 
 /**
  * @brief Translates the given callstack and returns an array of the translated frames.

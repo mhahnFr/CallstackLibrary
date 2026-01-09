@@ -1,7 +1,7 @@
 /*
  * CallstackLibrary - Library creating human-readable call stacks.
  *
- * Copyright (C) 2024 - 2025  mhahnFr
+ * Copyright (C) 2025  mhahnFr
  *
  * This file is part of the CallstackLibrary.
  *
@@ -19,11 +19,23 @@
  * CallstackLibrary, see the file LICENSE.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-#ifndef vector_string_h
-#define vector_string_h
+#ifndef __lcs_symbols_symbolInfo_h
+#define __lcs_symbols_symbolInfo_h
 
-#include <DC4C/vector.h>
+#include "../callstack_frame.h"
 
-typedef_vector_named(string, const char*);
+#ifdef __cplusplus
+extern "C" {
+#endif
 
-#endif /* vector_string_h */
+struct callstack_frame symbols_getInfo(const void* address);
+
+#ifdef LCS_USE_UNSAFE_OPTIMIZATION
+struct callstack_frame symbols_getInfoCached(const void* address);
+#endif
+
+#ifdef __cplusplus
+} // extern "C"
+#endif
+
+#endif //__lcs_symbols_symbolInfo_h
