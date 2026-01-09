@@ -1,7 +1,7 @@
 /*
  * CallstackLibrary - Library creating human-readable call stacks.
  *
- * Copyright (C) 2023 - 2025  mhahnFr
+ * Copyright (C) 2023 - 2026  mhahnFr
  *
  * This file is part of the CallstackLibrary.
  *
@@ -79,7 +79,8 @@ class exception: public std::exception {
         
         const char * rawName = typeid(*this).name();
         int status;
-        if (char* dName = abi::__cxa_demangle(rawName, LCS_NULL, LCS_NULL, &status); dName != LCS_NULL) {
+        char* dName = abi::__cxa_demangle(rawName, LCS_NULL, LCS_NULL, &status);
+        if (dName != LCS_NULL) {
             toReturn = dName;
             std::free(dName);
         } else {
