@@ -1,7 +1,7 @@
 /*
  * CallstackLibrary - Library creating human-readable call stacks.
  *
- * Copyright (C) 2024 - 2025  mhahnFr
+ * Copyright (C) 2024 - 2026  mhahnFr
  *
  * This file is part of the CallstackLibrary.
  *
@@ -30,7 +30,7 @@
  * @param libs the loaded library information vector
  * @return whether the information could be loaded successfully
  */
-bool dlMapper_platform_loadLoadedLibraries(vector_loadedLibInfo_t* libs);
+bool dlMapper_platform_loadLoadedLibraries(vector_binaryFile_t* libs);
 
 /**
  * @brief Relativizes the given address to the given runtime image info.
@@ -41,7 +41,7 @@ bool dlMapper_platform_loadLoadedLibraries(vector_loadedLibInfo_t* libs);
  * @param address the address to be relativized
  * @return the offset into the given runtime image
  */
-uintptr_t dlMapper_platform_relativize(const struct loadedLibInfo* info, const void* address);
+uintptr_t dlMapper_platform_relativize(const struct binaryFile* info, const void* address);
 
 /**
  * @brief Absolutizes the given address offset.
@@ -52,6 +52,6 @@ uintptr_t dlMapper_platform_relativize(const struct loadedLibInfo* info, const v
  * @param address the address offset into the given runtime image
  * @return the global address within the represented runtime image
  */
-uintptr_t dlMapper_platform_absolutize(const struct loadedLibInfo* info, uintptr_t address);
+uintptr_t dlMapper_platform_absolutize(const struct binaryFile* info, uintptr_t address);
 
 #endif /* dlMapper_platform_h */
