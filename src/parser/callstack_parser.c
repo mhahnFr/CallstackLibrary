@@ -1,7 +1,7 @@
 /*
  * CallstackLibrary - Library creating human-readable call stacks.
  *
- * Copyright (C) 2022 - 2025  mhahnFr
+ * Copyright (C) 2022 - 2026  mhahnFr
  *
  * This file is part of the CallstackLibrary.
  *
@@ -19,13 +19,11 @@
  * CallstackLibrary, see the file LICENSE.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-#include <string.h>
-
 #include "callstack_parser.h"
-#include "demangling/demangler.h"
 
 #include "../callstackInternal.h"
-#include "../loadedLibInfo.h"
+#include "demangling/demangler.h"
+#include "file/binaryFile.h"
 
 /**
  * @brief Translates the given callstack using the given parser.
@@ -39,13 +37,8 @@ static inline bool callstack_parser_parseImpl(const struct callstack_parser* sel
     (void) self;
     
     for (size_t i = 0; i < callstack->backtraceSize; ++i) {
-        struct loadedLibInfo*    info = callstack->frames[i].reserved;
-        struct callstack_frame* frame = &callstack->frames[i];
-
-        if (!loadedLibInfo_prepare(info)) {
-            continue;
-        }
-        binaryFile_addr2String(info->associated, callstack->backtrace[i], frame);
+        binaryFile_addr2String(callstack->frames[i].reserved, callstack->backtrace[i], &callstack->frames[i]);
+        // TODO: Error handling, also if reserved is NULL
     }
     return true;
 }
