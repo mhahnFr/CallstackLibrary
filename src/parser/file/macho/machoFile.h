@@ -46,6 +46,7 @@ struct machoFile {
     /** The VM address of the text segment.                                     */
     uint64_t text_vmaddr;
     uint64_t tlvSize;
+    bool parseShallow; // TODO: Throw out of here!
     /** Information about the dSYM bundle file.                                 */
     struct {
         /** Whether the file was already tried to be deducted. */

@@ -45,6 +45,8 @@ void machoFile_create(struct machoFile* self) {
     self->linkedit_vmaddr  = 0;
     self->tlvSize          = 0;
 
+    self->parseShallow = false;
+
     self->dSYMFile.triedParsing = false;
     self->dSYMFile.file         = NULL;
 
@@ -205,6 +207,11 @@ static inline bool machoFile_handleSegment##bits(struct machoFile* self, const v
         self->linkedit_fileoff = macho_maybeSwap(bits, bytesSwapped, segment->fileoff);                            \
     } else if (strcmp(segment->segname, SEG_TEXT) == 0) {                                                          \
         self->text_vmaddr = macho_maybeSwap(bits, bytesSwapped, segment->vmaddr);                                  \
+        self->_.relocationOffset = self->text_vmaddr;                                                              \
+        self->_.end = self->_.startAddress + macho_maybeSwap(bits, bytesSwapped, segment->vmsize);                 \
+    }                                                                                                              \
+    if (self->parseShallow) {                                                                                      \
+        return true;                                                                                               \
     }                                                                                                              \
                                                                                                                    \
     if (segment->initprot & 2 && segment->initprot & 1) {                                                          \
@@ -308,9 +315,9 @@ static inline void machoFile_fixupFunctions(struct machoFile* self) {
 #define machoFile_parseFileImpl(bits, suffix)                                                         \
 static inline bool machoFile_parseFileImpl##bits(struct machoFile* self, const void* baseAddress,     \
                                                  bool bytesSwapped) {                                 \
-    const struct mach_header##suffix*   header = baseAddress;                                         \
-    struct load_command* lc     = (void *) header + sizeof(*header);                                  \
-    const  uint32_t      ncmds  = macho_maybeSwap(32, bytesSwapped, header->ncmds);                   \
+    const struct mach_header##suffix* header = baseAddress;                                           \
+    struct load_command* lc = (void *) header + sizeof(*header);                                      \
+    const uint32_t ncmds = macho_maybeSwap(32, bytesSwapped, header->ncmds);                          \
                                                                                                       \
     for (size_t i = 0; i < ncmds; ++i) {                                                              \
         bool result = true;                                                                           \
@@ -320,6 +327,10 @@ static inline bool machoFile_parseFileImpl##bits(struct machoFile* self, const v
                 break;                                                                                \
                                                                                                       \
             case LC_SYMTAB: {                                                                         \
+                if (self->parseShallow) {                                                             \
+                    result = true;                                                                    \
+                    break;                                                                            \
+                }                                                                                     \
                 struct machoParser parser = machoParser_create(                                       \
                     (void*) lc, baseAddress, self->_.inMemory ?                                       \
                         (self->linkedit_vmaddr - self->text_vmaddr) - self->linkedit_fileoff : 0,     \
@@ -336,7 +347,9 @@ static inline bool machoFile_parseFileImpl##bits(struct machoFile* self, const v
                 break;                                                                                \
                                                                                                       \
             case LC_FUNCTION_STARTS:                                                                  \
-                result = machoFile_handleFunctionStarts(self, (void*) lc, baseAddress, bytesSwapped); \
+                result = self->parseShallow ? true : machoFile_handleFunctionStarts(                  \
+                    self, (void*) lc, baseAddress, bytesSwapped                                       \
+                );                                                                                    \
                 break;                                                                                \
         }                                                                                             \
         if (!result) {                                                                                \
@@ -345,14 +358,16 @@ static inline bool machoFile_parseFileImpl##bits(struct machoFile* self, const v
         lc = (void *) lc + macho_maybeSwap(32, bytesSwapped, lc->cmdsize);                            \
     }                                                                                                 \
                                                                                                       \
-    machoFile_fixupFunctions(self);                                                                   \
+    if (!self->parseShallow) {                                                                        \
+        machoFile_fixupFunctions(self);                                                               \
                                                                                                       \
-    intptr_t diff = (uintptr_t) header - self->text_vmaddr;                                           \
-    vector_iterate(&self->_.regions, {                                                                \
-        element->first += diff;                                                                       \
-        element->second += diff;                                                                      \
-    });                                                                                               \
-    BINARY_FILE_SUPER(self, sortRegions);                                                             \
+        intptr_t diff = (uintptr_t) header - self->text_vmaddr;                                       \
+        vector_iterate(&self->_.regions, {                                                            \
+            element->first += diff;                                                                   \
+            element->second += diff;                                                                  \
+        });                                                                                           \
+        BINARY_FILE_SUPER(self, sortRegions);                                                         \
+    }                                                                                                 \
                                                                                                       \
     return true;                                                                                      \
 }
@@ -390,7 +405,10 @@ static inline bool machoFile_parseFile(struct machoFile* self, const void* baseA
 }
 
 bool machoFile_parseShallow(struct machoFile* self) {
-    return false;
+    self->parseShallow = true;
+    const bool toReturn = machoFile_parse(self);
+    self->parseShallow = false;
+    return toReturn;
 }
 
 bool machoFile_parse(struct machoFile* self) {
