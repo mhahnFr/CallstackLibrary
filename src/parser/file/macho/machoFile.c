@@ -38,18 +38,7 @@
 #include "../../callstack_parser.h"
 #include "../dwarf/leb128.h"
 
-struct machoFile* machoFile_new(void) {
-    struct machoFile* toReturn = malloc(sizeof(struct machoFile));
-    
-    if (toReturn != NULL) {
-        machoFile_create(toReturn);
-    }
-    return toReturn;
-}
-
 void machoFile_create(struct machoFile* self) {
-    self->_ = binaryFile_initializer;
-
     self->addressOffset    = 0;
     self->linkedit_fileoff = 0;
     self->text_vmaddr      = 0;
@@ -390,13 +379,17 @@ static inline bool machoFile_parseFile(struct machoFile* self, const void* baseA
         case MH_CIGAM_64: return machoFile_parseFileImpl64(self, baseAddress, true);
 
         case FAT_MAGIC:
-        case FAT_MAGIC_64: return machoFile_parseFile(self, macho_parseFat(baseAddress, false, self->_.fileName));
+        case FAT_MAGIC_64: return machoFile_parseFile(self, macho_parseFat(baseAddress, false, self->_.fileName.original));
 
         case FAT_CIGAM:
-        case FAT_CIGAM_64: return machoFile_parseFile(self, macho_parseFat(baseAddress, true, self->_.fileName));
+        case FAT_CIGAM_64: return machoFile_parseFile(self, macho_parseFat(baseAddress, true, self->_.fileName.original));
 
         default: break;
     }
+    return false;
+}
+
+bool machoFile_parseShallow(struct machoFile* self) {
     return false;
 }
 

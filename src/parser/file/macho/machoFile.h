@@ -1,7 +1,7 @@
 /*
  * CallstackLibrary - Library creating human-readable call stacks.
  *
- * Copyright (C) 2023 - 2025  mhahnFr
+ * Copyright (C) 2023 - 2026  mhahnFr
  *
  * This file is part of the CallstackLibrary.
  *
@@ -65,18 +65,13 @@ struct machoFile {
 };
 
 /**
- * Allocates and initializes a Mach-O file structure.
- *
- * @return the allocated Mach-O file structure or `NULL` on error
- */
-struct machoFile* machoFile_new(void);
-
-/**
  * Initializes the given Mach-O file structure.
  *
  * @param self the Mach-O file structure to be initialized
  */
 void machoFile_create(struct machoFile* self);
+
+bool machoFile_parseShallow(struct machoFile* self);
 
 /**
  * Stores all debug information that is possible to deduct about the given
