@@ -74,13 +74,13 @@ void machoFile_create(struct machoFile* self) {
  */
 static inline struct objectFile* machoFile_findDSYMBundle(const struct machoFile* self) {
     const char* const dsymAmendment = ".dSYM/Contents/Resources/DWARF/";
-    const char* rawName = strrchr(self->_.fileName, '/');
+    const char* rawName = strrchr(self->_.fileName.original, '/');
     if (rawName == NULL) return NULL;
     rawName++;
-    const size_t size = strlen(self->_.fileName) + strlen(dsymAmendment) + strlen(rawName) + 1;
+    const size_t size = strlen(self->_.fileName.original) + strlen(dsymAmendment) + strlen(rawName) + 1;
     char* name = malloc(size);
     if (name == NULL) return NULL;
-    strlcpy(name, self->_.fileName, size);
+    strlcpy(name, self->_.fileName.original, size);
     strlcat(name, dsymAmendment, size);
     strlcat(name, rawName, size);
     name[size - 1] = '\0';
@@ -402,7 +402,7 @@ static inline bool machoFile_parseFile(struct machoFile* self, const void* baseA
 
 bool machoFile_parse(struct machoFile* self) {
     const bool success = self->_.inMemory ? machoFile_parseFile(self, self->_.startAddress)
-                                        : loader_loadFileAndExecute(self->_.fileName,
+                                        : loader_loadFileAndExecute(self->_.fileName.original,
                                                                     (union loader_parserFunction) { (loader_parser) machoFile_parseFile },
                                                                     false,
                                                                     self);

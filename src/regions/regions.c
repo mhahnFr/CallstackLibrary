@@ -1,7 +1,7 @@
 /*
  * CallstackLibrary - Library creating human-readable call stacks.
  *
- * Copyright (C) 2025  mhahnFr
+ * Copyright (C) 2025 - 2026  mhahnFr
  *
  * This file is part of the CallstackLibrary.
  *
@@ -81,8 +81,8 @@ struct regionInfo regions_getLoadedRegions(void) {
         vector_iterate(binaryFile_getRegions(outerElement->associated), {
             vector_push_back(&toReturn, ((struct region) {
                 element->first, element->second,
-                maybe(strdup, outerElement->absoluteFileName),
-                maybe(strdup, outerElement->relativeFileName),
+                maybe(strdup, file->fileName.absolute),
+                maybe(strdup, file->fileName.relative),
             }));
         });
     });
@@ -105,8 +105,8 @@ struct regionInfo regions_getTLSRegions(void) {
         vector_iterate(&result, {
             vector_push_back(&toReturn, ((struct region) {
                 element->first, element->second,
-                maybe(strdup, outerElement->absoluteFileName),
-                maybe(strdup, outerElement->relativeFileName),
+                maybe(strdup, file->fileName.absolute),
+                maybe(strdup, file->fileName.relative),
             }));
         });
         vector_destroy(&result);

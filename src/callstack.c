@@ -1,7 +1,7 @@
 /*
  * CallstackLibrary - Library creating human-readable call stacks.
  *
- * Copyright (C) 2022 - 2025  mhahnFr
+ * Copyright (C) 2022 - 2026  mhahnFr
  *
  * This file is part of the CallstackLibrary.
  *
@@ -92,7 +92,7 @@ bool callstack_relativize(struct callstack* self, const char** binaryNames) {
             return false;
         }
         self->backtrace[i] = (void*) info.second;
-        binaryNames[i] = info.first->absoluteFileName;
+        binaryNames[i] = info.first->fileName.absolute;
     }
     return true;
 }
