@@ -19,13 +19,14 @@
  * CallstackLibrary, see the file LICENSE.  If not, see <https://www.gnu.org/licenses/>.
  */
 
+#include "dlMapper.h"
+
 #include <stdlib.h>
 
-#include "dlMapper.h"
 #include "dlMapper_platform.h"
 
 /** The loaded library infos.                            */
-static vector_loadedLibInfo_t loadedLibs = vector_initializer;
+static vector_binaryFile_t loadedLibs = vector_initializer;
 /** Indicates whether the dlMapper has been initialized. */
 static bool dlMapper_inited = false;
 
@@ -39,9 +40,9 @@ static bool dlMapper_inited = false;
  * @return @c 0 if the two values compare equal or a value less than or greater
  * than @c 0 according to the sorting order
  */
-static inline int dlMapper_sortCompare(const struct loadedLibInfo* lhs, const struct loadedLibInfo* rhs) {
-    if (lhs->begin < rhs->begin) return -1;
-    if (lhs->begin > rhs->begin) return +1;
+static inline int dlMapper_sortCompare(const struct binaryFile** lhs, const struct binaryFile** rhs) {
+    if ((*lhs)->startAddress < (*rhs)->startAddress) return -1;
+    if ((*lhs)->startAddress > (*rhs)->startAddress) return +1;
     return 0;
 }
 
@@ -72,13 +73,14 @@ bool dlMapper_isInited(void) {
  * @return @c 0 if the key is in the loaded library or a value smaller or
  * greater than @c 0 according to the sorting order
  */
-static inline int dlMapper_searchCompare(const void* key, const struct loadedLibInfo* element) {
+static inline int dlMapper_searchCompare(const void* key, const struct binaryFile** element) {
     // IMPORTANT: key is the searched address, element the array element
 
-    if (key >= element->begin && key < element->end) {
+    const struct binaryFile* file = *element;
+    if (key >= file->startAddress && key < file->end) {
         return 0;
     }
-    return key > element->begin ? +1 : -1;
+    return key > file->startAddress ? +1 : -1;
 }
 
 static inline int dlMapper_searchCompareRegion(const void* key, const pair_ptr_t* element) {
@@ -89,59 +91,58 @@ static inline int dlMapper_searchCompareRegion(const void* key, const pair_ptr_t
     return k > element->first ? +1 : -1;
 }
 
-struct loadedLibInfo* dlMapper_libInfoForAddress(const void* address, const bool includeRegions) {
+struct binaryFile* dlMapper_binaryFileForAddress(const void* address, const bool includeRegions) {
     if (!dlMapper_inited) return NULL;
 
-    struct loadedLibInfo* toReturn = vector_search(&loadedLibs, address, dlMapper_searchCompare);
+    struct binaryFile** toReturn = vector_search(&loadedLibs, address, dlMapper_searchCompare);
     if (toReturn == NULL && includeRegions) {
-        vector_forEach(&loadedLibs, outerElement, {
-            if (!loadedLibInfo_prepare(outerElement)) {
-                continue;
-            }
-            const pair_ptr_t* result = vector_search(binaryFile_getRegions(outerElement->associated),
+        vector_iterate(&loadedLibs, {
+            const pair_ptr_t* result = vector_search(binaryFile_getRegions(*element),
                                                      address, dlMapper_searchCompareRegion);
             if (result != NULL) {
-                return outerElement;
+                return *element;
             }
         });
     }
-    return toReturn;
+    return toReturn == NULL ? NULL : *toReturn;
 }
 
-struct loadedLibInfo* dlMapper_libInfoForFileName(const char* fileName) {
+struct binaryFile* dlMapper_binaryFileForFileName(const char* fileName) {
     if (!dlMapper_inited) return NULL;
 
     vector_iterate(&loadedLibs, {
-        if (strcmp(fileName, element->fileName) == 0
-            || strcmp(fileName, element->absoluteFileName) == 0
-            || strcmp(fileName, element->relativeFileName) == 0) {
-            return element;
+        struct binaryFile* theElement = *element;
+        if (strcmp(fileName, theElement->fileName.original) == 0
+            || strcmp(fileName, theElement->fileName.absolute) == 0
+            || strcmp(fileName, theElement->fileName.relative) == 0) {
+            return theElement;
         }
     });
     return NULL;
 }
 
-pair_relativeInfo_t dlMapper_relativize(const void* address) {
-    pair_relativeInfo_t toReturn;
-    toReturn.first = dlMapper_libInfoForAddress(address, false);
-    toReturn.second = toReturn.first == NULL ? 0 : dlMapper_platform_relativize(toReturn.first, address);
-    return toReturn;
+pair_relativeFile_t dlMapper_relativize(const void* address) {
+    struct binaryFile* file = dlMapper_binaryFileForAddress(address, false);
+    return (pair_relativeFile_t) {
+        file,
+        file == NULL ? 0 : dlMapper_platform_relativize(file, address)
+    };
 }
 
 void* dlMapper_absolutize(const void* address, const char* binaryName) {
-    const struct loadedLibInfo* info = dlMapper_libInfoForFileName(binaryName);
+    const struct binaryFile* info = dlMapper_binaryFileForFileName(binaryName);
     if (info == NULL) {
         return NULL;
     }
     return (void*) dlMapper_platform_absolutize(info, (uintptr_t) address);
 }
 
-const vector_loadedLibInfo_t* dlMapper_getLoadedLibraries(void) {
+const vector_binaryFile_t* dlMapper_getLoadedBinaries(void) {
     return &loadedLibs;
 }
 
 void dlMapper_deinit(void) {
-    vector_destroyWithPtr(&loadedLibs, loadedLibInfo_destroy);
+    vector_destroyWith(&loadedLibs, binaryFile_delete);
     vector_init(&loadedLibs);
     dlMapper_inited = false;
 }

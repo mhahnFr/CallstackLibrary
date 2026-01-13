@@ -1,7 +1,7 @@
 /*
  * CallstackLibrary - Library creating human-readable call stacks.
  *
- * Copyright (C) 2024 - 2025  mhahnFr
+ * Copyright (C) 2024 - 2026  mhahnFr
  *
  * This file is part of the CallstackLibrary.
  *
@@ -23,13 +23,13 @@
 #define dlMapper_h
 
 #include <stdbool.h>
-
+#include <DC4C/pair.h>
 #include <DC4C/vector.h>
 
-#include "../loadedLibInfo.h"
+#include "../parser/file/binaryFile.h"
 
-typedef_vector_named(loadedLibInfo, struct loadedLibInfo);
-typedef_pair_named(relativeInfo, struct loadedLibInfo*, uintptr_t);
+typedef_vector_named(binaryFile, struct binaryFile*);
+typedef_pair_named(relativeFile, struct binaryFile*, uintptr_t);
 
 /**
  * @brief Initializes the dlMapper.
@@ -55,7 +55,7 @@ bool dlMapper_isInited(void);
  * @return the associated loaded library info object or @c NULL if not in any
  * loaded library
  */
-struct loadedLibInfo* dlMapper_libInfoForAddress(const void* address, bool includeRegions);
+struct binaryFile* dlMapper_binaryFileForAddress(const void* address, bool includeRegions);
 
 /**
  * Returns the runtime image info for the runtime image of the given name.
@@ -63,7 +63,7 @@ struct loadedLibInfo* dlMapper_libInfoForAddress(const void* address, bool inclu
  * @param fileName the file name of the runtime image
  * @return the associated runtime image info or @c NULL if not found
  */
-struct loadedLibInfo* dlMapper_libInfoForFileName(const char* fileName);
+struct binaryFile* dlMapper_binaryFileForFileName(const char* fileName);
 
 /**
  * Relativizes the given address.
@@ -71,7 +71,7 @@ struct loadedLibInfo* dlMapper_libInfoForFileName(const char* fileName);
  * @param address the global address to be relativized
  * @return the runtime image info to which the address belongs to and the offset into that image
  */
-pair_relativeInfo_t dlMapper_relativize(const void* address);
+pair_relativeFile_t dlMapper_relativize(const void* address);
 
 /**
  * Absolutizes the given address, interpreting it as offset into the runtime image
@@ -88,7 +88,7 @@ void* dlMapper_absolutize(const void* address, const char* binaryName);
  *
  * @return the loaded runtime image infos
  */
-const vector_loadedLibInfo_t* dlMapper_getLoadedLibraries(void);
+const vector_binaryFile_t* dlMapper_getLoadedBinaries(void);
 
 /**
  * Deinitializes the dlMapper.
