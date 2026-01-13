@@ -1,7 +1,7 @@
 /*
  * CallstackLibrary - Library creating human-readable call stacks.
  *
- * Copyright (C) 2025  mhahnFr
+ * Copyright (C) 2025 - 2026  mhahnFr
  *
  * This file is part of the CallstackLibrary.
  *
@@ -30,10 +30,9 @@ static inline struct callstack_frame symbols_getInfoShared(const void* address, 
     // FIXME: + 1 byte in order to bypass symbol table usage for functions.   - mhahnFr
     const void* searchAddress = address + 1;
     callstackFrame_translateBinary(&toReturn, searchAddress, useCache, true);
-    struct loadedLibInfo* info = toReturn.reserved;
-    if (loadedLibInfo_prepare(info)) {
-        binaryFile_addr2String(info->associated, searchAddress, &toReturn);
-    }
+    struct binaryFile* file = toReturn.reserved;
+    // TODO: if null or if failed to parse
+    binaryFile_addr2String(file, searchAddress, &toReturn);
     return toReturn;
 }
 
