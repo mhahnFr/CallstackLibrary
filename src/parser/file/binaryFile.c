@@ -1,7 +1,7 @@
 /*
  * CallstackLibrary - Library creating human-readable call stacks.
  *
- * Copyright (C) 2023 - 2025  mhahnFr
+ * Copyright (C) 2023 - 2026  mhahnFr
  *
  * This file is part of the CallstackLibrary.
  *
@@ -19,9 +19,10 @@
  * CallstackLibrary, see the file LICENSE.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-#include <sys/stat.h>
-
 #include "binaryFile.h"
+
+#include <file/pathUtils.h>
+#include <sys/stat.h>
 
 #ifdef __APPLE__
 # include "macho/machoFile.h"
@@ -54,13 +55,32 @@ typedef ConcreteFile* Concrete;
 #define LCS_FILE(self, NAME, ...) LCS_FILE_RAW(NAME)((Concrete) (self) __VA_OPT__(,) __VA_ARGS__)
 
 struct binaryFile* binaryFile_new(const char* fileName, const void* startAddress) {
-    Concrete tmp = LCS_FILE_RAW(new)();
-    struct binaryFile* toReturn = &tmp->_;
-
-    if (toReturn != NULL) {
-        toReturn->fileName     = fileName;
-        toReturn->startAddress = startAddress;
+    Concrete tmp = malloc(sizeof(ConcreteFile));
+    if (tmp == NULL) {
+        return NULL;
     }
+    struct binaryFile* toReturn = &tmp->_;
+    *toReturn = (struct binaryFile) {
+        false,
+        true,
+        false,
+        {
+            strdup(fileName),
+            path_toAbsolutePath(fileName),
+            path_toRelativePath(fileName),
+        },
+        startAddress,
+        NULL,
+        0,
+        vector_initializer,
+    };
+    LCS_FILE(tmp, create);
+    if (!LCS_FILE(tmp, parseShallow)) {
+        // TODO: Handle the error
+    }
+    volatile const void* inside = NULL;
+    inside = &binaryFile_new;
+    toReturn->isSelf = inside >= startAddress && inside <= toReturn->end;
     return toReturn;
 }
 
@@ -120,6 +140,10 @@ bool binaryFile_isOutdated(const struct dwarf_sourceFile file) {
 
 void binaryFile_destroy(struct binaryFile* self) {
     LCS_FILE(self, destroy);
+
+    free(self->fileName.original);
+    free(self->fileName.absolute);
+    free(self->fileName.relative);
     vector_destroy(&self->regions);
 }
 

@@ -1,7 +1,7 @@
 /*
  * CallstackLibrary - Library creating human-readable call stacks.
  *
- * Copyright (C) 2023 - 2025  mhahnFr
+ * Copyright (C) 2023 - 2026  mhahnFr
  *
  * This file is part of the CallstackLibrary.
  *
@@ -34,15 +34,19 @@
  */
 struct binaryFile {
     /** Indicates whether this file has already been parsed.             */
-    bool parsed;
+    bool parsed,
     /** Indicates whether the represented image is loaded by the system. */
-    bool inMemory;
+         inMemory,
+         isSelf;
 
-    /** The name of the represented binary file.                         */
-    const char * fileName;
-    
+    struct FileName {
+        char* original,
+            * absolute,
+            * relative;
+    } fileName;
     /** The start address in memory of the represented binary file.      */
-    const void* startAddress;
+    const void* startAddress,
+              * end;
     /** The relocation offset of the binary file.                        */
     uintptr_t relocationOffset;
     /** The regions for global storage in this binary file.              */
@@ -57,8 +61,6 @@ struct binaryFile {
  * @return the allocated binary file structure
  */
 struct binaryFile* binaryFile_new(const char* fileName, const void* startAddress);
-
-#define binaryFile_initializer (struct binaryFile) { false, false, NULL, NULL, 0, vector_initializer }
 
 /**
  * Deducts the debug information available for the given address and stores it
