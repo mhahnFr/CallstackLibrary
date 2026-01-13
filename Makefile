@@ -1,7 +1,7 @@
 #
 # CallstackLibrary - Library creating human-readable call stacks.
 #
-# Copyright (C) 2022 - 2025  mhahnFr
+# Copyright (C) 2022 - 2026  mhahnFr
 #
 # This file is part of the CallstackLibrary.
 #
@@ -40,7 +40,6 @@ LD = $(CC)
 
 # Main sources
 SRCS = \
-	src/loadedLibInfo.c \
 	src/callstackInternal.c \
 	src/callstack_internals.c \
 	src/callstackFrame/callstack_frame.c \
