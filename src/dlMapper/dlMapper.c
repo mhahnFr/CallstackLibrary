@@ -1,7 +1,7 @@
 /*
  * CallstackLibrary - Library creating human-readable call stacks.
  *
- * Copyright (C) 2024 - 2025  mhahnFr
+ * Copyright (C) 2024 - 2026  mhahnFr
  *
  * This file is part of the CallstackLibrary.
  *
@@ -55,6 +55,10 @@ bool dlMapper_init(void) {
         vector_sort(&loadedLibs, dlMapper_sortCompare);
     }
     return dlMapper_inited = result;
+}
+
+bool dlMapper_isInited(void) {
+    return dlMapper_inited;
 }
 
 /**
