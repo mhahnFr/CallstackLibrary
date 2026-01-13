@@ -19,15 +19,13 @@
  * CallstackLibrary, see the file LICENSE.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-#include <stdlib.h>
-#include <string.h>
-
 #include <callstack_internals.h>
+#include <stdlib.h>
+#include <DC4C/vector.h>
 #include <regions/regions.h>
 
-#include <DC4C/vector.h>
-
 #include "../dlMapper/dlMapper.h"
+#include "../parser/file/binaryFile.h"
 
 typedef_vector_named(region, struct region);
 
@@ -74,11 +72,9 @@ struct regionInfo regions_getLoadedRegions(void) {
     }
 
     vector_region_t toReturn = vector_initializer;
-    vector_forEach(dlMapper_getLoadedLibraries(), outerElement, {
-        if (!loadedLibInfo_prepare(outerElement)) {
-            continue;
-        }
-        vector_iterate(binaryFile_getRegions(outerElement->associated), {
+    vector_iterate(dlMapper_getLoadedBinaries(), {
+        struct binaryFile* file = *element;
+        vector_iterate(binaryFile_getRegions(file), {
             vector_push_back(&toReturn, ((struct region) {
                 element->first, element->second,
                 maybe(strdup, file->fileName.absolute),
@@ -97,11 +93,9 @@ struct regionInfo regions_getTLSRegions(void) {
     }
 
     vector_region_t toReturn = vector_initializer;
-    vector_forEach(dlMapper_getLoadedLibraries(), outerElement, {
-        if (!loadedLibInfo_prepare(outerElement)) {
-            continue;
-        }
-        vector_pair_ptr_t result = binaryFile_getTLSRegions(outerElement->associated);
+    vector_iterate(dlMapper_getLoadedBinaries(), {
+        struct binaryFile* file = *element;
+        vector_pair_ptr_t result = binaryFile_getTLSRegions(file);
         vector_iterate(&result, {
             vector_push_back(&toReturn, ((struct region) {
                 element->first, element->second,
