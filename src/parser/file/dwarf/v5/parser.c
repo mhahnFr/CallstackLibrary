@@ -1,7 +1,7 @@
 /*
  * CallstackLibrary - Library creating human-readable call stacks.
  *
- * Copyright (C) 2024 - 2025  mhahnFr
+ * Copyright (C) 2024 - 2026  mhahnFr
  *
  * This file is part of the CallstackLibrary.
  *
@@ -36,7 +36,7 @@
  * @return the read index or an empty optional if the requested data type was
  * not allowed
  */
-static inline optional_uint64_t dwarf5_readIndex(void* buffer, size_t* counter, const uint64_t type) {
+static inline optional_uint64_t dwarf5_readIndex(const void* buffer, size_t* counter, const uint64_t type) {
     uint64_t toReturn;
     switch (type) {
         case DW_FORM_data1:
@@ -66,7 +66,7 @@ static inline optional_uint64_t dwarf5_readIndex(void* buffer, size_t* counter, 
  * @return the read timestamp or an empty optional if the given data type was
  * not allowed
  */
-static inline optional_uint64_t dwarf5_readTimestamp(void* buffer, size_t* counter, const uint64_t type) {
+static inline optional_uint64_t dwarf5_readTimestamp(const void* buffer, size_t* counter, const uint64_t type) {
     uint64_t toReturn;
     switch (type) {
         case DW_FORM_udata:
@@ -104,7 +104,7 @@ static inline optional_uint64_t dwarf5_readTimestamp(void* buffer, size_t* count
  * @return the read size value or an empty optional if the given data type was
  * not allowed
  */
-static inline optional_uint64_t dwarf5_readSize(void* buffer, size_t* counter, const uint64_t type) {
+static inline optional_uint64_t dwarf5_readSize(const void* buffer, size_t* counter, const uint64_t type) {
     uint64_t toReturn;
     switch (type) {
         case DW_FORM_udata:
@@ -142,8 +142,8 @@ static inline optional_uint64_t dwarf5_readSize(void* buffer, size_t* counter, c
  * @param counter the reading index
  * @return the read MD5 hash
  */
-static inline uint8_t* dwarf5_readMD5(void* buffer, size_t* counter) {
-    uint8_t* toReturn = buffer + *counter;
+static inline const uint8_t* dwarf5_readMD5(const void* buffer, size_t* counter) {
+    const uint8_t* toReturn = buffer + *counter;
     *counter += 16;
     return toReturn;
 }
