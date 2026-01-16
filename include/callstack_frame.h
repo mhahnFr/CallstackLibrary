@@ -101,7 +101,7 @@ struct callstack_frame {
  * @since v1.1
  * @deprecated Prefer using the macro @c callstack_frame_initializer .
  */
-#define callstack_frame_create(self) (*(struct callstack_frame*) self = callstack_frame_initializer)
+#define callstack_frame_create(self) (*(struct callstack_frame*) (self) = callstack_frame_initializer)
 
 /**
  * Allocates a new and initialized callstack frame.

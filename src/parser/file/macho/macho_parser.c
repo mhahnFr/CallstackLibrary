@@ -43,7 +43,7 @@
  ENSYM: <function address>
  */
 
-#define machoParser_swap(self, bits, value) macho_maybeSwap(bits, self->bytesSwapped, value)
+#define machoParser_swap(self, bits, value) macho_maybeSwap(bits, (self)->bytesSwapped, value)
 
 struct machoParser machoParser_create(
     struct symtab_command* command, const void* baseAddress,

@@ -334,7 +334,7 @@ static inline bool machoFile_parseFileImpl##bits(struct machoFile* self, const v
                 struct machoParser parser = machoParser_create(                                       \
                     (void*) lc, baseAddress, self->_.inMemory ?                                       \
                         (self->linkedit_vmaddr - self->text_vmaddr) - self->linkedit_fileoff : 0,     \
-                    bytesSwapped, bits == 64, (machoParser_addFunction) machoFile_addFunction, self   \
+                    bytesSwapped, (bits) == 64, (machoParser_addFunction) machoFile_addFunction, self   \
                 );                                                                                    \
                 result = machoParser_parseSymbolTable(&parser);                                       \
                 machoParser_destroy(&parser);                                                         \

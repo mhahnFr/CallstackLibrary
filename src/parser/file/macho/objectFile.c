@@ -283,7 +283,7 @@ static inline bool objectFile_parseMachOImpl##bits(struct objectFile* self,     
             case LC_SYMTAB: {                                                                         \
                 struct machoParser parser = machoParser_create(                                       \
                     (void*) lc, baseAddress, 0,                                                       \
-                    bytesSwapped, bits == 64,                                                         \
+                    bytesSwapped, (bits) == 64,                                                         \
                     (machoParser_addFunction) objectFile_addFunctionCallback, self                    \
                 );                                                                                    \
                 result = machoParser_parseSymbolTable(&parser);                                       \
