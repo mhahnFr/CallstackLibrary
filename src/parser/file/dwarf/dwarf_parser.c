@@ -1,7 +1,7 @@
 /*
  * CallstackLibrary - Library creating human-readable call stacks.
  *
- * Copyright (C) 2024 - 2025  mhahnFr
+ * Copyright (C) 2024 - 2026  mhahnFr
  *
  * This file is part of the CallstackLibrary.
  *
@@ -285,7 +285,7 @@ static inline vector_pair_uint64_t dwarf_getAbbreviationTable(const struct lcs_s
     return toReturn;
 }
 
-uint64_t dwarf_parseInitialSize(void* buffer, size_t* counter, bool* bit64) {
+uint64_t dwarf_parseInitialSize(const void* buffer, size_t* counter, bool* bit64) {
     const uint32_t size = *(uint32_t*) (buffer + *counter);
     *counter += 4;
 
@@ -301,7 +301,7 @@ uint64_t dwarf_parseInitialSize(void* buffer, size_t* counter, bool* bit64) {
     return toReturn;
 }
 
-bool dwarf_consumeSome(const struct dwarf_parser* self, void* buffer, size_t* counter, const uint64_t type) {
+bool dwarf_consumeSome(const struct dwarf_parser* self, const void* buffer, size_t* counter, const uint64_t type) {
     switch (type) {
         case DW_FORM_block: {
             const uint64_t length = getULEB128(buffer, counter);
@@ -366,11 +366,11 @@ bool dwarf_consumeSome(const struct dwarf_parser* self, void* buffer, size_t* co
  * @return a pointer to the string in either section or @c NULL if the given
  * type specifies neither section
  */
-static inline char* dwarf_stringFromSection(const uint64_t offset,
-                                            const uint64_t type,
-                                            const struct lcs_section debugLineStr,
-                                            const struct lcs_section debugStr) {
-    char* toReturn = NULL;
+static inline const char* dwarf_stringFromSection(const uint64_t offset,
+                                                  const uint64_t type,
+                                                  const struct lcs_section debugLineStr,
+                                                  const struct lcs_section debugStr) {
+    const char* toReturn = NULL;
     switch (type) {
         case DW_FORM_line_strp: toReturn = debugLineStr.content + offset; break;
         case DW_FORM_strp:      toReturn = debugStr.content + offset;     break;
@@ -414,9 +414,9 @@ static inline optional_uint64_t dwarf_loadStringOffset(const uint64_t index,
     return (optional_uint64_t) { true, ((uint32_t*) (debugStrOffsets.content + counter))[index] };
 }
 
-char* dwarf_readString(const struct dwarf_parser* self, void* buffer, size_t* counter, uint64_t type) {
+const char* dwarf_readString(const struct dwarf_parser* self, const void* buffer, size_t* counter, uint64_t type) {
     if (type == DW_FORM_string) {
-        char* toReturn = buffer + *counter;
+        const char* toReturn = buffer + *counter;
         *counter += strlen(toReturn) + 1;
         return toReturn;
     }
