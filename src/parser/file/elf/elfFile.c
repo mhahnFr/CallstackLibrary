@@ -333,7 +333,6 @@ bool elfFile_parse(struct elfFile* self) {
     if (success) {
         vector_sort(&self->functions, elfFile_functionCompare);
         vector_sort(&self->lineInfos, elfFile_lineInfoCompare);
-        vector_iterate(&self->functions, __builtin_printf("%s: %s 0x%lx\n", self->_.fileName, element->linkedName, element->startAddress););
     } else {
         vector_destroyWithPtr(&self->functions, function_destroy);
         vector_init(&self->functions);
