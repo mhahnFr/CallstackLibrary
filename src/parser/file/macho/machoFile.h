@@ -46,7 +46,6 @@ struct machoFile {
     /** The VM address of the text segment.                                     */
     uint64_t text_vmaddr;
     uint64_t tlvSize;
-    bool parseShallow; // TODO: Throw out of here!
     /** Information about the dSYM bundle file.                                 */
     struct {
         /** Whether the file was already tried to be deducted. */
@@ -122,7 +121,7 @@ bool machoFile_parse(struct machoFile* self);
 void machoFile_destroy(struct machoFile* self);
 
 /**
- * Deinitializes and `free`s the given binary file structure if it is a Mach-O
+ * Deinitializes and frees the given binary file structure if it is a Mach-O
  * file structure.
  *
  * @param self the binary file structure to be deleted

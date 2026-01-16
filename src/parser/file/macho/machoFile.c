@@ -45,8 +45,6 @@ void machoFile_create(struct machoFile* self) {
     self->linkedit_vmaddr  = 0;
     self->tlvSize          = 0;
 
-    self->parseShallow = false;
-
     self->dSYMFile.triedParsing = false;
     self->dSYMFile.file         = NULL;
 
@@ -196,54 +194,57 @@ static inline optional_debugInfo_t machoFile_getDebugInfo(struct machoFile* self
  * @param bits the amount of bits the implementation should be generated for
  * @param suffix the optional suffix to be used for the native types
  */
-#define machoFile_handleSegment(bits, suffix)                                                                      \
-static inline bool machoFile_handleSegment##bits(struct machoFile* self, const void* buffer,                       \
-                                                 struct segment_command##suffix* segment, bool bytesSwapped) {     \
-    if (strcmp(segment->segname, SEG_PAGEZERO) == 0) {                                                             \
-        self->addressOffset = macho_maybeSwap(bits, bytesSwapped, segment->vmaddr)                                 \
-                            + macho_maybeSwap(bits, bytesSwapped, segment->vmsize);                                \
-    } else if (strcmp(segment->segname, SEG_LINKEDIT) == 0) {                                                      \
-        self->linkedit_vmaddr  = macho_maybeSwap(bits, bytesSwapped, segment->vmaddr);                             \
-        self->linkedit_fileoff = macho_maybeSwap(bits, bytesSwapped, segment->fileoff);                            \
-    } else if (strcmp(segment->segname, SEG_TEXT) == 0) {                                                          \
-        self->text_vmaddr = macho_maybeSwap(bits, bytesSwapped, segment->vmaddr);                                  \
-        self->_.relocationOffset = self->text_vmaddr;                                                              \
-        self->_.end = self->_.startAddress + macho_maybeSwap(bits, bytesSwapped, segment->vmsize);                 \
-    }                                                                                                              \
-    if (self->parseShallow) {                                                                                      \
-        return true;                                                                                               \
-    }                                                                                                              \
-                                                                                                                   \
-    if (segment->initprot & 2 && segment->initprot & 1) {                                                          \
-        vector_push_back(&self->_.regions, ((pair_ptr_t) { segment->vmaddr, segment->vmaddr + segment->vmsize })); \
-    }                                                                                                              \
-    optional_uint64_t size = { .has_value = false, .value = 0 };                                                   \
-    for (uint64_t i = 0; i < segment->nsects; ++i) {                                                               \
-        struct section##suffix* section = ((void*) segment) + sizeof(*segment)                                     \
-                                            + i * sizeof(struct section##suffix);                                  \
-        switch (section->flags & SECTION_TYPE) {                                                                   \
-            case S_THREAD_LOCAL_ZEROFILL:                                                                          \
-            case S_THREAD_LOCAL_REGULAR:                                                                           \
-                size.has_value = true;                                                                             \
-                size.value += section->size;                                                                       \
-                break;                                                                                             \
-                                                                                                                   \
-            case S_THREAD_LOCAL_VARIABLES: if (section->size != 0) { /* TODO: Can have multiple */                 \
-                uintptr_t slide = (uintptr_t) (buffer - self->text_vmaddr);                                        \
-                TLVDescriptor* begin = (TLVDescriptor*) (section->addr + slide);                                   \
-                const size_t amount = section->size / sizeof(TLVDescriptor);                                       \
-                vector_reserve(&self->tlvs, amount);                                                               \
-                memcpy(self->tlvs.content, begin, section->size);                                                  \
-                self->tlvs.count = amount;                                                                         \
-            }                                                                                                      \
-            break;                                                                                                 \
-        }                                                                                                          \
-    }                                                                                                              \
-    if (size.has_value) {                                                                                          \
-        self->tlvSize = size.value;                                                                                \
-    }                                                                                                              \
-                                                                                                                   \
-    return true;                                                                                                   \
+#define machoFile_handleSegment(bits, suffix)                                                      \
+static inline bool machoFile_handleSegment##bits(struct machoFile* self, const void* buffer,       \
+                                                 struct segment_command##suffix* segment,          \
+                                                 const bool bytesSwapped, const bool shallow) {    \
+    if (strcmp(segment->segname, SEG_PAGEZERO) == 0) {                                             \
+        self->addressOffset = macho_maybeSwap(bits, bytesSwapped, segment->vmaddr)                 \
+                            + macho_maybeSwap(bits, bytesSwapped, segment->vmsize);                \
+    } else if (strcmp(segment->segname, SEG_LINKEDIT) == 0) {                                      \
+        self->linkedit_vmaddr  = macho_maybeSwap(bits, bytesSwapped, segment->vmaddr);             \
+        self->linkedit_fileoff = macho_maybeSwap(bits, bytesSwapped, segment->fileoff);            \
+    } else if (strcmp(segment->segname, SEG_TEXT) == 0) {                                          \
+        self->text_vmaddr = macho_maybeSwap(bits, bytesSwapped, segment->vmaddr);                  \
+        self->_.relocationOffset = self->text_vmaddr;                                              \
+        self->_.end = self->_.startAddress + macho_maybeSwap(bits, bytesSwapped, segment->vmsize); \
+    }                                                                                              \
+    if (shallow) {                                                                                 \
+        return true;                                                                               \
+    }                                                                                              \
+                                                                                                   \
+    if (segment->initprot & 2 && segment->initprot & 1) {                                          \
+        vector_push_back(&self->_.regions, ((pair_ptr_t) {                                         \
+            segment->vmaddr,                                                                       \
+            segment->vmaddr + segment->vmsize                                                      \
+        }));                                                                                       \
+    }                                                                                              \
+    optional_uint64_t size = { .has_value = false, .value = 0 };                                   \
+    for (uint64_t i = 0; i < segment->nsects; ++i) {                                               \
+        struct section##suffix* section = ((void*) segment) + sizeof(*segment)                     \
+                                            + i * sizeof(struct section##suffix);                  \
+        switch (section->flags & SECTION_TYPE) {                                                   \
+            case S_THREAD_LOCAL_ZEROFILL:                                                          \
+            case S_THREAD_LOCAL_REGULAR:                                                           \
+                size.has_value = true;                                                             \
+                size.value += section->size;                                                       \
+                break;                                                                             \
+                                                                                                   \
+            case S_THREAD_LOCAL_VARIABLES: if (section->size != 0) { /* TODO: Can have multiple */ \
+                uintptr_t slide = (uintptr_t) (buffer - self->text_vmaddr);                        \
+                TLVDescriptor* begin = (TLVDescriptor*) (section->addr + slide);                   \
+                const size_t amount = section->size / sizeof(TLVDescriptor);                       \
+                vector_reserve(&self->tlvs, amount);                                               \
+                memcpy(self->tlvs.content, begin, section->size);                                  \
+                self->tlvs.count = amount;                                                         \
+            }                                                                                      \
+            break;                                                                                 \
+        }                                                                                          \
+    }                                                                                              \
+    if (size.has_value) {                                                                          \
+        self->tlvSize = size.value;                                                                \
+    }                                                                                              \
+    return true;                                                                                   \
 }
 
 machoFile_handleSegment(32,)
@@ -314,7 +315,7 @@ static inline void machoFile_fixupFunctions(struct machoFile* self) {
  */
 #define machoFile_parseFileImpl(bits, suffix)                                                         \
 static inline bool machoFile_parseFileImpl##bits(struct machoFile* self, const void* baseAddress,     \
-                                                 bool bytesSwapped) {                                 \
+                                                 const bool bytesSwapped, const bool shallow) {       \
     const struct mach_header##suffix* header = baseAddress;                                           \
     struct load_command* lc = (void *) header + sizeof(*header);                                      \
     const uint32_t ncmds = macho_maybeSwap(32, bytesSwapped, header->ncmds);                          \
@@ -323,18 +324,19 @@ static inline bool machoFile_parseFileImpl##bits(struct machoFile* self, const v
         bool result = true;                                                                           \
         switch (macho_maybeSwap(32, bytesSwapped, lc->cmd)) {                                         \
             case LC_SEGMENT##suffix:                                                                  \
-                result = machoFile_handleSegment##bits(self, baseAddress, (void *) lc, bytesSwapped); \
+                result = machoFile_handleSegment##bits(self, baseAddress, (void*) lc,                 \
+                                                       bytesSwapped, shallow);                        \
                 break;                                                                                \
                                                                                                       \
             case LC_SYMTAB: {                                                                         \
-                if (self->parseShallow) {                                                             \
+                if (shallow) {                                                                        \
                     result = true;                                                                    \
                     break;                                                                            \
                 }                                                                                     \
                 struct machoParser parser = machoParser_create(                                       \
                     (void*) lc, baseAddress, self->_.inMemory ?                                       \
                         (self->linkedit_vmaddr - self->text_vmaddr) - self->linkedit_fileoff : 0,     \
-                    bytesSwapped, (bits) == 64, (machoParser_addFunction) machoFile_addFunction, self   \
+                    bytesSwapped, (bits) == 64, (machoParser_addFunction) machoFile_addFunction, self \
                 );                                                                                    \
                 result = machoParser_parseSymbolTable(&parser);                                       \
                 machoParser_destroy(&parser);                                                         \
@@ -347,7 +349,7 @@ static inline bool machoFile_parseFileImpl##bits(struct machoFile* self, const v
                 break;                                                                                \
                                                                                                       \
             case LC_FUNCTION_STARTS:                                                                  \
-                result = self->parseShallow ? true : machoFile_handleFunctionStarts(                  \
+                result = shallow ? true : machoFile_handleFunctionStarts(                             \
                     self, (void*) lc, baseAddress, bytesSwapped                                       \
                 );                                                                                    \
                 break;                                                                                \
@@ -358,7 +360,7 @@ static inline bool machoFile_parseFileImpl##bits(struct machoFile* self, const v
         lc = (void *) lc + macho_maybeSwap(32, bytesSwapped, lc->cmdsize);                            \
     }                                                                                                 \
                                                                                                       \
-    if (!self->parseShallow) {                                                                        \
+    if (!shallow) {                                                                                   \
         machoFile_fixupFunctions(self);                                                               \
                                                                                                       \
         intptr_t diff = (uintptr_t) header - self->text_vmaddr;                                       \
@@ -368,7 +370,6 @@ static inline bool machoFile_parseFileImpl##bits(struct machoFile* self, const v
         });                                                                                           \
         BINARY_FILE_SUPER(self, sortRegions);                                                         \
     }                                                                                                 \
-                                                                                                      \
     return true;                                                                                      \
 }
 
@@ -383,40 +384,41 @@ machoFile_parseFileImpl(64, _64)
  * @param baseAddress the Mach-O file buffer
  * @return whether the parsing was successful
  */
-static inline bool machoFile_parseFile(struct machoFile* self, const void* baseAddress) {
+static inline bool machoFile_parseFile(struct machoFile* self, const void* baseAddress, const bool shallow) {
     if (baseAddress == NULL) return false;
 
     const struct mach_header* header = baseAddress;
     switch (header->magic) {
-        case MH_MAGIC:    return machoFile_parseFileImpl32(self, baseAddress, false);
-        case MH_CIGAM:    return machoFile_parseFileImpl32(self, baseAddress, true);
-        case MH_MAGIC_64: return machoFile_parseFileImpl64(self, baseAddress, false);
-        case MH_CIGAM_64: return machoFile_parseFileImpl64(self, baseAddress, true);
+        case MH_MAGIC:    return machoFile_parseFileImpl32(self, baseAddress, false, shallow);
+        case MH_CIGAM:    return machoFile_parseFileImpl32(self, baseAddress, true, shallow);
+        case MH_MAGIC_64: return machoFile_parseFileImpl64(self, baseAddress, false, shallow);
+        case MH_CIGAM_64: return machoFile_parseFileImpl64(self, baseAddress, true, shallow);
 
         case FAT_MAGIC:
-        case FAT_MAGIC_64: return machoFile_parseFile(self, macho_parseFat(baseAddress, false, self->_.fileName.original));
+        case FAT_MAGIC_64: return machoFile_parseFile(self, macho_parseFat(baseAddress, false, self->_.fileName.original), shallow);
 
         case FAT_CIGAM:
-        case FAT_CIGAM_64: return machoFile_parseFile(self, macho_parseFat(baseAddress, true, self->_.fileName.original));
+        case FAT_CIGAM_64: return machoFile_parseFile(self, macho_parseFat(baseAddress, true, self->_.fileName.original), shallow);
 
         default: break;
     }
     return false;
 }
 
+static inline bool machoFile_parseFileComplete(struct machoFile* self, const void* baseAddress) {
+    return machoFile_parseFile(self, baseAddress, false);
+}
+
 bool machoFile_parseShallow(struct machoFile* self) {
-    self->parseShallow = true;
-    const bool toReturn = machoFile_parse(self);
-    self->parseShallow = false;
-    return toReturn;
+    return machoFile_parseFile(self, self->_.startAddress, true);
 }
 
 bool machoFile_parse(struct machoFile* self) {
-    const bool success = self->_.inMemory ? machoFile_parseFile(self, self->_.startAddress)
-                                        : loader_loadFileAndExecute(self->_.fileName.original,
-                                                                    (union loader_parserFunction) { (loader_parser) machoFile_parseFile },
-                                                                    false,
-                                                                    self);
+    const bool success = self->_.inMemory ? machoFile_parseFileComplete(self, self->_.startAddress)
+                                          : loader_loadFileAndExecute(self->_.fileName.original,
+                                                                      (union loader_parserFunction) { (loader_parser) machoFile_parseFileComplete },
+                                                                      false,
+                                                                      self);
     if (success) {
         vector_sort(&self->functions, machoFile_functionSortCompare);
     } else {
