@@ -241,23 +241,77 @@ elfFile_parseFileImpl(32)
 elfFile_parseFileImpl(64)
 
 /**
+ * Generates an implementation for loading the ELF program header number.
+ *
+ * @param bits the amount of bits the implementation shall handle
+ */
+#define elfFile_loadEPHNum(bits)                                                                     \
+static inline uint32_t elfFile_loadEPHNum##bits(const Elf##bits##_Ehdr* header, bool littleEndian) { \
+    const uint16_t e_phnum = ELF_TO_HOST(16, header->e_phnum, littleEndian);                         \
+    if (e_phnum != PN_XNUM) {                                                                        \
+        return e_phnum;                                                                              \
+    }                                                                                                \
+                                                                                                     \
+    Elf##bits##_Shdr* sect = ((void*) header) + ELF_TO_HOST(bits, header->e_shoff, littleEndian);    \
+    return ELF_TO_HOST(32, sect->sh_info, littleEndian);                                             \
+}
+
+elfFile_loadEPHNum(32)
+elfFile_loadEPHNum(64)
+
+/**
+ * Generates an implementation for loading a given ELF file.
+ *
+ * @param bits the amount of bits the implementation shall handle
+ */
+#define elfFile_loadELF_impl(bits)                                                                  \
+static inline bool elfFile_loadELF##bits(struct elfFile* self, const void* base,                    \
+                                         const bool littleEndian) {                                 \
+    const Elf##bits##_Ehdr* header = base;                                                          \
+                                                                                                    \
+    const void* biggest = NULL;                                                                     \
+    const uint32_t e_phnum = elfFile_loadEPHNum##bits(header, littleEndian);                        \
+    for (uint32_t i = 0; i < e_phnum; ++i) {                                                        \
+        Elf##bits##_Phdr* seg = ((void*) header) + ELF_TO_HOST(bits, header->e_phoff, littleEndian) \
+                                + i * ELF_TO_HOST(16, header->e_phentsize, littleEndian);           \
+        const void* address = base + ELF_TO_HOST(bits, seg->p_offset, littleEndian)                 \
+                             + ELF_TO_HOST(bits, seg->p_memsz, littleEndian);                       \
+        if (biggest == NULL || biggest < address) {                                                 \
+            biggest = address;                                                                      \
+        }                                                                                           \
+    }                                                                                               \
+    self->_.end = biggest;                                                                          \
+    return true;                                                                                    \
+}
+
+elfFile_loadELF_impl(32)
+elfFile_loadELF_impl(64)
+
+/**
  * Parses the given ELF file into the given abstraction object.
  *
  * @param self the ELF file abstraction object
- * @param buffer the start pointer of the ELF file
+ * @param header the start pointer of the ELF file
  * @return whether the file was parsed successfully
  */
-static inline bool elfFile_parseFile(struct elfFile* self, void* buffer) {
+static inline bool elfFile_parseFile(struct elfFile* self, const Elf32_Ehdr* header, const bool shallow) {
     bool success = false;
-    const unsigned char* e_ident = buffer;
-    switch (e_ident[EI_CLASS]) {
-        case ELFCLASS32: success = elfFile_parseFile32(self, buffer, e_ident[EI_DATA] == ELFDATA2LSB); break;
-        case ELFCLASS64: success = elfFile_parseFile64(self, buffer, e_ident[EI_DATA] == ELFDATA2LSB); break;
+    const bool littleEndian = header->e_ident[EI_DATA] == ELFDATA2LSB;
+    switch (header->e_ident[EI_CLASS]) {
+        case ELFCLASS32:
+            success = shallow ? elfFile_loadELF32(self, header, littleEndian)
+                              : elfFile_parseFile32(self, header, littleEndian);
+            break;
+            
+        case ELFCLASS64:
+            success = shallow ? elfFile_loadELF64(self, header, littleEndian)
+                              : elfFile_parseFile64(self, (void*) header, littleEndian);
+            break;
 
         default: break;
     }
 
-    if (success && self->debugLine.size > 0) {
+    if (!shallow && success && self->debugLine.size > 0) {
         dwarf_parseLineProgram(self->debugLine,
                                self->debugLineStr,
                                self->debugStr,
@@ -309,6 +363,10 @@ static inline int elfFile_lineInfoCompare(const void* lhs, const void* rhs) {
     return 0;
 }
 
+static inline bool elfFile_parseFileComplete(struct elfFile* self, const Elf32_Ehdr* header) {
+    return elfFile_parseFile(self, header, false);
+}
+
 /**
  * Loads the ELF file represented by the given abstraction object.
  *
@@ -316,8 +374,8 @@ static inline int elfFile_lineInfoCompare(const void* lhs, const void* rhs) {
  * @return whether the ELF file was loaded successfully
  */
 bool elfFile_parse(struct elfFile* self) {
-    const bool success = loader_loadFileAndExecute(self->_.fileName, (union loader_parserFunction) {
-        .parseFunc = (loader_parser) elfFile_parseFile
+    const bool success = loader_loadFileAndExecute(self->_.fileName.original, (union loader_parserFunction) {
+        .parseFunc = (loader_parser) elfFile_parseFileComplete
     }, false, self);
     if (success) {
         vector_sort(&self->functions, elfFile_functionCompare);
@@ -327,6 +385,10 @@ bool elfFile_parse(struct elfFile* self) {
         vector_init(&self->functions);
     }
     return success;
+}
+
+bool elfFile_parseShallow(struct elfFile* self) {
+    return elfFile_parseFile(self, self->_.startAddress, true);
 }
 
 /**

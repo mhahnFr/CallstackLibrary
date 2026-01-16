@@ -1,7 +1,7 @@
 /*
  * CallstackLibrary - Library creating human-readable call stacks.
  *
- * Copyright (C) 2023 - 2025  mhahnFr
+ * Copyright (C) 2023 - 2026  mhahnFr
  *
  * This file is part of the CallstackLibrary.
  *
@@ -25,7 +25,6 @@
 #include "../binaryFile.h"
 #include "../function.h"
 #include "../lcs_section.h"
-
 #include "../dwarf/dwarf_lineInfo.h"
 
 /**
@@ -68,6 +67,8 @@ void elfFile_create(struct elfFile * self);
  * @return whether the ELF file was loaded successfully
  */
 bool elfFile_parse(struct elfFile* self);
+
+bool elfFile_parseShallow(struct elfFile* self);
 
 /**
  * Loads the debug information available for the given address into the given
