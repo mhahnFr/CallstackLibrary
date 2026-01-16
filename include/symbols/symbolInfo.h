@@ -1,7 +1,7 @@
 /*
  * CallstackLibrary - Library creating human-readable call stacks.
  *
- * Copyright (C) 2025  mhahnFr
+ * Copyright (C) 2025 - 2026  mhahnFr
  *
  * This file is part of the CallstackLibrary.
  *
@@ -28,10 +28,10 @@
 extern "C" {
 #endif
 
-struct callstack_frame symbols_getInfo(const void* address);
+struct callstack_frame symbols_getInfo(const void* address, bool* success);
 
 #ifdef LCS_USE_UNSAFE_OPTIMIZATION
-struct callstack_frame symbols_getInfoCached(const void* address);
+struct callstack_frame symbols_getInfoCached(const void* address, bool* success);
 #endif
 
 #ifdef __cplusplus

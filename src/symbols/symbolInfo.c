@@ -24,22 +24,25 @@
 #include "../callstackFrame/callstackFrameInternal.h"
 #include "../dlMapper/dlMapper.h"
 
-static inline struct callstack_frame symbols_getInfoShared(const void* address, const bool useCache) {
+static inline struct callstack_frame symbols_getInfoShared(const void* address, bool* success, const bool useCache) {
     struct callstack_frame toReturn;
     dlMapper_init();
     // FIXME: + 1 byte in order to bypass symbol table usage for functions.   - mhahnFr
     const void* searchAddress = address + 1;
     callstackFrame_translateBinary(&toReturn, searchAddress, useCache, true);
     struct binaryFile* file = toReturn.reserved;
-    // TODO: if null or if failed to parse
-    binaryFile_addr2String(file, searchAddress, &toReturn);
+    bool succeeded = false;
+    if (file != NULL) {
+        succeeded = binaryFile_addr2String(file, searchAddress, &toReturn);
+    }
+    if (success != NULL) *success = succeeded;
     return toReturn;
 }
 
-struct callstack_frame symbols_getInfo(const void* address) {
-    return symbols_getInfoShared(address, false);
+struct callstack_frame symbols_getInfo(const void* address, bool* success) {
+    return symbols_getInfoShared(address, success, false);
 }
 
-struct callstack_frame symbols_getInfoCached(const void* address) {
-    return symbols_getInfoShared(address, true);
+struct callstack_frame symbols_getInfoCached(const void* address, bool* success) {
+    return symbols_getInfoShared(address, success, true);
 }
