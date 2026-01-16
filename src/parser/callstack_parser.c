@@ -37,8 +37,13 @@ static inline bool callstack_parser_parseImpl(const struct callstack_parser* sel
     (void) self;
     
     for (size_t i = 0; i < callstack->backtraceSize; ++i) {
-        binaryFile_addr2String(callstack->frames[i].reserved, callstack->backtrace[i], &callstack->frames[i]);
-        // TODO: Error handling, also if reserved is NULL
+        struct binaryFile* file = callstack->frames[i].reserved;
+        if (file == NULL) {
+            continue;
+        }
+        if (!binaryFile_addr2String(file, callstack->backtrace[i], &callstack->frames[i])) {
+            return false;
+        }
     }
     return true;
 }
