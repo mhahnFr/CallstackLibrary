@@ -35,12 +35,13 @@
 #include "../dwarf/dwarf_parser.h"
 
 void elfFile_create(struct elfFile* self) {
-    lcs_section_create(&self->debugLine);
-    lcs_section_create(&self->debugLineStr);
-    lcs_section_create(&self->debugStr);
-    lcs_section_create(&self->debugInfo);
-    lcs_section_create(&self->debugAbbrev);
-    lcs_section_create(&self->debugStrOffsets);
+    self->debugLine       = lcs_section_initializer;
+    self->debugLineStr    = lcs_section_initializer;
+    self->debugStr        = lcs_section_initializer;
+    self->debugInfo       = lcs_section_initializer;
+    self->debugAbbrev     = lcs_section_initializer;
+    self->debugStrOffsets = lcs_section_initializer;
+
     vector_init(&self->lineInfos);
     vector_init(&self->functions);
 }
