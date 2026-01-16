@@ -22,7 +22,6 @@
 #ifndef objectFile_h
 #define objectFile_h
 
-#include <stdbool.h>
 #include <time.h>
 
 #include "../debugInfo.h"
