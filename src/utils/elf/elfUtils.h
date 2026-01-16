@@ -1,7 +1,7 @@
 /*
  * CallstackLibrary - Library creating human-readable call stacks.
  *
- * Copyright (C) 2024 - 2025  mhahnFr
+ * Copyright (C) 2024 - 2026  mhahnFr
  *
  * This file is part of the CallstackLibrary.
  *
@@ -31,6 +31,6 @@
  * @param number the value in question
  * @param littleEndian whether the given number uses little endianness
  */
-#define ELF_TO_HOST(bits, number, littleEndian) (littleEndian ? le##bits##toh(number) : be##bits##toh(number))
+#define ELF_TO_HOST(bits, number, littleEndian) ((littleEndian) ? le##bits##toh(number) : be##bits##toh(number))
 
 #endif /* utils_elf_elfUtils_h */
