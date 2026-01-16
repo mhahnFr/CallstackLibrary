@@ -103,12 +103,16 @@ static inline int dlMapper_platform_iterateCallback(struct dl_phdr_info* info, c
     }
     const void* loadedAddress = dlMapper_platform_loadELFLoadedAddress(info);
     if (loadedAddress == NULL) {
-        return 0;
+        goto exit;
     }
     struct binaryFile* file = binaryFile_new(fileName, loadedAddress);
     if (file != NULL) {
         file->relocationOffset = info->dlpi_addr;
         vector_push_back(data->libs, file);
+    }
+exit:
+    if (empty) {
+        free((void*) fileName);
     }
     return 0;
 }
