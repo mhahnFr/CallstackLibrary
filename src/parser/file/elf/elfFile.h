@@ -55,13 +55,6 @@ struct elfFile {
 };
 
 /**
- * Allocates a new ELF file structure.
- *
- * @return the allocated structure or @c NULL on error
- */
-struct elfFile * elfFile_new(void);
-
-/**
  * Initializes the given ELF file structure.
  *
  * @param self the structure to be initialized

@@ -34,18 +34,7 @@
 #include "../../callstack_parser.h"
 #include "../dwarf/dwarf_parser.h"
 
-struct elfFile* elfFile_new(void) {
-    struct elfFile* toReturn = malloc(sizeof(struct elfFile));
-    
-    if (toReturn != NULL) {
-        elfFile_create(toReturn);
-    }
-    return toReturn;
-}
-
 void elfFile_create(struct elfFile* self) {
-    self->_ = binaryFile_initializer;
-    
     lcs_section_create(&self->debugLine);
     lcs_section_create(&self->debugLineStr);
     lcs_section_create(&self->debugStr);
