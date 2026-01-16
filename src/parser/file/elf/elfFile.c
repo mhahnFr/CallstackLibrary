@@ -65,7 +65,7 @@ static inline void elfFile_lineProgramCallback(struct dwarf_lineInfo info, void*
  * @param bits the amount of bits the implementation shall handle
  */
 #define elfFile_loadSectionStrtab(bits)                                                                                         \
-static inline char* elfFile_loadSectionStrtab##bits(Elf##bits##_Ehdr* header, bool littleEndian) {                              \
+static inline char* elfFile_loadSectionStrtab##bits(const Elf##bits##_Ehdr* header, bool littleEndian) {                        \
     uint16_t index = ELF_TO_HOST(16, header->e_shstrndx, littleEndian);                                                         \
     if (index == SHN_UNDEF) {                                                                                                   \
         return NULL;                                                                                                            \
@@ -95,11 +95,11 @@ elfFile_loadSectionStrtab(64)
 static inline bool elfFile_parseSymtab##bits(struct elfFile*   self,                                             \
                                              Elf##bits##_Shdr* symtab,                                           \
                                              char*             strBegin,                                         \
-                                             void*             begin,                                            \
+                                             const void*       begin,                                            \
                                              bool              littleEndian) {                                   \
-    void* symtabBegin = begin + ELF_TO_HOST(bits, symtab->sh_offset, littleEndian);                              \
+    const void* symtabBegin = begin + ELF_TO_HOST(bits, symtab->sh_offset, littleEndian);                        \
     uint64_t count = ELF_TO_HOST(bits, symtab->sh_size, littleEndian) / sizeof(Elf##bits##_Sym);                 \
-    Elf##bits##_Sym* entry = symtabBegin;                                                                        \
+    const Elf##bits##_Sym* entry = symtabBegin;                                                                  \
     for (uint64_t i = 0; i < count; ++i, ++entry) {                                                              \
         const unsigned char type = ELF##bits##_ST_TYPE(entry->st_info);                                          \
         if ((type == STT_FUNC || type == STT_OBJECT) && ELF_TO_HOST(bits, entry->st_value, littleEndian) != 0) { \
@@ -124,7 +124,7 @@ elfFile_parseSymtab(64)
  * @param bits the amount of bits the implementation shall handle
  */
 #define elfFile_sectionToLCSSection(bits)                                                            \
-static inline struct lcs_section elfFile_sectionToLCSSection##bits(void*             buffer,         \
+static inline struct lcs_section elfFile_sectionToLCSSection##bits(const void*       buffer,         \
                                                                    Elf##bits##_Shdr* section,        \
                                                                    bool              littleEndian) { \
     return (struct lcs_section) {                                                                    \
@@ -142,7 +142,7 @@ elfFile_sectionToLCSSection(64)
  * @param bits the amount of bits the implementation shall handle
  */
 #define elfFile_loadShnum(bits) \
-static inline uint64_t elfFile_loadShnum##bits(Elf##bits##_Ehdr* buffer, bool littleEndian) {                                   \
+static inline uint64_t elfFile_loadShnum##bits(const Elf##bits##_Ehdr* buffer, bool littleEndian) {                                   \
     uint64_t shnum = ELF_TO_HOST(16, buffer->e_shnum, littleEndian);                                                            \
                                                                                                                                 \
     if (shnum == 0) {                                                                                                           \
@@ -165,7 +165,7 @@ elfFile_loadShnum(64)
  * @param bits the amount of bits the implementation shall handle
  */
 #define elfFile_parseFileImpl(bits)                                                                                  \
-static inline bool elfFile_parseFile##bits (struct elfFile* self, Elf##bits##_Ehdr* buffer, bool littleEndian) {     \
+static inline bool elfFile_parseFile##bits(struct elfFile* self, const Elf##bits##_Ehdr* buffer, bool littleEndian) {\
     if (ELF_TO_HOST(bits, buffer->e_shoff, littleEndian) == 0) return false;                                         \
                                                                                                                      \
     char* sectStrBegin = elfFile_loadSectionStrtab##bits(buffer, littleEndian);                                      \
