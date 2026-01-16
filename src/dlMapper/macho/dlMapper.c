@@ -25,18 +25,25 @@
 
 #include "../dlMapper_platform.h"
 
+#define dlMapper_safe(theObject, expr)  \
+typeof(theObject) object = (theObject); \
+if (object != NULL) {                   \
+    expr;                               \
+}
+
 bool dlMapper_platform_loadLoadedLibraries(vector_binaryFile_t* libs) {
     const uint32_t count = _dyld_image_count();
     vector_reserve(libs, count + 1);
     for (uint32_t i = 0; i < count; ++i) {
-        vector_push_back(libs, binaryFile_new(_dyld_get_image_name(i), _dyld_get_image_header(i)));
+        dlMapper_safe(binaryFile_new(_dyld_get_image_name(i),
+            _dyld_get_image_header(i)), vector_push_back(libs, object))
     }
 
     struct task_dyld_info dyldInfo;
     mach_msg_type_number_t infoCount = TASK_DYLD_INFO_COUNT;
     if (task_info(mach_task_self_, TASK_DYLD_INFO, (task_info_t) &dyldInfo, &infoCount) == KERN_SUCCESS) {
         const struct dyld_all_image_infos* infos = (void*) dyldInfo.all_image_info_addr;
-        vector_push_back(libs, binaryFile_new(infos->dyldPath, infos->dyldImageLoadAddress));
+        dlMapper_safe(binaryFile_new(infos->dyldPath, infos->dyldImageLoadAddress), vector_push_back(libs, object))
     } else {
         printf("LCS: Warning: Failed to load the dynamic loader. Callstacks might be truncated.\n");
     }
