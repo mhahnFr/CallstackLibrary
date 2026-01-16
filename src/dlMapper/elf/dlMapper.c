@@ -1,7 +1,7 @@
 /*
  * CallstackLibrary - Library creating human-readable call stacks.
  *
- * Copyright (C) 2024 - 2025  mhahnFr
+ * Copyright (C) 2024 - 2026  mhahnFr
  *
  * This file is part of the CallstackLibrary.
  *
@@ -30,11 +30,7 @@
 # undef __USE_GNU
 #undef _GNU_SOURCE
 
-#include <elf/elfUtils.h>
-#include <file/pathUtils.h>
-
 #include "../dlMapper_platform.h"
-#include "../pair_address.h"
 
 /**
  * This structure is used to pass the address of our runtime image and
@@ -44,7 +40,7 @@ struct dlMapper_platform_data {
     /** The pointer into our runtime image.    */
     const void* inside;
     /** The loaded library information vector. */
-    vector_loadedLibInfo_t* libs;
+    vector_binaryFile_t* libs;
 };
 
 /**
@@ -64,69 +60,6 @@ static inline char* dlMapper_platform_loadExecutableName(void) {
     }
     buffer[count] = '\0';
     return buffer;
-}
-
-/**
- * Generates an implementation for loading the ELF program header number.
- *
- * @param bits the amount of bits the implementation shall handle
- */
-#define dlMapper_platform_loadEPHNum(bits)                                                                     \
-static inline uint32_t dlMapper_platform_loadEPHNum##bits(const Elf##bits##_Ehdr* header, bool littleEndian) { \
-    const uint16_t e_phnum = ELF_TO_HOST(16, header->e_phnum, littleEndian);                                   \
-    if (e_phnum != PN_XNUM) {                                                                                  \
-        return e_phnum;                                                                                        \
-    }                                                                                                          \
-                                                                                                               \
-    Elf##bits##_Shdr* sect = ((void*) header) + ELF_TO_HOST(bits, header->e_shoff, littleEndian);              \
-    return ELF_TO_HOST(32, sect->sh_info, littleEndian);                                                       \
-}
-
-dlMapper_platform_loadEPHNum(32)
-dlMapper_platform_loadEPHNum(64)
-
-/**
- * Generates an implementation for loading a given ELF file.
- *
- * @param bits the amount of bits the implementation shall handle
- */
-#define dlMapper_platform_loadELF_impl(bits)                                                        \
-static inline pair_address_t dlMapper_platform_loadELF##bits(const void* base, bool littleEndian) { \
-    const Elf##bits##_Ehdr* header = base;                                                          \
-                                                                                                    \
-    const void* biggest = NULL;                                                                     \
-    const uint32_t e_phnum = dlMapper_platform_loadEPHNum##bits(header, littleEndian);              \
-    for (uint32_t i = 0; i < e_phnum; ++i) {                                                        \
-        Elf##bits##_Phdr* seg = ((void*) header) + ELF_TO_HOST(bits, header->e_phoff, littleEndian) \
-                                + i * ELF_TO_HOST(16, header->e_phentsize, littleEndian);           \
-        const void* address = base + ELF_TO_HOST(bits, seg->p_offset, littleEndian)                 \
-                             + ELF_TO_HOST(bits, seg->p_memsz, littleEndian);                       \
-        if (biggest == NULL || biggest < address) {                                                 \
-            biggest = address;                                                                      \
-        }                                                                                           \
-    }                                                                                               \
-    return (pair_address_t) { base, biggest };                                                      \
-}
-
-dlMapper_platform_loadELF_impl(32)
-dlMapper_platform_loadELF_impl(64)
-
-/**
- * Parses the given ELF file.
- *
- * @param baseAddress the start address of the ELF file
- * @return the start and the end address of the given ELF file
- */
-static inline pair_address_t dlMapper_platform_loadELF(const void* baseAddress) {
-    const Elf32_Ehdr* header = baseAddress;
-    switch (header->e_ident[EI_CLASS]) {
-        case ELFCLASS32: return dlMapper_platform_loadELF32(baseAddress, header->e_ident[EI_DATA] == ELFDATA2LSB);
-        case ELFCLASS64: return dlMapper_platform_loadELF64(baseAddress, header->e_ident[EI_DATA] == ELFDATA2LSB);
-
-        default: break;
-    }
-
-    return (pair_address_t) { NULL, NULL };
 }
 
 /**
@@ -172,17 +105,11 @@ static inline int dlMapper_platform_iterateCallback(struct dl_phdr_info* info, c
     if (loadedAddress == NULL) {
         return 0;
     }
-    const pair_address_t addresses = dlMapper_platform_loadELF(loadedAddress);
-    vector_push_back(data->libs, ((struct loadedLibInfo) {
-        addresses.first,
-        addresses.second,
-        info->dlpi_addr,
-        empty ? (char*) fileName : strdup(fileName),
-        path_toAbsolutePath(fileName),
-        path_toRelativePath(fileName),
-        data->inside >= addresses.first && data->inside <= addresses.second,
-        NULL
-    }));
+    struct binaryFile* file = binaryFile_new(fileName, loadedAddress);
+    if (file != NULL) {
+        file->relocationOffset = info->dlpi_addr;
+        vector_push_back(data->libs, file);
+    }
     return 0;
 }
 
@@ -197,7 +124,7 @@ static inline void* dlMapper_platform_loadLCSAddress(void) {
     return (void*) me;
 }
 
-bool dlMapper_platform_loadLoadedLibraries(vector_loadedLibInfo_t* libs) {
+bool dlMapper_platform_loadLoadedLibraries(vector_binaryFile_t* libs) {
     struct dlMapper_platform_data data = (struct dlMapper_platform_data) {
         dlMapper_platform_loadLCSAddress(),
         libs
@@ -206,10 +133,10 @@ bool dlMapper_platform_loadLoadedLibraries(vector_loadedLibInfo_t* libs) {
     return dl_iterate_phdr(dlMapper_platform_iterateCallback, &data) == 0;
 }
 
-uintptr_t dlMapper_platform_relativize(const struct loadedLibInfo* info, const void* address) {
+uintptr_t dlMapper_platform_relativize(const struct binaryFile* info, const void* address) {
     return (uintptr_t) address - info->relocationOffset;
 }
 
-uintptr_t dlMapper_platform_absolutize(const struct loadedLibInfo* info, const uintptr_t address) {
+uintptr_t dlMapper_platform_absolutize(const struct binaryFile* info, const uintptr_t address) {
     return address + info->relocationOffset;
 }
