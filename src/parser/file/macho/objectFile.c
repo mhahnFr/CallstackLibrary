@@ -36,10 +36,9 @@
 
 struct objectFile* objectFile_new(void) {
     struct objectFile* self = malloc(sizeof(struct objectFile));
-    if (self == NULL) {
-        return NULL;
+    if (self != NULL) {
+        *self = objectFile_initializer;
     }
-    objectFile_create(self);
     return self;
 }
 

@@ -1,7 +1,7 @@
 /*
  * CallstackLibrary - Library creating human-readable call stacks.
  *
- * Copyright (C) 2023 - 2025  mhahnFr
+ * Copyright (C) 2023 - 2026  mhahnFr
  *
  * This file is part of the CallstackLibrary.
  *
@@ -23,7 +23,6 @@
 #define objectFile_h
 
 #include <stdbool.h>
-#include <string.h>
 #include <time.h>
 
 #include "../debugInfo.h"
@@ -81,44 +80,19 @@ struct objectFile {
     struct objectFile * next;
 };
 
+#define objectFile_initializer (struct objectFile) {                             \
+    NULL, NULL, NULL, 0, { 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0 },     \
+    lcs_section_initializer, lcs_section_initializer, lcs_section_initializer,   \
+    lcs_section_initializer, lcs_section_initializer, lcs_section_initializer,   \
+    false, false, vector_initializer, vector_initializer, NULL, NULL, NULL, NULL \
+}
+
 /**
  * Allocates and initializes a new object file structure.
  *
  * @return the allocated object or @c NULL on error
  */
 struct objectFile * objectFile_new(void);
-
-/**
- * Initializes the given object file structure.
- *
- * @param self the object file structure to be initialized
- */
-static inline void objectFile_create(struct objectFile * self) {
-    *self = (struct objectFile) {
-        .sourceFile          = NULL,
-        .directory           = NULL,
-        .name                = NULL,
-        .next                = NULL,
-        .lastModified        = 0,
-        .parsed              = false,
-        .isDsymBundle        = false,
-        .mainSourceFileCache = NULL,
-        .mainSourceFileCacheRelative = NULL,
-        .mainSourceFileCacheAbsolute = NULL,
-    };
-
-    memset(self->uuid, 0, 16);
-
-    lcs_section_create(&self->debugLine);
-    lcs_section_create(&self->debugLineStr);
-    lcs_section_create(&self->debugStr);
-    lcs_section_create(&self->debugInfo);
-    lcs_section_create(&self->debugAbbrev);
-    lcs_section_create(&self->debugStrOffsets);
-
-    vector_init(&self->ownFunctions);
-    vector_init(&self->lineInfos);
-}
 
 /**
  * Parses the given buffer into the given object file object.
