@@ -76,7 +76,8 @@ struct binaryFile* binaryFile_new(const char* fileName, const void* startAddress
     };
     LCS_FILE(tmp, create);
     if (!LCS_FILE(tmp, parseShallow)) {
-        // TODO: Handle the error
+        binaryFile_delete(toReturn);
+        return NULL;
     }
     volatile const void* inside = NULL;
     inside = &binaryFile_new;
