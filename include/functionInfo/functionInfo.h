@@ -22,13 +22,13 @@
 #ifndef __lcs_functionInfo_functionInfo_h
 #define __lcs_functionInfo_functionInfo_h
 
-#ifdef __cplusplus
-extern "C" {
-#endif
-
 #include <stdbool.h>
 #include <stddef.h>
 #include <stdint.h>
+
+#ifdef __cplusplus
+extern "C" {
+#endif
 
 /**
  * Represents the gathered information for a function.

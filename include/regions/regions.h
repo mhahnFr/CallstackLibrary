@@ -1,7 +1,7 @@
 /*
  * CallstackLibrary - Library creating human-readable call stacks.
  *
- * Copyright (C) 2025  mhahnFr
+ * Copyright (C) 2025 - 2026  mhahnFr
  *
  * This file is part of the CallstackLibrary.
  *
@@ -22,11 +22,11 @@
 #ifndef __lcs_regions_regions_h
 #define __lcs_regions_regions_h
 
+#include <stdint.h>
+
 #ifdef __cplusplus
 extern "C" {
 #endif
-
-#include <stdint.h>
 
 /**
  * @brief Defines a memory region.

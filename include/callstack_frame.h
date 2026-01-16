@@ -22,12 +22,12 @@
 #ifndef __lcs_callstack_frame_h
 #define __lcs_callstack_frame_h
 
+#include <stdbool.h>
+#include <stddef.h>
+
 #ifdef __cplusplus
 extern "C" {
 #endif
-
-#include <stdbool.h>
-#include <stddef.h>
 
 /**
  * This structure represents a translated callstack frame.
