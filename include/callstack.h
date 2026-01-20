@@ -1,7 +1,7 @@
 /*
  * CallstackLibrary - Library creating human-readable call stacks.
  *
- * Copyright (C) 2022 - 2025  mhahnFr
+ * Copyright (C) 2022 - 2026  mhahnFr
  *
  * This file is part of the CallstackLibrary.
  *
@@ -22,16 +22,29 @@
 #ifndef __lcs_callstack_h
 #define __lcs_callstack_h
 
-#include <stdbool.h>
-
 #include "callstack_frame.h"
-#include "callstack_type.h"
 
 #ifdef __cplusplus
 extern "C" {
 #endif
 
 #define CALLSTACK_BACKTRACE_SIZE 128
+
+/**
+ * The type of the callstack.
+ */
+enum callstack_type {
+    /**
+     * The callstack has been translated.
+     *
+     * @since v1.1
+     */
+    TRANSLATED,
+    /** An error happened during translation. */
+    FAILED,
+    /** Not translated.                       */
+    NONE
+};
 
 /**
  * A structure representing a callstack.
