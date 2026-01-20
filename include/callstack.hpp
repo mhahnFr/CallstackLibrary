@@ -1,7 +1,7 @@
 /*
  * CallstackLibrary - Library creating human-readable call stacks.
  *
- * Copyright (C) 2022 - 2025  mhahnFr
+ * Copyright (C) 2022 - 2026  mhahnFr
  *
  * This file is part of the CallstackLibrary.
  *
@@ -19,13 +19,14 @@
  * CallstackLibrary, see the file LICENSE.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-#ifndef __lcs_callstack_h
+#ifndef _lcs_callstack_hpp
+#define _lcs_callstack_hpp
+
+#ifndef _lcs_callstack_h
 # warning Wrong inclusion of "callstack.hpp" redirected to '#include "callstack.h"'!
 # include "callstack.h"
+#endif
 
-#else
-# ifndef __lcs_callstack_hpp
-# define __lcs_callstack_hpp
 
 # if __cplusplus >= 201103
 #  include <array>
@@ -225,5 +226,4 @@ public:
 };
 }
 
- #endif /* __lcs_callstack_hpp */
-#endif /* __lcs_callstack_h */
+#endif /* _lcs_callstack_hpp */
