@@ -22,7 +22,7 @@
 #ifndef _lcs_symbols_symbolInfo_h
 #define _lcs_symbols_symbolInfo_h
 
-#include "../callstack_frame.h"
+#include <stdbool.h>
 
 #ifdef __cplusplus
 extern "C" {
