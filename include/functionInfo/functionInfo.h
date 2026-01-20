@@ -1,7 +1,7 @@
 /*
  * CallstackLibrary - Library creating human-readable call stacks.
  *
- * Copyright (C) 2024  mhahnFr
+ * Copyright (C) 2024, 2026  mhahnFr
  *
  * This file is part of the CallstackLibrary.
  *
@@ -19,8 +19,8 @@
  * CallstackLibrary, see the file LICENSE.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-#ifndef __lcs_functionInfo_functionInfo_h
-#define __lcs_functionInfo_functionInfo_h
+#ifndef _lcs_functionInfo_functionInfo_h
+#define _lcs_functionInfo_functionInfo_h
 
 #include <stdbool.h>
 #include <stddef.h>
@@ -75,4 +75,4 @@ static inline struct functionInfo functionInfo_load(const char* functionName) {
 } // extern "C"
 #endif
 
-#endif /* __lcs_functionInfo_functionInfo_h */
+#endif /* _lcs_functionInfo_functionInfo_h */

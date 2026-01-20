@@ -19,8 +19,8 @@
  * CallstackLibrary, see the file LICENSE.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-#ifndef __lcs_symbols_symbolInfo_h
-#define __lcs_symbols_symbolInfo_h
+#ifndef _lcs_symbols_symbolInfo_h
+#define _lcs_symbols_symbolInfo_h
 
 #include "../callstack_frame.h"
 
@@ -38,4 +38,4 @@ struct callstack_frame symbols_getInfoCached(const void* address, bool* success)
 } // extern "C"
 #endif
 
-#endif //__lcs_symbols_symbolInfo_h
+#endif // _lcs_symbols_symbolInfo_h

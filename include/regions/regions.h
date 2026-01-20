@@ -19,8 +19,8 @@
  * CallstackLibrary, see the file LICENSE.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-#ifndef __lcs_regions_regions_h
-#define __lcs_regions_regions_h
+#ifndef _lcs_regions_regions_h
+#define _lcs_regions_regions_h
 
 #include <stdint.h>
 
@@ -108,4 +108,4 @@ void regions_destroyInfo(const struct regionInfo* info);
 } // extern "C"
 #endif
 
-#endif /* __lcs_regions_regions_h */
+#endif /* _lcs_regions_regions_h */

@@ -19,8 +19,8 @@
  * CallstackLibrary, see the file LICENSE.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-#ifndef __lcs_callstack_exception_hpp
-#define __lcs_callstack_exception_hpp
+#ifndef _lcs_callstack_exception_hpp
+#define _lcs_callstack_exception_hpp
 
 #include <cxxabi.h>
 #include <exception>
@@ -203,4 +203,4 @@ public:
 };
 }
 
-#endif /* __lcs_callstack_exception_hpp */
+#endif /* _lcs_callstack_exception_hpp */
