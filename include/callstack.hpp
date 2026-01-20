@@ -27,15 +27,14 @@
 # include "callstack.h"
 #endif
 
+#include "callstack_cxx_compat.hpp"
 
-# if __cplusplus >= 201103
-#  include <array>
-#  include <system_error>
-# else
-#  include <stdexcept>
-# endif
-
-# include "callstack_cxx_compat.hpp"
+#ifdef LCS_CXX11
+# include <array>
+# include <system_error>
+#else
+# include <stdexcept>
+#endif
 
 /**
  * This namespace contains a wrapper class for the @code struct callstack@endcode.
@@ -60,7 +59,7 @@ class callstack {
      * @throws std::system_error if compiled using C++11 or newer, a @c std::runtime_error otherwise
      */
     inline static void error() {
-#if __cplusplus >= 201103
+#ifdef LCS_CXX11
         throw std::system_error(errno, std::generic_category());
 #else
         throw std::runtime_error("Backtrace invalid");
@@ -143,7 +142,7 @@ public:
         return *this;
     }
 
-#if __cplusplus >= 201103
+#ifdef LCS_CXX11
     inline callstack(callstack&& other) noexcept: self(other.self) {
         other.self = CALLSTACK_INITIALIZER;
     }
