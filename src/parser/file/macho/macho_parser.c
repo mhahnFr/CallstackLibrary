@@ -161,6 +161,8 @@ machoParser_handleFunctionImpl(64, _64)
 #define machoParser_handleGeneralEntryImpl(bits, suffix)                                     \
 static inline bool machoParser_handleGeneralEntry##bits(struct machoParser* self,            \
                                                         const struct nlist##suffix* entry) { \
+    if ((entry->n_type & N_TYPE) != N_SECT) return true;                                     \
+                                                                                             \
     self->functionCallback(self->object, (pair_funcFile_t) {                                 \
         (struct function) {                                                                  \
             machoParser_swap(self, bits, entry->n_value),                                    \
