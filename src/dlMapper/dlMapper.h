@@ -52,6 +52,7 @@ bool dlMapper_isInited(void);
  * Returns the loaded library info the given pointer is associated with.
  *
  * @param address the address whose runtime image to find
+ * @param includeRegions whether to search within all regions found in the binary files
  * @return the associated loaded library info object or @c NULL if not in any
  * loaded library
  */
