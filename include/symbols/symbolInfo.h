@@ -22,7 +22,9 @@
 #ifndef _lcs_symbols_symbolInfo_h
 #define _lcs_symbols_symbolInfo_h
 
-#include <stdbool.h>
+#ifndef __cplusplus
+# include <stdbool.h>
+#endif
 
 #ifdef __cplusplus
 extern "C" {

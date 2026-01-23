@@ -22,7 +22,9 @@
 #ifndef _lcs_callstack_internals_h
 #define _lcs_callstack_internals_h
 
-#include <stdbool.h>
+#ifndef __cplusplus
+# include <stdbool.h>
+#endif
 
 #ifdef __cplusplus
 extern "C" {
