@@ -22,8 +22,12 @@
 #ifndef _lcs_callstack_frame_h
 #define _lcs_callstack_frame_h
 
-#include <stdbool.h>
-#include <stddef.h>
+#ifdef __cplusplus
+# include <cstddef>
+#else
+# include <stdbool.h>
+# include <stddef.h>
+#endif
 
 #ifdef __cplusplus
 extern "C" {

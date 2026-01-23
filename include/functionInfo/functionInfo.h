@@ -22,9 +22,14 @@
 #ifndef _lcs_functionInfo_functionInfo_h
 #define _lcs_functionInfo_functionInfo_h
 
-#include <stdbool.h>
-#include <stddef.h>
-#include <stdint.h>
+#ifdef __cplusplus
+# include <cstddef>
+# include <cstdint>
+#else
+# include <stdbool.h>
+# include <stddef.h>
+# include <stdint.h>
+#endif
 
 #ifdef __cplusplus
 extern "C" {
