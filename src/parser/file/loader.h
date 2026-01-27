@@ -1,7 +1,7 @@
 /*
- * Callstack Library - Library creating human-readable call stacks.
+ * CallstackLibrary - Library creating human-readable call stacks.
  *
- * Copyright (C) 2024  mhahnFr
+ * Copyright (C) 2024, 2026  mhahnFr
  *
  * This file is part of the CallstackLibrary.
  *
@@ -23,6 +23,7 @@
 #define loader_h
 
 #include <stdbool.h>
+#include <time.h>
 
 /**
  * @brief The simple parser callback function prototype.
@@ -52,6 +53,10 @@ union loader_parserFunction {
     loader_parserExtended parseFuncExtended;
 };
 
+
+bool loader_loadFileAndExecuteTime(const char* fileName, const time_t* lastModified,
+                                   union loader_parserFunction func, bool extended, void* args);
+
 /**
  * @brief Loads the file of the given name and executes the given parser function using the payload and
  * the loaded data.
@@ -68,6 +73,9 @@ union loader_parserFunction {
  * @param args the payload passed to the callback
  * @return whether the file was loaded successfully and the parsing was successful
  */
-bool loader_loadFileAndExecute(const char* fileName, union loader_parserFunction func, bool extended, void* args);
+static inline bool loader_loadFileAndExecute(const char* fileName, const union loader_parserFunction func,
+                                             const bool extended, void* args) {
+    return loader_loadFileAndExecuteTime(fileName, NULL, func, extended, args);
+}
 
 #endif /* loader_h */

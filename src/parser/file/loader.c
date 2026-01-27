@@ -1,7 +1,7 @@
 /*
  * CallstackLibrary - Library creating human-readable call stacks.
  *
- * Copyright (C) 2024 - 2025  mhahnFr
+ * Copyright (C) 2024 - 2026  mhahnFr
  *
  * This file is part of the CallstackLibrary.
  *
@@ -19,19 +19,22 @@
  * CallstackLibrary, see the file LICENSE.  If not, see <https://www.gnu.org/licenses/>.
  */
 
+#include "loader.h"
+
 #include <stdio.h>
 #include <stdlib.h>
 #include <sys/stat.h>
 
-#include "loader.h"
-
-bool loader_loadFileAndExecute(const char* fileName, const union loader_parserFunction func, const bool extended, void* args) {
+bool loader_loadFileAndExecuteTime(const char* fileName, const time_t* lastModified,
+                                   const union loader_parserFunction func, const bool extended, void* args) {
     if (fileName == NULL) {
         return false;
     }
-    
     struct stat fileStats;
     if (stat(fileName, &fileStats) != 0) {
+        return false;
+    }
+    if (lastModified != NULL && fileStats.st_mtime != *lastModified) {
         return false;
     }
     void* buffer = malloc(fileStats.st_size);
