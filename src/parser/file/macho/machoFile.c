@@ -358,17 +358,6 @@ static inline bool machoFile_parseFileImpl##bits(struct machoFile* self, const v
         }                                                                                             \
         lc = (void *) lc + macho_maybeSwap(32, bytesSwapped, lc->cmdsize);                            \
     }                                                                                                 \
-                                                                                                      \
-    if (!shallow) {                                                                                   \
-        machoFile_fixupFunctions(self);                                                               \
-                                                                                                      \
-        intptr_t diff = (uintptr_t) header - self->text_vmaddr;                                       \
-        vector_iterate(&self->_.regions, {                                                            \
-            element->first += diff;                                                                   \
-            element->second += diff;                                                                  \
-        });                                                                                           \
-        BINARY_FILE_SUPER(self, sortRegions);                                                         \
-    }                                                                                                 \
     return true;                                                                                      \
 }
 
@@ -387,11 +376,12 @@ static inline bool machoFile_parseFile(struct machoFile* self, const void* baseA
     if (baseAddress == NULL) return false;
 
     const struct mach_header* header = baseAddress;
+    bool success = false;
     switch (header->magic) {
-        case MH_MAGIC:    return machoFile_parseFileImpl32(self, baseAddress, false, shallow);
-        case MH_CIGAM:    return machoFile_parseFileImpl32(self, baseAddress, true, shallow);
-        case MH_MAGIC_64: return machoFile_parseFileImpl64(self, baseAddress, false, shallow);
-        case MH_CIGAM_64: return machoFile_parseFileImpl64(self, baseAddress, true, shallow);
+        case MH_MAGIC:    success = machoFile_parseFileImpl32(self, baseAddress, false, shallow); break;
+        case MH_CIGAM:    success = machoFile_parseFileImpl32(self, baseAddress, true, shallow);  break;
+        case MH_MAGIC_64: success = machoFile_parseFileImpl64(self, baseAddress, false, shallow); break;
+        case MH_CIGAM_64: success = machoFile_parseFileImpl64(self, baseAddress, true, shallow);  break;
 
         case FAT_MAGIC:
         case FAT_MAGIC_64: return machoFile_parseFile(self, macho_parseFat(baseAddress, false, self->_.fileName.original), shallow);
@@ -401,7 +391,17 @@ static inline bool machoFile_parseFile(struct machoFile* self, const void* baseA
 
         default: break;
     }
-    return false;
+    if (success && !shallow) {
+        machoFile_fixupFunctions(self);
+
+        const uintptr_t diff = (uintptr_t) baseAddress - self->text_vmaddr;
+        vector_iterate(&self->_.regions, {
+            element->first += diff;
+            element->second += diff;
+        });
+        BINARY_FILE_SUPER(self, sortRegions);
+    }
+    return success;
 }
 
 static inline bool machoFile_parseFileComplete(struct machoFile* self, const void* baseAddress) {
