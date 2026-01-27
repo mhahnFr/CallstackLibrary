@@ -138,13 +138,15 @@ static inline const char* objectFile_getSourceFileName(struct objectFile* self) 
     return self->mainSourceFileCache = toReturn;
 }
 
+static inline bool objectFile_maybeParse(struct objectFile* self) {
+    return self->parsed || ((self->parsed = objectFile_parse(self)));
+}
+
 optional_debugInfo_t objectFile_getDebugInfo(struct objectFile* self, const uint64_t address, const struct function function) {
     const optional_debugInfo_t toReturn = { .has_value = false };
     
-    if (!self->parsed) {
-        if (!((self->parsed = objectFile_parse(self)))) {
-            return toReturn;
-        }
+    if (!objectFile_maybeParse(self)) {
+        return ERROR_RETURN;
     }
     uint64_t lineAddress;
     uint64_t functionBegin;
@@ -193,9 +195,7 @@ optional_debugInfo_t objectFile_getDebugInfo(struct objectFile* self, const uint
 }
 
 uint8_t* objectFile_getUUID(struct objectFile* self) {
-    if (!self->parsed) {
-        self->parsed = objectFile_parse(self);
-    }
+    objectFile_maybeParse(self);
     return self->uuid;
 }
 
