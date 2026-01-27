@@ -77,14 +77,11 @@ static inline int objectFile_dwarfLineInfoSortCompare(const void* lhs, const voi
  *
  * Sorted ascendingly.
  *
- * @param lhs the left-hand side value
- * @param rhs the right-hand side value
+ * @param a the left-hand side value
+ * @param b the right-hand side value
  * @return the difference between the two given functions
  */
-static inline int objectFile_functionCompare(const void* lhs, const void* rhs) {
-    const struct function* a = lhs;
-    const struct function* b = rhs;
-
+static inline int objectFile_functionCompare(const struct function* a, const struct function* b) {
     return strcmp(a->linkedName, b->linkedName);
 }
 
@@ -141,8 +138,8 @@ static inline bool objectFile_maybeParse(struct objectFile* self) {
 }
 
 optional_debugInfo_t objectFile_getDebugInfo(struct objectFile* self, const uint64_t address, const struct function function) {
-    const optional_debugInfo_t toReturn = { .has_value = false };
-    
+#define ERROR_RETURN (optional_debugInfo_t) { .has_value = false };
+
     if (!objectFile_maybeParse(self)) {
         return ERROR_RETURN;
     }
@@ -154,7 +151,7 @@ optional_debugInfo_t objectFile_getDebugInfo(struct objectFile* self, const uint
     } else {
         const optional_function_t ownFunction = objectFile_findOwnFunction(self, function.linkedName);
         if (!ownFunction.has_value) {
-            return toReturn;
+            return ERROR_RETURN;
         }
         lineAddress = ownFunction.value.startAddress + address - function.startAddress;
         functionBegin = ownFunction.value.startAddress;
@@ -168,21 +165,20 @@ optional_debugInfo_t objectFile_getDebugInfo(struct objectFile* self, const uint
                                                        objectFile_dwarfLineInfoSortCompare);
     if (closest == NULL || closest->address < functionBegin
         || (function.length != 0 && closest->address >= functionBegin + function.length)) {
-        return toReturn;
+        return ERROR_RETURN;
     }
     if (closest->sourceFile.fileName != NULL && closest->sourceFile.fileNameRelative == NULL && closest->sourceFile.fileNameAbsolute == NULL) {
         struct dwarf_lineInfo* mutableClosest = (struct dwarf_lineInfo*) closest;
         mutableClosest->sourceFile.fileNameRelative = path_toRelativePath(closest->sourceFile.fileName);
         mutableClosest->sourceFile.fileNameAbsolute = path_toAbsolutePath(closest->sourceFile.fileName);
     }
-    const char* fileName = closest->sourceFile.fileName == NULL ? objectFile_getSourceFileName(self) : closest->sourceFile.fileName;
     return (optional_debugInfo_t) {
         true, (struct debugInfo) {
             function, (optional_sourceFileInfo_t) {
                 true, (struct sourceFileInfo) {
                     closest->line,
                     closest->column,
-                    fileName,
+                    closest->sourceFile.fileName == NULL ? objectFile_getSourceFileName(self) : closest->sourceFile.fileName,
                     closest->sourceFile.fileName == NULL ? self->mainSourceFileCacheRelative : closest->sourceFile.fileNameRelative,
                     closest->sourceFile.fileName == NULL ? self->mainSourceFileCacheAbsolute : closest->sourceFile.fileNameAbsolute,
                     binaryFile_isOutdated(closest->sourceFile)
@@ -332,9 +328,8 @@ static inline bool objectFile_parseMachO(struct objectFile* self, const void* bu
 
     bool success = false;
     switch (header->magic) {
-        case MH_MAGIC: success = objectFile_parseMachOImpl32(self, buffer, false); break;
-        case MH_CIGAM: success = objectFile_parseMachOImpl32(self, buffer, true);  break;
-
+        case MH_MAGIC:    success = objectFile_parseMachOImpl32(self, buffer, false); break;
+        case MH_CIGAM:    success = objectFile_parseMachOImpl32(self, buffer, true);  break;
         case MH_MAGIC_64: success = objectFile_parseMachOImpl64(self, buffer, false); break;
         case MH_CIGAM_64: success = objectFile_parseMachOImpl64(self, buffer, true);  break;
 
