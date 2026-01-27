@@ -100,7 +100,7 @@ struct objectFile * objectFile_new(void);
  * @param buffer the Mach-O buffer to be parsed
  * @return whether the parsing was successful
  */
-bool objectFile_parseBuffer(struct objectFile* self, void* buffer);
+bool objectFile_parseBuffer(struct objectFile* self, const void* buffer);
 
 /**
  * @brief Parses the Mach-O file represented by the given object file object.

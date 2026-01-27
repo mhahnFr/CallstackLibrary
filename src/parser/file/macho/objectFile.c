@@ -237,7 +237,7 @@ static inline void objectFile_handleSection(struct objectFile* self,
 #define objectFile_handleSegmentFunc(bits, suffix)                                                 \
 static inline bool objectFile_handleSegment##bits(struct objectFile*         self,                 \
                                                   struct segment_command##suffix* command,         \
-                                                  void*                      baseAddress,          \
+                                                  const void*                baseAddress,          \
                                                   const bool                 bytesSwapped) {       \
     const uint32_t nsects = macho_maybeSwap(32, bytesSwapped, command->nsects);                    \
                                                                                                    \
@@ -267,9 +267,9 @@ static inline void objectFile_addFunctionCallback(struct objectFile* self, pair_
  */
 #define objectFile_parseMachOImplFunc(bits, suffix)                                                   \
 static inline bool objectFile_parseMachOImpl##bits(struct objectFile* self,                           \
-                                                   void*              baseAddress,                    \
+                                                   const void*        baseAddress,                    \
                                                    const bool         bytesSwapped) {                 \
-    struct mach_header##suffix* header = baseAddress;                                                 \
+    const struct mach_header##suffix* header = baseAddress;                                           \
     struct load_command*   lc     = (void*) header + sizeof(struct mach_header##suffix);              \
     const  uint32_t        ncmds  = macho_maybeSwap(32, bytesSwapped, header->ncmds);                 \
                                                                                                       \
@@ -283,7 +283,7 @@ static inline bool objectFile_parseMachOImpl##bits(struct objectFile* self,     
             case LC_SYMTAB: {                                                                         \
                 struct machoParser parser = machoParser_create(                                       \
                     (void*) lc, baseAddress, 0,                                                       \
-                    bytesSwapped, (bits) == 64,                                                         \
+                    bytesSwapped, (bits) == 64,                                                       \
                     (machoParser_addFunction) objectFile_addFunctionCallback, self                    \
                 );                                                                                    \
                 result = machoParser_parseSymbolTable(&parser);                                       \
@@ -319,11 +319,10 @@ objectFile_parseMachOImplFunc(64, _64)
  * @param buffer the buffer of the Mach-O file
  * @return whether the parsing was successful
  */
-static inline bool objectFile_parseMachO(struct objectFile* self,
-                                         void*              buffer) {
+static inline bool objectFile_parseMachO(struct objectFile* self, const void* buffer) {
     if (buffer == NULL) return false;
 
-    struct mach_header* header = buffer;
+    const struct mach_header* header = buffer;
 
     if (header->magic == MH_MAGIC    || header->magic == MH_CIGAM ||
         header->magic == MH_MAGIC_64 || header->magic == MH_CIGAM_64) {
@@ -362,7 +361,7 @@ static inline bool objectFile_parseMachO(struct objectFile* self,
     return success;
 }
 
-bool objectFile_parseBuffer(struct objectFile* self, void* buffer) {
+bool objectFile_parseBuffer(struct objectFile* self, const void* buffer) {
     const bool result = objectFile_parseMachO(self, buffer);
     if (!result) {
         vector_destroyWithPtr(&self->ownFunctions, function_destroy);
