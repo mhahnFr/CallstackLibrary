@@ -194,57 +194,56 @@ static inline optional_debugInfo_t machoFile_getDebugInfo(struct machoFile* self
  * @param bits the amount of bits the implementation should be generated for
  * @param suffix the optional suffix to be used for the native types
  */
-#define machoFile_handleSegment(bits, suffix)                                                      \
-static inline bool machoFile_handleSegment##bits(struct machoFile* self, const void* buffer,       \
-                                                 struct segment_command##suffix* segment,          \
-                                                 const bool bytesSwapped, const bool shallow) {    \
-    if (strcmp(segment->segname, SEG_PAGEZERO) == 0) {                                             \
-        self->addressOffset = macho_maybeSwap(bits, bytesSwapped, segment->vmaddr)                 \
-                            + macho_maybeSwap(bits, bytesSwapped, segment->vmsize);                \
-    } else if (strcmp(segment->segname, SEG_LINKEDIT) == 0) {                                      \
-        self->linkedit_vmaddr  = macho_maybeSwap(bits, bytesSwapped, segment->vmaddr);             \
-        self->linkedit_fileoff = macho_maybeSwap(bits, bytesSwapped, segment->fileoff);            \
-    } else if (strcmp(segment->segname, SEG_TEXT) == 0) {                                          \
-        self->text_vmaddr = macho_maybeSwap(bits, bytesSwapped, segment->vmaddr);                  \
-        self->_.relocationOffset = self->text_vmaddr;                                              \
-        self->_.end = self->_.startAddress + macho_maybeSwap(bits, bytesSwapped, segment->vmsize); \
-    }                                                                                              \
-    if (shallow) {                                                                                 \
-        return true;                                                                               \
-    }                                                                                              \
-                                                                                                   \
-    if (segment->initprot & 2 && segment->initprot & 1) {                                          \
-        vector_push_back(&self->_.regions, ((pair_ptr_t) {                                         \
-            segment->vmaddr,                                                                       \
-            segment->vmaddr + segment->vmsize                                                      \
-        }));                                                                                       \
-    }                                                                                              \
-    optional_uint64_t size = { .has_value = false, .value = 0 };                                   \
-    for (uint64_t i = 0; i < segment->nsects; ++i) {                                               \
-        struct section##suffix* section = ((void*) segment) + sizeof(*segment)                     \
-                                            + i * sizeof(struct section##suffix);                  \
-        switch (section->flags & SECTION_TYPE) {                                                   \
-            case S_THREAD_LOCAL_ZEROFILL:                                                          \
-            case S_THREAD_LOCAL_REGULAR:                                                           \
-                size.has_value = true;                                                             \
-                size.value += section->size;                                                       \
-                break;                                                                             \
-                                                                                                   \
-            case S_THREAD_LOCAL_VARIABLES: if (section->size != 0) { /* TODO: Can have multiple */ \
-                uintptr_t slide = (uintptr_t) (buffer - self->text_vmaddr);                        \
-                TLVDescriptor* begin = (TLVDescriptor*) (section->addr + slide);                   \
-                const size_t amount = section->size / sizeof(TLVDescriptor);                       \
-                vector_reserve(&self->tlvs, amount);                                               \
-                memcpy(self->tlvs.content, begin, section->size);                                  \
-                self->tlvs.count = amount;                                                         \
-            }                                                                                      \
-            break;                                                                                 \
-        }                                                                                          \
-    }                                                                                              \
-    if (size.has_value) {                                                                          \
-        self->tlvSize = size.value;                                                                \
-    }                                                                                              \
-    return true;                                                                                   \
+#define machoFile_handleSegment(bits, suffix)                                                   \
+static inline bool machoFile_handleSegment##bits(struct machoFile* self, const void* buffer,    \
+                                                 const struct segment_command##suffix* segment, \
+                                                 const bool bytesSwapped, const bool shallow) { \
+    uint##bits##_t vmaddr = macho_maybeSwap(bits, bytesSwapped, segment->vmaddr),               \
+                   vmsize = macho_maybeSwap(bits, bytesSwapped, segment->vmsize);               \
+    if (strcmp(segment->segname, SEG_PAGEZERO) == 0) {                                          \
+        self->addressOffset = vmaddr + vmsize;                                                  \
+    } else if (strcmp(segment->segname, SEG_LINKEDIT) == 0) {                                   \
+        self->linkedit_vmaddr = vmaddr;                                                         \
+        self->linkedit_fileoff = macho_maybeSwap(bits, bytesSwapped, segment->fileoff);         \
+    } else if (strcmp(segment->segname, SEG_TEXT) == 0) {                                       \
+        self->_.relocationOffset = self->text_vmaddr = vmaddr;                                  \
+        self->_.end = self->_.startAddress + vmsize;                                            \
+    }                                                                                           \
+    if (shallow) {                                                                              \
+        return true;                                                                            \
+    }                                                                                           \
+    if (segment->initprot & 2 && segment->initprot & 1) {                                       \
+        vector_push_back(&self->_.regions, ((pair_ptr_t) { vmaddr, vmaddr + vmsize }));         \
+    }                                                                                           \
+    optional_uint64_t size = { .has_value = false, .value = 0 };                                \
+    for (uint64_t i = 0; i < segment->nsects; ++i) {                                            \
+        struct section##suffix* section = ((void*) segment) + sizeof(*segment)                  \
+                                            + i * sizeof(struct section##suffix);               \
+        uint##bits##_t sectionSize = macho_maybeSwap(bits, bytesSwapped, section->size);        \
+        switch (section->flags & SECTION_TYPE) {                                                \
+            case S_THREAD_LOCAL_ZEROFILL:                                                       \
+            case S_THREAD_LOCAL_REGULAR:                                                        \
+                size.has_value = true;                                                          \
+                size.value += sectionSize;                                                      \
+                break;                                                                          \
+                                                                                                \
+            case S_THREAD_LOCAL_VARIABLES: if (sectionSize != 0) {                              \
+                /* TODO: Can have multiple */                                                   \
+                uintptr_t slide = (uintptr_t) buffer - self->text_vmaddr;                       \
+                TLVDescriptor* begin = (TLVDescriptor*)                                         \
+                    (macho_maybeSwap(bits, bytesSwapped, section->addr) + slide);               \
+                const size_t amount = sectionSize / sizeof(TLVDescriptor);                      \
+                vector_reserve(&self->tlvs, amount);                                            \
+                memcpy(self->tlvs.content, begin, sectionSize);                                 \
+                self->tlvs.count = amount;                                                      \
+            }                                                                                   \
+            break;                                                                              \
+        }                                                                                       \
+    }                                                                                           \
+    if (size.has_value) {                                                                       \
+        self->tlvSize = size.value;                                                             \
+    }                                                                                           \
+    return true;                                                                                \
 }
 
 machoFile_handleSegment(32,)
