@@ -19,19 +19,17 @@
  * CallstackLibrary, see the file LICENSE.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-#include <stdio.h>
-#include <stdlib.h>
-#include <mach-o/loader.h>
-#include <sys/stat.h>
+#include "objectFile.h"
 
 #include <file/pathUtils.h>
+#include <mach-o/loader.h>
 #include <macho/fat_handler.h>
 #include <macho/macho_utils.h>
 
-#include "objectFile.h"
 #include "macho_parser.h"
 #include "../binaryFile.h"
 #include "../bounds.h"
+#include "../loader.h"
 #include "../dwarf/dwarf_parser.h"
 
 struct objectFile* objectFile_new(void) {
@@ -374,29 +372,10 @@ bool objectFile_parseBuffer(struct objectFile* self, const void* buffer) {
 }
 
 bool objectFile_parse(struct objectFile* self) {
-    if (self == NULL) return false;
-
-    struct stat fileStats;
-    if (stat(self->name, &fileStats) != 0) {
-        return false;
-    }
-    if (self->lastModified != 0 && fileStats.st_mtime != self->lastModified) {
-        return false;
-    }
-    void* buffer = malloc(fileStats.st_size);
-    if (buffer == NULL) {
-        return false;
-    }
-    FILE* file = fopen(self->name, "r");
-    if (file == NULL) {
-        free(buffer);
-        return false;
-    }
-    const size_t count = fread(buffer, 1, fileStats.st_size, file);
-    fclose(file);
-    const bool success = (off_t) count == fileStats.st_size && objectFile_parseBuffer(self, buffer);
-    free(buffer);
-    return success;
+    const time_t lastModified = self->lastModified;
+    return loader_loadFileAndExecuteTime(self->name, lastModified == 0 ? NULL : &lastModified, (union loader_parserFunction) {
+        (loader_parser) objectFile_parseBuffer
+    }, false, self);
 }
 
 
