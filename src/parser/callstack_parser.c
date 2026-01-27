@@ -35,17 +35,18 @@
 static inline bool callstack_parser_parseImpl(const struct callstack_parser* self,
                                               const struct callstack*        callstack) {
     (void) self;
-    
+
+    size_t failed = 0;
     for (size_t i = 0; i < callstack->backtraceSize; ++i) {
         struct binaryFile* file = callstack->frames[i].reserved;
         if (file == NULL) {
             continue;
         }
         if (!binaryFile_addr2String(file, callstack->backtrace[i], &callstack->frames[i])) {
-            return false;
+            ++failed;
         }
     }
-    return true;
+    return failed != callstack->backtraceSize;
 }
 
 char* callstack_parser_demangleCopy(char* name, const bool copy) {
