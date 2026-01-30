@@ -30,7 +30,7 @@
 #include "../binaryFile.h"
 #include "../bounds.h"
 #include "../loader.h"
-#include "../dwarf/dwarf_parser.h"
+#include "../dwarf/parser.h"
 
 struct objectFile* objectFile_new(void) {
     struct objectFile* self = malloc(sizeof(struct objectFile));

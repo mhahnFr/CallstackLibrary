@@ -20,9 +20,9 @@
  */
 
 #include "parser.h"
+#include "../parser.h"
 
 #include "../definitions.h"
-#include "../dwarf_parser.h"
 #include "../leb128.h"
 #include "../v3/definitions.h"
 #include "../v4/definitions.h"

@@ -19,12 +19,12 @@
  * CallstackLibrary, see the file LICENSE.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-#include "dwarf_parser.h"
+#include "parser.h"
+#include "lineInfo/parser.h"
 
 #include <misc/numberContainers.h>
 
 #include "leb128.h"
-#include "lineInfo/parser.h"
 #include "v4/definitions.h"
 #include "v5/definitions.h"
 

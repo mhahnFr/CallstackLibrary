@@ -53,7 +53,7 @@ SRCS = \
 	src/parser/file/bounds.c \
 	src/parser/file/binaryFile.c \
 	src/parser/file/dwarf/leb128.c \
-	src/parser/file/dwarf/dwarf_parser.c \
+	src/parser/file/dwarf/parser.c \
 	src/parser/file/dwarf/v5/parser.c \
 	src/parser/file/dwarf/v4/parser.c \
 	src/parser/demangling/demangler.c \

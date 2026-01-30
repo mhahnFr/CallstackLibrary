@@ -20,11 +20,11 @@
  */
 
 #include "parser.h"
+#include "../parser.h"
 
 #include <misc/numberContainers.h>
 
 #include "definitions.h"
-#include "../dwarf_parser.h"
 #include "../leb128.h"
 
 /**
