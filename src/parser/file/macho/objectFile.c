@@ -222,33 +222,6 @@ static inline void objectFile_handleSection(struct objectFile* self,
     }
 }
 
-/**
- * Generates an implementation for an object file segment handling parsing function.
- *
- * @param bits the amount of bits the implementation should be generated for
- * @param suffix the optional suffix for the native data structures
- */
-#define objectFile_handleSegmentFunc(bits, suffix)                                                 \
-static inline bool objectFile_handleSegment##bits(struct objectFile*         self,                 \
-                                                  struct segment_command##suffix* command,         \
-                                                  const void*                baseAddress,          \
-                                                  const bool                 bytesSwapped) {       \
-    const uint32_t nsects = macho_maybeSwap(32, bytesSwapped, command->nsects);                    \
-                                                                                                   \
-    for (size_t i = 0; i < nsects; ++i) {                                                          \
-        struct section##suffix* section = (void*) command + sizeof(struct segment_command##suffix) \
-                                        + i * sizeof(struct section##suffix);                      \
-        objectFile_handleSection(self, (struct lcs_section) {                                      \
-            baseAddress + macho_maybeSwap(32, bytesSwapped, section->offset),                      \
-            macho_maybeSwap(bits, bytesSwapped, section->size)                                     \
-        }, section->segname, section->sectname);                                                   \
-    }                                                                                              \
-    return true;                                                                                   \
-}
-
-objectFile_handleSegmentFunc(32,)
-objectFile_handleSegmentFunc(64, _64)
-
 static inline void objectFile_addFunctionCallback(struct objectFile* self, pair_funcFile_t pair) {
     vector_push_back(&self->ownFunctions, pair.first);
 }
@@ -259,45 +232,45 @@ static inline void objectFile_addFunctionCallback(struct objectFile* self, pair_
  * @param bits the amount of bits the implementation should be generated for
  * @param suffix the optional suffix for the native data structures
  */
-#define objectFile_parseMachOImplFunc(bits, suffix)                                                   \
-static inline bool objectFile_parseMachOImpl##bits(struct objectFile* self,                           \
-                                                   const void*        baseAddress,                    \
-                                                   const bool         bytesSwapped) {                 \
-    const struct mach_header##suffix* header = baseAddress;                                           \
-    struct load_command*   lc     = (void*) header + sizeof(struct mach_header##suffix);              \
-    const  uint32_t        ncmds  = macho_maybeSwap(32, bytesSwapped, header->ncmds);                 \
-                                                                                                      \
-    for (size_t i = 0; i < ncmds; ++i) {                                                              \
-        bool result = true;                                                                           \
-        switch (macho_maybeSwap(32, bytesSwapped, lc->cmd)) {                                         \
-            case LC_SEGMENT##suffix:                                                                  \
-                result = objectFile_handleSegment##bits(self, (void*) lc, baseAddress, bytesSwapped); \
-                break;                                                                                \
-                                                                                                      \
-            case LC_SYMTAB: {                                                                         \
-                struct machoParser parser = machoParser_create(                                       \
-                    (void*) lc, baseAddress, 0,                                                       \
-                    bytesSwapped, (bits) == 64,                                                       \
-                    (machoParser_addFunction) objectFile_addFunctionCallback, self                    \
-                );                                                                                    \
-                result = machoParser_parseSymbolTable(&parser);                                       \
-                machoParser_destroy(&parser);                                                         \
-                break;                                                                                \
-            }                                                                                         \
-                                                                                                      \
-            case LC_UUID:                                                                             \
-                memcpy(&self->uuid, &((struct uuid_command*) (void*) lc)->uuid, 16);                  \
-                result = true;                                                                        \
-                break;                                                                                \
-                                                                                                      \
-            default: break;                                                                           \
-        }                                                                                             \
-        if (!result) {                                                                                \
-            return false;                                                                             \
-        }                                                                                             \
-        lc = (void*) lc + macho_maybeSwap(32, bytesSwapped, lc->cmdsize);                             \
-    }                                                                                                 \
-    return true;                                                                                      \
+#define objectFile_parseMachOImplFunc(bits, suffix)                                           \
+static inline bool objectFile_parseMachOImpl##bits(struct objectFile* self,                   \
+                                                   const void*        baseAddress,            \
+                                                   const bool         bytesSwapped) {         \
+    macho_iterateSegments(baseAddress, bytesSwapped, suffix, {                                \
+        bool result = true;                                                                   \
+        switch (macho_maybeSwap(32, bytesSwapped, loadCommand->cmd)) {                        \
+            case LC_SEGMENT##suffix:                                                          \
+                macho_iterateSections((void*) loadCommand, bytesSwapped, suffix,              \
+                    objectFile_handleSection(self, (struct lcs_section) {                     \
+                        baseAddress + macho_maybeSwap(32, bytesSwapped, section->offset),     \
+                        macho_maybeSwap(bits, bytesSwapped, section->size)                    \
+                    }, section->segname, section->sectname);                                  \
+                )                                                                             \
+                break;                                                                        \
+                                                                                              \
+            case LC_SYMTAB: {                                                                 \
+                struct machoParser parser = machoParser_create(                               \
+                    (void*) loadCommand, baseAddress, 0,                                      \
+                    bytesSwapped, (bits) == 64,                                               \
+                    (machoParser_addFunction) objectFile_addFunctionCallback, self            \
+                );                                                                            \
+                result = machoParser_parseSymbolTable(&parser);                               \
+                machoParser_destroy(&parser);                                                 \
+                break;                                                                        \
+            }                                                                                 \
+                                                                                              \
+            case LC_UUID:                                                                     \
+                memcpy(&self->uuid, &((struct uuid_command*) (void*) loadCommand)->uuid, 16); \
+                result = true;                                                                \
+                break;                                                                        \
+                                                                                              \
+            default: break;                                                                   \
+        }                                                                                     \
+        if (!result) {                                                                        \
+            return false;                                                                     \
+        }                                                                                     \
+    })                                                                                        \
+    return true;                                                                              \
 }
 
 objectFile_parseMachOImplFunc(32,)
