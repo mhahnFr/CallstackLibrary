@@ -41,4 +41,14 @@
     }                                                                                                \
 }
 
+#define macho_iterateSections(segment, bytesSwapped, suffix, block) {                   \
+    const struct segment_command##suffix* _segment = (void*) (segment);                 \
+    const uint32_t _sectionCount = macho_maybeSwap(32, bytesSwapped, _segment->nsects); \
+    for (uint32_t _j = 0; _j < _sectionCount; ++_j) {                                   \
+        const struct section##suffix* section = ((void*) _segment) + sizeof(*_segment)  \
+                                                + _j * sizeof(struct section##suffix);  \
+        { block }                                                                       \
+    }                                                                                   \
+}
+
 #endif /* macho_utils_h */
