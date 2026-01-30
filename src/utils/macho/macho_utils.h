@@ -1,7 +1,7 @@
 /*
  * CallstackLibrary - Library creating human-readable call stacks.
  *
- * Copyright (C) 2024 - 2025  mhahnFr
+ * Copyright (C) 2024 - 2026  mhahnFr
  *
  * This file is part of the CallstackLibrary.
  *
@@ -30,5 +30,15 @@
  * @param value the value in question
  */
 #define macho_maybeSwap(bits, swap, value) ((swap) ? OSSwapInt##bits(value) : (value))
+
+#define macho_iterateSegments(baseAddr, bytesSwapped, suffix, block) {                               \
+    const struct mach_header##suffix* _header = (void*) (baseAddr);                                  \
+    struct load_command* loadCommand = (void*) _header + sizeof(*_header);                           \
+    const uint32_t _cmdCount = macho_maybeSwap(32, bytesSwapped, _header->ncmds);                    \
+    for (uint32_t _i = 0; _i < _cmdCount; ++_i) {                                                    \
+        { block }                                                                                    \
+        loadCommand = (void*) loadCommand + macho_maybeSwap(32, bytesSwapped, loadCommand->cmdsize); \
+    }                                                                                                \
+}
 
 #endif /* macho_utils_h */
