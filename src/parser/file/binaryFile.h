@@ -27,7 +27,7 @@
 #include <functionInfo/functionInfo.h>
 
 #include "vector_pair_ptr.h"
-#include "dwarf/dwarf_lineInfo.h"
+#include "dwarf/lineInfo/lineInfo.h"
 
 /**
  * This structure represents a generic binary executable file.

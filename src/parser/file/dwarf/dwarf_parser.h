@@ -26,8 +26,8 @@
 #include <stdint.h>
 #include <misc/numberContainers.h>
 
-#include "dwarf_lineInfo.h"
 #include "../lcs_section.h"
+#include "lineInfo/lineInfo.h"
 #include "v4/parser.h"
 #include "v5/parser.h"
 

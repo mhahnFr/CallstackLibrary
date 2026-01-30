@@ -27,7 +27,7 @@
 #include "../debugInfo.h"
 #include "../function.h"
 #include "../lcs_section.h"
-#include "../dwarf/dwarf_lineInfo.h"
+#include "../dwarf/lineInfo/lineInfo.h"
 
 /**
  * This structure represents an object file.
