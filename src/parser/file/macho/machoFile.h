@@ -95,6 +95,8 @@ bool machoFile_addr2String(struct machoFile* self, const void* address, struct c
  */
 bool machoFile_getFunctionInfo(struct machoFile* self, const char* functionName, struct functionInfo* info);
 
+bool machoFile_getSymbolInfo(struct machoFile* self, const void* symbolAddress, struct callstack_frame* frame);
+
 /**
  * Returns the contained thread-local storage regions.
  *

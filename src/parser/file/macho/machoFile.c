@@ -127,6 +127,8 @@ static inline int machoFile_functionSortCompare(const void* lhs, const void* rhs
     return 0;
 }
 
+typedef const void* (*searchFunction)(const void*, const void*, size_t, size_t, int (*)(const void*, const void*));
+
 /**
  * Tries to deduct the debugging information available for the given address in
  * the given Mach-O file.
@@ -135,16 +137,16 @@ static inline int machoFile_functionSortCompare(const void* lhs, const void* rhs
  * @param address the address to be translated
  * @return the optionally deducted debug information
  */
-static inline optional_debugInfo_t machoFile_getDebugInfo(struct machoFile* self, const void* address) {
+static inline optional_debugInfo_t machoFile_getDebugInfo(struct machoFile* self, const void* address, const searchFunction function) {
     const uint64_t searchAddress = (uintptr_t) (address - self->_.startAddress)
                                  + (self->_.inMemory ? self->text_vmaddr : self->addressOffset);
 
     const pair_funcFile_t tmp = (pair_funcFile_t) { .first.startAddress = searchAddress };
-    const pair_funcFile_t* closest = upper_bound(&tmp,
-                                                 self->functions.content,
-                                                 self->functions.count,
-                                                 sizeof(pair_funcFile_t),
-                                                 machoFile_functionSortCompare);
+    const pair_funcFile_t* closest = function(&tmp,
+                                              self->functions.content,
+                                              self->functions.count,
+                                              sizeof(pair_funcFile_t),
+                                              machoFile_functionSortCompare);
 
     optional_debugInfo_t info = { .has_value = false };
     if (closest == NULL
@@ -450,12 +452,12 @@ vector_pair_ptr_t machoFile_getTLSRegions(struct machoFile* self) {
     return toReturn;
 }
 
-bool machoFile_addr2String(struct machoFile* self, const void* address, struct callstack_frame* frame) {
+static inline bool machoFile_addr2StringImpl(struct machoFile* self, const void* address, struct callstack_frame* frame, const searchFunction searchFunction) {
     if (!BINARY_FILE_SUPER(self, maybeParse)) {
         return false;
     }
 
-    const optional_debugInfo_t result = machoFile_getDebugInfo(self, address);
+    const optional_debugInfo_t result = machoFile_getDebugInfo(self, address, searchFunction);
     if (result.has_value) {
         if (result.value.function.linkedName == NULL) {
             return false;
@@ -499,6 +501,14 @@ bool machoFile_addr2String(struct machoFile* self, const void* address, struct c
         return true;
     }
     return false;
+}
+
+bool machoFile_getSymbolInfo(struct machoFile* self, const void* symbolAddress, struct callstack_frame* frame) {
+    return machoFile_addr2StringImpl(self, symbolAddress, frame, lower_bound); // TODO: Appropriate search function?
+}
+
+bool machoFile_addr2String(struct machoFile* self, const void* address, struct callstack_frame* frame) {
+    return machoFile_addr2StringImpl(self, address, frame, upper_bound);
 }
 
 void machoFile_destroy(struct machoFile* self) {
