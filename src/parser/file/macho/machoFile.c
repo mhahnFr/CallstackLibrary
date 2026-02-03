@@ -452,7 +452,7 @@ vector_pair_ptr_t machoFile_getTLSRegions(struct machoFile* self) {
     return toReturn;
 }
 
-static inline bool machoFile_addr2StringImpl(struct machoFile* self, const void* address, struct callstack_frame* frame, const searchFunction searchFunction) {
+static inline bool machoFile_addr2StringImpl(struct machoFile* self, const void* address, struct callstack_frame* frame, const searchFunction searchFunction, const bool forceDiff) {
     if (!BINARY_FILE_SUPER(self, maybeParse)) {
         return false;
     }
@@ -490,13 +490,17 @@ static inline bool machoFile_addr2StringImpl(struct machoFile* self, const void*
             frame->reserved2 = frame->reserved1;
         } else {
             char* toReturn = NULL;
-            asprintf(&toReturn, "%s + %td",
-                     name,
-                     (ptrdiff_t) (address - self->_.startAddress
-                                  + (self->_.inMemory ? self->text_vmaddr : self->addressOffset)
-                                  - result.value.function.startAddress));
+            const ptrdiff_t diff = (ptrdiff_t) (address - self->_.startAddress
+                                      + (self->_.inMemory ? self->text_vmaddr : self->addressOffset)
+                                      - result.value.function.startAddress);
+            if (diff > 0 || forceDiff) {
+                asprintf(&toReturn, "%s + %td", name, diff);
+                frame->reserved2 = false;
+            } else {
+                toReturn = utils_maybeCopySave(name, !frame->reserved1);
+                frame->reserved2 = frame->reserved1;
+            }
             frame->function = toReturn;
-            frame->reserved2 = false;
         }
         return true;
     }
@@ -504,11 +508,11 @@ static inline bool machoFile_addr2StringImpl(struct machoFile* self, const void*
 }
 
 bool machoFile_getSymbolInfo(struct machoFile* self, const void* symbolAddress, struct callstack_frame* frame) {
-    return machoFile_addr2StringImpl(self, symbolAddress, frame, lower_bound); // TODO: Appropriate search function?
+    return machoFile_addr2StringImpl(self, symbolAddress, frame, lower_bound, false);
 }
 
 bool machoFile_addr2String(struct machoFile* self, const void* address, struct callstack_frame* frame) {
-    return machoFile_addr2StringImpl(self, address, frame, upper_bound);
+    return machoFile_addr2StringImpl(self, address, frame, upper_bound, true);
 }
 
 void machoFile_destroy(struct machoFile* self) {
