@@ -26,8 +26,8 @@
 #include "../dlMapper/dlMapper.h"
 #include "misc/cache.h"
 
-static inline struct callstack_frame symbols_getInfoShared(const void* address, bool* success, const bool useCache) {
-    struct callstack_frame toReturn;
+static inline SymbolInfo symbols_getInfoShared(const void* address, bool* success, const bool useCache) {
+    SymbolInfo toReturn;
     dlMapper_init();
     callstackFrame_translateBinary(&toReturn, address, useCache, true);
     struct binaryFile* file = toReturn.reserved;
@@ -40,10 +40,10 @@ static inline struct callstack_frame symbols_getInfoShared(const void* address, 
     return toReturn;
 }
 
-struct callstack_frame symbols_getInfo(const void* address, bool* success) {
+SymbolInfo symbols_getInfo(const void* address, bool* success) {
     return symbols_getInfoShared(address, success, false);
 }
 
-struct callstack_frame symbols_getInfoCached(const void* address, bool* success) {
+SymbolInfo symbols_getInfoCached(const void* address, bool* success) {
     return symbols_getInfoShared(address, success, true);
 }

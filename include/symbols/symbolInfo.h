@@ -30,10 +30,12 @@
 extern "C" {
 #endif
 
-struct callstack_frame symbols_getInfo(const void* address, bool* success);
+typedef struct callstack_frame SymbolInfo;
+
+SymbolInfo symbols_getInfo(const void* address, bool* success);
 
 #ifdef LCS_USE_UNSAFE_OPTIMIZATION
-struct callstack_frame symbols_getInfoCached(const void* address, bool* success);
+SymbolInfo symbols_getInfoCached(const void* address, bool* success);
 #endif
 
 #ifdef __cplusplus
