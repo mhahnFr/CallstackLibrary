@@ -21,8 +21,10 @@
 
 #include <symbols/symbolInfo.h>
 
+#include "callstack_internals.h"
 #include "../callstackFrame/callstackFrameInternal.h"
 #include "../dlMapper/dlMapper.h"
+#include "misc/cache.h"
 
 static inline struct callstack_frame symbols_getInfoShared(const void* address, bool* success, const bool useCache) {
     struct callstack_frame toReturn;
@@ -34,6 +36,7 @@ static inline struct callstack_frame symbols_getInfoShared(const void* address, 
         succeeded = binaryFile_getSymbolInfo(file, address, &toReturn);
     }
     if (success != NULL) *success = succeeded;
+    maybeV(callstack_clearCaches);
     return toReturn;
 }
 
