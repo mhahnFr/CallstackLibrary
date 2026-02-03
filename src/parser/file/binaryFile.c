@@ -98,6 +98,10 @@ vector_pair_ptr_t* binaryFile_getRegions(struct binaryFile* self) {
     return &self->regions;
 }
 
+bool binaryFile_getSymbolInfo(struct binaryFile* self, const void* symbolAddress, struct callstack_frame* frame) {
+    return LCS_FILE(self, getSymbolInfo, symbolAddress, frame);
+}
+
 static inline int binaryFile_regionsCompare(const pair_ptr_t* lhs, const pair_ptr_t* rhs) {
     if (lhs->first < rhs->first) return -1;
     if (lhs->first > rhs->first) return +1;

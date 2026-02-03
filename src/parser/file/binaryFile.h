@@ -84,6 +84,7 @@ bool binaryFile_addr2String(struct binaryFile* self, const void* address, struct
 bool binaryFile_getFunctionInfo(struct binaryFile* self, const char* functionName, struct functionInfo* info);
 
 vector_pair_ptr_t* binaryFile_getRegions(struct binaryFile* self);
+bool binaryFile_getSymbolInfo(struct binaryFile* self, const void* symbolAddress, struct callstack_frame* frame);
 void binaryFile_sortRegions(struct binaryFile* self);
 
 /**
