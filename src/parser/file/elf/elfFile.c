@@ -400,16 +400,16 @@ bool elfFile_parseShallow(struct elfFile* self) {
  * @param address the address to be translated
  * @return the optionally available debug information
  */
-static inline optional_debugInfo_t elfFile_getDebugInfo(const struct elfFile* self, const void* address) {
+static inline optional_debugInfo_t elfFile_getDebugInfo(const struct elfFile* self, const void* address, const binaryFile_searchFunction function) {
     optional_debugInfo_t toReturn = { .has_value = false };
 
     const uint64_t translated = (uintptr_t) address - self->_.relocationOffset;
     const struct function tmp = (struct function) { .startAddress = translated };
-    const struct function* closest = upper_bound(&tmp,
-                                                 self->functions.content,
-                                                 self->functions.count,
-                                                 sizeof(struct function),
-                                                 elfFile_functionCompare);
+    const struct function* closest = function(&tmp,
+                                              self->functions.content,
+                                              self->functions.count,
+                                              sizeof(struct function),
+                                              elfFile_functionCompare);
     if (closest == NULL
         || closest->startAddress > translated
         || closest->startAddress + closest->length < translated) {
@@ -481,12 +481,12 @@ vector_pair_ptr_t elfFile_getTLSRegions(struct elfFile* self) {
     return (vector_pair_ptr_t) vector_initializer;
 }
 
-bool elfFile_addr2String(struct elfFile* self, const void* address, struct callstack_frame* frame) {
+static inline bool elfFile_addr2StringImpl(struct elfFile* self, const void* address, struct callstack_frame* frame, const binaryFile_searchFunction function, const bool forceDiff) {
     if (!BINARY_FILE_SUPER(self, maybeParse)) {
         return false;
     }
 
-    const optional_debugInfo_t result = elfFile_getDebugInfo(self, address);
+    const optional_debugInfo_t result = elfFile_getDebugInfo(self, address, function);
     if (result.has_value) {
         if (result.value.function.linkedName == NULL) {
             return false;
@@ -503,13 +503,27 @@ bool elfFile_addr2String(struct elfFile* self, const void* address, struct calls
             frame->reserved2 = frame->reserved1;
         } else {
             char* toReturn = NULL;
-            asprintf(&toReturn, "%s + %td", name, (ptrdiff_t) (address - self->_.relocationOffset - result.value.function.startAddress));
+            const ptrdiff_t diff = (ptrdiff_t) (address - self->_.relocationOffset - result.value.function.startAddress);
+            if (diff > 0 || forceDiff) {
+                asprintf(&toReturn, "%s + %td", name, diff);
+                frame->reserved2 = false;
+            } else {
+                toReturn = utils_maybeCopySave(name, !frame->reserved1);
+                frame->reserved2 = frame->reserved1;
+            }
             frame->function = toReturn;
-            frame->reserved2 = false;
         }
         return true;
     }
     return false;
+}
+
+bool elfFile_getSymbolInfo(struct elfFile* self, const void* symbolAddress, struct callstack_frame* frame) {
+    return elfFile_addr2StringImpl(self, symbolAddress, frame, lower_bound, false);
+}
+
+bool elfFile_addr2String(struct elfFile* self, const void* address, struct callstack_frame* frame) {
+    return elfFile_addr2StringImpl(self, address, frame, upper_bound, true);
 }
 
 void elfFile_destroy(struct elfFile* self) {
