@@ -19,10 +19,10 @@
  * CallstackLibrary, see the file LICENSE.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-#include <stdbool.h>
-
 #include <callstack_internals.h>
+#include <stdbool.h>
 #include <functionInfo/functionInfo.h>
+#include <misc/cache.h>
 
 #include "../dlMapper/dlMapper.h"
 
@@ -47,9 +47,7 @@ struct functionInfo functionInfo_loadHint(const char* functionName, const char* 
 
     dlMapper_init();
     if (libraryName != NULL && functionInfo_getFrom(dlMapper_binaryFileForFileName(libraryName), functionName, &toReturn)) {
-        if (callstack_autoClearCaches) {
-            callstack_clearCaches();
-        }
+        maybeV(callstack_clearCaches);
         return toReturn;
     }
 
@@ -58,9 +56,6 @@ struct functionInfo functionInfo_loadHint(const char* functionName, const char* 
             break;
         }
     });
-
-    if (callstack_autoClearCaches) {
-        callstack_clearCaches();
-    }
+    maybeV(callstack_clearCaches);
     return toReturn;
 }
