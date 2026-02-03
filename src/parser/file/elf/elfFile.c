@@ -103,7 +103,8 @@ static inline bool elfFile_parseSymtab##bits(struct elfFile*   self,            
     const Elf##bits##_Sym* entry = symtabBegin;                                                                  \
     for (uint64_t i = 0; i < count; ++i, ++entry) {                                                              \
         const unsigned char type = ELF##bits##_ST_TYPE(entry->st_info);                                          \
-        if ((type == STT_FUNC || type == STT_OBJECT) && ELF_TO_HOST(bits, entry->st_value, littleEndian) != 0) { \
+        if ((type == STT_FUNC || type == STT_OBJECT) && ELF_TO_HOST(bits, entry->st_value, littleEndian) != 0    \
+            && ELF##bits##_ST_VISIBILITY(entry->st_other) == STV_DEFAULT) {                                      \
             struct function f = {                                                                                \
                 .startAddress = ELF_TO_HOST(bits, entry->st_value, littleEndian),                                \
                 .linkedName   = strdup(strBegin + ELF_TO_HOST(32, entry->st_name, littleEndian)),                \
