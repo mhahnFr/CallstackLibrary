@@ -53,6 +53,8 @@ struct binaryFile {
     vector_pair_ptr_t regions;
 };
 
+typedef const void* (*binaryFile_searchFunction)(const void*, const void*, size_t, size_t, int (*)(const void*, const void*));
+
 /**
  * Allocates a new concrete binary file structure.
  *
