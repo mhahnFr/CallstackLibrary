@@ -27,13 +27,11 @@
 static inline struct callstack_frame symbols_getInfoShared(const void* address, bool* success, const bool useCache) {
     struct callstack_frame toReturn;
     dlMapper_init();
-    // FIXME: + 1 byte in order to bypass symbol table usage for functions.   - mhahnFr
-    const void* searchAddress = address + 1;
-    callstackFrame_translateBinary(&toReturn, searchAddress, useCache, true);
+    callstackFrame_translateBinary(&toReturn, address, useCache, true);
     struct binaryFile* file = toReturn.reserved;
     bool succeeded = false;
     if (file != NULL) {
-        succeeded = binaryFile_addr2String(file, searchAddress, &toReturn);
+        succeeded = binaryFile_getSymbolInfo(file, address, &toReturn);
     }
     if (success != NULL) *success = succeeded;
     return toReturn;
