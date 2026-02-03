@@ -32,7 +32,7 @@
 #include "../debugInfo.h"
 #include "../loader.h"
 #include "../../callstack_parser.h"
-#include "../dwarf/dwarf_parser.h"
+#include "../dwarf/parser.h"
 
 void elfFile_create(struct elfFile* self) {
     self->debugLine       = lcs_section_initializer;
