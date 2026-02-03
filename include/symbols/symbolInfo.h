@@ -38,6 +38,8 @@ SymbolInfo symbols_getInfo(const void* address, bool* success);
 SymbolInfo symbols_getInfoCached(const void* address, bool* success);
 #endif
 
+void symbols_destroyInfo(const SymbolInfo* info);
+
 #ifdef __cplusplus
 } // extern "C"
 #endif

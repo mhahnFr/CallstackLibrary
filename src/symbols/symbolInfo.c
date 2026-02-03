@@ -47,3 +47,7 @@ SymbolInfo symbols_getInfo(const void* address, bool* success) {
 SymbolInfo symbols_getInfoCached(const void* address, bool* success) {
     return symbols_getInfoShared(address, success, true);
 }
+
+void symbols_destroyInfo(const SymbolInfo* info) {
+    callstack_frame_destroy(info);
+}
