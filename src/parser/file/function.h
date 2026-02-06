@@ -42,6 +42,9 @@ struct function {
     optional_string_t demangledName;
 };
 
+/**
+ * The initializing expression of the function structure.
+ */
 #define function_initializer (struct function) { 0, 0, NULL, { .has_value = false }}
 
 /**
