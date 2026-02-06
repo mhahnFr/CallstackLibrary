@@ -93,13 +93,18 @@ struct callstack_frame {
 # define callstack_frame_initializer_prefix (struct callstack_frame)
 #endif
 
+/**
+ * The initializing expression for the callstack frame structure.
+ *
+ * @since v2.3
+ */
 #define callstack_frame_initializer \
     callstack_frame_initializer_prefix { NULL, false, false, false, false, NULL, NULL, NULL, NULL, NULL, 0, 0 }
 
 /**
  * @brief Constructs the given callstack frame.
  *
- * @details Since version 2.X this function has been replaced by a macro.
+ * @details Since version 2.3 this function has been replaced by a macro.
  *
  * @param self the callstack frame to be initialized
  * @since v1.1
