@@ -63,7 +63,8 @@ static inline bool dwarf_parser_parse(struct dwarf_parser* self, size_t counter,
     while (counter - (self->bit64 ? 12 : 4) < actualSize) {
         const uint8_t opCode = *(uint8_t*) (self->debugLine.content + counter++);
         if (opCode == 0) {
-            dwarf_lineInfoParser_handleSpecialOperation(&parser, &counter, getULEB128(self->debugLine.content, &counter), *(uint8_t*) (self->debugLine.content + counter++));
+            const uint64_t length = getULEB128(self->debugLine.content, &counter);
+            dwarf_lineInfoParser_handleSpecialOperation(&parser, &counter, length, *(uint8_t*) (self->debugLine.content + counter++));
         } else if (opCode < self->opCodeBase) {
             dwarf_lineInfoParser_handleSingeInstruction(&parser, &counter, opCode);
         } else {
