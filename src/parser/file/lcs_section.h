@@ -34,6 +34,9 @@ struct lcs_section {
     uint64_t size;
 };
 
+/**
+ * The initializing expression for the @c lcs_section structure.
+ */
 #define lcs_section_initializer (struct lcs_section) { .content = NULL, .size = 0 }
 
 #endif /* lcs_section_h */
