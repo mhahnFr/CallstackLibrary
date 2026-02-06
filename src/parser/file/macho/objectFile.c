@@ -73,33 +73,33 @@ static inline int objectFile_dwarfLineInfoSortCompare(const void* lhs, const voi
 }
 
 /**
- * @brief Returns how the two given functions compare.
+ * @brief Returns how the two given symbols compare.
  *
  * Sorted ascendingly.
  *
  * @param a the left-hand side value
  * @param b the right-hand side value
- * @return the difference between the two given functions
+ * @return the difference between the two given symbols
  */
-static inline int objectFile_functionCompare(const struct function* a, const struct function* b) {
+static inline int objectFile_symbolCompare(const struct symbol* a, const struct symbol* b) {
     return strcmp(a->linkedName, b->linkedName);
 }
 
 /**
- * Finds and returns the function with the given name deducted from the
+ * Finds and returns the symbol with the given name deducted from the
  * represented object file.
  *
  * @param self the object file object
- * @param name the name of the desired function
- * @return the optionally found function
+ * @param name the name of the desired symbol
+ * @return the optionally found symbol
  */
-static inline optional_function_t objectFile_findOwnFunction(struct objectFile* self, const char* name) {
-    optional_function_t toReturn = { .has_value = false };
+static inline optional_symbol_t objectFile_findOwnSymbol(struct objectFile* self, const char* name) {
+    optional_symbol_t toReturn = { .has_value = false };
 
-    const struct function searched = (struct function) { .linkedName = (char*) name };
-    const struct function* it = vector_search(&self->ownFunctions, &searched, objectFile_functionCompare);
+    const struct symbol searched = (struct symbol) { .linkedName = (char*) name };
+    const struct symbol* it = vector_search(&self->ownSymbols, &searched, objectFile_symbolCompare);
     if (it != NULL) {
-        toReturn = (struct optional_function) { true, *it };
+        toReturn = (struct optional_symbol) { true, *it };
     }
     
     return toReturn;
@@ -137,24 +137,24 @@ static inline bool objectFile_maybeParse(struct objectFile* self) {
     return self->parsed || ((self->parsed = objectFile_parse(self)));
 }
 
-optional_debugInfo_t objectFile_getDebugInfo(struct objectFile* self, const uint64_t address, const struct function function) {
+optional_debugInfo_t objectFile_getDebugInfo(struct objectFile* self, const uint64_t address, const struct symbol symbol) {
 #define ERROR_RETURN (optional_debugInfo_t) { .has_value = false };
 
     if (!objectFile_maybeParse(self)) {
         return ERROR_RETURN;
     }
     uint64_t lineAddress;
-    uint64_t functionBegin;
+    uint64_t symbolBegin;
     if (self->isDsymBundle) {
         lineAddress = address;
-        functionBegin = function.startAddress;
+        symbolBegin = symbol.startAddress;
     } else {
-        const optional_function_t ownFunction = objectFile_findOwnFunction(self, function.linkedName);
-        if (!ownFunction.has_value) {
+        const optional_symbol_t ownsymbol = objectFile_findOwnSymbol(self, symbol.linkedName);
+        if (!ownsymbol.has_value) {
             return ERROR_RETURN;
         }
-        lineAddress = ownFunction.value.startAddress + address - function.startAddress;
-        functionBegin = ownFunction.value.startAddress;
+        lineAddress = ownsymbol.value.startAddress + address - symbol.startAddress;
+        symbolBegin = ownsymbol.value.startAddress;
     }
 
     const struct dwarf_lineInfo tmp = (struct dwarf_lineInfo) { .address = lineAddress };
@@ -163,8 +163,8 @@ optional_debugInfo_t objectFile_getDebugInfo(struct objectFile* self, const uint
                                                        self->lineInfos.count,
                                                        sizeof(struct dwarf_lineInfo),
                                                        objectFile_dwarfLineInfoSortCompare);
-    if (closest == NULL || closest->address < functionBegin
-        || (function.length != 0 && closest->address >= functionBegin + function.length)) {
+    if (closest == NULL || closest->address < symbolBegin
+        || (symbol.length != 0 && closest->address >= symbolBegin + symbol.length)) {
         return ERROR_RETURN;
     }
     if (closest->sourceFile.fileName != NULL && closest->sourceFile.fileNameRelative == NULL && closest->sourceFile.fileNameAbsolute == NULL) {
@@ -174,7 +174,7 @@ optional_debugInfo_t objectFile_getDebugInfo(struct objectFile* self, const uint
     }
     return (optional_debugInfo_t) {
         true, (struct debugInfo) {
-            function, (optional_sourceFileInfo_t) {
+            symbol, (optional_sourceFileInfo_t) {
                 true, (struct sourceFileInfo) {
                     closest->line,
                     closest->column,
@@ -222,8 +222,8 @@ static inline void objectFile_handleSection(struct objectFile* self,
     }
 }
 
-static inline void objectFile_addFunctionCallback(struct objectFile* self, pair_funcFile_t pair) {
-    vector_push_back(&self->ownFunctions, pair.first);
+static inline void objectFile_addSymbolCallback(struct objectFile* self, pair_symbolFile_t pair) {
+    vector_push_back(&self->ownSymbols, pair.first);
 }
 
 /**
@@ -252,7 +252,7 @@ static inline bool objectFile_parseMachOImpl##bits(struct objectFile* self,     
                 struct machoParser parser = machoParser_create(                               \
                     (void*) loadCommand, baseAddress, 0,                                      \
                     bytesSwapped, (bits) == 64,                                               \
-                    (machoParser_addFunction) objectFile_addFunctionCallback, self            \
+                    (machoParser_addSymbol) objectFile_addSymbolCallback, self                \
                 );                                                                            \
                 result = machoParser_parseSymbolTable(&parser);                               \
                 machoParser_destroy(&parser);                                                 \
@@ -330,11 +330,11 @@ static inline bool objectFile_parseMachO(struct objectFile* self, const void* bu
 bool objectFile_parseBuffer(struct objectFile* self, const void* buffer) {
     const bool result = objectFile_parseMachO(self, buffer);
     if (!result) {
-        vector_destroyWithPtr(&self->ownFunctions, function_destroy);
-        vector_init(&self->ownFunctions);
+        vector_destroyWithPtr(&self->ownSymbols, symbol_destroy);
+        vector_init(&self->ownSymbols);
     } else {
         vector_sort(&self->lineInfos, objectFile_dwarfLineInfoSortCompare);
-        vector_sort(&self->ownFunctions, objectFile_functionCompare);
+        vector_sort(&self->ownSymbols, objectFile_symbolCompare);
     }
     return result;
 }
@@ -348,7 +348,7 @@ bool objectFile_parse(struct objectFile* self) {
 
 
 void objectFile_destroy(struct objectFile* self) {
-    vector_destroyWithPtr(&self->ownFunctions, function_destroy);
+    vector_destroyWithPtr(&self->ownSymbols, symbol_destroy);
     vector_destroyWithPtr(&self->lineInfos, dwarf_lineInfo_destroy);
     free((void*) self->mainSourceFileCache);
     free((void*) self->mainSourceFileCacheRelative);

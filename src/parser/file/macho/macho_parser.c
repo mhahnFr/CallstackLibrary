@@ -48,11 +48,11 @@
 struct machoParser machoParser_create(
     struct symtab_command* command, const void* baseAddress,
     const uintptr_t parsingOffset, const bool bytesSwapped, const bool bit64,
-    const machoParser_addFunction functionCallback, void* object)
+    const machoParser_addSymbol symbolCallback, void* object)
 {
     return (struct machoParser) {
         command, baseAddress, bytesSwapped, bit64, parsingOffset,
-        functionCallback, object,
+        symbolCallback, object,
         baseAddress + (macho_maybeSwap(32, bytesSwapped, command->stroff) + parsingOffset),
         bit64 ? sizeof(struct nlist_64) : sizeof(struct nlist),
         {
@@ -62,15 +62,15 @@ struct machoParser machoParser_create(
     };
 }
 
-#define machoParser_handleSymbolBeginImpl(bits, suffix)                                                   \
-static inline bool machoParser_handleSymbolBegin##bits(struct machoParser* self,                          \
-                                                       const struct nlist##suffix* entry) {               \
-    if (self->parsingState.currentFunction.has_value) {                                                   \
-        return false;                                                                                     \
-    }                                                                                                     \
-    self->parsingState.currentFunction = (optional_function_t) { true, function_initializer };            \
-    self->parsingState.currentFunction.value.startAddress = machoParser_swap(self, bits, entry->n_value); \
-    return true;                                                                                          \
+#define machoParser_handleSymbolBeginImpl(bits, suffix)                                                 \
+static inline bool machoParser_handleSymbolBegin##bits(struct machoParser* self,                        \
+                                                       const struct nlist##suffix* entry) {             \
+    if (self->parsingState.currentSymbol.has_value) {                                                   \
+        return false;                                                                                   \
+    }                                                                                                   \
+    self->parsingState.currentSymbol = (optional_symbol_t) { true, symbol_initializer };                \
+    self->parsingState.currentSymbol.value.startAddress = machoParser_swap(self, bits, entry->n_value); \
+    return true;                                                                                        \
 }
 
 machoParser_handleSymbolBeginImpl(32,)
@@ -78,14 +78,14 @@ machoParser_handleSymbolBeginImpl(64, _64)
 
 #define machoParser_handleSymbolEndImpl(bits, suffix)                            \
 static inline bool machoParser_handleSymbolEnd##bits(struct machoParser* self) { \
-    if (!self->parsingState.currentFunction.has_value) {                         \
+    if (!self->parsingState.currentSymbol.has_value) {                           \
         return false;                                                            \
     }                                                                            \
-    self->functionCallback(self->object, (pair_funcFile_t) {                     \
-        self->parsingState.currentFunction.value,                                \
+    self->symbolCallback(self->object, (pair_symbolFile_t) {                     \
+        self->parsingState.currentSymbol.value,                                  \
         self->parsingState.currentObjectFile                                     \
     });                                                                          \
-    self->parsingState.currentFunction.has_value = false;                        \
+    self->parsingState.currentSymbol.has_value = false;                          \
     return true;                                                                 \
 }
 
@@ -139,32 +139,32 @@ static inline bool machoParser_handleObjectFile##bits(struct machoParser* self, 
 machoParser_handleObjectFileImpl(32,)
 machoParser_handleObjectFileImpl(64, _64)
 
-#define machoParser_handleFunctionImpl(bits, suffix)                                                          \
-static inline bool machoParser_handleFunction##bits(struct machoParser* self,                                 \
-                                                    const struct nlist##suffix* entry) {                      \
-    if (!self->parsingState.currentFunction.has_value) {                                                      \
-        return false;                                                                                         \
-    }                                                                                                         \
-    const char* value = self->stringTable + machoParser_swap(self, 32, entry->n_un.n_strx);                   \
-    if (*value == '\0') {                                                                                     \
-        self->parsingState.currentFunction.value.length = machoParser_swap(self, bits, entry->n_value);       \
-    } else {                                                                                                  \
-        self->parsingState.currentFunction.value.linkedName   = strdup(value);                                \
-        self->parsingState.currentFunction.value.startAddress = machoParser_swap(self, bits, entry->n_value); \
-    }                                                                                                         \
-    return true;                                                                                              \
+#define machoParser_handleSymbolImpl(bits, suffix)                                                          \
+static inline bool machoParser_handleSymbol##bits(struct machoParser* self,                                 \
+                                                    const struct nlist##suffix* entry) {                    \
+    if (!self->parsingState.currentSymbol.has_value) {                                                      \
+        return false;                                                                                       \
+    }                                                                                                       \
+    const char* value = self->stringTable + machoParser_swap(self, 32, entry->n_un.n_strx);                 \
+    if (*value == '\0') {                                                                                   \
+        self->parsingState.currentSymbol.value.length = machoParser_swap(self, bits, entry->n_value);       \
+    } else {                                                                                                \
+        self->parsingState.currentSymbol.value.linkedName   = strdup(value);                                \
+        self->parsingState.currentSymbol.value.startAddress = machoParser_swap(self, bits, entry->n_value); \
+    }                                                                                                       \
+    return true;                                                                                            \
 }
 
-machoParser_handleFunctionImpl(32,)
-machoParser_handleFunctionImpl(64, _64)
+machoParser_handleSymbolImpl(32,)
+machoParser_handleSymbolImpl(64, _64)
 
 #define machoParser_handleGeneralEntryImpl(bits, suffix)                                     \
 static inline bool machoParser_handleGeneralEntry##bits(struct machoParser* self,            \
                                                         const struct nlist##suffix* entry) { \
     if ((entry->n_type & N_TYPE) != N_SECT) return true;                                     \
                                                                                              \
-    self->functionCallback(self->object, (pair_funcFile_t) {                                 \
-        (struct function) {                                                                  \
+    self->symbolCallback(self->object, (pair_symbolFile_t) {                                 \
+        (struct symbol) {                                                                    \
             machoParser_swap(self, bits, entry->n_value),                                    \
             0,                                                                               \
             strdup(self->stringTable + machoParser_swap(self, 32, entry->n_un.n_strx)),      \
@@ -188,7 +188,7 @@ static inline bool machoParser_handleEntry##bits(struct machoParser* self,      
         case N_SO:  return machoParser_handleSourceInfo##bits(self, entry);           \
         case N_OSO: return machoParser_handleObjectFile##bits(self, entry);           \
                                                                                       \
-        case N_FUN: return machoParser_handleFunction##bits(self, entry);             \
+        case N_FUN: return machoParser_handleSymbol##bits(self, entry);               \
                                                                                       \
         default: return machoParser_handleGeneralEntry##bits(self, entry);            \
     }                                                                                 \
@@ -217,7 +217,7 @@ bool machoParser_parseSymbolTable(struct machoParser* self) {
 }
 
 void machoParser_destroy(const struct machoParser* self) {
-    if (self->parsingState.currentFunction.has_value) {
-        function_destroy(&self->parsingState.currentFunction.value);
+    if (self->parsingState.currentSymbol.has_value) {
+        symbol_destroy(&self->parsingState.currentSymbol.value);
     }
 }

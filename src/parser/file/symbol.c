@@ -19,9 +19,9 @@
  * CallstackLibrary, see the file LICENSE.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-#include "function.h"
+#include "symbol.h"
 
-void function_destroy(const struct function* self) {
+void symbol_destroy(const struct symbol* self) {
     free(self->linkedName);
     if (self->demangledName.has_value) {
         free(self->demangledName.value);

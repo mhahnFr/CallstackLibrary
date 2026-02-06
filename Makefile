@@ -49,7 +49,7 @@ SRCS = \
 	src/regions/regions.c \
 	src/parser/callstack_parser.c \
 	src/parser/file/loader.c \
-	src/parser/file/function.c \
+	src/parser/file/symbol.c \
 	src/parser/file/bounds.c \
 	src/parser/file/binaryFile.c \
 	src/parser/file/dwarf/leb128.c \

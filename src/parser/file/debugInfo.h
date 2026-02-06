@@ -1,7 +1,7 @@
 /*
  * CallstackLibrary - Library creating human-readable call stacks.
  *
- * Copyright (C) 2024 - 2025  mhahnFr
+ * Copyright (C) 2024 - 2026  mhahnFr
  *
  * This file is part of the CallstackLibrary.
  *
@@ -23,10 +23,9 @@
 #define debugInfo_h
 
 #include <stdint.h>
-
 #include <DC4C/optional.h>
 
-#include "function.h"
+#include "symbol.h"
 
 /**
  * Represents the deducted information about the source file.
@@ -53,8 +52,7 @@ typedef_optional_named(sourceFileInfo, struct sourceFileInfo);
  * Represents the deducted debug information.
  */
 struct debugInfo {
-    /** The deducted name of the function.                    */
-    struct function function;
+    struct symbol symbol;
     
     /** The source file info if it was successfully deducted. */
     optional_sourceFileInfo_t sourceFileInfo;

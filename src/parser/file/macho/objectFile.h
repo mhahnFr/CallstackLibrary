@@ -25,8 +25,8 @@
 #include <time.h>
 
 #include "../debugInfo.h"
-#include "../function.h"
 #include "../lcs_section.h"
+#include "../symbol.h"
 #include "../dwarf/lineInfo/lineInfo.h"
 
 /**
@@ -64,8 +64,8 @@ struct objectFile {
     /** Whether the represented file is part of a .dSYM bundle. */
     bool isDsymBundle;
     
-    /** The functions present in the represented object file.   */
-    vector_function_t ownFunctions;
+    /** The symbols present in the represented object file.     */
+    vector_symbol_t ownSymbols;
     /** The deducted DWARF line infos.                          */
     vector_dwarfLineInfo_t lineInfos;
     /** The cached name of the main source file.                */
@@ -126,16 +126,16 @@ uint8_t* objectFile_getUUID(struct objectFile* self);
 
 /**
  * @brief Extracts the debug information for the given address inside the
- * given function from the given object file object.
+ * given symbol from the given object file object.
  *
  * If no information could be deducted, an empty optional is returned.
  *
  * @param self the object file object
- * @param address the address inside the function
- * @param function the function
+ * @param address the address inside the symbol
+ * @param symbol the symbol
  * @return the optionally deducted debug information
  */
-optional_debugInfo_t objectFile_getDebugInfo(struct objectFile* self, uint64_t address, struct function function);
+optional_debugInfo_t objectFile_getDebugInfo(struct objectFile* self, uint64_t address, struct symbol symbol);
 
 /**
  * Deinitializes the given object file structure.

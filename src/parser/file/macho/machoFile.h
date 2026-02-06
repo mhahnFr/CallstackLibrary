@@ -25,7 +25,7 @@
 #include <stdbool.h>
 #include <misc/numberContainers.h>
 
-#include "containers_funcFile.h"
+#include "containers_symbolFile.h"
 #include "objectFile.h"
 #include "TLVDescriptor.h"
 #include "../binaryFile.h"
@@ -56,8 +56,8 @@ struct machoFile {
     /** The UUID of the represented Mach-O file.                                */
     uint8_t uuid[16];
     
-    /** The functions mapped to their object file.                              */
-    vector_pairFuncFile_t functions;
+    /** The symbols mapped to their object file.                              */
+    vector_pairSymbolFile_t symbols;
     /** The start addresses of the contained functions.                         */
     vector_uint64_t functionStarts;
     /** The contained thread-local value descriptors.                           */

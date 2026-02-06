@@ -48,7 +48,7 @@ void machoFile_create(struct machoFile* self) {
     self->dSYMFile.triedParsing = false;
     self->dSYMFile.file         = NULL;
 
-    vector_init(&self->functions);
+    vector_init(&self->symbols);
     vector_init(&self->functionStarts);
     vector_init(&self->tlvs);
 }
@@ -115,8 +115,8 @@ static inline struct objectFile* machoFile_getDSYMBundle(struct machoFile* self)
  * than @c 0 according to the sorting order
  */
 static inline int machoFile_functionSortCompare(const void* lhs, const void* rhs) {
-    const pair_funcFile_t* a = lhs;
-    const pair_funcFile_t* b = rhs;
+    const pair_symbolFile_t* a = lhs;
+    const pair_symbolFile_t* b = rhs;
 
     if (a->first.startAddress < b->first.startAddress) return +1;
     if (a->first.startAddress > b->first.startAddress) return -1;
@@ -139,11 +139,11 @@ static inline optional_debugInfo_t machoFile_getDebugInfo(struct machoFile* self
     const uint64_t searchAddress = (uintptr_t) (address - self->_.startAddress)
                                  + (self->_.inMemory ? self->text_vmaddr : self->addressOffset);
 
-    const pair_funcFile_t tmp = (pair_funcFile_t) { .first.startAddress = searchAddress };
-    const pair_funcFile_t* closest = function(&tmp,
-                                              self->functions.content,
-                                              self->functions.count,
-                                              sizeof(pair_funcFile_t),
+    const pair_symbolFile_t tmp = (pair_symbolFile_t) { .first.startAddress = searchAddress };
+    const pair_symbolFile_t* closest = function(&tmp,
+                                              self->symbols.content,
+                                              self->symbols.count,
+                                              sizeof(pair_symbolFile_t),
                                               machoFile_functionSortCompare);
 
     optional_debugInfo_t info = { .has_value = false };
@@ -152,7 +152,7 @@ static inline optional_debugInfo_t machoFile_getDebugInfo(struct machoFile* self
         return info;
     }
     if (!closest->first.demangledName.has_value) {
-        pair_funcFile_t* mutableClosest = (struct pair_funcFile*) closest;
+        pair_symbolFile_t* mutableClosest = (struct pair_symbolFile*) closest;
         char* toDemangle = closest->first.linkedName;
         if (*toDemangle == '\1' || *toDemangle == '_') {
             ++toDemangle;
@@ -247,8 +247,8 @@ static inline bool machoFile_handleSegment##bits(struct machoFile* self, const v
 machoFile_handleSegment(32,)
 machoFile_handleSegment(64, _64)
 
-static inline void machoFile_addFunction(struct machoFile* self, pair_funcFile_t pair) {
-    vector_push_back(&self->functions, pair);
+static inline void machoFile_addSymbol(struct machoFile* self, pair_symbolFile_t pair) {
+    vector_push_back(&self->symbols, pair);
 }
 
 /**
@@ -294,7 +294,7 @@ static inline bool machoFile_handleFunctionStarts(struct machoFile* self, struct
  * @param self the Mach-O file abstraction structure
  */
 static inline void machoFile_fixupFunctions(struct machoFile* self) {
-    vector_iterate(&self->functions, {
+    vector_iterate(&self->symbols, {
         if (element->first.length != 0) continue;
 
         const uint64_t* address = vector_search(&self->functionStarts, &element->first.startAddress, &machoFile_uint64Compare);
@@ -310,48 +310,48 @@ static inline void machoFile_fixupFunctions(struct machoFile* self) {
  * @param bits the amount of bits the implementation should handle
  * @param suffix the optional suffix to be used for the native data structures
  */
-#define machoFile_parseFileImpl(bits, suffix)                                                         \
-static inline bool machoFile_parseFileImpl##bits(struct machoFile* self, const void* baseAddress,     \
-                                                 const bool bytesSwapped, const bool shallow) {       \
-    macho_iterateSegments(baseAddress, bytesSwapped, suffix, {                                        \
-        bool result = true;                                                                           \
-        switch (macho_maybeSwap(32, bytesSwapped, loadCommand->cmd)) {                                \
-            case LC_SEGMENT##suffix:                                                                  \
-                result = machoFile_handleSegment##bits(self, baseAddress, (void*) loadCommand,        \
-                                                       bytesSwapped, shallow);                        \
-                break;                                                                                \
-                                                                                                      \
-            case LC_SYMTAB: {                                                                         \
-                if (shallow) {                                                                        \
-                    result = true;                                                                    \
-                    break;                                                                            \
-                }                                                                                     \
-                struct machoParser parser = machoParser_create(                                       \
-                    (void*) loadCommand, baseAddress, self->_.inMemory ?                              \
-                        (self->linkedit_vmaddr - self->text_vmaddr) - self->linkedit_fileoff : 0,     \
-                    bytesSwapped, (bits) == 64, (machoParser_addFunction) machoFile_addFunction, self \
-                );                                                                                    \
-                result = machoParser_parseSymbolTable(&parser);                                       \
-                machoParser_destroy(&parser);                                                         \
-                break;                                                                                \
-            }                                                                                         \
-                                                                                                      \
-            case LC_UUID:                                                                             \
-                memcpy(&self->uuid, &((struct uuid_command*) ((void*) loadCommand))->uuid, 16);       \
-                result = true;                                                                        \
-                break;                                                                                \
-                                                                                                      \
-            case LC_FUNCTION_STARTS:                                                                  \
-                result = shallow ? true : machoFile_handleFunctionStarts(                             \
-                    self, (void*) loadCommand, baseAddress, bytesSwapped                              \
-                );                                                                                    \
-                break;                                                                                \
-        }                                                                                             \
-        if (!result) {                                                                                \
-            return false;                                                                             \
-        }                                                                                             \
-    })                                                                                                \
-    return true;                                                                                      \
+#define machoFile_parseFileImpl(bits, suffix)                                                     \
+static inline bool machoFile_parseFileImpl##bits(struct machoFile* self, const void* baseAddress, \
+                                                 const bool bytesSwapped, const bool shallow) {   \
+    macho_iterateSegments(baseAddress, bytesSwapped, suffix, {                                    \
+        bool result = true;                                                                       \
+        switch (macho_maybeSwap(32, bytesSwapped, loadCommand->cmd)) {                            \
+            case LC_SEGMENT##suffix:                                                              \
+                result = machoFile_handleSegment##bits(self, baseAddress, (void*) loadCommand,    \
+                                                       bytesSwapped, shallow);                    \
+                break;                                                                            \
+                                                                                                  \
+            case LC_SYMTAB: {                                                                     \
+                if (shallow) {                                                                    \
+                    result = true;                                                                \
+                    break;                                                                        \
+                }                                                                                 \
+                struct machoParser parser = machoParser_create(                                   \
+                    (void*) loadCommand, baseAddress, self->_.inMemory ?                          \
+                        (self->linkedit_vmaddr - self->text_vmaddr) - self->linkedit_fileoff : 0, \
+                    bytesSwapped, (bits) == 64, (machoParser_addSymbol) machoFile_addSymbol, self \
+                );                                                                                \
+                result = machoParser_parseSymbolTable(&parser);                                   \
+                machoParser_destroy(&parser);                                                     \
+                break;                                                                            \
+            }                                                                                     \
+                                                                                                  \
+            case LC_UUID:                                                                         \
+                memcpy(&self->uuid, &((struct uuid_command*) ((void*) loadCommand))->uuid, 16);   \
+                result = true;                                                                    \
+                break;                                                                            \
+                                                                                                  \
+            case LC_FUNCTION_STARTS:                                                              \
+                result = shallow ? true : machoFile_handleFunctionStarts(                         \
+                    self, (void*) loadCommand, baseAddress, bytesSwapped                          \
+                );                                                                                \
+                break;                                                                            \
+        }                                                                                         \
+        if (!result) {                                                                            \
+            return false;                                                                         \
+        }                                                                                         \
+    })                                                                                            \
+    return true;                                                                                  \
 }
 
 machoFile_parseFileImpl(32,)
@@ -412,10 +412,10 @@ bool machoFile_parse(struct machoFile* self) {
                                                                       false,
                                                                       self);
     if (success) {
-        vector_sort(&self->functions, machoFile_functionSortCompare);
+        vector_sort(&self->symbols, machoFile_functionSortCompare);
     } else {
-        vector_iterate(&self->functions, function_destroy(&element->first););
-        vector_clear(&self->functions);
+        vector_iterate(&self->symbols, symbol_destroy(&element->first););
+        vector_clear(&self->symbols);
     }
 
     return success;
@@ -426,7 +426,7 @@ bool machoFile_getFunctionInfo(struct machoFile* self, const char* functionName,
         return false;
     }
 
-    vector_iterate(&self->functions, {
+    vector_iterate(&self->symbols, {
         if (strcmp(element->first.linkedName, functionName) == 0) {
             info->begin = (uintptr_t) element->first.startAddress + (uintptr_t) self->_.startAddress
                         - (self->_.inMemory ? self->text_vmaddr : self->addressOffset);
@@ -457,24 +457,24 @@ static inline bool machoFile_addr2StringImpl(struct machoFile* self, const void*
 
     const optional_debugInfo_t result = machoFile_getDebugInfo(self, address, searchFunction);
     if (result.has_value) {
-        if (result.value.function.linkedName == NULL) {
+        if (result.value.symbol.linkedName == NULL) {
             return false;
         }
 
         const char* name;
         if (callstack_rawNames) {
-            name = result.value.function.linkedName;
+            name = result.value.symbol.linkedName;
             if (*name == '\1') {
                 ++name;
             }
         } else {
-            if (result.value.function.demangledName.value == NULL) {
-                name = result.value.function.linkedName;
+            if (result.value.symbol.demangledName.value == NULL) {
+                name = result.value.symbol.linkedName;
                 if (*name == '_' || *name == '\1') {
                     ++name;
                 }
             } else {
-                name = result.value.function.demangledName.value;
+                name = result.value.symbol.demangledName.value;
             }
         }
 
@@ -490,7 +490,7 @@ static inline bool machoFile_addr2StringImpl(struct machoFile* self, const void*
             char* toReturn = NULL;
             const ptrdiff_t diff = (ptrdiff_t) (address - self->_.startAddress
                                       + (self->_.inMemory ? self->text_vmaddr : self->addressOffset)
-                                      - result.value.function.startAddress);
+                                      - result.value.symbol.startAddress);
             if (diff > 0 || forceDiff) {
                 asprintf(&toReturn, "%s + %td", name, diff);
                 frame->reserved2 = false;
@@ -514,8 +514,8 @@ bool machoFile_addr2String(struct machoFile* self, const void* address, struct c
 }
 
 void machoFile_destroy(struct machoFile* self) {
-    vector_iterate(&self->functions, function_destroy(&element->first););
-    vector_destroy(&self->functions);
+    vector_iterate(&self->symbols, symbol_destroy(&element->first););
+    vector_destroy(&self->symbols);
     if (self->dSYMFile.file != NULL) {
         objectFile_delete(self->dSYMFile.file);
     }

@@ -25,24 +25,24 @@
 #include <stdbool.h>
 #include <mach-o/loader.h>
 
-#include "containers_funcFile.h"
+#include "containers_symbolFile.h"
 #include "objectFile.h"
 
-typedef void (*machoParser_addFunction)(void* arg, pair_funcFile_t);
+typedef void (*machoParser_addSymbol)(void* arg, pair_symbolFile_t);
 
 struct machoParser {
     struct symtab_command* command;
     const void* baseAddress;
     bool bytesSwapped, bit64;
     uintptr_t parsingOffset;
-    machoParser_addFunction functionCallback;
+    machoParser_addSymbol symbolCallback;
     void* object;
 
 // private:
     const char* stringTable;
     size_t entrySize;
     struct State {
-        struct optional_function currentFunction;
+        struct optional_symbol currentSymbol;
         struct objectFile* currentObjectFile;
         const char* path, *sourceFilename;
     } parsingState;
@@ -51,7 +51,7 @@ struct machoParser {
 struct machoParser machoParser_create(
     struct symtab_command* command, const void* baseAddress,
     uintptr_t parsingOffset, bool bytesSwapped, bool bit64,
-    machoParser_addFunction functionCallback, void* object);
+    machoParser_addSymbol symbolCallback, void* object);
 
 bool machoParser_parseSymbolTable(struct machoParser* self);
 void machoParser_destroy(const struct machoParser* self);
