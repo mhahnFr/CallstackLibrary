@@ -125,6 +125,13 @@ struct callstack_frame * callstack_toArray(struct callstack * self) {
     return self->frames;
 }
 
+/**
+ * Retrieves the binary file information for the given callstack object.
+ *
+ * @param self the callstack object
+ * @param useCache whether to use cached pointers
+ * @return the array of translated callstack frames or @c NULL on error
+ */
 static inline struct callstack_frame* callstack_getBinariesShared(struct callstack* self, const bool useCache) {
     if (self == NULL) return NULL;
 
