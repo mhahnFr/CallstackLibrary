@@ -28,6 +28,9 @@
 extern "C" {
 #endif
 
+/**
+ * The amount of frames to be stored in a callstack object.
+ */
 #define CALLSTACK_BACKTRACE_SIZE 128
 
 /**
@@ -71,6 +74,11 @@ struct callstack {
     void *  backtrace[CALLSTACK_BACKTRACE_SIZE];
 };
 
+/**
+ * The initializing expression for the callstack object.
+ *
+ * @since v2.3
+ */
 #define CALLSTACK_INITIALIZER { NONE, 0, NULL, 0, {} }
 
 /**
