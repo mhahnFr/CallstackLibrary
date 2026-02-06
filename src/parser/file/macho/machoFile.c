@@ -127,8 +127,6 @@ static inline int machoFile_functionSortCompare(const void* lhs, const void* rhs
     return 0;
 }
 
-typedef const void* (*searchFunction)(const void*, const void*, size_t, size_t, int (*)(const void*, const void*));
-
 /**
  * Tries to deduct the debugging information available for the given address in
  * the given Mach-O file.
@@ -137,7 +135,7 @@ typedef const void* (*searchFunction)(const void*, const void*, size_t, size_t, 
  * @param address the address to be translated
  * @return the optionally deducted debug information
  */
-static inline optional_debugInfo_t machoFile_getDebugInfo(struct machoFile* self, const void* address, const searchFunction function) {
+static inline optional_debugInfo_t machoFile_getDebugInfo(struct machoFile* self, const void* address, const binaryFile_searchFunction function) {
     const uint64_t searchAddress = (uintptr_t) (address - self->_.startAddress)
                                  + (self->_.inMemory ? self->text_vmaddr : self->addressOffset);
 
@@ -452,7 +450,7 @@ vector_pair_ptr_t machoFile_getTLSRegions(struct machoFile* self) {
     return toReturn;
 }
 
-static inline bool machoFile_addr2StringImpl(struct machoFile* self, const void* address, struct callstack_frame* frame, const searchFunction searchFunction, const bool forceDiff) {
+static inline bool machoFile_addr2StringImpl(struct machoFile* self, const void* address, struct callstack_frame* frame, const binaryFile_searchFunction searchFunction, const bool forceDiff) {
     if (!BINARY_FILE_SUPER(self, maybeParse)) {
         return false;
     }
