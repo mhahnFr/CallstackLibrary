@@ -45,6 +45,7 @@ struct machoFile {
     uint64_t linkedit_fileoff;
     /** The VM address of the text segment.                                     */
     uint64_t text_vmaddr;
+    /** The cumulated size of the thread-local variables in bytes.              */
     uint64_t tlvSize;
     /** Information about the dSYM bundle file.                                 */
     struct {
@@ -56,7 +57,7 @@ struct machoFile {
     /** The UUID of the represented Mach-O file.                                */
     uint8_t uuid[16];
     
-    /** The symbols mapped to their object file.                              */
+    /** The symbols mapped to their object file.                                */
     vector_pairSymbolFile_t symbols;
     /** The start addresses of the contained functions.                         */
     vector_uint64_t functionStarts;
@@ -71,6 +72,12 @@ struct machoFile {
  */
 void machoFile_create(struct machoFile* self);
 
+/**
+ * Parses the minimal necessary information of the represented Mach-O file.
+ *
+ * @param self the Mach-O file object
+ * @return whether the parsing was successful
+ */
 bool machoFile_parseShallow(struct machoFile* self);
 
 /**
@@ -95,6 +102,14 @@ bool machoFile_addr2String(struct machoFile* self, const void* address, struct c
  */
 bool machoFile_getFunctionInfo(struct machoFile* self, const char* functionName, struct functionInfo* info);
 
+/**
+ * Deducts the debug information for the symbol of the given address.
+ *
+ * @param self the Mach-O file object
+ * @param symbolAddress the address of the symbol
+ * @param frame the @c callstack_frame structure to be filled
+ * @return whether a symbol was found
+ */
 bool machoFile_getSymbolInfo(struct machoFile* self, const void* symbolAddress, struct callstack_frame* frame);
 
 /**
