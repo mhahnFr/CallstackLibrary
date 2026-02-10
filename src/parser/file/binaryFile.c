@@ -102,6 +102,14 @@ bool binaryFile_getSymbolInfo(struct binaryFile* self, const void* symbolAddress
     return LCS_FILE(self, getSymbolInfo, symbolAddress, frame);
 }
 
+/**
+ * Compares the two given region infos.
+ *
+ * @param lhs the left hand side region info
+ * @param rhs the right hand side region info
+ * @return a negative number if the first region is smaller, a positive one if
+ * the second region is smaller, zero if equal
+ */
 static inline int binaryFile_regionsCompare(const pair_ptr_t* lhs, const pair_ptr_t* rhs) {
     if (lhs->first < rhs->first) return -1;
     if (lhs->first > rhs->first) return +1;
