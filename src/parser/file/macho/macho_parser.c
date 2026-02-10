@@ -43,6 +43,13 @@
  ENSYM: <function address>
  */
 
+/**
+ * Swap the endianness of the given value if necessary.
+ *
+ * @param self the Mach-O symbol table parser
+ * @param bits the amount of bits
+ * @param value the value
+ */
 #define machoParser_swap(self, bits, value) macho_maybeSwap(bits, (self)->bytesSwapped, value)
 
 struct machoParser machoParser_create(
@@ -63,6 +70,12 @@ struct machoParser machoParser_create(
     };
 }
 
+/**
+ * Generates an implementation for the symbol begin handling.
+ *
+ * @param bits the amount of bits to generate the implementation for
+ * @param suffix the suffix to be used for the system provided structures
+ */
 #define machoParser_handleSymbolBeginImpl(bits, suffix)                                                         \
 static inline bool machoParser_handleSymbolBegin##bits(struct machoParser* self,                                \
                                                        const struct nlist##suffix* entry) {                     \
@@ -77,6 +90,12 @@ static inline bool machoParser_handleSymbolBegin##bits(struct machoParser* self,
 machoParser_handleSymbolBeginImpl(32,)
 machoParser_handleSymbolBeginImpl(64, _64)
 
+/**
+ * Generates an implementation for handling symbol endings.
+ *
+ * @param bits the amount of bits to generate the implementation for
+ * @param suffix the suffix to be used for the system provided structures
+ */
 #define machoParser_handleSymbolEndImpl(bits, suffix)                            \
 static inline bool machoParser_handleSymbolEnd##bits(struct machoParser* self) { \
     if (!self->private.parsingState.currentSymbol.has_value) {                   \
@@ -93,6 +112,12 @@ static inline bool machoParser_handleSymbolEnd##bits(struct machoParser* self) {
 machoParser_handleSymbolEndImpl(32,)
 machoParser_handleSymbolEndImpl(64, _64)
 
+/**
+ * Generates an implementation for handling the source file information.
+ *
+ * @param bits the amount of bits to generate the implementation for
+ * @param suffix the suffix to be used for the system provided structures
+ */
 #define machoParser_handleSourceInfoImpl(bits, suffix)                                              \
 static inline bool machoParser_handleSourceInfo##bits(struct machoParser* self,                     \
                                                       const struct nlist##suffix* entry) {          \
@@ -115,6 +140,12 @@ static inline bool machoParser_handleSourceInfo##bits(struct machoParser* self, 
 machoParser_handleSourceInfoImpl(32,)
 machoParser_handleSourceInfoImpl(64, _64)
 
+/**
+ * Generates an implementation for handling object file entries.
+ *
+ * @param bits the amount of bits to generate the implementation for
+ * @param suffix the suffix to be used for the system provided data structures
+ */
 #define machoParser_handleObjectFileImpl(bits, suffix)                                                               \
 static inline bool machoParser_handleObjectFile##bits(struct machoParser* self,                                      \
                                                       const struct nlist##suffix* entry) {                           \
@@ -140,6 +171,12 @@ static inline bool machoParser_handleObjectFile##bits(struct machoParser* self, 
 machoParser_handleObjectFileImpl(32,)
 machoParser_handleObjectFileImpl(64, _64)
 
+/**
+ * Generates an implementation for the handling of symbol entries.
+ *
+ * @param bits the amount of bits to generate the implementation for
+ * @param suffix the suffix to be used for the system provided data structures
+ */
 #define machoParser_handleSymbolImpl(bits, suffix)                                                                  \
 static inline bool machoParser_handleSymbol##bits(struct machoParser* self,                                         \
                                                     const struct nlist##suffix* entry) {                            \
@@ -159,6 +196,12 @@ static inline bool machoParser_handleSymbol##bits(struct machoParser* self,     
 machoParser_handleSymbolImpl(32,)
 machoParser_handleSymbolImpl(64, _64)
 
+/**
+ * Generates an implementation for the handling of general entries.
+ *
+ * @param bits the amount of bits to generate the implementation for
+ * @param suffix the suffix to be used for the system provided data structures
+ */
 #define machoParser_handleGeneralEntryImpl(bits, suffix)                                        \
 static inline bool machoParser_handleGeneralEntry##bits(struct machoParser* self,               \
                                                         const struct nlist##suffix* entry) {    \
@@ -179,6 +222,12 @@ static inline bool machoParser_handleGeneralEntry##bits(struct machoParser* self
 machoParser_handleGeneralEntryImpl(32,)
 machoParser_handleGeneralEntryImpl(64, _64)
 
+/**
+ * Generates an implementation for handling symbol table entries.
+ *
+ * @param bits the amount of bits to generate the implementation for
+ * @param suffix the suffix to be used for the system provided data structures
+ */
 #define machoParser_handleEntryImpl(bits, suffix)                                     \
 static inline bool machoParser_handleEntry##bits(struct machoParser* self,            \
                                                  const struct nlist##suffix* entry) { \
@@ -198,6 +247,13 @@ static inline bool machoParser_handleEntry##bits(struct machoParser* self,      
 machoParser_handleEntryImpl(32,)
 machoParser_handleEntryImpl(64, _64)
 
+/**
+ * Handles the given symbol table entry.
+ *
+ * @param self the Mach-O symbol table parser
+ * @param entryAddress the address of the entry to be handled
+ * @return whether the handling was successful
+ */
 static inline bool machoParser_handleEntry(struct machoParser* self, const void* entryAddress) {
     if (self->bit64) {
         return machoParser_handleEntry64(self, entryAddress);
