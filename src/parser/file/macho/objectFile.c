@@ -133,6 +133,12 @@ static inline const char* objectFile_getSourceFileName(struct objectFile* self) 
     return self->mainSourceFileCache = toReturn;
 }
 
+/**
+ * Parses the given object file if it has not already been parsed.
+ *
+ * @param self the object file
+ * @return whether the object file has been parsed
+ */
 static inline bool objectFile_maybeParse(struct objectFile* self) {
     return self->parsed || ((self->parsed = objectFile_parse(self)));
 }
@@ -222,6 +228,12 @@ static inline void objectFile_handleSection(struct objectFile* self,
     }
 }
 
+/**
+ * Callback function adding the given symbol to the list of the object file.
+ *
+ * @param self the object file
+ * @param pair the symbol to be added
+ */
 static inline void objectFile_addSymbolCallback(struct objectFile* self, pair_symbolFile_t pair) {
     vector_push_back(&self->ownSymbols, pair.first);
 }
