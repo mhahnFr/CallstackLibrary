@@ -37,15 +37,26 @@ struct binaryFile {
     bool parsed,
     /** Indicates whether the represented image is loaded by the system. */
          inMemory,
+    /**
+     * Indicates whether the represented image is the located within the image
+     * of the CallstackLibrary.
+     */
          isSelf;
 
+    /**
+     * The different versions of the file name.
+     */
     struct FileName {
+        /** The original file name as given by the system. */
         char* original,
+        /** The absolute file name, if available.          */
             * absolute,
+        /** The relative file name, if available.          */
             * relative;
     } fileName;
     /** The start address in memory of the represented binary file.      */
     const void* startAddress,
+    /** The end address in memory of the represented binary file.        */
               * end;
     /** The relocation offset of the binary file.                        */
     uintptr_t relocationOffset;
@@ -53,6 +64,9 @@ struct binaryFile {
     vector_pair_ptr_t regions;
 };
 
+/**
+ * A search function prototype suitable for searching a symbol in the symbol table.
+ */
 typedef const void* (*binaryFile_searchFunction)(const void*, const void*, size_t, size_t, int (*)(const void*, const void*));
 
 /**
@@ -85,8 +99,31 @@ bool binaryFile_addr2String(struct binaryFile* self, const void* address, struct
  */
 bool binaryFile_getFunctionInfo(struct binaryFile* self, const char* functionName, struct functionInfo* info);
 
+/**
+ * @brief Returns the regions found in the given binary file.
+ *
+ * Parses the file if necessary before returning the regions.
+ *
+ * @param self the binary file
+ * @return the vector with the regions found in the given binary file
+ */
 vector_pair_ptr_t* binaryFile_getRegions(struct binaryFile* self);
+
+/**
+ * Queries the debug information for the symbol of the given address.
+ *
+ * @param self the binary file
+ * @param symbolAddress the address of the desired symbol
+ * @param frame the @c callstack_frame structure to place the debug info in
+ * @return whether a symbol was found
+ */
 bool binaryFile_getSymbolInfo(struct binaryFile* self, const void* symbolAddress, struct callstack_frame* frame);
+
+/**
+ * Sorts the regions found in the given binary file.
+ *
+ * @param self the binary file
+ */
 void binaryFile_sortRegions(struct binaryFile* self);
 
 /**
