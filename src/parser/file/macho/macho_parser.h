@@ -28,14 +28,28 @@
 #include "containers_symbolFile.h"
 #include "objectFile.h"
 
+/**
+ * Callback function prototype for adding a newly deducted symbol.
+ */
 typedef void (*machoParser_addSymbol)(void* arg, pair_symbolFile_t);
 
+/**
+ * Represents a Mach-O symbol table parser.
+ */
 struct machoParser {
+    /** The symbol table load command to be handled.            */
     struct symtab_command* command;
+    /** The start address of the Mach-O file.                   */
     const void* baseAddress;
-    bool bytesSwapped, bit64;
+    /** Whether to swap endianness while parsing.               */
+    bool bytesSwapped,
+    /** Whether to parse in 64-bit mode.                        */
+         bit64;
+    /** The offset to be used for the parsing.                  */
     uintptr_t parsingOffset;
+    /** The callback called once a symbol has been deducted.    */
     machoParser_addSymbol symbolCallback;
+    /** The payload to pass on to the symbol callback function. */
     void* object;
 
     /** Collection of the private member variables.             */
@@ -58,12 +72,37 @@ struct machoParser {
     } private;
 };
 
+/**
+ * Constructs a Mach-O symbol table parser using the given information.
+ *
+ * @param command the symbol table load command to handle
+ * @param baseAddress the base address of the Mach-O file
+ * @param parsingOffset the offset to be used while parsing
+ * @param bytesSwapped whether to swap endianness
+ * @param bit64 whether to parse in 64-bit mode
+ * @param symbolCallback the callback to be called once a symbol has been
+ * deducted
+ * @param object the payload to be passed to the callback
+ * @return the newly constructed Mach-O symbol table parser
+ */
 struct machoParser machoParser_create(
     struct symtab_command* command, const void* baseAddress,
     uintptr_t parsingOffset, bool bytesSwapped, bool bit64,
     machoParser_addSymbol symbolCallback, void* object);
 
+/**
+ * Parses the symbol table the given Mach-O parser represents.
+ *
+ * @param self the Mach-O symbol table parser
+ * @return whether the parsing was successful
+ */
 bool machoParser_parseSymbolTable(struct machoParser* self);
+
+/**
+ * Destroys the given symbol table parser.
+ *
+ * @param self the Mach-O symbol table parser
+ */
 void machoParser_destroy(const struct machoParser* self);
 
 #endif /* macho_parser_h */
