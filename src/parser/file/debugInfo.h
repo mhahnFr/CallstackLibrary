@@ -52,6 +52,7 @@ typedef_optional_named(sourceFileInfo, struct sourceFileInfo);
  * Represents the deducted debug information.
  */
 struct debugInfo {
+    /** The symbol info for this debug info entry.            */
     struct symbol symbol;
     
     /** The source file info if it was successfully deducted. */
