@@ -155,12 +155,12 @@ optional_debugInfo_t objectFile_getDebugInfo(struct objectFile* self, const uint
         lineAddress = address;
         symbolBegin = symbol.startAddress;
     } else {
-        const optional_symbol_t ownsymbol = objectFile_findOwnSymbol(self, symbol.linkedName);
-        if (!ownsymbol.has_value) {
+        const optional_symbol_t ownSymbol = objectFile_findOwnSymbol(self, symbol.linkedName);
+        if (!ownSymbol.has_value) {
             return ERROR_RETURN;
         }
-        lineAddress = ownsymbol.value.startAddress + address - symbol.startAddress;
-        symbolBegin = ownsymbol.value.startAddress;
+        lineAddress = ownSymbol.value.startAddress + address - symbol.startAddress;
+        symbolBegin = ownSymbol.value.startAddress;
     }
 
     const struct dwarf_lineInfo tmp = (struct dwarf_lineInfo) { .address = lineAddress };
@@ -192,6 +192,7 @@ optional_debugInfo_t objectFile_getDebugInfo(struct objectFile* self, const uint
             }
         }
     };
+#undef ERROR_RETURN
 }
 
 uint8_t* objectFile_getUUID(struct objectFile* self) {
