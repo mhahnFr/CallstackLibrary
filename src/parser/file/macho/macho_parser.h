@@ -38,14 +38,24 @@ struct machoParser {
     machoParser_addSymbol symbolCallback;
     void* object;
 
-// private:
-    const char* stringTable;
-    size_t entrySize;
-    struct State {
-        struct optional_symbol currentSymbol;
-        struct objectFile* currentObjectFile;
-        const char* path, *sourceFilename;
-    } parsingState;
+    /** Collection of the private member variables.             */
+    struct {
+        /** The beginning of the string table. */
+        const char* stringTable;
+        /** The size of an entry.              */
+        size_t entrySize;
+        /** The parsing state.                 */
+        struct State {
+            /** The currently handled symbol.      */
+            struct optional_symbol currentSymbol;
+            /** The currently handled object file. */
+            struct objectFile* currentObjectFile;
+            /** The path of the object file.       */
+            const char* path,
+            /** The name of the source file.       */
+                      * sourceFilename;
+        } parsingState;
+    } private;
 };
 
 struct machoParser machoParser_create(
