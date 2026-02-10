@@ -133,9 +133,12 @@ static inline int machoFile_functionSortCompare(const void* lhs, const void* rhs
  *
  * @param self the Mach-O file to search the debug information in
  * @param address the address to be translated
+ * @param function the search function to be used to search for appropriate
+ * debug information
  * @return the optionally deducted debug information
  */
-static inline optional_debugInfo_t machoFile_getDebugInfo(struct machoFile* self, const void* address, const binaryFile_searchFunction function) {
+static inline optional_debugInfo_t machoFile_getDebugInfo(struct machoFile* self, const void* address,
+                                                          const binaryFile_searchFunction function) {
     const uint64_t searchAddress = (uintptr_t) (address - self->_.startAddress)
                                  + (self->_.inMemory ? self->text_vmaddr : self->addressOffset);
 
@@ -247,6 +250,13 @@ static inline bool machoFile_handleSegment##bits(struct machoFile* self, const v
 machoFile_handleSegment(32,)
 machoFile_handleSegment(64, _64)
 
+/**
+ * Callback function for adding the given symbol and object file pair to the
+ * symbol list.
+ *
+ * @param self the Mach-O file object
+ * @param pair the symbol and object file pair to be added
+ */
 static inline void machoFile_addSymbol(struct machoFile* self, pair_symbolFile_t pair) {
     vector_push_back(&self->symbols, pair);
 }
@@ -363,6 +373,8 @@ machoFile_parseFileImpl(64, _64)
  *
  * @param self the Mach-O file abstraction object
  * @param baseAddress the Mach-O file buffer
+ * @param shallow whether to only parse the strictly necessary information from
+ * the represented file
  * @return whether the parsing was successful
  */
 static inline bool machoFile_parseFile(struct machoFile* self, const void* baseAddress, const bool shallow) {
@@ -397,6 +409,13 @@ static inline bool machoFile_parseFile(struct machoFile* self, const void* baseA
     return success;
 }
 
+/**
+ * Parses the given Mach-O file entirely.
+ *
+ * @param self the Mach-O file object
+ * @param baseAddress the base address of the represented file
+ * @return whether the parsing was successful
+ */
 static inline bool machoFile_parseFileComplete(struct machoFile* self, const void* baseAddress) {
     return machoFile_parseFile(self, baseAddress, false);
 }
@@ -450,7 +469,19 @@ vector_pair_ptr_t machoFile_getTLSRegions(struct machoFile* self) {
     return toReturn;
 }
 
-static inline bool machoFile_addr2StringImpl(struct machoFile* self, const void* address, struct callstack_frame* frame, const binaryFile_searchFunction searchFunction, const bool forceDiff) {
+/**
+ * Symbolizes the given address into the given @c callstack_frame structure.
+ *
+ * @param self the Mach-O file object
+ * @param address the address to symbolize
+ * @param frame the @c callstack_frame structure to be filled
+ * @param searchFunction the search function to be used
+ * @param forceDiff whether to print a difference value in the symbol name if
+ * not found and the difference value would be zero
+ * @return whether the symbolization was successful
+ */
+static inline bool machoFile_addr2StringImpl(struct machoFile* self, const void* address, struct callstack_frame* frame,
+                                             const binaryFile_searchFunction searchFunction, const bool forceDiff) {
     if (!BINARY_FILE_SUPER(self, maybeParse)) {
         return false;
     }
