@@ -79,6 +79,9 @@ struct objectFile {
     struct objectFile * next;
 };
 
+/**
+ * The initializing expression for an @c objectFile structure.
+ */
 #define objectFile_initializer (struct objectFile) {                             \
     NULL, NULL, NULL, 0, { 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0 },     \
     lcs_section_initializer, lcs_section_initializer, lcs_section_initializer,   \
