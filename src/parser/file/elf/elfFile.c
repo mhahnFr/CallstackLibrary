@@ -43,7 +43,7 @@ void elfFile_create(struct elfFile* self) {
     self->debugStrOffsets = lcs_section_initializer;
 
     vector_init(&self->lineInfos);
-    vector_init(&self->functions);
+    vector_init(&self->symbols);
 }
 
 /**
@@ -92,29 +92,29 @@ elfFile_loadSectionStrtab(64)
  *
  * @param bits the amount of bits the implementation shall handle
  */
-#define elfFile_parseSymtab(bits)                                                                                \
-static inline bool elfFile_parseSymtab##bits(struct elfFile*   self,                                             \
-                                             Elf##bits##_Shdr* symtab,                                           \
-                                             char*             strBegin,                                         \
-                                             const void*       begin,                                            \
-                                             bool              littleEndian) {                                   \
-    const void* symtabBegin = begin + ELF_TO_HOST(bits, symtab->sh_offset, littleEndian);                        \
-    uint64_t count = ELF_TO_HOST(bits, symtab->sh_size, littleEndian) / sizeof(Elf##bits##_Sym);                 \
-    const Elf##bits##_Sym* entry = symtabBegin;                                                                  \
-    for (uint64_t i = 0; i < count; ++i, ++entry) {                                                              \
-        const unsigned char type = ELF##bits##_ST_TYPE(entry->st_info);                                          \
-        if ((type == STT_FUNC || type == STT_OBJECT) && ELF_TO_HOST(bits, entry->st_value, littleEndian) != 0    \
-            && ELF##bits##_ST_VISIBILITY(entry->st_other) == STV_DEFAULT) {                                      \
-            struct function f = {                                                                                \
-                .startAddress = ELF_TO_HOST(bits, entry->st_value, littleEndian),                                \
-                .linkedName   = strdup(strBegin + ELF_TO_HOST(32, entry->st_name, littleEndian)),                \
-                .length       = ELF_TO_HOST(bits, entry->st_size, littleEndian),                                 \
-                .demangledName.has_value = false,                                                                \
-            };                                                                                                   \
-            vector_push_back(&self->functions, f);                                                               \
-        }                                                                                                        \
-    }                                                                                                            \
-    return true;                                                                                                 \
+#define elfFile_parseSymtab(bits)                                                                             \
+static inline bool elfFile_parseSymtab##bits(struct elfFile*   self,                                          \
+                                             Elf##bits##_Shdr* symtab,                                        \
+                                             char*             strBegin,                                      \
+                                             const void*       begin,                                         \
+                                             bool              littleEndian) {                                \
+    const void* symtabBegin = begin + ELF_TO_HOST(bits, symtab->sh_offset, littleEndian);                     \
+    uint64_t count = ELF_TO_HOST(bits, symtab->sh_size, littleEndian) / sizeof(Elf##bits##_Sym);              \
+    const Elf##bits##_Sym* entry = symtabBegin;                                                               \
+    for (uint64_t i = 0; i < count; ++i, ++entry) {                                                           \
+        const unsigned char type = ELF##bits##_ST_TYPE(entry->st_info);                                       \
+        if ((type == STT_FUNC || type == STT_OBJECT) && ELF_TO_HOST(bits, entry->st_value, littleEndian) != 0 \
+            && ELF##bits##_ST_VISIBILITY(entry->st_other) == STV_DEFAULT) {                                   \
+            struct symbol f = {                                                                               \
+                .startAddress = ELF_TO_HOST(bits, entry->st_value, littleEndian),                             \
+                .linkedName   = strdup(strBegin + ELF_TO_HOST(32, entry->st_name, littleEndian)),             \
+                .length       = ELF_TO_HOST(bits, entry->st_size, littleEndian),                              \
+                .demangledName.has_value = false,                                                             \
+            };                                                                                                \
+            vector_push_back(&self->symbols, f);                                                              \
+        }                                                                                                     \
+    }                                                                                                         \
+    return true;                                                                                              \
 }
 
 elfFile_parseSymtab(32)
@@ -337,8 +337,8 @@ static inline bool elfFile_parseFile(struct elfFile* self, const Elf32_Ehdr* hea
  * greater than @c 0 according to the sorting order
  */
 static inline int elfFile_functionCompare(const void* lhs, const void* rhs) {
-    const struct function* a = lhs,
-                         * b = rhs;
+    const struct symbol* a = lhs,
+                       * b = rhs;
     if (a->startAddress < b->startAddress) return +1;
     if (a->startAddress > b->startAddress) return -1;
 
@@ -380,11 +380,11 @@ bool elfFile_parse(struct elfFile* self) {
         .parseFunc = (loader_parser) elfFile_parseFileComplete
     }, false, self);
     if (success) {
-        vector_sort(&self->functions, elfFile_functionCompare);
+        vector_sort(&self->symbols, elfFile_functionCompare);
         vector_sort(&self->lineInfos, elfFile_lineInfoCompare);
     } else {
-        vector_destroyWithPtr(&self->functions, function_destroy);
-        vector_init(&self->functions);
+        vector_destroyWithPtr(&self->symbols, symbol_destroy);
+        vector_init(&self->symbols);
     }
     return success;
 }
@@ -405,19 +405,19 @@ static inline optional_debugInfo_t elfFile_getDebugInfo(const struct elfFile* se
     optional_debugInfo_t toReturn = { .has_value = false };
 
     const uint64_t translated = (uintptr_t) address - self->_.relocationOffset;
-    const struct function tmp = (struct function) { .startAddress = translated };
-    const struct function* closest = function(&tmp,
-                                              self->functions.content,
-                                              self->functions.count,
-                                              sizeof(struct function),
-                                              elfFile_functionCompare);
+    const struct symbol tmp = (struct symbol) { .startAddress = translated };
+    const struct symbol* closest = function(&tmp,
+                                            self->symbols.content,
+                                            self->symbols.count,
+                                            sizeof(struct symbol),
+                                            elfFile_functionCompare);
     if (closest == NULL
         || closest->startAddress > translated
         || closest->startAddress + closest->length < translated) {
         return toReturn;
     }
     if (!closest->demangledName.has_value) {
-        struct function* mutableClosest = (struct function*) closest;
+        struct symbol* mutableClosest = (struct symbol*) closest;
         mutableClosest->demangledName = (optional_string_t) {
             true,
             callstack_parser_demangleCopy(closest->linkedName, false),
@@ -426,7 +426,7 @@ static inline optional_debugInfo_t elfFile_getDebugInfo(const struct elfFile* se
     toReturn = (optional_debugInfo_t) {
         .has_value = true,
         .value = (struct debugInfo) {
-            .function = *closest,
+            .symbol = *closest,
             .sourceFileInfo = { .has_value = false }
         }
     };
@@ -466,7 +466,7 @@ bool elfFile_getFunctionInfo(struct elfFile* self, const char* functionName, str
         return false;
     }
 
-    vector_iterate(&self->functions, {
+    vector_iterate(&self->symbols, {
         if (strcmp(element->linkedName, functionName) == 0) {
             info->begin = (uintptr_t) element->startAddress + self->_.relocationOffset;
             info->length = element->length;
@@ -489,11 +489,11 @@ static inline bool elfFile_addr2StringImpl(struct elfFile* self, const void* add
 
     const optional_debugInfo_t result = elfFile_getDebugInfo(self, address, function);
     if (result.has_value) {
-        if (result.value.function.linkedName == NULL) {
+        if (result.value.symbol.linkedName == NULL) {
             return false;
         }
-        const char* name = callstack_rawNames || result.value.function.demangledName.value == NULL
-            ? result.value.function.linkedName : result.value.function.demangledName.value;
+        const char* name = callstack_rawNames || result.value.symbol.demangledName.value == NULL
+            ? result.value.symbol.linkedName : result.value.symbol.demangledName.value;
         if (result.value.sourceFileInfo.has_value) {
             frame->sourceFile = utils_maybeCopySave(result.value.sourceFileInfo.value.sourceFileAbsolute, !frame->reserved1);
             frame->sourceFileRelative = utils_maybeCopySave(result.value.sourceFileInfo.value.sourceFileRelative, !frame->reserved1);
@@ -504,7 +504,7 @@ static inline bool elfFile_addr2StringImpl(struct elfFile* self, const void* add
             frame->reserved2 = frame->reserved1;
         } else {
             char* toReturn = NULL;
-            const ptrdiff_t diff = (ptrdiff_t) (address - self->_.relocationOffset - result.value.function.startAddress);
+            const ptrdiff_t diff = (ptrdiff_t) (address - self->_.relocationOffset - result.value.symbol.startAddress);
             if (diff > 0 || forceDiff) {
                 asprintf(&toReturn, "%s + %td", name, diff);
                 frame->reserved2 = false;
@@ -528,7 +528,7 @@ bool elfFile_addr2String(struct elfFile* self, const void* address, struct calls
 }
 
 void elfFile_destroy(struct elfFile* self) {
-    vector_destroyWithPtr(&self->functions, function_destroy);
+    vector_destroyWithPtr(&self->symbols, symbol_destroy);
     vector_destroyWith(&self->lineInfos, dwarf_lineInfo_destroyValue);
 }
 

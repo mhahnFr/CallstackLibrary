@@ -23,8 +23,8 @@
 #define elfFile_h
 
 #include "../binaryFile.h"
-#include "../function.h"
 #include "../lcs_section.h"
+#include "../symbol.h"
 #include "../dwarf/lineInfo/lineInfo.h"
 
 /**
@@ -48,7 +48,7 @@ struct elfFile {
                        debugStrOffsets;
     
     /** The functions found in the represented ELF file.             */
-    vector_function_t functions;
+    vector_symbol_t symbols;
     /* The DWARF line information found in the represented ELF file. */
     vector_dwarfLineInfo_t lineInfos;
 };
