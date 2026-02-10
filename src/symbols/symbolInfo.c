@@ -26,6 +26,18 @@
 #include "../dlMapper/dlMapper.h"
 #include "misc/cache.h"
 
+/**
+ * @brief Translates the given address and returns the deducted debug
+ * information for it.
+ *
+ * The success of finding a symbol is placed in the given boolean value if it
+ * is not @c NULL .
+ *
+ * @param address the address to find the closest symbol for
+ * @param success the boolean value to place the success information in
+ * @param useCache whether to use cache values for the returned information
+ * @return the symbol information that was deducted
+ */
 static inline SymbolInfo symbols_getInfoShared(const void* address, bool* success, const bool useCache) {
     SymbolInfo toReturn;
     dlMapper_init();
