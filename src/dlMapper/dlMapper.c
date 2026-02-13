@@ -83,6 +83,14 @@ static inline int dlMapper_searchCompare(const void* key, const struct binaryFil
     return key > file->startAddress ? +1 : -1;
 }
 
+/**
+ * Compares the given key with the given element.
+ *
+ * @param key the searched key
+ * @param element the region element to be checked
+ * @return a positive number if the key is bigger that the element, a negative
+ * number if it is smaller or zero if the key is found within the given element
+ */
 static inline int dlMapper_searchCompareRegion(const void* key, const pair_ptr_t* element) {
     const uintptr_t k = (uintptr_t) key;
     if (k >= element->first && k < element->second) {
