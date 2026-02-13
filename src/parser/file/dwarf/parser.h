@@ -93,6 +93,7 @@ struct dwarf_parser {
     /** Creates the file reference for the given file index.                            */
     struct dwarf_sourceFile (*getFileName)(const struct dwarf_parser*, uint64_t);
 
+    /** The version specific part of the DWARF parser.                                  */
     union {
         /** The parser part for version 4. */
         struct dwarf4_parser v4;
