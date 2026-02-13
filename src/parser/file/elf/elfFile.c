@@ -32,28 +32,18 @@
 #include "../debugInfo.h"
 #include "../loader.h"
 #include "../../callstack_parser.h"
-#include "../dwarf/dwarf_parser.h"
-
-struct elfFile* elfFile_new(void) {
-    struct elfFile* toReturn = malloc(sizeof(struct elfFile));
-    
-    if (toReturn != NULL) {
-        elfFile_create(toReturn);
-    }
-    return toReturn;
-}
+#include "../dwarf/parser.h"
 
 void elfFile_create(struct elfFile* self) {
-    self->_ = binaryFile_initializer;
-    
-    lcs_section_create(&self->debugLine);
-    lcs_section_create(&self->debugLineStr);
-    lcs_section_create(&self->debugStr);
-    lcs_section_create(&self->debugInfo);
-    lcs_section_create(&self->debugAbbrev);
-    lcs_section_create(&self->debugStrOffsets);
+    self->debugLine       = lcs_section_initializer;
+    self->debugLineStr    = lcs_section_initializer;
+    self->debugStr        = lcs_section_initializer;
+    self->debugInfo       = lcs_section_initializer;
+    self->debugAbbrev     = lcs_section_initializer;
+    self->debugStrOffsets = lcs_section_initializer;
+
     vector_init(&self->lineInfos);
-    vector_init(&self->functions);
+    vector_init(&self->symbols);
 }
 
 /**
@@ -76,7 +66,7 @@ static inline void elfFile_lineProgramCallback(struct dwarf_lineInfo info, void*
  * @param bits the amount of bits the implementation shall handle
  */
 #define elfFile_loadSectionStrtab(bits)                                                                                         \
-static inline char* elfFile_loadSectionStrtab##bits(Elf##bits##_Ehdr* header, bool littleEndian) {                              \
+static inline char* elfFile_loadSectionStrtab##bits(const Elf##bits##_Ehdr* header, bool littleEndian) {                        \
     uint16_t index = ELF_TO_HOST(16, header->e_shstrndx, littleEndian);                                                         \
     if (index == SHN_UNDEF) {                                                                                                   \
         return NULL;                                                                                                            \
@@ -102,28 +92,29 @@ elfFile_loadSectionStrtab(64)
  *
  * @param bits the amount of bits the implementation shall handle
  */
-#define elfFile_parseSymtab(bits)                                                                                \
-static inline bool elfFile_parseSymtab##bits(struct elfFile*   self,                                             \
-                                             Elf##bits##_Shdr* symtab,                                           \
-                                             char*             strBegin,                                         \
-                                             void*             begin,                                            \
-                                             bool              littleEndian) {                                   \
-    void* symtabBegin = begin + ELF_TO_HOST(bits, symtab->sh_offset, littleEndian);                              \
-    uint64_t count = ELF_TO_HOST(bits, symtab->sh_size, littleEndian) / sizeof(Elf##bits##_Sym);                 \
-    Elf##bits##_Sym* entry = symtabBegin;                                                                        \
-    for (uint64_t i = 0; i < count; ++i, ++entry) {                                                              \
-        const unsigned char type = ELF##bits##_ST_TYPE(entry->st_info);                                          \
-        if ((type == STT_FUNC || type == STT_OBJECT) && ELF_TO_HOST(bits, entry->st_value, littleEndian) != 0) { \
-            struct function f = {                                                                                \
-                .startAddress = ELF_TO_HOST(bits, entry->st_value, littleEndian),                                \
-                .linkedName   = strdup(strBegin + ELF_TO_HOST(32, entry->st_name, littleEndian)),                \
-                .length       = ELF_TO_HOST(bits, entry->st_size, littleEndian),                                 \
-                .demangledName.has_value = false,                                                                \
-            };                                                                                                   \
-            vector_push_back(&self->functions, f);                                                               \
-        }                                                                                                        \
-    }                                                                                                            \
-    return true;                                                                                                 \
+#define elfFile_parseSymtab(bits)                                                                             \
+static inline bool elfFile_parseSymtab##bits(struct elfFile*   self,                                          \
+                                             Elf##bits##_Shdr* symtab,                                        \
+                                             char*             strBegin,                                      \
+                                             const void*       begin,                                         \
+                                             bool              littleEndian) {                                \
+    const void* symtabBegin = begin + ELF_TO_HOST(bits, symtab->sh_offset, littleEndian);                     \
+    uint64_t count = ELF_TO_HOST(bits, symtab->sh_size, littleEndian) / sizeof(Elf##bits##_Sym);              \
+    const Elf##bits##_Sym* entry = symtabBegin;                                                               \
+    for (uint64_t i = 0; i < count; ++i, ++entry) {                                                           \
+        const unsigned char type = ELF##bits##_ST_TYPE(entry->st_info);                                       \
+        if ((type == STT_FUNC || type == STT_OBJECT) && ELF_TO_HOST(bits, entry->st_value, littleEndian) != 0 \
+            && ELF##bits##_ST_VISIBILITY(entry->st_other) == STV_DEFAULT) {                                   \
+            struct symbol f = {                                                                               \
+                .startAddress = ELF_TO_HOST(bits, entry->st_value, littleEndian),                             \
+                .linkedName   = strdup(strBegin + ELF_TO_HOST(32, entry->st_name, littleEndian)),             \
+                .length       = ELF_TO_HOST(bits, entry->st_size, littleEndian),                              \
+                .demangledName.has_value = false,                                                             \
+            };                                                                                                \
+            vector_push_back(&self->symbols, f);                                                              \
+        }                                                                                                     \
+    }                                                                                                         \
+    return true;                                                                                              \
 }
 
 elfFile_parseSymtab(32)
@@ -135,7 +126,7 @@ elfFile_parseSymtab(64)
  * @param bits the amount of bits the implementation shall handle
  */
 #define elfFile_sectionToLCSSection(bits)                                                            \
-static inline struct lcs_section elfFile_sectionToLCSSection##bits(void*             buffer,         \
+static inline struct lcs_section elfFile_sectionToLCSSection##bits(const void*       buffer,         \
                                                                    Elf##bits##_Shdr* section,        \
                                                                    bool              littleEndian) { \
     return (struct lcs_section) {                                                                    \
@@ -153,7 +144,7 @@ elfFile_sectionToLCSSection(64)
  * @param bits the amount of bits the implementation shall handle
  */
 #define elfFile_loadShnum(bits) \
-static inline uint64_t elfFile_loadShnum##bits(Elf##bits##_Ehdr* buffer, bool littleEndian) {                                   \
+static inline uint64_t elfFile_loadShnum##bits(const Elf##bits##_Ehdr* buffer, bool littleEndian) {                             \
     uint64_t shnum = ELF_TO_HOST(16, buffer->e_shnum, littleEndian);                                                            \
                                                                                                                                 \
     if (shnum == 0) {                                                                                                           \
@@ -175,100 +166,155 @@ elfFile_loadShnum(64)
  *
  * @param bits the amount of bits the implementation shall handle
  */
-#define elfFile_parseFileImpl(bits)                                                                                  \
-static inline bool elfFile_parseFile##bits (struct elfFile* self, Elf##bits##_Ehdr* buffer, bool littleEndian) {     \
-    if (ELF_TO_HOST(bits, buffer->e_shoff, littleEndian) == 0) return false;                                         \
-                                                                                                                     \
-    char* sectStrBegin = elfFile_loadSectionStrtab##bits(buffer, littleEndian);                                      \
-    if (sectStrBegin == NULL) return false;                                                                          \
-                                                                                                                     \
-    void* sectBegin = (void*) buffer + ELF_TO_HOST(bits, buffer->e_shoff, littleEndian);                             \
-    Elf##bits##_Shdr* strtab   = NULL,                                                                               \
-                    * symtab   = NULL,                                                                               \
-                    * dystrtab = NULL,                                                                               \
-                    * dysymtab = NULL;                                                                               \
-    uint16_t shnum = elfFile_loadShnum##bits(buffer, littleEndian);                                                  \
-    for (uint16_t i = 0; i < shnum; ++i) {                                                                           \
-        Elf##bits##_Shdr* current = sectBegin + i * ELF_TO_HOST(16, buffer->e_shentsize, littleEndian);              \
-        const char* sectionName = sectStrBegin + ELF_TO_HOST(32, current->sh_name, littleEndian);                    \
-        if (strcmp(".debug_line", sectionName) == 0) {                                                               \
-            self->debugLine = elfFile_sectionToLCSSection##bits(buffer, current, littleEndian);                      \
-            continue;                                                                                                \
-        } else if (strcmp(".debug_str", sectionName) == 0) {                                                         \
-            self->debugStr = elfFile_sectionToLCSSection##bits(buffer, current, littleEndian);                       \
-            continue;                                                                                                \
-        } else if (strncmp(".debug_line_str", sectionName, 16) == 0) {                                               \
-            self->debugLineStr = elfFile_sectionToLCSSection##bits(buffer, current, littleEndian);                   \
-            continue;                                                                                                \
-        } else if (strcmp(".debug_info", sectionName) == 0) {                                                        \
-            self->debugInfo = elfFile_sectionToLCSSection##bits(buffer, current, littleEndian);                      \
-            continue;                                                                                                \
-        } else if (strcmp(".debug_abbrev", sectionName) == 0) {                                                      \
-            self->debugAbbrev = elfFile_sectionToLCSSection##bits(buffer, current, littleEndian);                    \
-            continue;                                                                                                \
-        } else if (strcmp(".debug_str_offsets", sectionName) == 0) {                                                 \
-            self->debugStrOffsets = elfFile_sectionToLCSSection##bits(buffer, current, littleEndian);                \
-        }                                                                                                            \
-        switch (ELF_TO_HOST(32, current->sh_type, littleEndian)) {                                                   \
-            case SHT_SYMTAB:                                                                                         \
-                symtab = current;                                                                                    \
-                break;                                                                                               \
-                                                                                                                     \
-            case SHT_DYNSYM:                                                                                         \
-                dysymtab = current;                                                                                  \
-                break;                                                                                               \
-                                                                                                                     \
-            case SHT_STRTAB:                                                                                         \
-                if (strcmp(".strtab", sectStrBegin + ELF_TO_HOST(32, current->sh_name, littleEndian)) == 0) {        \
-                    strtab = current;                                                                                \
-                } else if (strcmp(".dynstr", sectStrBegin + ELF_TO_HOST(32, current->sh_name, littleEndian)) == 0) { \
-                    dystrtab = current;                                                                              \
-                }                                                                                                    \
-                break;                                                                                               \
-        }                                                                                                            \
-        if ((current->sh_flags & SHF_WRITE) != 0 && (current->sh_flags & SHF_ALLOC) != 0) {                          \
-            vector_push_back(&self->_.regions, ((pair_ptr_t) {                                                       \
-                self->_.relocationOffset + current->sh_addr,                                                         \
-                self->_.relocationOffset + current->sh_addr + current->sh_size                                       \
-            }));                                                                                                     \
-        }                                                                                                            \
-    }                                                                                                                \
-    if (symtab == NULL || strtab == NULL) {                                                                          \
-        if (dystrtab == NULL || dysymtab == NULL) {                                                                  \
-            return false;                                                                                            \
-        }                                                                                                            \
-        symtab = dysymtab;                                                                                           \
-        strtab = dystrtab;                                                                                           \
-    }                                                                                                                \
-                                                                                                                     \
-    return elfFile_parseSymtab##bits(self,                                                                           \
-                                     symtab,                                                                         \
-                                     (void*) buffer + ELF_TO_HOST(bits, strtab->sh_offset, littleEndian),            \
-                                     buffer,                                                                         \
-                                     littleEndian);                                                                  \
+#define elfFile_parseFileImpl(bits)                                                                                   \
+static inline bool elfFile_parseFile##bits(struct elfFile* self, const Elf##bits##_Ehdr* buffer, bool littleEndian) { \
+    if (ELF_TO_HOST(bits, buffer->e_shoff, littleEndian) == 0) return false;                                          \
+                                                                                                                      \
+    char* sectStrBegin = elfFile_loadSectionStrtab##bits(buffer, littleEndian);                                       \
+    if (sectStrBegin == NULL) return false;                                                                           \
+                                                                                                                      \
+    void* sectBegin = (void*) buffer + ELF_TO_HOST(bits, buffer->e_shoff, littleEndian);                              \
+    Elf##bits##_Shdr* strtab   = NULL,                                                                                \
+                    * symtab   = NULL,                                                                                \
+                    * dystrtab = NULL,                                                                                \
+                    * dysymtab = NULL;                                                                                \
+    uint16_t shnum = elfFile_loadShnum##bits(buffer, littleEndian);                                                   \
+    for (uint16_t i = 0; i < shnum; ++i) {                                                                            \
+        Elf##bits##_Shdr* current = sectBegin + i * ELF_TO_HOST(16, buffer->e_shentsize, littleEndian);               \
+        const char* sectionName = sectStrBegin + ELF_TO_HOST(32, current->sh_name, littleEndian);                     \
+        if (strcmp(".debug_line", sectionName) == 0) {                                                                \
+            self->debugLine = elfFile_sectionToLCSSection##bits(buffer, current, littleEndian);                       \
+            continue;                                                                                                 \
+        } else if (strcmp(".debug_str", sectionName) == 0) {                                                          \
+            self->debugStr = elfFile_sectionToLCSSection##bits(buffer, current, littleEndian);                        \
+            continue;                                                                                                 \
+        } else if (strncmp(".debug_line_str", sectionName, 16) == 0) {                                                \
+            self->debugLineStr = elfFile_sectionToLCSSection##bits(buffer, current, littleEndian);                    \
+            continue;                                                                                                 \
+        } else if (strcmp(".debug_info", sectionName) == 0) {                                                         \
+            self->debugInfo = elfFile_sectionToLCSSection##bits(buffer, current, littleEndian);                       \
+            continue;                                                                                                 \
+        } else if (strcmp(".debug_abbrev", sectionName) == 0) {                                                       \
+            self->debugAbbrev = elfFile_sectionToLCSSection##bits(buffer, current, littleEndian);                     \
+            continue;                                                                                                 \
+        } else if (strcmp(".debug_str_offsets", sectionName) == 0) {                                                  \
+            self->debugStrOffsets = elfFile_sectionToLCSSection##bits(buffer, current, littleEndian);                 \
+        }                                                                                                             \
+        switch (ELF_TO_HOST(32, current->sh_type, littleEndian)) {                                                    \
+            case SHT_SYMTAB:                                                                                          \
+                symtab = current;                                                                                     \
+                break;                                                                                                \
+                                                                                                                      \
+            case SHT_DYNSYM:                                                                                          \
+                dysymtab = current;                                                                                   \
+                break;                                                                                                \
+                                                                                                                      \
+            case SHT_STRTAB:                                                                                          \
+                if (strcmp(".strtab", sectStrBegin + ELF_TO_HOST(32, current->sh_name, littleEndian)) == 0) {         \
+                    strtab = current;                                                                                 \
+                } else if (strcmp(".dynstr", sectStrBegin + ELF_TO_HOST(32, current->sh_name, littleEndian)) == 0) {  \
+                    dystrtab = current;                                                                               \
+                }                                                                                                     \
+                break;                                                                                                \
+        }                                                                                                             \
+        if ((current->sh_flags & SHF_WRITE) != 0 && (current->sh_flags & SHF_ALLOC) != 0) {                           \
+            vector_push_back(&self->_.regions, ((pair_ptr_t) {                                                        \
+                self->_.relocationOffset + current->sh_addr,                                                          \
+                self->_.relocationOffset + current->sh_addr + current->sh_size                                        \
+            }));                                                                                                      \
+        }                                                                                                             \
+    }                                                                                                                 \
+    if (symtab == NULL || strtab == NULL) {                                                                           \
+        if (dystrtab == NULL || dysymtab == NULL) {                                                                   \
+            return false;                                                                                             \
+        }                                                                                                             \
+        symtab = dysymtab;                                                                                            \
+        strtab = dystrtab;                                                                                            \
+    }                                                                                                                 \
+                                                                                                                      \
+    return elfFile_parseSymtab##bits(self,                                                                            \
+                                     symtab,                                                                          \
+                                     (void*) buffer + ELF_TO_HOST(bits, strtab->sh_offset, littleEndian),             \
+                                     buffer,                                                                          \
+                                     littleEndian);                                                                   \
 }
 
 elfFile_parseFileImpl(32)
 elfFile_parseFileImpl(64)
 
 /**
+ * Generates an implementation for loading the ELF program header number.
+ *
+ * @param bits the amount of bits the implementation shall handle
+ */
+#define elfFile_loadEPHNum(bits)                                                                     \
+static inline uint32_t elfFile_loadEPHNum##bits(const Elf##bits##_Ehdr* header, bool littleEndian) { \
+    const uint16_t e_phnum = ELF_TO_HOST(16, header->e_phnum, littleEndian);                         \
+    if (e_phnum != PN_XNUM) {                                                                        \
+        return e_phnum;                                                                              \
+    }                                                                                                \
+                                                                                                     \
+    Elf##bits##_Shdr* sect = ((void*) header) + ELF_TO_HOST(bits, header->e_shoff, littleEndian);    \
+    return ELF_TO_HOST(32, sect->sh_info, littleEndian);                                             \
+}
+
+elfFile_loadEPHNum(32)
+elfFile_loadEPHNum(64)
+
+/**
+ * Generates an implementation for loading a given ELF file.
+ *
+ * @param bits the amount of bits the implementation shall handle
+ */
+#define elfFile_loadELF_impl(bits)                                                                  \
+static inline bool elfFile_loadELF##bits(struct elfFile* self, const void* base,                    \
+                                         const bool littleEndian) {                                 \
+    const Elf##bits##_Ehdr* header = base;                                                          \
+                                                                                                    \
+    const void* biggest = NULL;                                                                     \
+    const uint32_t e_phnum = elfFile_loadEPHNum##bits(header, littleEndian);                        \
+    for (uint32_t i = 0; i < e_phnum; ++i) {                                                        \
+        Elf##bits##_Phdr* seg = ((void*) header) + ELF_TO_HOST(bits, header->e_phoff, littleEndian) \
+                                + i * ELF_TO_HOST(16, header->e_phentsize, littleEndian);           \
+        const void* address = base + ELF_TO_HOST(bits, seg->p_offset, littleEndian)                 \
+                             + ELF_TO_HOST(bits, seg->p_memsz, littleEndian);                       \
+        if (biggest == NULL || biggest < address) {                                                 \
+            biggest = address;                                                                      \
+        }                                                                                           \
+    }                                                                                               \
+    self->_.end = biggest;                                                                          \
+    return true;                                                                                    \
+}
+
+elfFile_loadELF_impl(32)
+elfFile_loadELF_impl(64)
+
+/**
  * Parses the given ELF file into the given abstraction object.
  *
  * @param self the ELF file abstraction object
- * @param buffer the start pointer of the ELF file
+ * @param header the start pointer of the ELF file
+ * @param shallow whether to parse only the strictly necessary information
  * @return whether the file was parsed successfully
  */
-static inline bool elfFile_parseFile(struct elfFile* self, void* buffer) {
+static inline bool elfFile_parseFile(struct elfFile* self, const Elf32_Ehdr* header, const bool shallow) {
     bool success = false;
-    const unsigned char* e_ident = buffer;
-    switch (e_ident[EI_CLASS]) {
-        case ELFCLASS32: success = elfFile_parseFile32(self, buffer, e_ident[EI_DATA] == ELFDATA2LSB); break;
-        case ELFCLASS64: success = elfFile_parseFile64(self, buffer, e_ident[EI_DATA] == ELFDATA2LSB); break;
+    const bool littleEndian = header->e_ident[EI_DATA] == ELFDATA2LSB;
+    switch (header->e_ident[EI_CLASS]) {
+        case ELFCLASS32:
+            success = shallow ? elfFile_loadELF32(self, header, littleEndian)
+                              : elfFile_parseFile32(self, header, littleEndian);
+            break;
+            
+        case ELFCLASS64:
+            success = shallow ? elfFile_loadELF64(self, header, littleEndian)
+                              : elfFile_parseFile64(self, (void*) header, littleEndian);
+            break;
 
         default: break;
     }
 
-    if (success && self->debugLine.size > 0) {
+    if (!shallow && success && self->debugLine.size > 0) {
         dwarf_parseLineProgram(self->debugLine,
                                self->debugLineStr,
                                self->debugStr,
@@ -292,8 +338,8 @@ static inline bool elfFile_parseFile(struct elfFile* self, void* buffer) {
  * greater than @c 0 according to the sorting order
  */
 static inline int elfFile_functionCompare(const void* lhs, const void* rhs) {
-    const struct function* a = lhs,
-                         * b = rhs;
+    const struct symbol* a = lhs,
+                       * b = rhs;
     if (a->startAddress < b->startAddress) return +1;
     if (a->startAddress > b->startAddress) return -1;
 
@@ -321,24 +367,32 @@ static inline int elfFile_lineInfoCompare(const void* lhs, const void* rhs) {
 }
 
 /**
- * Loads the ELF file represented by the given abstraction object.
+ * Parses the given ELF file entirely.
  *
- * @param self the ELF file abstraction object
- * @return whether the ELF file was loaded successfully
+ * @param self the ELF file object
+ * @param header the ELF file header
+ * @return whether the parsing was successful
  */
+static inline bool elfFile_parseFileComplete(struct elfFile* self, const Elf32_Ehdr* header) {
+    return elfFile_parseFile(self, header, false);
+}
+
 bool elfFile_parse(struct elfFile* self) {
-    const bool success = loader_loadFileAndExecute(self->_.fileName, (union loader_parserFunction) {
-        .parseFunc = (loader_parser) elfFile_parseFile
+    const bool success = loader_loadFileAndExecute(self->_.fileName.original, (union loader_parserFunction) {
+        .parseFunc = (loader_parser) elfFile_parseFileComplete
     }, false, self);
     if (success) {
-        vector_sort(&self->functions, elfFile_functionCompare);
+        vector_sort(&self->symbols, elfFile_functionCompare);
         vector_sort(&self->lineInfos, elfFile_lineInfoCompare);
-        vector_iterate(&self->functions, __builtin_printf("%s: %s 0x%lx\n", self->_.fileName, element->linkedName, element->startAddress););
     } else {
-        vector_destroyWithPtr(&self->functions, function_destroy);
-        vector_init(&self->functions);
+        vector_destroyWithPtr(&self->symbols, symbol_destroy);
+        vector_init(&self->symbols);
     }
     return success;
+}
+
+bool elfFile_parseShallow(struct elfFile* self) {
+    return elfFile_parseFile(self, self->_.startAddress, true);
 }
 
 /**
@@ -347,25 +401,27 @@ bool elfFile_parse(struct elfFile* self) {
  *
  * @param self the ELF file abstraction object to be searched
  * @param address the address to be translated
+ * @param function the function to be used to search within the symbol table
  * @return the optionally available debug information
  */
-static inline optional_debugInfo_t elfFile_getDebugInfo(const struct elfFile* self, const void* address) {
+static inline optional_debugInfo_t elfFile_getDebugInfo(const struct elfFile* self, const void* address,
+                                                        const binaryFile_searchFunction function) {
     optional_debugInfo_t toReturn = { .has_value = false };
 
     const uint64_t translated = (uintptr_t) address - self->_.relocationOffset;
-    const struct function tmp = (struct function) { .startAddress = translated };
-    const struct function* closest = upper_bound(&tmp,
-                                                 self->functions.content,
-                                                 self->functions.count,
-                                                 sizeof(struct function),
-                                                 elfFile_functionCompare);
+    const struct symbol tmp = (struct symbol) { .startAddress = translated };
+    const struct symbol* closest = function(&tmp,
+                                            self->symbols.content,
+                                            self->symbols.count,
+                                            sizeof(struct symbol),
+                                            elfFile_functionCompare);
     if (closest == NULL
         || closest->startAddress > translated
         || closest->startAddress + closest->length < translated) {
         return toReturn;
     }
     if (!closest->demangledName.has_value) {
-        struct function* mutableClosest = (struct function*) closest;
+        struct symbol* mutableClosest = (struct symbol*) closest;
         mutableClosest->demangledName = (optional_string_t) {
             true,
             callstack_parser_demangleCopy(closest->linkedName, false),
@@ -374,7 +430,7 @@ static inline optional_debugInfo_t elfFile_getDebugInfo(const struct elfFile* se
     toReturn = (optional_debugInfo_t) {
         .has_value = true,
         .value = (struct debugInfo) {
-            .function = *closest,
+            .symbol = *closest,
             .sourceFileInfo = { .has_value = false }
         }
     };
@@ -414,7 +470,7 @@ bool elfFile_getFunctionInfo(struct elfFile* self, const char* functionName, str
         return false;
     }
 
-    vector_iterate(&self->functions, {
+    vector_iterate(&self->symbols, {
         if (strcmp(element->linkedName, functionName) == 0) {
             info->begin = (uintptr_t) element->startAddress + self->_.relocationOffset;
             info->length = element->length;
@@ -430,18 +486,30 @@ vector_pair_ptr_t elfFile_getTLSRegions(struct elfFile* self) {
     return (vector_pair_ptr_t) vector_initializer;
 }
 
-bool elfFile_addr2String(struct elfFile* self, const void* address, struct callstack_frame* frame) {
+/**
+ * Symbolizes the given address.
+ *
+ * @param self the ELF file object
+ * @param address the address to be symbolized
+ * @param frame the @c callstack_frame structure to be filled
+ * @param function the function to used to search within the symbol table
+ * @param forceDiff whether to add the difference value to the name if no line
+ * information is available and that difference is zero
+ * @return whether the symbolization was successful
+ */
+static inline bool elfFile_addr2StringImpl(struct elfFile* self, const void* address, struct callstack_frame* frame,
+                                           const binaryFile_searchFunction function, const bool forceDiff) {
     if (!BINARY_FILE_SUPER(self, maybeParse)) {
         return false;
     }
 
-    const optional_debugInfo_t result = elfFile_getDebugInfo(self, address);
+    const optional_debugInfo_t result = elfFile_getDebugInfo(self, address, function);
     if (result.has_value) {
-        if (result.value.function.linkedName == NULL) {
+        if (result.value.symbol.linkedName == NULL) {
             return false;
         }
-        const char* name = callstack_rawNames || result.value.function.demangledName.value == NULL
-            ? result.value.function.linkedName : result.value.function.demangledName.value;
+        const char* name = callstack_rawNames || result.value.symbol.demangledName.value == NULL
+            ? result.value.symbol.linkedName : result.value.symbol.demangledName.value;
         if (result.value.sourceFileInfo.has_value) {
             frame->sourceFile = utils_maybeCopySave(result.value.sourceFileInfo.value.sourceFileAbsolute, !frame->reserved1);
             frame->sourceFileRelative = utils_maybeCopySave(result.value.sourceFileInfo.value.sourceFileRelative, !frame->reserved1);
@@ -452,17 +520,31 @@ bool elfFile_addr2String(struct elfFile* self, const void* address, struct calls
             frame->reserved2 = frame->reserved1;
         } else {
             char* toReturn = NULL;
-            asprintf(&toReturn, "%s + %td", name, (ptrdiff_t) (address - self->_.relocationOffset - result.value.function.startAddress));
+            const ptrdiff_t diff = (ptrdiff_t) (address - self->_.relocationOffset - result.value.symbol.startAddress);
+            if (diff > 0 || forceDiff) {
+                asprintf(&toReturn, "%s + %td", name, diff);
+                frame->reserved2 = false;
+            } else {
+                toReturn = utils_maybeCopySave(name, !frame->reserved1);
+                frame->reserved2 = frame->reserved1;
+            }
             frame->function = toReturn;
-            frame->reserved2 = false;
         }
         return true;
     }
     return false;
 }
 
+bool elfFile_getSymbolInfo(struct elfFile* self, const void* symbolAddress, struct callstack_frame* frame) {
+    return elfFile_addr2StringImpl(self, symbolAddress, frame, lower_bound, false);
+}
+
+bool elfFile_addr2String(struct elfFile* self, const void* address, struct callstack_frame* frame) {
+    return elfFile_addr2StringImpl(self, address, frame, upper_bound, true);
+}
+
 void elfFile_destroy(struct elfFile* self) {
-    vector_destroyWithPtr(&self->functions, function_destroy);
+    vector_destroyWithPtr(&self->symbols, symbol_destroy);
     vector_destroyWith(&self->lineInfos, dwarf_lineInfo_destroyValue);
 }
 

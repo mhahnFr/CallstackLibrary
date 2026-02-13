@@ -1,7 +1,7 @@
 /*
  * CallstackLibrary - Library creating human-readable call stacks.
  *
- * Copyright (C) 2023 - 2025  mhahnFr
+ * Copyright (C) 2023 - 2026  mhahnFr
  *
  * This file is part of the CallstackLibrary.
  *
@@ -25,7 +25,7 @@
 #include <stdbool.h>
 #include <misc/numberContainers.h>
 
-#include "containers_funcFile.h"
+#include "containers_symbolFile.h"
 #include "objectFile.h"
 #include "TLVDescriptor.h"
 #include "../binaryFile.h"
@@ -45,6 +45,7 @@ struct machoFile {
     uint64_t linkedit_fileoff;
     /** The VM address of the text segment.                                     */
     uint64_t text_vmaddr;
+    /** The cumulated size of the thread-local variables in bytes.              */
     uint64_t tlvSize;
     /** Information about the dSYM bundle file.                                 */
     struct {
@@ -56,8 +57,8 @@ struct machoFile {
     /** The UUID of the represented Mach-O file.                                */
     uint8_t uuid[16];
     
-    /** The functions mapped to their object file.                              */
-    vector_pairFuncFile_t functions;
+    /** The symbols mapped to their object file.                                */
+    vector_pairSymbolFile_t symbols;
     /** The start addresses of the contained functions.                         */
     vector_uint64_t functionStarts;
     /** The contained thread-local value descriptors.                           */
@@ -65,18 +66,19 @@ struct machoFile {
 };
 
 /**
- * Allocates and initializes a Mach-O file structure.
- *
- * @return the allocated Mach-O file structure or `NULL` on error
- */
-struct machoFile* machoFile_new(void);
-
-/**
  * Initializes the given Mach-O file structure.
  *
  * @param self the Mach-O file structure to be initialized
  */
 void machoFile_create(struct machoFile* self);
+
+/**
+ * Parses the minimal necessary information of the represented Mach-O file.
+ *
+ * @param self the Mach-O file object
+ * @return whether the parsing was successful
+ */
+bool machoFile_parseShallow(struct machoFile* self);
 
 /**
  * Stores all debug information that is possible to deduct about the given
@@ -99,6 +101,16 @@ bool machoFile_addr2String(struct machoFile* self, const void* address, struct c
  * @return whether the function was found
  */
 bool machoFile_getFunctionInfo(struct machoFile* self, const char* functionName, struct functionInfo* info);
+
+/**
+ * Deducts the debug information for the symbol of the given address.
+ *
+ * @param self the Mach-O file object
+ * @param symbolAddress the address of the symbol
+ * @param frame the @c callstack_frame structure to be filled
+ * @return whether a symbol was found
+ */
+bool machoFile_getSymbolInfo(struct machoFile* self, const void* symbolAddress, struct callstack_frame* frame);
 
 /**
  * Returns the contained thread-local storage regions.
@@ -126,7 +138,7 @@ bool machoFile_parse(struct machoFile* self);
 void machoFile_destroy(struct machoFile* self);
 
 /**
- * Deinitializes and `free`s the given binary file structure if it is a Mach-O
+ * Deinitializes and frees the given binary file structure if it is a Mach-O
  * file structure.
  *
  * @param self the binary file structure to be deleted

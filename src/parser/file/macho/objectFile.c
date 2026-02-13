@@ -1,7 +1,7 @@
 /*
  * CallstackLibrary - Library creating human-readable call stacks.
  *
- * Copyright (C) 2023 - 2025  mhahnFr
+ * Copyright (C) 2023 - 2026  mhahnFr
  *
  * This file is part of the CallstackLibrary.
  *
@@ -19,27 +19,24 @@
  * CallstackLibrary, see the file LICENSE.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-#include <stdio.h>
-#include <stdlib.h>
-#include <mach-o/loader.h>
-#include <sys/stat.h>
+#include "objectFile.h"
 
 #include <file/pathUtils.h>
+#include <mach-o/loader.h>
 #include <macho/fat_handler.h>
 #include <macho/macho_utils.h>
 
-#include "objectFile.h"
 #include "macho_parser.h"
 #include "../binaryFile.h"
 #include "../bounds.h"
-#include "../dwarf/dwarf_parser.h"
+#include "../loader.h"
+#include "../dwarf/parser.h"
 
 struct objectFile* objectFile_new(void) {
     struct objectFile* self = malloc(sizeof(struct objectFile));
-    if (self == NULL) {
-        return NULL;
+    if (self != NULL) {
+        *self = objectFile_initializer;
     }
-    objectFile_create(self);
     return self;
 }
 
@@ -76,36 +73,33 @@ static inline int objectFile_dwarfLineInfoSortCompare(const void* lhs, const voi
 }
 
 /**
- * @brief Returns how the two given functions compare.
+ * @brief Returns how the two given symbols compare.
  *
  * Sorted ascendingly.
  *
- * @param lhs the left-hand side value
- * @param rhs the right-hand side value
- * @return the difference between the two given functions
+ * @param a the left-hand side value
+ * @param b the right-hand side value
+ * @return the difference between the two given symbols
  */
-static inline int objectFile_functionCompare(const void* lhs, const void* rhs) {
-    const struct function* a = lhs;
-    const struct function* b = rhs;
-
+static inline int objectFile_symbolCompare(const struct symbol* a, const struct symbol* b) {
     return strcmp(a->linkedName, b->linkedName);
 }
 
 /**
- * Finds and returns the function with the given name deducted from the
+ * Finds and returns the symbol with the given name deducted from the
  * represented object file.
  *
  * @param self the object file object
- * @param name the name of the desired function
- * @return the optionally found function
+ * @param name the name of the desired symbol
+ * @return the optionally found symbol
  */
-static inline optional_function_t objectFile_findOwnFunction(struct objectFile* self, const char* name) {
-    optional_function_t toReturn = { .has_value = false };
+static inline optional_symbol_t objectFile_findOwnSymbol(struct objectFile* self, const char* name) {
+    optional_symbol_t toReturn = { .has_value = false };
 
-    const struct function searched = (struct function) { .linkedName = (char*) name };
-    const struct function* it = vector_search(&self->ownFunctions, &searched, objectFile_functionCompare);
+    const struct symbol searched = (struct symbol) { .linkedName = (char*) name };
+    const struct symbol* it = vector_search(&self->ownSymbols, &searched, objectFile_symbolCompare);
     if (it != NULL) {
-        toReturn = (struct optional_function) { true, *it };
+        toReturn = (struct optional_symbol) { true, *it };
     }
     
     return toReturn;
@@ -139,26 +133,34 @@ static inline const char* objectFile_getSourceFileName(struct objectFile* self) 
     return self->mainSourceFileCache = toReturn;
 }
 
-optional_debugInfo_t objectFile_getDebugInfo(struct objectFile* self, const uint64_t address, const struct function function) {
-    const optional_debugInfo_t toReturn = { .has_value = false };
-    
-    if (!self->parsed) {
-        if (!((self->parsed = objectFile_parse(self)))) {
-            return toReturn;
-        }
+/**
+ * Parses the given object file if it has not already been parsed.
+ *
+ * @param self the object file
+ * @return whether the object file has been parsed
+ */
+static inline bool objectFile_maybeParse(struct objectFile* self) {
+    return self->parsed || ((self->parsed = objectFile_parse(self)));
+}
+
+optional_debugInfo_t objectFile_getDebugInfo(struct objectFile* self, const uint64_t address, const struct symbol symbol) {
+#define ERROR_RETURN (optional_debugInfo_t) { .has_value = false };
+
+    if (!objectFile_maybeParse(self)) {
+        return ERROR_RETURN;
     }
     uint64_t lineAddress;
-    uint64_t functionBegin;
+    uint64_t symbolBegin;
     if (self->isDsymBundle) {
         lineAddress = address;
-        functionBegin = function.startAddress;
+        symbolBegin = symbol.startAddress;
     } else {
-        const optional_function_t ownFunction = objectFile_findOwnFunction(self, function.linkedName);
-        if (!ownFunction.has_value) {
-            return toReturn;
+        const optional_symbol_t ownSymbol = objectFile_findOwnSymbol(self, symbol.linkedName);
+        if (!ownSymbol.has_value) {
+            return ERROR_RETURN;
         }
-        lineAddress = ownFunction.value.startAddress + address - function.startAddress;
-        functionBegin = ownFunction.value.startAddress;
+        lineAddress = ownSymbol.value.startAddress + address - symbol.startAddress;
+        symbolBegin = ownSymbol.value.startAddress;
     }
 
     const struct dwarf_lineInfo tmp = (struct dwarf_lineInfo) { .address = lineAddress };
@@ -167,23 +169,22 @@ optional_debugInfo_t objectFile_getDebugInfo(struct objectFile* self, const uint
                                                        self->lineInfos.count,
                                                        sizeof(struct dwarf_lineInfo),
                                                        objectFile_dwarfLineInfoSortCompare);
-    if (closest == NULL || closest->address < functionBegin
-        || (function.length != 0 && closest->address >= functionBegin + function.length)) {
-        return toReturn;
+    if (closest == NULL || closest->address < symbolBegin
+        || (symbol.length != 0 && closest->address >= symbolBegin + symbol.length)) {
+        return ERROR_RETURN;
     }
     if (closest->sourceFile.fileName != NULL && closest->sourceFile.fileNameRelative == NULL && closest->sourceFile.fileNameAbsolute == NULL) {
         struct dwarf_lineInfo* mutableClosest = (struct dwarf_lineInfo*) closest;
         mutableClosest->sourceFile.fileNameRelative = path_toRelativePath(closest->sourceFile.fileName);
         mutableClosest->sourceFile.fileNameAbsolute = path_toAbsolutePath(closest->sourceFile.fileName);
     }
-    const char* fileName = closest->sourceFile.fileName == NULL ? objectFile_getSourceFileName(self) : closest->sourceFile.fileName;
     return (optional_debugInfo_t) {
         true, (struct debugInfo) {
-            function, (optional_sourceFileInfo_t) {
+            symbol, (optional_sourceFileInfo_t) {
                 true, (struct sourceFileInfo) {
                     closest->line,
                     closest->column,
-                    fileName,
+                    closest->sourceFile.fileName == NULL ? objectFile_getSourceFileName(self) : closest->sourceFile.fileName,
                     closest->sourceFile.fileName == NULL ? self->mainSourceFileCacheRelative : closest->sourceFile.fileNameRelative,
                     closest->sourceFile.fileName == NULL ? self->mainSourceFileCacheAbsolute : closest->sourceFile.fileNameAbsolute,
                     binaryFile_isOutdated(closest->sourceFile)
@@ -191,12 +192,11 @@ optional_debugInfo_t objectFile_getDebugInfo(struct objectFile* self, const uint
             }
         }
     };
+#undef ERROR_RETURN
 }
 
 uint8_t* objectFile_getUUID(struct objectFile* self) {
-    if (!self->parsed) {
-        self->parsed = objectFile_parse(self);
-    }
+    objectFile_maybeParse(self);
     return self->uuid;
 }
 
@@ -230,43 +230,13 @@ static inline void objectFile_handleSection(struct objectFile* self,
 }
 
 /**
- * Generates an implementation for an object file segment handling parsing function.
+ * Callback function adding the given symbol to the list of the object file.
  *
- * @param bits the amount of bits the implementation should be generated for
- * @param suffix the optional suffix for the native data structures
+ * @param self the object file
+ * @param pair the symbol to be added
  */
-#define objectFile_handleSegmentFunc(bits, suffix)                                                 \
-static inline bool objectFile_handleSegment##bits(struct objectFile*         self,                 \
-                                                  struct segment_command##suffix* command,         \
-                                                  void*                      baseAddress,          \
-                                                  const bool                 bytesSwapped) {       \
-    const uint32_t nsects = macho_maybeSwap(32, bytesSwapped, command->nsects);                    \
-                                                                                                   \
-    for (size_t i = 0; i < nsects; ++i) {                                                          \
-        struct section##suffix* section = (void*) command + sizeof(struct segment_command##suffix) \
-                                        + i * sizeof(struct section##suffix);                      \
-        objectFile_handleSection(self, (struct lcs_section) {                                      \
-            baseAddress + macho_maybeSwap(32, bytesSwapped, section->offset),                      \
-            macho_maybeSwap(bits, bytesSwapped, section->size)                                     \
-        }, section->segname, section->sectname);                                                   \
-    }                                                                                              \
-    return true;                                                                                   \
-}
-
-objectFile_handleSegmentFunc(32,)
-objectFile_handleSegmentFunc(64, _64)
-
-/**
- * The callback adding the function / object file pair to the object file
- * object passed via the variadic argument list.
- *
- * @param f the function / object file pair
- * @param args the arguments - should contain as first argument the object file object ot add the pair to
- */
-static inline void objectFile_addFunctionCallback(struct pair_funcFile f, va_list args) {
-    struct objectFile* self = va_arg(args, void*);
-
-    vector_push_back(&self->ownFunctions, f.first);
+static inline void objectFile_addSymbolCallback(struct objectFile* self, pair_symbolFile_t pair) {
+    vector_push_back(&self->ownSymbols, pair.first);
 }
 
 /**
@@ -275,39 +245,45 @@ static inline void objectFile_addFunctionCallback(struct pair_funcFile f, va_lis
  * @param bits the amount of bits the implementation should be generated for
  * @param suffix the optional suffix for the native data structures
  */
-#define objectFile_parseMachOImplFunc(bits, suffix)                                                   \
-static inline bool objectFile_parseMachOImpl##bits(struct objectFile* self,                           \
-                                                   void*              baseAddress,                    \
-                                                   const bool         bytesSwapped) {                 \
-    struct mach_header##suffix* header = baseAddress;                                                 \
-    struct load_command*   lc     = (void*) header + sizeof(struct mach_header##suffix);              \
-    const  uint32_t        ncmds  = macho_maybeSwap(32, bytesSwapped, header->ncmds);                 \
-                                                                                                      \
-    for (size_t i = 0; i < ncmds; ++i) {                                                              \
-        bool result = true;                                                                           \
-        switch (macho_maybeSwap(32, bytesSwapped, lc->cmd)) {                                         \
-            case LC_SEGMENT##suffix:                                                                  \
-                result = objectFile_handleSegment##bits(self, (void*) lc, baseAddress, bytesSwapped); \
-                break;                                                                                \
-                                                                                                      \
-            case LC_SYMTAB:                                                                           \
-                result = macho_parseSymtab((void*) lc, baseAddress, 0, bytesSwapped, true, NULL,      \
-                                           objectFile_addFunctionCallback, self);                     \
-                break;                                                                                \
-                                                                                                      \
-            case LC_UUID:                                                                             \
-                memcpy(&self->uuid, &((struct uuid_command*) (void*) lc)->uuid, 16);                  \
-                result = true;                                                                        \
-                break;                                                                                \
-                                                                                                      \
-            default: break;                                                                           \
-        }                                                                                             \
-        if (!result) {                                                                                \
-            return false;                                                                             \
-        }                                                                                             \
-        lc = (void*) lc + macho_maybeSwap(32, bytesSwapped, lc->cmdsize);                             \
-    }                                                                                                 \
-    return true;                                                                                      \
+#define objectFile_parseMachOImplFunc(bits, suffix)                                           \
+static inline bool objectFile_parseMachOImpl##bits(struct objectFile* self,                   \
+                                                   const void*        baseAddress,            \
+                                                   const bool         bytesSwapped) {         \
+    macho_iterateSegments(baseAddress, bytesSwapped, suffix, {                                \
+        bool result = true;                                                                   \
+        switch (macho_maybeSwap(32, bytesSwapped, loadCommand->cmd)) {                        \
+            case LC_SEGMENT##suffix:                                                          \
+                macho_iterateSections((void*) loadCommand, bytesSwapped, suffix,              \
+                    objectFile_handleSection(self, (struct lcs_section) {                     \
+                        baseAddress + macho_maybeSwap(32, bytesSwapped, section->offset),     \
+                        macho_maybeSwap(bits, bytesSwapped, section->size)                    \
+                    }, section->segname, section->sectname);                                  \
+                )                                                                             \
+                break;                                                                        \
+                                                                                              \
+            case LC_SYMTAB: {                                                                 \
+                struct machoParser parser = machoParser_create(                               \
+                    (void*) loadCommand, baseAddress, 0,                                      \
+                    bytesSwapped, (bits) == 64,                                               \
+                    (machoParser_addSymbol) objectFile_addSymbolCallback, self                \
+                );                                                                            \
+                result = machoParser_parseSymbolTable(&parser);                               \
+                machoParser_destroy(&parser);                                                 \
+                break;                                                                        \
+            }                                                                                 \
+                                                                                              \
+            case LC_UUID:                                                                     \
+                memcpy(&self->uuid, &((struct uuid_command*) (void*) loadCommand)->uuid, 16); \
+                result = true;                                                                \
+                break;                                                                        \
+                                                                                              \
+            default: break;                                                                   \
+        }                                                                                     \
+        if (!result) {                                                                        \
+            return false;                                                                     \
+        }                                                                                     \
+    })                                                                                        \
+    return true;                                                                              \
 }
 
 objectFile_parseMachOImplFunc(32,)
@@ -323,11 +299,10 @@ objectFile_parseMachOImplFunc(64, _64)
  * @param buffer the buffer of the Mach-O file
  * @return whether the parsing was successful
  */
-static inline bool objectFile_parseMachO(struct objectFile* self,
-                                         void*              buffer) {
+static inline bool objectFile_parseMachO(struct objectFile* self, const void* buffer) {
     if (buffer == NULL) return false;
 
-    struct mach_header* header = buffer;
+    const struct mach_header* header = buffer;
 
     if (header->magic == MH_MAGIC    || header->magic == MH_CIGAM ||
         header->magic == MH_MAGIC_64 || header->magic == MH_CIGAM_64) {
@@ -339,9 +314,8 @@ static inline bool objectFile_parseMachO(struct objectFile* self,
 
     bool success = false;
     switch (header->magic) {
-        case MH_MAGIC: success = objectFile_parseMachOImpl32(self, buffer, false); break;
-        case MH_CIGAM: success = objectFile_parseMachOImpl32(self, buffer, true);  break;
-
+        case MH_MAGIC:    success = objectFile_parseMachOImpl32(self, buffer, false); break;
+        case MH_CIGAM:    success = objectFile_parseMachOImpl32(self, buffer, true);  break;
         case MH_MAGIC_64: success = objectFile_parseMachOImpl64(self, buffer, false); break;
         case MH_CIGAM_64: success = objectFile_parseMachOImpl64(self, buffer, true);  break;
 
@@ -366,47 +340,28 @@ static inline bool objectFile_parseMachO(struct objectFile* self,
     return success;
 }
 
-bool objectFile_parseBuffer(struct objectFile* self, void* buffer) {
+bool objectFile_parseBuffer(struct objectFile* self, const void* buffer) {
     const bool result = objectFile_parseMachO(self, buffer);
     if (!result) {
-        vector_destroyWithPtr(&self->ownFunctions, function_destroy);
-        vector_init(&self->ownFunctions);
+        vector_destroyWithPtr(&self->ownSymbols, symbol_destroy);
+        vector_init(&self->ownSymbols);
     } else {
         vector_sort(&self->lineInfos, objectFile_dwarfLineInfoSortCompare);
-        vector_sort(&self->ownFunctions, objectFile_functionCompare);
+        vector_sort(&self->ownSymbols, objectFile_symbolCompare);
     }
     return result;
 }
 
 bool objectFile_parse(struct objectFile* self) {
-    if (self == NULL) return false;
-
-    struct stat fileStats;
-    if (stat(self->name, &fileStats) != 0) {
-        return false;
-    }
-    if (self->lastModified != 0 && fileStats.st_mtime != self->lastModified) {
-        return false;
-    }
-    void* buffer = malloc(fileStats.st_size);
-    if (buffer == NULL) {
-        return false;
-    }
-    FILE* file = fopen(self->name, "r");
-    if (file == NULL) {
-        free(buffer);
-        return false;
-    }
-    const size_t count = fread(buffer, 1, fileStats.st_size, file);
-    fclose(file);
-    const bool success = (off_t) count == fileStats.st_size && objectFile_parseBuffer(self, buffer);
-    free(buffer);
-    return success;
+    const time_t lastModified = self->lastModified;
+    return loader_loadFileAndExecuteTime(self->name, lastModified == 0 ? NULL : &lastModified, (union loader_parserFunction) {
+        (loader_parser) objectFile_parseBuffer
+    }, false, self);
 }
 
 
 void objectFile_destroy(struct objectFile* self) {
-    vector_destroyWithPtr(&self->ownFunctions, function_destroy);
+    vector_destroyWithPtr(&self->ownSymbols, symbol_destroy);
     vector_destroyWithPtr(&self->lineInfos, dwarf_lineInfo_destroy);
     free((void*) self->mainSourceFileCache);
     free((void*) self->mainSourceFileCacheRelative);

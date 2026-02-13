@@ -1,7 +1,7 @@
 /*
  * CallstackLibrary - Library creating human-readable call stacks.
  *
- * Copyright (C) 2022 - 2025  mhahnFr
+ * Copyright (C) 2022 - 2026  mhahnFr
  *
  * This file is part of the CallstackLibrary.
  *
@@ -19,22 +19,22 @@
  * CallstackLibrary, see the file LICENSE.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-#ifndef __lcs_callstack_h
+#ifndef _lcs_callstack_hpp
+#define _lcs_callstack_hpp
+
+#ifndef _lcs_callstack_h
 # warning Wrong inclusion of "callstack.hpp" redirected to '#include "callstack.h"'!
 # include "callstack.h"
+#endif
 
+#include "callstack_cxx_compat.hpp"
+
+#ifdef LCS_CXX11
+# include <array>
+# include <system_error>
 #else
-# ifndef __lcs_callstack_hpp
-# define __lcs_callstack_hpp
-
-# if __cplusplus >= 201103
-#  include <array>
-#  include <system_error>
-# else
-#  include <stdexcept>
-# endif
-
-# include "callstack_cxx_compat.hpp"
+# include <stdexcept>
+#endif
 
 /**
  * This namespace contains a wrapper class for the @code struct callstack@endcode.
@@ -59,7 +59,7 @@ class callstack {
      * @throws std::system_error if compiled using C++11 or newer, a @c std::runtime_error otherwise
      */
     inline static void error() {
-#if __cplusplus >= 201103
+#ifdef LCS_CXX11
         throw std::system_error(errno, std::generic_category());
 #else
         throw std::runtime_error("Backtrace invalid");
@@ -142,7 +142,7 @@ public:
         return *this;
     }
 
-#if __cplusplus >= 201103
+#ifdef LCS_CXX11
     inline callstack(callstack&& other) noexcept: self(other.self) {
         other.self = CALLSTACK_INITIALIZER;
     }
@@ -154,6 +154,12 @@ public:
         return *this;
     }
 
+    /**
+     * Relativizes the represented callstack.
+     *
+     * @return an array with a string for each callstack frame
+     * @since v2.3
+     */
     inline auto relativize() -> std::array<const char*, CALLSTACK_BACKTRACE_SIZE> {
         auto toReturn = std::array<const char*, CALLSTACK_BACKTRACE_SIZE>();
         relativize(toReturn.data());
@@ -161,12 +167,26 @@ public:
     }
 #endif
 
+    /**
+     * Relativizes the represented callstack.
+     *
+     * @param binaryNames the array to be filled with a binary file name for
+     * each callstack frame
+     * @since v2.3
+     */
     inline void relativize(const char* binaryNames[CALLSTACK_BACKTRACE_SIZE]) {
         if (!callstack_relativize(*this, binaryNames)) {
             throw std::runtime_error("Failed to relativize the callstack!");
         }
     }
 
+    /**
+     * Absolutizes and translates the represented callstack.
+     *
+     * @param binaryNames an array of the binary file names each callstack frame is
+     * relative to, must be at least include one binary file name for each callstack frame
+     * @since v2.3
+     */
     inline callstack_frame* absolutize(const char** binaryNames) {
         return callstack_translateRelative(*this, binaryNames);
     }
@@ -177,6 +197,7 @@ public:
      * @param onlyBinaries whether to only deduct the names of the runtime images
      * @return @c this
      * @throws std::runtime_error if the translation failed
+     * @since v2.1
      */
     inline callstack& translate(const bool onlyBinaries = false) {
         if (onlyBinaries) {
@@ -200,6 +221,7 @@ public:
      *
      * @return @c this
      * @throws std::runtime_error if the translation failed
+     * @since v2.1
      */
     inline callstack& translateBinariesCached() {
         if (callstack_getBinariesCached(*this) == LCS_NULL) {
@@ -209,10 +231,24 @@ public:
     }
 #endif
 
+    /**
+     * Returns the beginning iterator for the callstack frames included by the
+     * represented callstack.
+     *
+     * @return the beginning iterator
+     * @since v2.1
+     */
     LCS_CONSTEXPR inline const callstack_frame* begin() const LCS_NOEXCEPT {
         return self.frames;
     }
 
+    /**
+     * Returns the end iterator for the callstack frames included by the
+     * represented callstack.
+     *
+     * @return the end iterator
+     * @since v2.1
+     */
     LCS_CONSTEXPR inline const callstack_frame* end() const LCS_NOEXCEPT {
         return self.frames + self.frameCount;
     }
@@ -225,5 +261,4 @@ public:
 };
 }
 
- #endif /* __lcs_callstack_hpp */
-#endif /* __lcs_callstack_h */
+#endif /* _lcs_callstack_hpp */

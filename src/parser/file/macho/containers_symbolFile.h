@@ -1,7 +1,7 @@
 /*
  * CallstackLibrary - Library creating human-readable call stacks.
  *
- * Copyright (C) 2022 - 2024  mhahnFr
+ * Copyright (C) 2023 - 2026  mhahnFr
  *
  * This file is part of the CallstackLibrary.
  *
@@ -19,23 +19,18 @@
  * CallstackLibrary, see the file LICENSE.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-#ifndef __lcs_callstack_type_h
-#define __lcs_callstack_type_h
+#ifndef optional_pair_symbolFile_h
+#define optional_pair_symbolFile_h
 
-/**
- * The type of the callstack.
- */
-enum callstack_type {
-    /**
-     * The callstack has been translated.
-     *
-     * @since v1.1
-     */
-    TRANSLATED,
-    /** An error happened during translation. */
-    FAILED,
-    /** Not translated.                       */
-    NONE
-};
+#include <DC4C/optional.h>
+#include <DC4C/pair.h>
+#include <DC4C/vector.h>
 
-#endif /* __lcs_callstack_type_h */
+#include "objectFile.h"
+#include "../symbol.h"
+
+typedef_pair_named(symbolFile, struct symbol, struct objectFile *);
+typedef_optional_named(symbolFile, struct pair_symbolFile);
+typedef_vector_named(pairSymbolFile, pair_symbolFile_t);
+
+#endif /* optional_pair_symbolFile_h */

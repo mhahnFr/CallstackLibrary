@@ -180,7 +180,7 @@ int main() {
     foo2();
 }
 ```
-Compiled and linked on Fedora 42 with `g++ -g -std=c++11 main.cpp -I<path/to/library>/include -L<path/to/library> -lcallstack`
+Compiled and linked on Fedora with `g++ -g -std=c++11 main.cpp -I<path/to/library>/include -L<path/to/library> -lcallstack`
 and after [enabling **C++** functions][6] of the library the following output is produced:
 ```
 The current callstack:
@@ -232,17 +232,17 @@ Compiled and linked on macOS using `c++ -g main.cpp -I<path/to/library>/include 
 after [enabling **C++** functions][6] of the library the following output is produced:
 ```
 lcs::exception: "Callstack exception with a message", stacktrace:
-At: (a.out) lcs::callstack::callstack(bool) (include/callstack.hpp:81)
-in: (a.out) lcs::callstack::callstack(bool) (include/callstack.hpp:79)
-in: (a.out) lcs::exception::exception(char const*, bool) (include/callstack_exception.hpp:126)
-in: (a.out) lcs::exception::exception(char const*, bool) (include/callstack_exception.hpp:127)
+At: (a.out) lcs::callstack::callstack(bool) (include/callstack.hpp:83)
+in: (a.out) lcs::callstack::callstack(bool) (include/callstack.hpp:81)
+in: (a.out) lcs::exception::exception(char const*, bool) (include/callstack_exception.hpp:109)
+in: (a.out) lcs::exception::exception(char const*, bool) (include/callstack_exception.hpp:110)
 in: (a.out) printCallstack() (main.cpp:8)
 in: (a.out) bar2() (main.cpp:11)
 in: (a.out) foo2() (main.cpp:12)
 in: (a.out) bar() (main.cpp:14)
 in: (a.out) foo() (main.cpp:15)
 in: (a.out) main (main.cpp:19)
-in: (/usr/lib/dyld) start + 1942
+in: (/usr/lib/dyld) start + 3056
 ```
 
 #### Extending the callstack exception
@@ -278,8 +278,8 @@ Compiled and linked on Debian using `g++ -g main.cpp -I<path/to/library>/include
 after [enabling **C++** functions][6] of the library the example creates the following output:
 ```
 CustomStacktraceException, stacktrace:
-At: (a.out) lcs::callstack::callstack(bool) (include/callstack.hpp:81)
-in: (a.out) lcs::exception::exception(bool) (include/callstack_exception.hpp:116)
+At: (a.out) lcs::callstack::callstack(bool) (include/callstack.hpp:83)
+in: (a.out) lcs::exception::exception(bool) (include/callstack_exception.hpp:99)
 in: (a.out) CustomStacktraceException::CustomStacktraceException() (main.cpp:7)
 in: (a.out) printCallstack() (main.cpp:10)
 in: (a.out) bar2() (main.cpp:13)
@@ -321,13 +321,13 @@ hesitate to [open an issue][9] or a [pull request][10].
 
 This library is licensed under the terms of the GNU GPL in version 3 or later.
 
-© Copyright 2022 - 2025 [mhahnFr][4]
+© Copyright 2022 - 2026 [mhahnFr][4]
 
 [1]: https://github.com/mhahnFr/CallstackLibrary/releases/latest
-[2]: https://github.com/mhahnFr/CallstackLibrary/blob/main/include/callstack.h
+[2]: include/callstack.h
 [3]: https://github.com/mhahnFr/CallstackLibrary/wiki
 [4]: https://github.com/mhahnFr
-[5]: https://github.com/mhahnFr/CallstackLibrary/blob/main/include/callstack_exception.hpp
+[5]: include/callstack_exception.hpp
 [6]: https://github.com/mhahnFr/CallstackLibrary/wiki/Home#enabling-additional-c-exclusive-functions
 [7]: #callstacks
 [8]: https://github.com/mhahnFr/CallstackLibrary/wiki/callstack.hpp#class-callstack

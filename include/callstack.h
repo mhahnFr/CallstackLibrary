@@ -1,7 +1,7 @@
 /*
  * CallstackLibrary - Library creating human-readable call stacks.
  *
- * Copyright (C) 2022 - 2025  mhahnFr
+ * Copyright (C) 2022 - 2026  mhahnFr
  *
  * This file is part of the CallstackLibrary.
  *
@@ -19,19 +19,35 @@
  * CallstackLibrary, see the file LICENSE.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-#ifndef __lcs_callstack_h
-#define __lcs_callstack_h
-
-#include <stdbool.h>
+#ifndef _lcs_callstack_h
+#define _lcs_callstack_h
 
 #include "callstack_frame.h"
-#include "callstack_type.h"
 
 #ifdef __cplusplus
 extern "C" {
 #endif
 
+/**
+ * The amount of frames to be stored in a callstack object.
+ */
 #define CALLSTACK_BACKTRACE_SIZE 128
+
+/**
+ * The type of the callstack.
+ */
+enum callstack_type {
+    /**
+     * The callstack has been translated.
+     *
+     * @since v1.1
+     */
+    TRANSLATED,
+    /** An error happened during translation. */
+    FAILED,
+    /** Not translated.                       */
+    NONE
+};
 
 /**
  * A structure representing a callstack.
@@ -58,6 +74,11 @@ struct callstack {
     void *  backtrace[CALLSTACK_BACKTRACE_SIZE];
 };
 
+/**
+ * The initializing expression for the callstack object.
+ *
+ * @since v2.3
+ */
 #define CALLSTACK_INITIALIZER { NONE, 0, NULL, 0, {} }
 
 /**
@@ -273,4 +294,4 @@ void callstack_delete(struct callstack * self);
 
 #endif /* __cplusplus */
 
-#endif /* __lcs_callstack_h */
+#endif /* _lcs_callstack_h */

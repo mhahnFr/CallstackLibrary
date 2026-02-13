@@ -1,7 +1,7 @@
 /*
  * CallstackLibrary - Library creating human-readable call stacks.
  *
- * Copyright (C) 2023 - 2025  mhahnFr
+ * Copyright (C) 2023 - 2026  mhahnFr
  *
  * This file is part of the CallstackLibrary.
  *
@@ -22,14 +22,12 @@
 #ifndef objectFile_h
 #define objectFile_h
 
-#include <stdbool.h>
-#include <string.h>
 #include <time.h>
 
 #include "../debugInfo.h"
-#include "../function.h"
 #include "../lcs_section.h"
-#include "../dwarf/dwarf_lineInfo.h"
+#include "../symbol.h"
+#include "../dwarf/lineInfo/lineInfo.h"
 
 /**
  * This structure represents an object file.
@@ -66,8 +64,8 @@ struct objectFile {
     /** Whether the represented file is part of a .dSYM bundle. */
     bool isDsymBundle;
     
-    /** The functions present in the represented object file.   */
-    vector_function_t ownFunctions;
+    /** The symbols present in the represented object file.     */
+    vector_symbol_t ownSymbols;
     /** The deducted DWARF line infos.                          */
     vector_dwarfLineInfo_t lineInfos;
     /** The cached name of the main source file.                */
@@ -82,43 +80,21 @@ struct objectFile {
 };
 
 /**
+ * The initializing expression for an @c objectFile structure.
+ */
+#define objectFile_initializer (struct objectFile) {                             \
+    NULL, NULL, NULL, 0, { 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0 },     \
+    lcs_section_initializer, lcs_section_initializer, lcs_section_initializer,   \
+    lcs_section_initializer, lcs_section_initializer, lcs_section_initializer,   \
+    false, false, vector_initializer, vector_initializer, NULL, NULL, NULL, NULL \
+}
+
+/**
  * Allocates and initializes a new object file structure.
  *
  * @return the allocated object or @c NULL on error
  */
 struct objectFile * objectFile_new(void);
-
-/**
- * Initializes the given object file structure.
- *
- * @param self the object file structure to be initialized
- */
-static inline void objectFile_create(struct objectFile * self) {
-    *self = (struct objectFile) {
-        .sourceFile          = NULL,
-        .directory           = NULL,
-        .name                = NULL,
-        .next                = NULL,
-        .lastModified        = 0,
-        .parsed              = false,
-        .isDsymBundle        = false,
-        .mainSourceFileCache = NULL,
-        .mainSourceFileCacheRelative = NULL,
-        .mainSourceFileCacheAbsolute = NULL,
-    };
-
-    memset(self->uuid, 0, 16);
-
-    lcs_section_create(&self->debugLine);
-    lcs_section_create(&self->debugLineStr);
-    lcs_section_create(&self->debugStr);
-    lcs_section_create(&self->debugInfo);
-    lcs_section_create(&self->debugAbbrev);
-    lcs_section_create(&self->debugStrOffsets);
-
-    vector_init(&self->ownFunctions);
-    vector_init(&self->lineInfos);
-}
 
 /**
  * Parses the given buffer into the given object file object.
@@ -127,7 +103,7 @@ static inline void objectFile_create(struct objectFile * self) {
  * @param buffer the Mach-O buffer to be parsed
  * @return whether the parsing was successful
  */
-bool objectFile_parseBuffer(struct objectFile* self, void* buffer);
+bool objectFile_parseBuffer(struct objectFile* self, const void* buffer);
 
 /**
  * @brief Parses the Mach-O file represented by the given object file object.
@@ -153,16 +129,16 @@ uint8_t* objectFile_getUUID(struct objectFile* self);
 
 /**
  * @brief Extracts the debug information for the given address inside the
- * given function from the given object file object.
+ * given symbol from the given object file object.
  *
  * If no information could be deducted, an empty optional is returned.
  *
  * @param self the object file object
- * @param address the address inside the function
- * @param function the function
+ * @param address the address inside the symbol
+ * @param symbol the symbol
  * @return the optionally deducted debug information
  */
-optional_debugInfo_t objectFile_getDebugInfo(struct objectFile* self, uint64_t address, struct function function);
+optional_debugInfo_t objectFile_getDebugInfo(struct objectFile* self, uint64_t address, struct symbol symbol);
 
 /**
  * Deinitializes the given object file structure.

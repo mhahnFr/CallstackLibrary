@@ -1,7 +1,7 @@
 /*
  * CallstackLibrary - Library creating human-readable call stacks.
  *
- * Copyright (C) 2023 - 2025  mhahnFr
+ * Copyright (C) 2023 - 2026  mhahnFr
  *
  * This file is part of the CallstackLibrary.
  *
@@ -23,10 +23,9 @@
 #define elfFile_h
 
 #include "../binaryFile.h"
-#include "../function.h"
 #include "../lcs_section.h"
-
-#include "../dwarf/dwarf_lineInfo.h"
+#include "../symbol.h"
+#include "../dwarf/lineInfo/lineInfo.h"
 
 /**
  * This structure represents an ELF binary file.
@@ -49,17 +48,10 @@ struct elfFile {
                        debugStrOffsets;
     
     /** The functions found in the represented ELF file.             */
-    vector_function_t functions;
+    vector_symbol_t symbols;
     /* The DWARF line information found in the represented ELF file. */
     vector_dwarfLineInfo_t lineInfos;
 };
-
-/**
- * Allocates a new ELF file structure.
- *
- * @return the allocated structure or @c NULL on error
- */
-struct elfFile * elfFile_new(void);
 
 /**
  * Initializes the given ELF file structure.
@@ -75,6 +67,14 @@ void elfFile_create(struct elfFile * self);
  * @return whether the ELF file was loaded successfully
  */
 bool elfFile_parse(struct elfFile* self);
+
+/**
+ * Parses only the strictly necessary information of the represented ELF file.
+ *
+ * @param self the ELF file object
+ * @return whether the parsing was successful
+ */
+bool elfFile_parseShallow(struct elfFile* self);
 
 /**
  * Loads the debug information available for the given address into the given
@@ -96,6 +96,16 @@ bool elfFile_addr2String(struct elfFile* self, const void* address, struct calls
  * @return whether the function was found
  */
 bool elfFile_getFunctionInfo(struct elfFile* self, const char* functionName, struct functionInfo* info);
+
+/**
+ * Queries the debug information for the symbol of the given address.
+ *
+ * @param self the ELF file object
+ * @param symbolAddress the address of the symbol to query
+ * @param frame the @c callstack_frame structure to be filled
+ * @return whether a symbol could be deducted
+ */
+bool elfFile_getSymbolInfo(struct elfFile* self, const void* symbolAddress, struct callstack_frame* frame);
 
 /**
  * Returns the thread-local storage regions in the given ELF file.

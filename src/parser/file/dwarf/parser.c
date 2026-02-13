@@ -1,7 +1,7 @@
 /*
  * CallstackLibrary - Library creating human-readable call stacks.
  *
- * Copyright (C) 2024 - 2025  mhahnFr
+ * Copyright (C) 2024 - 2026  mhahnFr
  *
  * This file is part of the CallstackLibrary.
  *
@@ -19,7 +19,8 @@
  * CallstackLibrary, see the file LICENSE.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-#include "dwarf_parser.h"
+#include "parser.h"
+#include "lineInfo/parser.h"
 
 #include <misc/numberContainers.h>
 
@@ -58,172 +59,16 @@ static inline bool dwarf_parser_parse(struct dwarf_parser* self, size_t counter,
         return false;
     }
 
-    uint64_t address       = 0,
-             opIndex       = 0,
-             file          = 1,
-             line          = 1,
-             column        = 0,
-             isa           = 0,
-             discriminator = 0;
-
-    bool isStmt         = self->defaultIsStmt,
-          basicBlock    = false,
-          endSequence   = false,
-          prologueEnd   = false,
-          epilogueBegin = false;
-
+    struct dwarf_lineInfoParser parser = dwarf_lineInfoParser_initializer(self->defaultIsStmt, self);
     while (counter - (self->bit64 ? 12 : 4) < actualSize) {
         const uint8_t opCode = *(uint8_t*) (self->debugLine.content + counter++);
         if (opCode == 0) {
             const uint64_t length = getULEB128(self->debugLine.content, &counter);
-            const uint8_t  actualOpCode = *(uint8_t*) (self->debugLine.content + counter++);
-            switch (actualOpCode) {
-                case DW_LNE_end_sequence: {
-                    endSequence = true;
-                    self->cb((struct dwarf_lineInfo) {
-                        address, line, column, isa, discriminator,
-                        self->getFileName(self, file),
-                        isStmt, basicBlock, endSequence, prologueEnd, epilogueBegin
-                    }, self->args);
-                    
-                    address = opIndex = column = isa = discriminator = 0;
-                    basicBlock = endSequence = prologueEnd = epilogueBegin = false;
-                    file = line = 1;
-                    isStmt = self->defaultIsStmt;
-                    break;
-                }
-                    
-                case DW_LNE_set_address: {
-                    const size_t newAddress = *(size_t*) (self->debugLine.content + counter);
-                    counter += sizeof(size_t);
-                    address = newAddress;
-                    opIndex = 0;
-                    break;
-                }
-                    
-                case DW_LNE_define_file: {
-                    const char* fileName = self->debugLine.content + counter;
-                    counter += strlen(fileName) + 1;
-                    const uint64_t  dirIndex = getULEB128(self->debugLine.content, &counter),
-                                   timeStamp = getULEB128(self->debugLine.content, &counter),
-                                        size = getULEB128(self->debugLine.content, &counter);
-                    if (self->version < 5) {
-                        vector_push_back(&self->specific.v4.fileNames, ((struct dwarf_fileNameEntry) {
-                            fileName, dirIndex, timeStamp, size
-                        }));
-                    }
-                    break;
-                }
-
-                case DW_LNE_set_discriminator:
-                    if (self->version > 3) {
-                        discriminator = getULEB128(self->debugLine.content, &counter);
-                        break;
-                    }
-                    // else fallthrough
-
-                default: counter += length - 1; break;
-            }
+            dwarf_lineInfoParser_handleSpecialOperation(&parser, &counter, length, *(uint8_t*) (self->debugLine.content + counter++));
         } else if (opCode < self->opCodeBase) {
-            switch (opCode) {
-                case DW_LNS_copy: {
-                    self->cb((struct dwarf_lineInfo) {
-                        address, line, column, isa, discriminator,
-                        self->getFileName(self, file),
-                        isStmt, basicBlock, endSequence, prologueEnd, epilogueBegin
-                    }, self->args);
-
-                    discriminator = 0;
-                    basicBlock = prologueEnd = epilogueBegin = false;
-                    break;
-                }
-
-                case DW_LNS_advance_pc: {
-                    const uint64_t operationAdvance = getULEB128(self->debugLine.content, &counter);
-                    if (self->version > 3) {
-                        address += self->minimumInstructionLength * ((opIndex + operationAdvance) / self->maximumOperationsPerInstruction);
-                        opIndex = (opIndex + operationAdvance) % self->maximumOperationsPerInstruction;
-                    } else {
-                        address += self->minimumInstructionLength * operationAdvance;
-                    }
-                    break;
-                }
-
-                case DW_LNS_advance_line:    line += getLEB128(self->debugLine.content, &counter);   break;
-                case DW_LNS_set_file:        file = getULEB128(self->debugLine.content, &counter);   break;
-                case DW_LNS_set_column:      column = getULEB128(self->debugLine.content, &counter); break;
-                case DW_LNS_negate_stmt:     isStmt = !isStmt;                                       break;
-                case DW_LNS_set_basic_block: basicBlock = true;                                      break;
-
-                case DW_LNS_const_add_pc: {
-                    const uint8_t adjustedOpCode = 255 - self->opCodeBase;
-                    if (self->version > 3) {
-                        const uint8_t operationAdvance = adjustedOpCode / self->lineRange;
-
-                        address += self->minimumInstructionLength * ((opIndex + operationAdvance) / self->maximumOperationsPerInstruction);
-                        opIndex  = (opIndex + operationAdvance) % self->maximumOperationsPerInstruction;
-                    } else {
-                        address += adjustedOpCode / self->lineRange * self->minimumInstructionLength;
-                    }
-                    break;
-                }
-
-                case DW_LNS_fixed_advance_pc: {
-                    opIndex = 0;
-                    address += *(uint16_t*) (self->debugLine.content + counter);
-                    counter += 2;
-                    break;
-                }
-
-                case DW_LNS_set_prologue_end:
-                    if (self->version > 2) {
-                        prologueEnd = true;
-                        break;
-                    }
-                    // else fallthrough
-
-                case DW_LNS_set_epilogue_begin:
-                    if (self->version > 2) {
-                        epilogueBegin = true;
-                        break;
-                    }
-                    // else fallthrough
-
-                case DW_LNS_set_isa:
-                    if (self->version > 2) {
-                        isa = getULEB128(self->debugLine.content, &counter);
-                        break;
-                    }
-                    // else fallthrough
-
-                default:
-                    for (uint64_t i = 0; i < self->stdOpcodeLengths.content[opCode - 1]; ++i) {
-                        getLEB128(self->debugLine.content, &counter);
-                    }
-                    break;
-            }
+            dwarf_lineInfoParser_handleSingeInstruction(&parser, &counter, opCode);
         } else {
-            const uint8_t adjustedOpCode = opCode - self->opCodeBase;
-            if (self->version > 3) {
-                const uint8_t operationAdvance = adjustedOpCode / self->lineRange;
-
-                address += self->minimumInstructionLength * ((opIndex + operationAdvance) / self->maximumOperationsPerInstruction);
-                opIndex  = (opIndex + operationAdvance) % self->maximumOperationsPerInstruction;
-            } else {
-                address += adjustedOpCode / self->lineRange * self->minimumInstructionLength;
-            }
-            line += self->lineBase + adjustedOpCode % self->lineRange;
-
-            self->cb((struct dwarf_lineInfo) {
-                address, line, column, isa, discriminator,
-                self->getFileName(self, file),
-                isStmt, basicBlock, endSequence, prologueEnd, epilogueBegin
-            }, self->args);
-            
-            basicBlock    = false;
-            prologueEnd   = false;
-            epilogueBegin = false;
-            discriminator = 0;
+            dwarf_lineInfoParser_handleDefaultEntry(&parser, opCode);
         }
     }
     
@@ -285,7 +130,7 @@ static inline vector_pair_uint64_t dwarf_getAbbreviationTable(const struct lcs_s
     return toReturn;
 }
 
-uint64_t dwarf_parseInitialSize(void* buffer, size_t* counter, bool* bit64) {
+uint64_t dwarf_parseInitialSize(const void* buffer, size_t* counter, bool* bit64) {
     const uint32_t size = *(uint32_t*) (buffer + *counter);
     *counter += 4;
 
@@ -301,7 +146,7 @@ uint64_t dwarf_parseInitialSize(void* buffer, size_t* counter, bool* bit64) {
     return toReturn;
 }
 
-bool dwarf_consumeSome(const struct dwarf_parser* self, void* buffer, size_t* counter, const uint64_t type) {
+bool dwarf_consumeSome(const struct dwarf_parser* self, const void* buffer, size_t* counter, const uint64_t type) {
     switch (type) {
         case DW_FORM_block: {
             const uint64_t length = getULEB128(buffer, counter);
@@ -366,11 +211,11 @@ bool dwarf_consumeSome(const struct dwarf_parser* self, void* buffer, size_t* co
  * @return a pointer to the string in either section or @c NULL if the given
  * type specifies neither section
  */
-static inline char* dwarf_stringFromSection(const uint64_t offset,
-                                            const uint64_t type,
-                                            const struct lcs_section debugLineStr,
-                                            const struct lcs_section debugStr) {
-    char* toReturn = NULL;
+static inline const char* dwarf_stringFromSection(const uint64_t offset,
+                                                  const uint64_t type,
+                                                  const struct lcs_section debugLineStr,
+                                                  const struct lcs_section debugStr) {
+    const char* toReturn = NULL;
     switch (type) {
         case DW_FORM_line_strp: toReturn = debugLineStr.content + offset; break;
         case DW_FORM_strp:      toReturn = debugStr.content + offset;     break;
@@ -414,9 +259,9 @@ static inline optional_uint64_t dwarf_loadStringOffset(const uint64_t index,
     return (optional_uint64_t) { true, ((uint32_t*) (debugStrOffsets.content + counter))[index] };
 }
 
-char* dwarf_readString(const struct dwarf_parser* self, void* buffer, size_t* counter, uint64_t type) {
+const char* dwarf_readString(const struct dwarf_parser* self, const void* buffer, size_t* counter, uint64_t type) {
     if (type == DW_FORM_string) {
-        char* toReturn = buffer + *counter;
+        const char* toReturn = buffer + *counter;
         *counter += strlen(toReturn) + 1;
         return toReturn;
     }

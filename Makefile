@@ -40,7 +40,6 @@ LD = $(CC)
 
 # Main sources
 SRCS = \
-	src/loadedLibInfo.c \
 	src/callstackInternal.c \
 	src/callstack_internals.c \
 	src/callstackFrame/callstack_frame.c \
@@ -50,11 +49,11 @@ SRCS = \
 	src/regions/regions.c \
 	src/parser/callstack_parser.c \
 	src/parser/file/loader.c \
-	src/parser/file/function.c \
+	src/parser/file/symbol.c \
 	src/parser/file/bounds.c \
 	src/parser/file/binaryFile.c \
 	src/parser/file/dwarf/leb128.c \
-	src/parser/file/dwarf/dwarf_parser.c \
+	src/parser/file/dwarf/parser.c \
 	src/parser/file/dwarf/v5/parser.c \
 	src/parser/file/dwarf/v4/parser.c \
 	src/parser/demangling/demangler.c \
@@ -62,6 +61,7 @@ SRCS = \
 	src/functionInfo/functionInfo.c \
 	src/dlMapper/dlMapper.c \
 	src/symbols/symbolInfo.c \
+	src/parser/file/dwarf/lineInfo/parser.c \
 	mh_tryCatch/src/try_catch.c
 
 OBJS = $(patsubst %.c, %.o, $(SRCS))

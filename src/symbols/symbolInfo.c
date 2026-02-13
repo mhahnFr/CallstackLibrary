@@ -1,7 +1,7 @@
 /*
  * CallstackLibrary - Library creating human-readable call stacks.
  *
- * Copyright (C) 2025  mhahnFr
+ * Copyright (C) 2025 - 2026  mhahnFr
  *
  * This file is part of the CallstackLibrary.
  *
@@ -21,26 +21,39 @@
 
 #include <symbols/symbolInfo.h>
 
+#include "callstack_internals.h"
 #include "../callstackFrame/callstackFrameInternal.h"
 #include "../dlMapper/dlMapper.h"
+#include "misc/cache.h"
 
-static inline struct callstack_frame symbols_getInfoShared(const void* address, const bool useCache) {
-    struct callstack_frame toReturn;
+/**
+ * Translates the given address.
+ *
+ * @param address the address to find the closest symbol for
+ * @param info the symbol information structure to be filled
+ * @param useCache whether to use cache values for the returned information
+ * @return whether a symbol info could be deducted
+ */
+static inline bool symbols_getInfoShared(const void* address, SymbolInfo* info, const bool useCache) {
     dlMapper_init();
-    // FIXME: + 1 byte in order to bypass symbol table usage for functions.   - mhahnFr
-    const void* searchAddress = address + 1;
-    callstackFrame_translateBinary(&toReturn, searchAddress, useCache, true);
-    struct loadedLibInfo* info = toReturn.reserved;
-    if (loadedLibInfo_prepare(info)) {
-        binaryFile_addr2String(info->associated, searchAddress, &toReturn);
+    callstackFrame_translateBinary(info, address, useCache, true);
+    struct binaryFile* file = info->reserved;
+    bool toReturn = false;
+    if (file != NULL) {
+        toReturn = binaryFile_getSymbolInfo(file, address, info);
     }
+    maybeV(callstack_clearCaches);
     return toReturn;
 }
 
-struct callstack_frame symbols_getInfo(const void* address) {
-    return symbols_getInfoShared(address, false);
+bool symbols_getInfo(const void* address, SymbolInfo* info) {
+    return symbols_getInfoShared(address, info, false);
 }
 
-struct callstack_frame symbols_getInfoCached(const void* address) {
-    return symbols_getInfoShared(address, true);
+bool symbols_getInfoCached(const void* address, SymbolInfo* info) {
+    return symbols_getInfoShared(address, info, true);
+}
+
+void symbols_destroyInfo(const SymbolInfo* info) {
+    callstack_frame_destroy(info);
 }

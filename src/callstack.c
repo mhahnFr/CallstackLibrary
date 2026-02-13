@@ -1,7 +1,7 @@
 /*
  * CallstackLibrary - Library creating human-readable call stacks.
  *
- * Copyright (C) 2022 - 2025  mhahnFr
+ * Copyright (C) 2022 - 2026  mhahnFr
  *
  * This file is part of the CallstackLibrary.
  *
@@ -87,12 +87,12 @@ bool callstack_relativize(struct callstack* self, const char** binaryNames) {
 
     dlMapper_init();
     for (size_t i = 0; i < self->backtraceSize; ++i) {
-        const pair_relativeInfo_t info = dlMapper_relativize(self->backtrace[i]);
+        const pair_relativeFile_t info = dlMapper_relativize(self->backtrace[i]);
         if (info.first == NULL) {
             return false;
         }
         self->backtrace[i] = (void*) info.second;
-        binaryNames[i] = info.first->absoluteFileName;
+        binaryNames[i] = info.first->fileName.absolute;
     }
     return true;
 }
@@ -125,6 +125,13 @@ struct callstack_frame * callstack_toArray(struct callstack * self) {
     return self->frames;
 }
 
+/**
+ * Retrieves the binary file information for the given callstack object.
+ *
+ * @param self the callstack object
+ * @param useCache whether to use cached pointers
+ * @return the array of translated callstack frames or @c NULL on error
+ */
 static inline struct callstack_frame* callstack_getBinariesShared(struct callstack* self, const bool useCache) {
     if (self == NULL) return NULL;
 

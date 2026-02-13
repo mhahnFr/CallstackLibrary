@@ -1,7 +1,7 @@
 /*
  * CallstackLibrary - Library creating human-readable call stacks.
  *
- * Copyright (C) 2024  mhahnFr
+ * Copyright (C) 2023 - 2026  mhahnFr
  *
  * This file is part of the CallstackLibrary.
  *
@@ -19,11 +19,11 @@
  * CallstackLibrary, see the file LICENSE.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-#ifndef pair_address_h
-#define pair_address_h
+#include "symbol.h"
 
-#include <DC4C/pair.h>
-
-typedef_pair_named(address, const void*, const void*);
-
-#endif /* pair_address_h */
+void symbol_destroy(const struct symbol* self) {
+    free(self->linkedName);
+    if (self->demangledName.has_value) {
+        free(self->demangledName.value);
+    }
+}

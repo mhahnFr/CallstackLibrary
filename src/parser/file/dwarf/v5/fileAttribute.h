@@ -1,7 +1,7 @@
 /*
  * CallstackLibrary - Library creating human-readable call stacks.
  *
- * Copyright (C) 2024 - 2025  mhahnFr
+ * Copyright (C) 2024 - 2026  mhahnFr
  *
  * This file is part of the CallstackLibrary.
  *
@@ -33,7 +33,7 @@
  */
 struct fileAttribute {
     /** The path name.                          */
-    char*    path;
+    const char* path;
     /** The directory index.                    */
     uint64_t index;
     /** The timestamp of the last modification. */
@@ -41,7 +41,7 @@ struct fileAttribute {
     /** The size of the file entity.            */
     uint64_t size;
     /** The MD5 hash of the file entity.        */
-    uint8_t* md5;
+    const uint8_t* md5;
 };
 
 typedef_vector_named(fileAttribute, struct fileAttribute);

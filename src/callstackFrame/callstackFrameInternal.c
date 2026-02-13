@@ -27,10 +27,10 @@ void callstackFrame_translateBinary(struct callstack_frame* self, const void* ad
                                     const bool useCache, const bool includeRegions) {
     *self = callstack_frame_initializer;
 
-    struct loadedLibInfo* info = dlMapper_libInfoForAddress(address, includeRegions);
+    struct binaryFile* info = dlMapper_binaryFileForAddress(address, includeRegions);
     if (info != NULL) {
-        self->binaryFile = useCache ? info->absoluteFileName : strdup(info->absoluteFileName);
-        self->binaryFileRelative = useCache ? info->relativeFileName : strdup(info->relativeFileName);
+        self->binaryFile = useCache ? info->fileName.absolute : strdup(info->fileName.absolute);
+        self->binaryFileRelative = useCache ? info->fileName.relative : strdup(info->fileName.relative);
         self->binaryFileIsSelf = info->isSelf;
     }
     self->reserved = info;

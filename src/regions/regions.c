@@ -1,7 +1,7 @@
 /*
  * CallstackLibrary - Library creating human-readable call stacks.
  *
- * Copyright (C) 2025  mhahnFr
+ * Copyright (C) 2025 - 2026  mhahnFr
  *
  * This file is part of the CallstackLibrary.
  *
@@ -19,54 +19,16 @@
  * CallstackLibrary, see the file LICENSE.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-#include <stdlib.h>
-#include <string.h>
-
 #include <callstack_internals.h>
+#include <stdlib.h>
+#include <DC4C/vector.h>
+#include <misc/cache.h>
 #include <regions/regions.h>
 
-#include <DC4C/vector.h>
-
 #include "../dlMapper/dlMapper.h"
+#include "../parser/file/binaryFile.h"
 
 typedef_vector_named(region, struct region);
-
-/**
- * Executes the given function, passing the given arguments if the given
- * condition evaluates to @c true .
- *
- * @param b the condition
- * @param func the function to possibly execute
- * @param ... the arguments to pass to the given function
- * @return the return value of the given function or the given arguments
- */
-#define maybeRun(b, func, ...) ({ (b) ? (func)(__VA_ARGS__) : (__VA_ARGS__); })
-
-/**
- * Executes the given function if the given condition evaluates to @c true .
- *
- * @param b the condition
- * @param func the function to possibly execute
- * @return the return value of the given function or @c NULL
- */
-#define maybeRunV(b, func) ((b) ? (func)() : (void) NULL)
-
-/**
- * Executes the given function if @c callstack_autoClearCaches is @c true .
- *
- * @param func the function to possibly execute
- * @param ... the arguments to pass to the given function
- * @return the return value of the function or the given arguments
- */
-#define maybe(func, ...) maybeRun(callstack_autoClearCaches, func, __VA_ARGS__)
-
-/**
- * Executes the given function if @c callstack_autoClearCaches is @c true .
- *
- * @param func the function to possibly execute
- * @return the return value of the given function or @c NULL
- */
-#define maybeV(func) maybeRunV(callstack_autoClearCaches, func)
 
 struct regionInfo regions_getLoadedRegions(void) {
     if (!dlMapper_init()) {
@@ -74,15 +36,13 @@ struct regionInfo regions_getLoadedRegions(void) {
     }
 
     vector_region_t toReturn = vector_initializer;
-    vector_forEach(dlMapper_getLoadedLibraries(), outerElement, {
-        if (!loadedLibInfo_prepare(outerElement)) {
-            continue;
-        }
-        vector_iterate(binaryFile_getRegions(outerElement->associated), {
+    vector_iterate(dlMapper_getLoadedBinaries(), {
+        struct binaryFile* file = *element;
+        vector_iterate(binaryFile_getRegions(file), {
             vector_push_back(&toReturn, ((struct region) {
                 element->first, element->second,
-                maybe(strdup, outerElement->absoluteFileName),
-                maybe(strdup, outerElement->relativeFileName),
+                maybe(strdup, file->fileName.absolute),
+                maybe(strdup, file->fileName.relative),
             }));
         });
     });
@@ -97,16 +57,14 @@ struct regionInfo regions_getTLSRegions(void) {
     }
 
     vector_region_t toReturn = vector_initializer;
-    vector_forEach(dlMapper_getLoadedLibraries(), outerElement, {
-        if (!loadedLibInfo_prepare(outerElement)) {
-            continue;
-        }
-        vector_pair_ptr_t result = binaryFile_getTLSRegions(outerElement->associated);
+    vector_iterate(dlMapper_getLoadedBinaries(), {
+        struct binaryFile* file = *element;
+        vector_pair_ptr_t result = binaryFile_getTLSRegions(file);
         vector_iterate(&result, {
             vector_push_back(&toReturn, ((struct region) {
                 element->first, element->second,
-                maybe(strdup, outerElement->absoluteFileName),
-                maybe(strdup, outerElement->relativeFileName),
+                maybe(strdup, file->fileName.absolute),
+                maybe(strdup, file->fileName.relative),
             }));
         });
         vector_destroy(&result);

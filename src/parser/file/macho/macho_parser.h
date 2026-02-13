@@ -1,7 +1,7 @@
 /*
  * CallstackLibrary - Library creating human-readable call stacks.
  *
- * Copyright (C) 2024 - 2025  mhahnFr
+ * Copyright (C) 2024 - 2026  mhahnFr
  *
  * This file is part of the CallstackLibrary.
  *
@@ -22,59 +22,87 @@
 #ifndef macho_parser_h
 #define macho_parser_h
 
-#include <stdarg.h>
 #include <stdbool.h>
 #include <mach-o/loader.h>
 
-#include "containers_funcFile.h"
+#include "containers_symbolFile.h"
 #include "objectFile.h"
 
 /**
- * @brief The function prototype for the callback called with a new object file object.
- *
- * Takes the object file object and the additionally passed arguments.
+ * Callback function prototype for adding a newly deducted symbol.
  */
-typedef void (*macho_addObjectFile)(struct objectFile*, va_list);
-/**
- * @brief The function prototype for the callback called with a new function / object file pair.
- *
- * Takes the function / object file pair and the additionally passed arguments.
- */
-typedef void (*macho_addFunction)(pair_funcFile_t, va_list);
+typedef void (*machoParser_addSymbol)(void* arg, pair_symbolFile_t);
 
 /**
- * @brief Parses the given Mach-O symbol table.
- *
- * At least one callback function needs to be provided (the other one may be
- * @c NULL) or both. If none is given, the given symbol table is not parsed and
- * @c false is returned.
- * <br><br>
- * The object file callback will be called when all information associated with
- * an object file is read.<br>
- * The function / object file callback is called for every symbol that is not
- * external.<br>
- * Both functions will be passed the additional arguments passed to this
- * function.
- *
- * @param command the Mach-O symbol table load command
- * @param baseAddress the start address of the Mach-O file the given symbol
- * table is in
- * @param offset the additional parsing offset
- * @param bytesSwapped whether the bytes need to be swapped to be in host byte
- * order
- * @param bit64 whether a 64 bit Mach-O file is parsed
- * @param objCb the object file callback function
- * @param funCb the function / object file pair callback function
- * @param ... the additional parameters to pass to the given functions
- * @return whether the symbol table was parsed successfully
+ * Represents a Mach-O symbol table parser.
  */
-bool macho_parseSymtab(struct symtab_command* command, 
-                       const void*            baseAddress,
-                       uint64_t               offset,
-                       bool                   bytesSwapped,
-                       bool                   bit64,
-                       macho_addObjectFile    objCb,
-                       macho_addFunction      funCb,
-                       ...);
+struct machoParser {
+    /** The symbol table load command to be handled.            */
+    struct symtab_command* command;
+    /** The start address of the Mach-O file.                   */
+    const void* baseAddress;
+    /** Whether to swap endianness while parsing.               */
+    bool bytesSwapped,
+    /** Whether to parse in 64-bit mode.                        */
+         bit64;
+    /** The offset to be used for the parsing.                  */
+    uintptr_t parsingOffset;
+    /** The callback called once a symbol has been deducted.    */
+    machoParser_addSymbol symbolCallback;
+    /** The payload to pass on to the symbol callback function. */
+    void* object;
+
+    /** Collection of the private member variables.             */
+    struct {
+        /** The beginning of the string table. */
+        const char* stringTable;
+        /** The size of an entry.              */
+        size_t entrySize;
+        /** The parsing state.                 */
+        struct State {
+            /** The currently handled symbol.      */
+            struct optional_symbol currentSymbol;
+            /** The currently handled object file. */
+            struct objectFile* currentObjectFile;
+            /** The path of the object file.       */
+            const char* path,
+            /** The name of the source file.       */
+                      * sourceFilename;
+        } parsingState;
+    } private;
+};
+
+/**
+ * Constructs a Mach-O symbol table parser using the given information.
+ *
+ * @param command the symbol table load command to handle
+ * @param baseAddress the base address of the Mach-O file
+ * @param parsingOffset the offset to be used while parsing
+ * @param bytesSwapped whether to swap endianness
+ * @param bit64 whether to parse in 64-bit mode
+ * @param symbolCallback the callback to be called once a symbol has been
+ * deducted
+ * @param object the payload to be passed to the callback
+ * @return the newly constructed Mach-O symbol table parser
+ */
+struct machoParser machoParser_create(
+    struct symtab_command* command, const void* baseAddress,
+    uintptr_t parsingOffset, bool bytesSwapped, bool bit64,
+    machoParser_addSymbol symbolCallback, void* object);
+
+/**
+ * Parses the symbol table the given Mach-O parser represents.
+ *
+ * @param self the Mach-O symbol table parser
+ * @return whether the parsing was successful
+ */
+bool machoParser_parseSymbolTable(struct machoParser* self);
+
+/**
+ * Destroys the given symbol table parser.
+ *
+ * @param self the Mach-O symbol table parser
+ */
+void machoParser_destroy(const struct machoParser* self);
 
 #endif /* macho_parser_h */

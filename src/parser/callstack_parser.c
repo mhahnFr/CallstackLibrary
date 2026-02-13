@@ -1,7 +1,7 @@
 /*
  * CallstackLibrary - Library creating human-readable call stacks.
  *
- * Copyright (C) 2022 - 2025  mhahnFr
+ * Copyright (C) 2022 - 2026  mhahnFr
  *
  * This file is part of the CallstackLibrary.
  *
@@ -19,13 +19,11 @@
  * CallstackLibrary, see the file LICENSE.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-#include <string.h>
-
 #include "callstack_parser.h"
-#include "demangling/demangler.h"
 
 #include "../callstackInternal.h"
-#include "../loadedLibInfo.h"
+#include "demangling/demangler.h"
+#include "file/binaryFile.h"
 
 /**
  * @brief Translates the given callstack using the given parser.
@@ -37,17 +35,18 @@
 static inline bool callstack_parser_parseImpl(const struct callstack_parser* self,
                                               const struct callstack*        callstack) {
     (void) self;
-    
-    for (size_t i = 0; i < callstack->backtraceSize; ++i) {
-        struct loadedLibInfo*    info = callstack->frames[i].reserved;
-        struct callstack_frame* frame = &callstack->frames[i];
 
-        if (!loadedLibInfo_prepare(info)) {
+    size_t failed = 0;
+    for (size_t i = 0; i < callstack->backtraceSize; ++i) {
+        struct binaryFile* file = callstack->frames[i].reserved;
+        if (file == NULL) {
             continue;
         }
-        binaryFile_addr2String(info->associated, callstack->backtrace[i], frame);
+        if (!binaryFile_addr2String(file, callstack->backtrace[i], &callstack->frames[i])) {
+            ++failed;
+        }
     }
-    return true;
+    return failed != callstack->backtraceSize;
 }
 
 char* callstack_parser_demangleCopy(char* name, const bool copy) {

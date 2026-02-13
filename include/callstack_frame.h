@@ -19,15 +19,19 @@
  * CallstackLibrary, see the file LICENSE.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-#ifndef __lcs_callstack_frame_h
-#define __lcs_callstack_frame_h
+#ifndef _lcs_callstack_frame_h
+#define _lcs_callstack_frame_h
+
+#ifdef __cplusplus
+# include <cstddef>
+#else
+# include <stdbool.h>
+# include <stddef.h>
+#endif
 
 #ifdef __cplusplus
 extern "C" {
 #endif
-
-#include <stdbool.h>
-#include <stddef.h>
 
 /**
  * This structure represents a translated callstack frame.
@@ -89,19 +93,24 @@ struct callstack_frame {
 # define callstack_frame_initializer_prefix (struct callstack_frame)
 #endif
 
+/**
+ * The initializing expression for the callstack frame structure.
+ *
+ * @since v2.3
+ */
 #define callstack_frame_initializer \
     callstack_frame_initializer_prefix { NULL, false, false, false, false, NULL, NULL, NULL, NULL, NULL, 0, 0 }
 
 /**
  * @brief Constructs the given callstack frame.
  *
- * @details Since version 2.X this function has been replaced by a macro.
+ * @details Since version 2.3 this function has been replaced by a macro.
  *
  * @param self the callstack frame to be initialized
  * @since v1.1
  * @deprecated Prefer using the macro @c callstack_frame_initializer .
  */
-#define callstack_frame_create(self) (*(struct callstack_frame*) self = callstack_frame_initializer)
+#define callstack_frame_create(self) (*(struct callstack_frame*) (self) = callstack_frame_initializer)
 
 /**
  * Allocates a new and initialized callstack frame.
@@ -201,4 +210,4 @@ void callstack_frame_delete(struct callstack_frame* self);
 } // extern "C"
 #endif
 
-#endif /* __lcs_callstack_frame_h */
+#endif /* _lcs_callstack_frame_h */
