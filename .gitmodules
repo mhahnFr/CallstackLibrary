@@ -3,4 +3,4 @@
 	url = https://github.com/mhahnFr/DC4C.git
 [submodule "mh_tryCatch"]
 	path = mh_tryCatch
-	url = git@github.com:mhahnFr/mh_tryCatch.git
+	url = https://github.com/mhahnFr/mh_tryCatch.git
