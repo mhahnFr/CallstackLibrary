@@ -52,6 +52,11 @@ void dwarf_lineInfoParser_handleDefaultEntry(struct dwarf_lineInfoParser* self, 
     self->discriminator = 0;
 }
 
+/**
+ * Handles the copy entry single instruction.
+ *
+ * @param self the DWARF line information parser object
+ */
 static inline void dwarf_lineInfoParser_commandCopy(struct dwarf_lineInfoParser* self) {
     self->parser->cb((struct dwarf_lineInfo) {
         self->address, self->line, self->column, self->isa, self->discriminator,
@@ -63,6 +68,12 @@ static inline void dwarf_lineInfoParser_commandCopy(struct dwarf_lineInfoParser*
     self->basicBlock = self->prologueEnd = self->epilogueBegin = false;
 }
 
+/**
+ * Handles the advance single instruction.
+ *
+ * @param self the DWARF line information parser object
+ * @param counter the counter used as offset into the memory buffer
+ */
 static inline void dwarf_lineInfoParser_commandAdvance(struct dwarf_lineInfoParser* self, size_t* counter) {
     const uint64_t operationAdvance = getULEB128(self->parser->debugLine.content, counter);
     if (self->parser->version > 3) {
@@ -74,6 +85,11 @@ static inline void dwarf_lineInfoParser_commandAdvance(struct dwarf_lineInfoPars
     }
 }
 
+/**
+ * Handles the add to address single instruction.
+ *
+ * @param self the DWARF line information parser
+ */
 static inline void dwarf_lineInfoParser_commandAdd(struct dwarf_lineInfoParser* self) {
     const uint8_t adjustedOpCode = 255 - self->parser->opCodeBase;
     if (self->parser->version > 3) {
@@ -87,6 +103,13 @@ static inline void dwarf_lineInfoParser_commandAdd(struct dwarf_lineInfoParser* 
     }
 }
 
+/**
+ * Handles all other single instructions.
+ *
+ * @param self the DWARF line information parser object
+ * @param counter the counter used as offset into the memory buffer
+ * @param opCode the operation code to be handled
+ */
 static inline void dwarf_lineInfoParser_commandOthers(struct dwarf_lineInfoParser* self, size_t* counter,
                                                       const uint8_t opCode) {
     if (self->parser->version > 2) switch (opCode) {
@@ -123,6 +146,11 @@ void dwarf_lineInfoParser_handleSingeInstruction(struct dwarf_lineInfoParser* se
     }
 }
 
+/**
+ * Handles the end of a sequence special instruction.
+ *
+ * @param self the DWARF line information parser object
+ */
 static inline void dwarf_lineInfoParser_handleEndSequence(struct dwarf_lineInfoParser* self) {
     self->endSequence = true;
     self->parser->cb((struct dwarf_lineInfo) {
@@ -137,6 +165,12 @@ static inline void dwarf_lineInfoParser_handleEndSequence(struct dwarf_lineInfoP
     self->isStmt = self->parser->defaultIsStmt;
 }
 
+/**
+ * Handles the file definition special instruction.
+ *
+ * @param self the DWARF line information parser object
+ * @param counter the counter used as offset into the memory buffer
+ */
 static inline void dwarf_lineInfoParser_handleFileDefinition(const struct dwarf_lineInfoParser* self, size_t* counter) {
     const char* fileName = self->parser->debugLine.content + *counter;
     *counter += strlen(fileName) + 1;
@@ -150,6 +184,14 @@ static inline void dwarf_lineInfoParser_handleFileDefinition(const struct dwarf_
     }
 }
 
+/**
+ * Handles other special instructions.
+ *
+ * @param self the DWARF line information parser object
+ * @param counter the counter used as offset into the memory buffer
+ * @param length the length of the instruction
+ * @param opCode the operation code to be handled
+ */
 static inline void dwarf_lineInfoParser_handleOtherSpecials(struct dwarf_lineInfoParser* self, size_t* counter,
                                                             const uint64_t length, const uint8_t opCode) {
     if (self->parser->version > 3 && opCode == DW_LNE_set_discriminator) {
