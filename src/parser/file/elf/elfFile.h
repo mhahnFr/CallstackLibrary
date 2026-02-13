@@ -68,6 +68,12 @@ void elfFile_create(struct elfFile * self);
  */
 bool elfFile_parse(struct elfFile* self);
 
+/**
+ * Parses only the strictly necessary information of the represented ELF file.
+ *
+ * @param self the ELF file object
+ * @return whether the parsing was successful
+ */
 bool elfFile_parseShallow(struct elfFile* self);
 
 /**
@@ -91,6 +97,14 @@ bool elfFile_addr2String(struct elfFile* self, const void* address, struct calls
  */
 bool elfFile_getFunctionInfo(struct elfFile* self, const char* functionName, struct functionInfo* info);
 
+/**
+ * Queries the debug information for the symbol of the given address.
+ *
+ * @param self the ELF file object
+ * @param symbolAddress the address of the symbol to query
+ * @param frame the @c callstack_frame structure to be filled
+ * @return whether a symbol could be deducted
+ */
 bool elfFile_getSymbolInfo(struct elfFile* self, const void* symbolAddress, struct callstack_frame* frame);
 
 /**
