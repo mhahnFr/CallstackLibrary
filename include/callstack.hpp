@@ -154,6 +154,12 @@ public:
         return *this;
     }
 
+    /**
+     * Relativizes the represented callstack.
+     *
+     * @return an array with a string for each callstack frame
+     * @since v2.3
+     */
     inline auto relativize() -> std::array<const char*, CALLSTACK_BACKTRACE_SIZE> {
         auto toReturn = std::array<const char*, CALLSTACK_BACKTRACE_SIZE>();
         relativize(toReturn.data());
@@ -161,12 +167,26 @@ public:
     }
 #endif
 
+    /**
+     * Relativizes the represented callstack.
+     *
+     * @param binaryNames the array to be filled with a binary file name for
+     * each callstack frame
+     * @since v2.3
+     */
     inline void relativize(const char* binaryNames[CALLSTACK_BACKTRACE_SIZE]) {
         if (!callstack_relativize(*this, binaryNames)) {
             throw std::runtime_error("Failed to relativize the callstack!");
         }
     }
 
+    /**
+     * Absolutizes and translates the represented callstack.
+     *
+     * @param binaryNames an array of the binary file names each callstack frame is
+     * relative to, must be at least include one binary file name for each callstack frame
+     * @since v2.3
+     */
     inline callstack_frame* absolutize(const char** binaryNames) {
         return callstack_translateRelative(*this, binaryNames);
     }
@@ -209,10 +229,24 @@ public:
     }
 #endif
 
+    /**
+     * Returns the beginning iterator for the callstack frames included by the
+     * represented callstack.
+     *
+     * @return the beginning iterator
+     * @since v2.1
+     */
     LCS_CONSTEXPR inline const callstack_frame* begin() const LCS_NOEXCEPT {
         return self.frames;
     }
 
+    /**
+     * Returns the end iterator for the callstack frames included by the
+     * represented callstack.
+     *
+     * @return the end iterator
+     * @since v2.1
+     */
     LCS_CONSTEXPR inline const callstack_frame* end() const LCS_NOEXCEPT {
         return self.frames + self.frameCount;
     }
