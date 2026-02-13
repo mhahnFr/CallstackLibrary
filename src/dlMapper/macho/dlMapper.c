@@ -25,6 +25,13 @@
 
 #include "../dlMapper_platform.h"
 
+/**
+ * Efficiently checks the given object expression whether it is @c NULL , if it
+ * is not, the given expression is executed.
+ *
+ * @param theObject the object to be checked
+ * @param expr the expression to be executed if the given object is not @c NULL
+ */
 #define dlMapper_safe(theObject, expr)  \
 typeof(theObject) object = (theObject); \
 if (object != NULL) {                   \
