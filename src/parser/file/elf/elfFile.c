@@ -144,7 +144,7 @@ elfFile_sectionToLCSSection(64)
  * @param bits the amount of bits the implementation shall handle
  */
 #define elfFile_loadShnum(bits) \
-static inline uint64_t elfFile_loadShnum##bits(const Elf##bits##_Ehdr* buffer, bool littleEndian) {                                   \
+static inline uint64_t elfFile_loadShnum##bits(const Elf##bits##_Ehdr* buffer, bool littleEndian) {                             \
     uint64_t shnum = ELF_TO_HOST(16, buffer->e_shnum, littleEndian);                                                            \
                                                                                                                                 \
     if (shnum == 0) {                                                                                                           \
@@ -166,77 +166,77 @@ elfFile_loadShnum(64)
  *
  * @param bits the amount of bits the implementation shall handle
  */
-#define elfFile_parseFileImpl(bits)                                                                                  \
-static inline bool elfFile_parseFile##bits(struct elfFile* self, const Elf##bits##_Ehdr* buffer, bool littleEndian) {\
-    if (ELF_TO_HOST(bits, buffer->e_shoff, littleEndian) == 0) return false;                                         \
-                                                                                                                     \
-    char* sectStrBegin = elfFile_loadSectionStrtab##bits(buffer, littleEndian);                                      \
-    if (sectStrBegin == NULL) return false;                                                                          \
-                                                                                                                     \
-    void* sectBegin = (void*) buffer + ELF_TO_HOST(bits, buffer->e_shoff, littleEndian);                             \
-    Elf##bits##_Shdr* strtab   = NULL,                                                                               \
-                    * symtab   = NULL,                                                                               \
-                    * dystrtab = NULL,                                                                               \
-                    * dysymtab = NULL;                                                                               \
-    uint16_t shnum = elfFile_loadShnum##bits(buffer, littleEndian);                                                  \
-    for (uint16_t i = 0; i < shnum; ++i) {                                                                           \
-        Elf##bits##_Shdr* current = sectBegin + i * ELF_TO_HOST(16, buffer->e_shentsize, littleEndian);              \
-        const char* sectionName = sectStrBegin + ELF_TO_HOST(32, current->sh_name, littleEndian);                    \
-        if (strcmp(".debug_line", sectionName) == 0) {                                                               \
-            self->debugLine = elfFile_sectionToLCSSection##bits(buffer, current, littleEndian);                      \
-            continue;                                                                                                \
-        } else if (strcmp(".debug_str", sectionName) == 0) {                                                         \
-            self->debugStr = elfFile_sectionToLCSSection##bits(buffer, current, littleEndian);                       \
-            continue;                                                                                                \
-        } else if (strncmp(".debug_line_str", sectionName, 16) == 0) {                                               \
-            self->debugLineStr = elfFile_sectionToLCSSection##bits(buffer, current, littleEndian);                   \
-            continue;                                                                                                \
-        } else if (strcmp(".debug_info", sectionName) == 0) {                                                        \
-            self->debugInfo = elfFile_sectionToLCSSection##bits(buffer, current, littleEndian);                      \
-            continue;                                                                                                \
-        } else if (strcmp(".debug_abbrev", sectionName) == 0) {                                                      \
-            self->debugAbbrev = elfFile_sectionToLCSSection##bits(buffer, current, littleEndian);                    \
-            continue;                                                                                                \
-        } else if (strcmp(".debug_str_offsets", sectionName) == 0) {                                                 \
-            self->debugStrOffsets = elfFile_sectionToLCSSection##bits(buffer, current, littleEndian);                \
-        }                                                                                                            \
-        switch (ELF_TO_HOST(32, current->sh_type, littleEndian)) {                                                   \
-            case SHT_SYMTAB:                                                                                         \
-                symtab = current;                                                                                    \
-                break;                                                                                               \
-                                                                                                                     \
-            case SHT_DYNSYM:                                                                                         \
-                dysymtab = current;                                                                                  \
-                break;                                                                                               \
-                                                                                                                     \
-            case SHT_STRTAB:                                                                                         \
-                if (strcmp(".strtab", sectStrBegin + ELF_TO_HOST(32, current->sh_name, littleEndian)) == 0) {        \
-                    strtab = current;                                                                                \
-                } else if (strcmp(".dynstr", sectStrBegin + ELF_TO_HOST(32, current->sh_name, littleEndian)) == 0) { \
-                    dystrtab = current;                                                                              \
-                }                                                                                                    \
-                break;                                                                                               \
-        }                                                                                                            \
-        if ((current->sh_flags & SHF_WRITE) != 0 && (current->sh_flags & SHF_ALLOC) != 0) {                          \
-            vector_push_back(&self->_.regions, ((pair_ptr_t) {                                                       \
-                self->_.relocationOffset + current->sh_addr,                                                         \
-                self->_.relocationOffset + current->sh_addr + current->sh_size                                       \
-            }));                                                                                                     \
-        }                                                                                                            \
-    }                                                                                                                \
-    if (symtab == NULL || strtab == NULL) {                                                                          \
-        if (dystrtab == NULL || dysymtab == NULL) {                                                                  \
-            return false;                                                                                            \
-        }                                                                                                            \
-        symtab = dysymtab;                                                                                           \
-        strtab = dystrtab;                                                                                           \
-    }                                                                                                                \
-                                                                                                                     \
-    return elfFile_parseSymtab##bits(self,                                                                           \
-                                     symtab,                                                                         \
-                                     (void*) buffer + ELF_TO_HOST(bits, strtab->sh_offset, littleEndian),            \
-                                     buffer,                                                                         \
-                                     littleEndian);                                                                  \
+#define elfFile_parseFileImpl(bits)                                                                                   \
+static inline bool elfFile_parseFile##bits(struct elfFile* self, const Elf##bits##_Ehdr* buffer, bool littleEndian) { \
+    if (ELF_TO_HOST(bits, buffer->e_shoff, littleEndian) == 0) return false;                                          \
+                                                                                                                      \
+    char* sectStrBegin = elfFile_loadSectionStrtab##bits(buffer, littleEndian);                                       \
+    if (sectStrBegin == NULL) return false;                                                                           \
+                                                                                                                      \
+    void* sectBegin = (void*) buffer + ELF_TO_HOST(bits, buffer->e_shoff, littleEndian);                              \
+    Elf##bits##_Shdr* strtab   = NULL,                                                                                \
+                    * symtab   = NULL,                                                                                \
+                    * dystrtab = NULL,                                                                                \
+                    * dysymtab = NULL;                                                                                \
+    uint16_t shnum = elfFile_loadShnum##bits(buffer, littleEndian);                                                   \
+    for (uint16_t i = 0; i < shnum; ++i) {                                                                            \
+        Elf##bits##_Shdr* current = sectBegin + i * ELF_TO_HOST(16, buffer->e_shentsize, littleEndian);               \
+        const char* sectionName = sectStrBegin + ELF_TO_HOST(32, current->sh_name, littleEndian);                     \
+        if (strcmp(".debug_line", sectionName) == 0) {                                                                \
+            self->debugLine = elfFile_sectionToLCSSection##bits(buffer, current, littleEndian);                       \
+            continue;                                                                                                 \
+        } else if (strcmp(".debug_str", sectionName) == 0) {                                                          \
+            self->debugStr = elfFile_sectionToLCSSection##bits(buffer, current, littleEndian);                        \
+            continue;                                                                                                 \
+        } else if (strncmp(".debug_line_str", sectionName, 16) == 0) {                                                \
+            self->debugLineStr = elfFile_sectionToLCSSection##bits(buffer, current, littleEndian);                    \
+            continue;                                                                                                 \
+        } else if (strcmp(".debug_info", sectionName) == 0) {                                                         \
+            self->debugInfo = elfFile_sectionToLCSSection##bits(buffer, current, littleEndian);                       \
+            continue;                                                                                                 \
+        } else if (strcmp(".debug_abbrev", sectionName) == 0) {                                                       \
+            self->debugAbbrev = elfFile_sectionToLCSSection##bits(buffer, current, littleEndian);                     \
+            continue;                                                                                                 \
+        } else if (strcmp(".debug_str_offsets", sectionName) == 0) {                                                  \
+            self->debugStrOffsets = elfFile_sectionToLCSSection##bits(buffer, current, littleEndian);                 \
+        }                                                                                                             \
+        switch (ELF_TO_HOST(32, current->sh_type, littleEndian)) {                                                    \
+            case SHT_SYMTAB:                                                                                          \
+                symtab = current;                                                                                     \
+                break;                                                                                                \
+                                                                                                                      \
+            case SHT_DYNSYM:                                                                                          \
+                dysymtab = current;                                                                                   \
+                break;                                                                                                \
+                                                                                                                      \
+            case SHT_STRTAB:                                                                                          \
+                if (strcmp(".strtab", sectStrBegin + ELF_TO_HOST(32, current->sh_name, littleEndian)) == 0) {         \
+                    strtab = current;                                                                                 \
+                } else if (strcmp(".dynstr", sectStrBegin + ELF_TO_HOST(32, current->sh_name, littleEndian)) == 0) {  \
+                    dystrtab = current;                                                                               \
+                }                                                                                                     \
+                break;                                                                                                \
+        }                                                                                                             \
+        if ((current->sh_flags & SHF_WRITE) != 0 && (current->sh_flags & SHF_ALLOC) != 0) {                           \
+            vector_push_back(&self->_.regions, ((pair_ptr_t) {                                                        \
+                self->_.relocationOffset + current->sh_addr,                                                          \
+                self->_.relocationOffset + current->sh_addr + current->sh_size                                        \
+            }));                                                                                                      \
+        }                                                                                                             \
+    }                                                                                                                 \
+    if (symtab == NULL || strtab == NULL) {                                                                           \
+        if (dystrtab == NULL || dysymtab == NULL) {                                                                   \
+            return false;                                                                                             \
+        }                                                                                                             \
+        symtab = dysymtab;                                                                                            \
+        strtab = dystrtab;                                                                                            \
+    }                                                                                                                 \
+                                                                                                                      \
+    return elfFile_parseSymtab##bits(self,                                                                            \
+                                     symtab,                                                                          \
+                                     (void*) buffer + ELF_TO_HOST(bits, strtab->sh_offset, littleEndian),             \
+                                     buffer,                                                                          \
+                                     littleEndian);                                                                   \
 }
 
 elfFile_parseFileImpl(32)
@@ -294,6 +294,7 @@ elfFile_loadELF_impl(64)
  *
  * @param self the ELF file abstraction object
  * @param header the start pointer of the ELF file
+ * @param shallow whether to parse only the strictly necessary information
  * @return whether the file was parsed successfully
  */
 static inline bool elfFile_parseFile(struct elfFile* self, const Elf32_Ehdr* header, const bool shallow) {
@@ -365,16 +366,17 @@ static inline int elfFile_lineInfoCompare(const void* lhs, const void* rhs) {
     return 0;
 }
 
+/**
+ * Parses the given ELF file entirely.
+ *
+ * @param self the ELF file object
+ * @param header the ELF file header
+ * @return whether the parsing was successful
+ */
 static inline bool elfFile_parseFileComplete(struct elfFile* self, const Elf32_Ehdr* header) {
     return elfFile_parseFile(self, header, false);
 }
 
-/**
- * Loads the ELF file represented by the given abstraction object.
- *
- * @param self the ELF file abstraction object
- * @return whether the ELF file was loaded successfully
- */
 bool elfFile_parse(struct elfFile* self) {
     const bool success = loader_loadFileAndExecute(self->_.fileName.original, (union loader_parserFunction) {
         .parseFunc = (loader_parser) elfFile_parseFileComplete
@@ -399,9 +401,11 @@ bool elfFile_parseShallow(struct elfFile* self) {
  *
  * @param self the ELF file abstraction object to be searched
  * @param address the address to be translated
+ * @param function the function to be used to search within the symbol table
  * @return the optionally available debug information
  */
-static inline optional_debugInfo_t elfFile_getDebugInfo(const struct elfFile* self, const void* address, const binaryFile_searchFunction function) {
+static inline optional_debugInfo_t elfFile_getDebugInfo(const struct elfFile* self, const void* address,
+                                                        const binaryFile_searchFunction function) {
     optional_debugInfo_t toReturn = { .has_value = false };
 
     const uint64_t translated = (uintptr_t) address - self->_.relocationOffset;
@@ -482,7 +486,19 @@ vector_pair_ptr_t elfFile_getTLSRegions(struct elfFile* self) {
     return (vector_pair_ptr_t) vector_initializer;
 }
 
-static inline bool elfFile_addr2StringImpl(struct elfFile* self, const void* address, struct callstack_frame* frame, const binaryFile_searchFunction function, const bool forceDiff) {
+/**
+ * Symbolizes the given address.
+ *
+ * @param self the ELF file object
+ * @param address the address to be symbolized
+ * @param frame the @c callstack_frame structure to be filled
+ * @param function the function to used to search within the symbol table
+ * @param forceDiff whether to add the difference value to the name if no line
+ * information is available and that difference is zero
+ * @return whether the symbolization was successful
+ */
+static inline bool elfFile_addr2StringImpl(struct elfFile* self, const void* address, struct callstack_frame* frame,
+                                           const binaryFile_searchFunction function, const bool forceDiff) {
     if (!BINARY_FILE_SUPER(self, maybeParse)) {
         return false;
     }
