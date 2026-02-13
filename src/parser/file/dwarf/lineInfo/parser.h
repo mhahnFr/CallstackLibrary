@@ -26,12 +26,46 @@
 #include <stddef.h>
 #include <stdint.h>
 
+/**
+ * Represents a DWARF line information parser.
+ */
 struct dwarf_lineInfoParser {
-    uint64_t address, opIndex, file, line, column, isa, discriminator;
-    bool isStmt, basicBlock, endSequence, prologueEnd, epilogueBegin;
+    /** The address of the current position.                              */
+    uint64_t address,
+    /** The operation index.                                              */
+             opIndex,
+    /** The number of the file currently used.                            */
+             file,
+    /** The current line number.                                          */
+             line,
+    /** The current column number.                                        */
+             column,
+    /** The current isa value.                                            */
+             isa,
+    /** The discriminator of the current position.                        */
+             discriminator;
+
+    /** Whether the position is a recommended breakpoint position.        */
+    bool isStmt,
+    /** Whether the current position is a basic code block.               */
+         basicBlock,
+    /** Whether the current position is the end of a sequence.            */
+         endSequence,
+    /** Whether the current position is the end of the function prologue. */
+         prologueEnd,
+    /** Whether the current position is the beginning of the epilogue.    */
+         epilogueBegin;
+
+    /** The main DWARF parser. */
     struct dwarf_parser* parser;
 };
 
+/**
+ * Initializing expression for the DWARF line information parser structure.
+ *
+ * @param defaultIsStmt whether the @c stmt value is @c true by default
+ * @param parser the main DWARF parser
+ */
 #define dwarf_lineInfoParser_initializer(defaultIsStmt, parser) \
 (struct dwarf_lineInfoParser) {                                 \
     0, 0, 1, 1, 0, 0, 0,                                        \
@@ -39,8 +73,31 @@ struct dwarf_lineInfoParser {
     parser                                                      \
 }
 
+/**
+ * Handles a default operation entry.
+ *
+ * @param self the DWARF line information parser object
+ * @param opCode the operation code to be handled
+ */
 void dwarf_lineInfoParser_handleDefaultEntry(struct dwarf_lineInfoParser* self, uint8_t opCode);
+
+/**
+ * Handles a single instruction operation code.
+ *
+ * @param self the DWARF line information parser
+ * @param counter the counter used as offset into the memory buffer
+ * @param opCode the operation code to be handled
+ */
 void dwarf_lineInfoParser_handleSingeInstruction(struct dwarf_lineInfoParser* self, size_t* counter, uint8_t opCode);
+
+/**
+ * Handles a special operation code.
+ *
+ * @param self the DWARF line information parser object
+ * @param counter the counter used as offset into the memory buffer
+ * @param length the length of the operation
+ * @param opCode the operation code to be handled
+ */
 void dwarf_lineInfoParser_handleSpecialOperation(struct dwarf_lineInfoParser* self, size_t* counter, uint64_t length,
                                                  uint8_t opCode);
 
