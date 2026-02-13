@@ -27,37 +27,31 @@
 #include "misc/cache.h"
 
 /**
- * @brief Translates the given address and returns the deducted debug
- * information for it.
- *
- * The success of finding a symbol is placed in the given boolean value if it
- * is not @c NULL .
+ * Translates the given address.
  *
  * @param address the address to find the closest symbol for
- * @param success the boolean value to place the success information in
+ * @param info the symbol information structure to be filled
  * @param useCache whether to use cache values for the returned information
- * @return the symbol information that was deducted
+ * @return whether a symbol info could be deducted
  */
-static inline SymbolInfo symbols_getInfoShared(const void* address, bool* success, const bool useCache) {
-    SymbolInfo toReturn;
+static inline bool symbols_getInfoShared(const void* address, SymbolInfo* info, const bool useCache) {
     dlMapper_init();
-    callstackFrame_translateBinary(&toReturn, address, useCache, true);
-    struct binaryFile* file = toReturn.reserved;
-    bool succeeded = false;
+    callstackFrame_translateBinary(info, address, useCache, true);
+    struct binaryFile* file = info->reserved;
+    bool toReturn = false;
     if (file != NULL) {
-        succeeded = binaryFile_getSymbolInfo(file, address, &toReturn);
+        toReturn = binaryFile_getSymbolInfo(file, address, info);
     }
-    if (success != NULL) *success = succeeded;
     maybeV(callstack_clearCaches);
     return toReturn;
 }
 
-SymbolInfo symbols_getInfo(const void* address, bool* success) {
-    return symbols_getInfoShared(address, success, false);
+bool symbols_getInfo(const void* address, SymbolInfo* info) {
+    return symbols_getInfoShared(address, info, false);
 }
 
-SymbolInfo symbols_getInfoCached(const void* address, bool* success) {
-    return symbols_getInfoShared(address, success, true);
+bool symbols_getInfoCached(const void* address, SymbolInfo* info) {
+    return symbols_getInfoShared(address, info, true);
 }
 
 void symbols_destroyInfo(const SymbolInfo* info) {
