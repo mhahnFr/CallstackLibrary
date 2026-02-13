@@ -197,6 +197,7 @@ public:
      * @param onlyBinaries whether to only deduct the names of the runtime images
      * @return @c this
      * @throws std::runtime_error if the translation failed
+     * @since v2.1
      */
     inline callstack& translate(const bool onlyBinaries = false) {
         if (onlyBinaries) {
@@ -220,6 +221,7 @@ public:
      *
      * @return @c this
      * @throws std::runtime_error if the translation failed
+     * @since v2.1
      */
     inline callstack& translateBinariesCached() {
         if (callstack_getBinariesCached(*this) == LCS_NULL) {
