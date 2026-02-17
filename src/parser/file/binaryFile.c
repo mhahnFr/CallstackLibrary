@@ -21,6 +21,7 @@
 
 #include "binaryFile.h"
 
+#include <try_catch.h>
 #include <file/pathUtils.h>
 #include <sys/stat.h>
 
@@ -75,8 +76,13 @@ struct binaryFile* binaryFile_new(const char* fileName, const void* startAddress
         vector_initializer,
     };
     LCS_FILE(tmp, create);
-    if (!LCS_FILE(tmp, parseShallow)) {
+    TRY({
+        LCS_FILE(tmp, parseShallow);
+    }, CATCH_ALL(_, {
         binaryFile_delete(toReturn);
+        toReturn = NULL;
+    }))
+    if (toReturn == NULL) {
         return NULL;
     }
     volatile const void* inside = NULL;
@@ -125,7 +131,15 @@ vector_pair_ptr_t binaryFile_getTLSRegions(struct binaryFile* self) {
 }
 
 bool binaryFile_maybeParse(struct binaryFile* self) {
-    return self->parsed || ((self->parsed = LCS_FILE(self, parse)));
+    if (!self->parsed) {
+        TRY({
+            LCS_FILE(self, parse);
+            self->parsed = true;
+        }, CATCH_ALL(_, {
+            self->parsed = false;
+        }))
+    }
+    return self->parsed;
 }
 
 void binaryFile_clearCaches(void) {
