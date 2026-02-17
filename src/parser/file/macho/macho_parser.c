@@ -22,6 +22,7 @@
 #include "macho_parser.h"
 
 #include <string.h>
+#include <try_catch.h>
 #include <mach-o/nlist.h>
 #include <mach-o/stab.h>
 #include <macho/macho_utils.h>
@@ -52,6 +53,8 @@
  */
 #define machoParser_swap(self, bits, value) macho_maybeSwap(bits, (self)->bytesSwapped, value)
 
+#define throw(theCode, ...) THROW1(struct machoParserException, { .code = machoParserExceptionCode_##theCode __VA_OPT__(,) __VA_ARGS__ })
+
 struct machoParser machoParser_create(
     struct symtab_command* command, const void* baseAddress,
     const uintptr_t parsingOffset, const bool bytesSwapped, const bool bit64,
@@ -77,14 +80,13 @@ struct machoParser machoParser_create(
  * @param suffix the suffix to be used for the system provided structures
  */
 #define machoParser_handleSymbolBeginImpl(bits, suffix)                                                         \
-static inline bool machoParser_handleSymbolBegin##bits(struct machoParser* self,                                \
+static inline void machoParser_handleSymbolBegin##bits(struct machoParser* self,                                \
                                                        const struct nlist##suffix* entry) {                     \
     if (self->private.parsingState.currentSymbol.has_value) {                                                   \
-        return false;                                                                                           \
+        throw(invalidState, "Symbol begin with active symbol");                                                 \
     }                                                                                                           \
     self->private.parsingState.currentSymbol = (optional_symbol_t) { true, symbol_initializer };                \
     self->private.parsingState.currentSymbol.value.startAddress = machoParser_swap(self, bits, entry->n_value); \
-    return true;                                                                                                \
 }
 
 machoParser_handleSymbolBeginImpl(32,)
@@ -97,16 +99,15 @@ machoParser_handleSymbolBeginImpl(64, _64)
  * @param suffix the suffix to be used for the system provided structures
  */
 #define machoParser_handleSymbolEndImpl(bits, suffix)                            \
-static inline bool machoParser_handleSymbolEnd##bits(struct machoParser* self) { \
+static inline void machoParser_handleSymbolEnd##bits(struct machoParser* self) { \
     if (!self->private.parsingState.currentSymbol.has_value) {                   \
-        return false;                                                            \
+        throw(invalidState, "Symbol end without active symbol");                 \
     }                                                                            \
     self->symbolCallback(self->object, (pair_symbolFile_t) {                     \
         self->private.parsingState.currentSymbol.value,                          \
         self->private.parsingState.currentObjectFile                             \
     });                                                                          \
     self->private.parsingState.currentSymbol.has_value = false;                  \
-    return true;                                                                 \
 }
 
 machoParser_handleSymbolEndImpl(32,)
@@ -119,13 +120,13 @@ machoParser_handleSymbolEndImpl(64, _64)
  * @param suffix the suffix to be used for the system provided structures
  */
 #define machoParser_handleSourceInfoImpl(bits, suffix)                                              \
-static inline bool machoParser_handleSourceInfo##bits(struct machoParser* self,                     \
+static inline void machoParser_handleSourceInfo##bits(struct machoParser* self,                     \
                                                       const struct nlist##suffix* entry) {          \
     const char* value = self->private.stringTable + machoParser_swap(self, 32, entry->n_un.n_strx); \
     if (*value == '\0') {                                                                           \
         if (self->private.parsingState.currentObjectFile == NULL) {                                 \
             /* Beginning of the symbol table source information, ignore. */                         \
-            return true;                                                                            \
+            return;                                                                                 \
         }                                                                                           \
         self->private.parsingState.currentObjectFile = NULL;                                        \
         self->private.parsingState.path = self->private.parsingState.sourceFilename = NULL;         \
@@ -134,7 +135,6 @@ static inline bool machoParser_handleSourceInfo##bits(struct machoParser* self, 
     } else {                                                                                        \
         self->private.parsingState.sourceFilename = value;                                          \
     }                                                                                               \
-    return true;                                                                                    \
 }
 
 machoParser_handleSourceInfoImpl(32,)
@@ -147,15 +147,15 @@ machoParser_handleSourceInfoImpl(64, _64)
  * @param suffix the suffix to be used for the system provided data structures
  */
 #define machoParser_handleObjectFileImpl(bits, suffix)                                                               \
-static inline bool machoParser_handleObjectFile##bits(struct machoParser* self,                                      \
+static inline void machoParser_handleObjectFile##bits(struct machoParser* self,                                      \
                                                       const struct nlist##suffix* entry) {                           \
     if (self->private.parsingState.currentObjectFile != NULL) {                                                      \
-        return false;                                                                                                \
+        throw(invalidState, "Handling object file without active object file");                                      \
     }                                                                                                                \
     const char* fileName = self->private.stringTable + machoParser_swap(self, 32, entry->n_un.n_strx);               \
     const uint64_t modified = machoParser_swap(self, bits, entry->n_value);                                          \
     if ((self->private.parsingState.currentObjectFile = macho_cache_findOrAdd(fileName, modified)) == NULL) {        \
-        return false;                                                                                                \
+        throw(failed, "Failed to cache object file");                                                                \
     }                                                                                                                \
     if (self->private.parsingState.currentObjectFile->directory == NULL) {                                           \
         self->private.parsingState.currentObjectFile->directory = self->private.parsingState.path == NULL            \
@@ -165,7 +165,6 @@ static inline bool machoParser_handleObjectFile##bits(struct machoParser* self, 
         self->private.parsingState.currentObjectFile->sourceFile = self->private.parsingState.sourceFilename == NULL \
                                                          ? NULL : strdup(self->private.parsingState.sourceFilename); \
     }                                                                                                                \
-    return true;                                                                                                     \
 }
 
 machoParser_handleObjectFileImpl(32,)
@@ -178,10 +177,10 @@ machoParser_handleObjectFileImpl(64, _64)
  * @param suffix the suffix to be used for the system provided data structures
  */
 #define machoParser_handleSymbolImpl(bits, suffix)                                                                  \
-static inline bool machoParser_handleSymbol##bits(struct machoParser* self,                                         \
-                                                    const struct nlist##suffix* entry) {                            \
+static inline void machoParser_handleSymbol##bits(struct machoParser* self,                                         \
+                                                  const struct nlist##suffix* entry) {                              \
     if (!self->private.parsingState.currentSymbol.has_value) {                                                      \
-        return false;                                                                                               \
+        throw(invalidState, "Handling symbol without active symbol");                                               \
     }                                                                                                               \
     const char* value = self->private.stringTable + machoParser_swap(self, 32, entry->n_un.n_strx);                 \
     if (*value == '\0') {                                                                                           \
@@ -190,7 +189,6 @@ static inline bool machoParser_handleSymbol##bits(struct machoParser* self,     
         self->private.parsingState.currentSymbol.value.linkedName   = strdup(value);                                \
         self->private.parsingState.currentSymbol.value.startAddress = machoParser_swap(self, bits, entry->n_value); \
     }                                                                                                               \
-    return true;                                                                                                    \
 }
 
 machoParser_handleSymbolImpl(32,)
@@ -203,9 +201,9 @@ machoParser_handleSymbolImpl(64, _64)
  * @param suffix the suffix to be used for the system provided data structures
  */
 #define machoParser_handleGeneralEntryImpl(bits, suffix)                                        \
-static inline bool machoParser_handleGeneralEntry##bits(struct machoParser* self,               \
+static inline void machoParser_handleGeneralEntry##bits(struct machoParser* self,               \
                                                         const struct nlist##suffix* entry) {    \
-    if ((entry->n_type & N_TYPE) != N_SECT) return true;                                        \
+    if ((entry->n_type & N_TYPE) != N_SECT) return;                                             \
                                                                                                 \
     self->symbolCallback(self->object, (pair_symbolFile_t) {                                    \
         (struct symbol) {                                                                       \
@@ -216,7 +214,6 @@ static inline bool machoParser_handleGeneralEntry##bits(struct machoParser* self
         },                                                                                      \
         NULL                                                                                    \
     });                                                                                         \
-    return true;                                                                                \
 }
 
 machoParser_handleGeneralEntryImpl(32,)
@@ -229,18 +226,18 @@ machoParser_handleGeneralEntryImpl(64, _64)
  * @param suffix the suffix to be used for the system provided data structures
  */
 #define machoParser_handleEntryImpl(bits, suffix)                                     \
-static inline bool machoParser_handleEntry##bits(struct machoParser* self,            \
+static inline void machoParser_handleEntry##bits(struct machoParser* self,            \
                                                  const struct nlist##suffix* entry) { \
     switch (entry->n_type) {                                                          \
-        case N_BNSYM: return machoParser_handleSymbolBegin##bits(self, entry);        \
-        case N_ENSYM: return machoParser_handleSymbolEnd##bits(self);                 \
+        case N_BNSYM: machoParser_handleSymbolBegin##bits(self, entry); break;        \
+        case N_ENSYM: machoParser_handleSymbolEnd##bits(self);          break;        \
                                                                                       \
-        case N_SO:  return machoParser_handleSourceInfo##bits(self, entry);           \
-        case N_OSO: return machoParser_handleObjectFile##bits(self, entry);           \
+        case N_SO:  machoParser_handleSourceInfo##bits(self, entry);    break;        \
+        case N_OSO: machoParser_handleObjectFile##bits(self, entry);    break;        \
                                                                                       \
-        case N_FUN: return machoParser_handleSymbol##bits(self, entry);               \
+        case N_FUN: machoParser_handleSymbol##bits(self, entry);        break;        \
                                                                                       \
-        default: return machoParser_handleGeneralEntry##bits(self, entry);            \
+        default: machoParser_handleGeneralEntry##bits(self, entry);     break;        \
     }                                                                                 \
 }
 
@@ -254,23 +251,21 @@ machoParser_handleEntryImpl(64, _64)
  * @param entryAddress the address of the entry to be handled
  * @return whether the handling was successful
  */
-static inline bool machoParser_handleEntry(struct machoParser* self, const void* entryAddress) {
+static inline void machoParser_handleEntry(struct machoParser* self, const void* entryAddress) {
     if (self->bit64) {
-        return machoParser_handleEntry64(self, entryAddress);
+        machoParser_handleEntry64(self, entryAddress);
+    } else {
+        machoParser_handleEntry32(self, entryAddress);
     }
-    return machoParser_handleEntry32(self, entryAddress);
 }
 
-bool machoParser_parseSymbolTable(struct machoParser* self) {
+void machoParser_parseSymbolTable(struct machoParser* self) {
     const uint32_t symCnt  = machoParser_swap(self, 32, self->command->nsyms),
                    symOff = machoParser_swap(self, 32, self->command->symoff);
     for (uint32_t i = 0; i < symCnt; ++i) {
-        if (!machoParser_handleEntry(self, self->baseAddress + symOff + self->parsingOffset
-                                           + i * self->private.entrySize)) {
-            return false;
-        }
+        machoParser_handleEntry(self, self->baseAddress + symOff + self->parsingOffset
+                                      + i * self->private.entrySize);
     }
-    return true;
 }
 
 void machoParser_destroy(const struct machoParser* self) {
