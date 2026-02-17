@@ -318,48 +318,47 @@ static inline void machoFile_fixupFunctions(struct machoFile* self) {
  * @param bits the amount of bits the implementation should handle
  * @param suffix the optional suffix to be used for the native data structures
  */
-#define machoFile_parseFileImpl(bits, suffix)                                                     \
-static inline bool machoFile_parseFileImpl##bits(struct machoFile* self, const void* baseAddress, \
-                                                 const bool bytesSwapped, const bool shallow) {   \
-    macho_iterateSegments(baseAddress, bytesSwapped, suffix, {                                    \
-        bool result = true;                                                                       \
-        switch (macho_maybeSwap(32, bytesSwapped, loadCommand->cmd)) {                            \
-            case LC_SEGMENT##suffix:                                                              \
-                result = machoFile_handleSegment##bits(self, baseAddress, (void*) loadCommand,    \
-                                                       bytesSwapped, shallow);                    \
-                break;                                                                            \
-                                                                                                  \
-            case LC_SYMTAB: {                                                                     \
-                if (shallow) {                                                                    \
-                    result = true;                                                                \
-                    break;                                                                        \
-                }                                                                                 \
-                struct machoParser parser = machoParser_create(                                   \
-                    (void*) loadCommand, baseAddress, self->_.inMemory ?                          \
-                        (self->linkedit_vmaddr - self->text_vmaddr) - self->linkedit_fileoff : 0, \
-                    bytesSwapped, (bits) == 64, (machoParser_addSymbol) machoFile_addSymbol, self \
-                );                                                                                \
-                result = machoParser_parseSymbolTable(&parser);                                   \
-                machoParser_destroy(&parser);                                                     \
-                break;                                                                            \
-            }                                                                                     \
-                                                                                                  \
-            case LC_UUID:                                                                         \
-                memcpy(&self->uuid, &((struct uuid_command*) ((void*) loadCommand))->uuid, 16);   \
-                result = true;                                                                    \
-                break;                                                                            \
-                                                                                                  \
-            case LC_FUNCTION_STARTS:                                                              \
-                result = shallow ? true : machoFile_handleFunctionStarts(                         \
-                    self, (void*) loadCommand, baseAddress, bytesSwapped                          \
-                );                                                                                \
-                break;                                                                            \
-        }                                                                                         \
-        if (!result) {                                                                            \
-            return false;                                                                         \
-        }                                                                                         \
-    })                                                                                            \
-    return true;                                                                                  \
+#define machoFile_parseFileImpl(bits, suffix)                                                                 \
+static inline void machoFile_parseFileImpl##bits(struct machoFile* self, const void* baseAddress,             \
+                                                 const bool bytesSwapped, const bool shallow) {               \
+    macho_iterateSegments(baseAddress, bytesSwapped, suffix, {                                                \
+        switch (macho_maybeSwap(32, bytesSwapped, loadCommand->cmd)) {                                        \
+            case LC_SEGMENT##suffix:                                                                          \
+                machoFile_handleSegment##bits(self, baseAddress, (void*) loadCommand, bytesSwapped, shallow); \
+                break;                                                                                        \
+                                                                                                              \
+            case LC_SYMTAB: {                                                                                 \
+                if (shallow) {                                                                                \
+                    break;                                                                                    \
+                }                                                                                             \
+                struct machoParser parser = machoParser_create(                                               \
+                    (void*) loadCommand, baseAddress, self->_.inMemory ?                                      \
+                        (self->linkedit_vmaddr - self->text_vmaddr) - self->linkedit_fileoff : 0,             \
+                    bytesSwapped, (bits) == 64, (machoParser_addSymbol) machoFile_addSymbol, self             \
+                );                                                                                            \
+                TRY({                                                                                         \
+                    machoParser_parseSymbolTable(&parser);                                                    \
+                    machoParser_destroy(&parser);                                                             \
+                }, CATCH_ALL(_, {                                                                             \
+                    machoParser_destroy(&parser);                                                             \
+                    RETHROW;                                                                                  \
+                }))                                                                                           \
+                break;                                                                                        \
+            }                                                                                                 \
+                                                                                                              \
+            case LC_UUID:                                                                                     \
+                memcpy(&self->uuid, &((struct uuid_command*) ((void*) loadCommand))->uuid, 16);               \
+                break;                                                                                        \
+                                                                                                              \
+            case LC_FUNCTION_STARTS:                                                                          \
+                if (!shallow) {                                                                               \
+                    machoFile_handleFunctionStarts(self, (void*) loadCommand, baseAddress, bytesSwapped);     \
+                }                                                                                             \
+                break;                                                                                        \
+                                                                                                              \
+            default: break;                                                                                   \
+        }                                                                                                     \
+    })                                                                                                        \
 }
 
 machoFile_parseFileImpl(32,)
