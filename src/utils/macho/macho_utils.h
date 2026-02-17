@@ -22,6 +22,8 @@
 #ifndef macho_utils_h
 #define macho_utils_h
 
+#include <try_catch.h>
+
 /**
  * Changes the endianness of the given value if requested.
  *
@@ -72,5 +74,18 @@
         { block }                                                                       \
     }                                                                                   \
 }
+
+struct machoException {
+    enum type {
+        machoExceptionType_unknown,
+
+        machoExceptionType_unsupported,
+        machoExceptionType_empty,
+        machoExceptionType_failed,
+    } code;
+    const char* message;
+};
+
+#define M_THROW(theCode, ...) THROW1(struct machoException, { .code = machoExceptionType_##theCode __VA_OPT__(,) __VA_ARGS__ })
 
 #endif /* macho_utils_h */
