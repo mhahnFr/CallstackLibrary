@@ -78,7 +78,7 @@ void machoFile_create(struct machoFile* self);
  * @param self the Mach-O file object
  * @return whether the parsing was successful
  */
-bool machoFile_parseShallow(struct machoFile* self);
+void machoFile_parseShallow(struct machoFile* self);
 
 /**
  * Stores all debug information that is possible to deduct about the given
@@ -127,7 +127,7 @@ vector_pair_ptr_t machoFile_getTLSRegions(struct machoFile* self);
  * @param self the Mach-O file abstraction object
  * @return whether the file was parsed successfully
  */
-bool machoFile_parse(struct machoFile* self);
+void machoFile_parse(struct machoFile* self);
 
 /**
  * Deinitializes the given binary file structure if it is a Mach-O file

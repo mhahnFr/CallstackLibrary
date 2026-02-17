@@ -374,7 +374,7 @@ machoFile_parseFileImpl(64, _64)
  * the represented file
  * @return whether the parsing was successful
  */
-static inline void machoFile_parseFileThrows(struct machoFile* self, const void* baseAddress, const bool shallow) {
+static inline void machoFile_parseFile(struct machoFile* self, const void* baseAddress, const bool shallow) {
     if (baseAddress == NULL) {
         M_THROW(empty, "Buffer to be parsed is NULL");
     }
@@ -387,10 +387,10 @@ static inline void machoFile_parseFileThrows(struct machoFile* self, const void*
         case MH_CIGAM_64: machoFile_parseFileImpl64(self, baseAddress, true, shallow);  break;
 
         case FAT_MAGIC:
-        case FAT_MAGIC_64: return machoFile_parseFileThrows(self, macho_parseFat(baseAddress, false, self->_.fileName.original), shallow);
+        case FAT_MAGIC_64: machoFile_parseFile(self, macho_parseFat(baseAddress, false, self->_.fileName.original), shallow); return;
 
         case FAT_CIGAM:
-        case FAT_CIGAM_64: return machoFile_parseFileThrows(self, macho_parseFat(baseAddress, true, self->_.fileName.original), shallow);
+        case FAT_CIGAM_64: machoFile_parseFile(self, macho_parseFat(baseAddress, true, self->_.fileName.original), shallow); return;
 
         default: break;
     }
@@ -406,16 +406,6 @@ static inline void machoFile_parseFileThrows(struct machoFile* self, const void*
     }
 }
 
-static inline bool machoFile_parseFile(struct machoFile* self, const void* baseAddress, const bool shallow) {
-    bool result = true;
-    TRY({
-        machoFile_parseFileThrows(self, baseAddress, shallow);
-    }, CATCH_ALL(_, {
-        result = false;
-    }))
-    return result;
-}
-
 /**
  * Parses the given Mach-O file entirely.
  *
@@ -423,28 +413,26 @@ static inline bool machoFile_parseFile(struct machoFile* self, const void* baseA
  * @param baseAddress the base address of the represented file
  * @return whether the parsing was successful
  */
-static inline bool machoFile_parseFileComplete(struct machoFile* self, const void* baseAddress) {
-    return machoFile_parseFile(self, baseAddress, false);
+static inline void machoFile_parseFileComplete(struct machoFile* self, const void* baseAddress) {
+    machoFile_parseFile(self, baseAddress, false);
 }
 
-bool machoFile_parseShallow(struct machoFile* self) {
-    return machoFile_parseFile(self, self->_.startAddress, true);
+void machoFile_parseShallow(struct machoFile* self) {
+    machoFile_parseFile(self, self->_.startAddress, true);
 }
 
-bool machoFile_parse(struct machoFile* self) {
-    const bool success = self->_.inMemory ? machoFile_parseFileComplete(self, self->_.startAddress)
-                                          : loader_loadFileAndExecute(self->_.fileName.original,
-                                                                      (union loader_parserFunction) { (loader_parser) machoFile_parseFileComplete },
-                                                                      false,
-                                                                      self);
-    if (success) {
+void machoFile_parse(struct machoFile* self) {
+    TRY({
+        self->_.inMemory ? machoFile_parseFileComplete(self, self->_.startAddress)
+                         : loader_loadFileAndExecute(self->_.fileName.original,
+                                                     (union loader_parserFunction) { (loader_parser) machoFile_parseFileComplete },
+                                                     false, self);
         vector_sort(&self->symbols, machoFile_functionSortCompare);
-    } else {
+    }, CATCH_ALL(_, {
         vector_iterate(&self->symbols, symbol_destroy(&element->first););
         vector_clear(&self->symbols);
-    }
-
-    return success;
+        RETHROW;
+    }))
 }
 
 bool machoFile_getFunctionInfo(struct machoFile* self, const char* functionName, struct functionInfo* info) {
