@@ -25,6 +25,8 @@
 #include <stdlib.h>
 #include <sys/stat.h>
 
+#include "try_catch.h"
+
 bool loader_loadFileAndExecuteTime(const char* fileName, const time_t* lastModified,
                                    const union loader_parserFunction func, const bool extended, void* args) {
     if (fileName == NULL) {
@@ -48,8 +50,20 @@ bool loader_loadFileAndExecuteTime(const char* fileName, const time_t* lastModif
     }
     const size_t count = fread(buffer, 1, fileStats.st_size, file);
     fclose(file);
-    const bool toReturn = (off_t) count == fileStats.st_size && (extended ? func.parseFuncExtended(buffer, fileName, count, args)
-                                                                          : func.parseFunc(args, buffer));
+    if ((off_t) count != fileStats.st_size) {
+        free(buffer);
+        return false;
+    }
+    TRY({
+        if (extended) {
+            func.parseFuncExtended(buffer, fileName, count, args);
+        } else {
+            func.parseFunc(args, buffer);
+        }
+    }, CATCH_ALL(_, {
+        free(buffer);
+        RETHROW;
+    }))
     free(buffer);
-    return toReturn;
+    return true;
 }

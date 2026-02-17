@@ -33,7 +33,7 @@
  *
  * Returns whether the parsing was successful.
  */
-typedef bool (*loader_parser)(void*, void*);
+typedef void (*loader_parser)(void*, void*);
 /**
  * @brief The complex parser callback function prototype.
  *
@@ -43,7 +43,7 @@ typedef bool (*loader_parser)(void*, void*);
  * <br><br>
  * Returns whether the parsing was successful.
  */
-typedef bool (*loader_parserExtended)(void*, const char*, size_t, void*);
+typedef void (*loader_parserExtended)(void*, const char*, size_t, void*);
 
 /** Union consisting of the two possible parser functions. */
 union loader_parserFunction {
