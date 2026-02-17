@@ -246,7 +246,7 @@ static inline void objectFile_addSymbolCallback(struct objectFile* self, pair_sy
  * @param suffix the optional suffix for the native data structures
  */
 #define objectFile_parseMachOImplFunc(bits, suffix)                                           \
-static inline bool objectFile_parseMachOImpl##bits(struct objectFile* self,                   \
+static inline void objectFile_parseMachOImpl##bits(struct objectFile* self,                   \
                                                    const void*        baseAddress,            \
                                                    const bool         bytesSwapped) {         \
     macho_iterateSegments(baseAddress, bytesSwapped, suffix, {                                \
@@ -274,16 +274,11 @@ static inline bool objectFile_parseMachOImpl##bits(struct objectFile* self,     
                                                                                               \
             case LC_UUID:                                                                     \
                 memcpy(&self->uuid, &((struct uuid_command*) (void*) loadCommand)->uuid, 16); \
-                result = true;                                                                \
                 break;                                                                        \
                                                                                               \
             default: break;                                                                   \
         }                                                                                     \
-        if (!result) {                                                                        \
-            return false;                                                                     \
-        }                                                                                     \
     })                                                                                        \
-    return true;                                                                              \
 }
 
 objectFile_parseMachOImplFunc(32,)
@@ -299,8 +294,10 @@ objectFile_parseMachOImplFunc(64, _64)
  * @param buffer the buffer of the Mach-O file
  * @return whether the parsing was successful
  */
-static inline bool objectFile_parseMachO(struct objectFile* self, const void* buffer) {
-    if (buffer == NULL) return false;
+static inline void objectFile_parseMachO(struct objectFile* self, const void* buffer) {
+    if (buffer == NULL) {
+        M_THROW(empty, "No buffer to be parsed given");
+    }
 
     const struct mach_header* header = buffer;
 
@@ -308,16 +305,15 @@ static inline bool objectFile_parseMachO(struct objectFile* self, const void* bu
         header->magic == MH_MAGIC_64 || header->magic == MH_CIGAM_64) {
         const uint32_t fileType = macho_maybeSwap(32, header->magic == MH_CIGAM || header->magic == MH_CIGAM_64, header->filetype);
         if (fileType != MH_OBJECT && fileType != MH_DSYM) {
-            return false;
+            M_THROW(unsupported, "Mach-O file to parse is neither a dSYM bundle file nor an object file");
         }
     }
 
-    bool success = false;
     switch (header->magic) {
-        case MH_MAGIC:    success = objectFile_parseMachOImpl32(self, buffer, false); break;
-        case MH_CIGAM:    success = objectFile_parseMachOImpl32(self, buffer, true);  break;
-        case MH_MAGIC_64: success = objectFile_parseMachOImpl64(self, buffer, false); break;
-        case MH_CIGAM_64: success = objectFile_parseMachOImpl64(self, buffer, true);  break;
+        case MH_MAGIC:    objectFile_parseMachOImpl32(self, buffer, false); break;
+        case MH_CIGAM:    objectFile_parseMachOImpl32(self, buffer, true);  break;
+        case MH_MAGIC_64: objectFile_parseMachOImpl64(self, buffer, false); break;
+        case MH_CIGAM_64: objectFile_parseMachOImpl64(self, buffer, true);  break;
 
         case FAT_MAGIC:
         case FAT_MAGIC_64: return objectFile_parseMachO(self, macho_parseFat(buffer, false, self->name));
@@ -328,7 +324,7 @@ static inline bool objectFile_parseMachO(struct objectFile* self, const void* bu
         default: break;
     }
 
-    if (success && self->debugLine.size > 0) {
+    if (self->debugLine.size > 0) {
         dwarf_parseLineProgram(self->debugLine,
                                self->debugLineStr,
                                self->debugStr,
@@ -337,18 +333,19 @@ static inline bool objectFile_parseMachO(struct objectFile* self, const void* bu
                                self->debugStrOffsets,
                                objectFile_dwarfLineCallback, self);
     }
-    return success;
 }
 
 bool objectFile_parseBuffer(struct objectFile* self, const void* buffer) {
-    const bool result = objectFile_parseMachO(self, buffer);
-    if (!result) {
-        vector_destroyWithPtr(&self->ownSymbols, symbol_destroy);
-        vector_init(&self->ownSymbols);
-    } else {
+    bool result = true;
+    TRY({
+        objectFile_parseMachO(self, buffer);
         vector_sort(&self->lineInfos, objectFile_dwarfLineInfoSortCompare);
         vector_sort(&self->ownSymbols, objectFile_symbolCompare);
-    }
+    }, CATCH_ALL(_, {
+        vector_destroyWithPtr(&self->ownSymbols, symbol_destroy);
+        vector_init(&self->ownSymbols);
+        result = false;
+    }));
     return result;
 }
 
