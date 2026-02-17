@@ -250,7 +250,6 @@ static inline void objectFile_parseMachOImpl##bits(struct objectFile* self,     
                                                    const void*        baseAddress,            \
                                                    const bool         bytesSwapped) {         \
     macho_iterateSegments(baseAddress, bytesSwapped, suffix, {                                \
-        bool result = true;                                                                   \
         switch (macho_maybeSwap(32, bytesSwapped, loadCommand->cmd)) {                        \
             case LC_SEGMENT##suffix:                                                          \
                 macho_iterateSections((void*) loadCommand, bytesSwapped, suffix,              \
@@ -267,8 +266,13 @@ static inline void objectFile_parseMachOImpl##bits(struct objectFile* self,     
                     bytesSwapped, (bits) == 64,                                               \
                     (machoParser_addSymbol) objectFile_addSymbolCallback, self                \
                 );                                                                            \
-                result = machoParser_parseSymbolTable(&parser);                               \
-                machoParser_destroy(&parser);                                                 \
+                TRY({                                                                         \
+                    machoParser_parseSymbolTable(&parser);                                    \
+                    machoParser_destroy(&parser);                                             \
+                }, CATCH_ALL(_, {                                                             \
+                    machoParser_destroy(&parser);                                             \
+                    RETHROW;                                                                  \
+                }))                                                                           \
                 break;                                                                        \
             }                                                                                 \
                                                                                               \
