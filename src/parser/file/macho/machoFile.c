@@ -198,7 +198,7 @@ static inline optional_debugInfo_t machoFile_getDebugInfo(struct machoFile* self
  * @param suffix the optional suffix to be used for the native types
  */
 #define machoFile_handleSegment(bits, suffix)                                                   \
-static inline bool machoFile_handleSegment##bits(struct machoFile* self, const void* buffer,    \
+static inline void machoFile_handleSegment##bits(struct machoFile* self, const void* buffer,    \
                                                  const struct segment_command##suffix* segment, \
                                                  const bool bytesSwapped, const bool shallow) { \
     uint##bits##_t vmaddr = macho_maybeSwap(bits, bytesSwapped, segment->vmaddr),               \
@@ -213,7 +213,7 @@ static inline bool machoFile_handleSegment##bits(struct machoFile* self, const v
         self->_.end = self->_.startAddress + vmsize;                                            \
     }                                                                                           \
     if (shallow) {                                                                              \
-        return true;                                                                            \
+        return;                                                                                 \
     }                                                                                           \
     if (segment->initprot & 2 && segment->initprot & 1) {                                       \
         vector_push_back(&self->_.regions, ((pair_ptr_t) { vmaddr, vmaddr + vmsize }));         \
@@ -244,7 +244,6 @@ static inline bool machoFile_handleSegment##bits(struct machoFile* self, const v
     if (size.has_value) {                                                                       \
         self->tlvSize = size.value;                                                             \
     }                                                                                           \
-    return true;                                                                                \
 }
 
 machoFile_handleSegment(32,)
@@ -283,7 +282,7 @@ static inline int machoFile_uint64Compare(const uint64_t* lhs, const uint64_t* r
  * @param bitsReversed whether to swap the endianness of read numbers
  * @return whether the parsing was successful
  */
-static inline bool machoFile_handleFunctionStarts(struct machoFile* self, struct linkedit_data_command* command,
+static inline void machoFile_handleFunctionStarts(struct machoFile* self, struct linkedit_data_command* command,
                                                   const void* baseAddress, const bool bitsReversed) {
     const uint32_t offset = macho_maybeSwap(32, bitsReversed, command->dataoff);
     const uint32_t size   = macho_maybeSwap(32, bitsReversed, command->datasize);
@@ -295,7 +294,6 @@ static inline bool machoFile_handleFunctionStarts(struct machoFile* self, struct
         vector_push_back(&self->functionStarts, funcAddr);
     }
     vector_sort(&self->functionStarts, &machoFile_uint64Compare);
-    return true;
 }
 
 /**
@@ -377,26 +375,27 @@ machoFile_parseFileImpl(64, _64)
  * the represented file
  * @return whether the parsing was successful
  */
-static inline bool machoFile_parseFile(struct machoFile* self, const void* baseAddress, const bool shallow) {
-    if (baseAddress == NULL) return false;
+static inline void machoFile_parseFileThrows(struct machoFile* self, const void* baseAddress, const bool shallow) {
+    if (baseAddress == NULL) {
+        M_THROW(empty, "Buffer to be parsed is NULL");
+    }
 
     const struct mach_header* header = baseAddress;
-    bool success = false;
     switch (header->magic) {
-        case MH_MAGIC:    success = machoFile_parseFileImpl32(self, baseAddress, false, shallow); break;
-        case MH_CIGAM:    success = machoFile_parseFileImpl32(self, baseAddress, true, shallow);  break;
-        case MH_MAGIC_64: success = machoFile_parseFileImpl64(self, baseAddress, false, shallow); break;
-        case MH_CIGAM_64: success = machoFile_parseFileImpl64(self, baseAddress, true, shallow);  break;
+        case MH_MAGIC:    machoFile_parseFileImpl32(self, baseAddress, false, shallow); break;
+        case MH_CIGAM:    machoFile_parseFileImpl32(self, baseAddress, true, shallow);  break;
+        case MH_MAGIC_64: machoFile_parseFileImpl64(self, baseAddress, false, shallow); break;
+        case MH_CIGAM_64: machoFile_parseFileImpl64(self, baseAddress, true, shallow);  break;
 
         case FAT_MAGIC:
-        case FAT_MAGIC_64: return machoFile_parseFile(self, macho_parseFat(baseAddress, false, self->_.fileName.original), shallow);
+        case FAT_MAGIC_64: return machoFile_parseFileThrows(self, macho_parseFat(baseAddress, false, self->_.fileName.original), shallow);
 
         case FAT_CIGAM:
-        case FAT_CIGAM_64: return machoFile_parseFile(self, macho_parseFat(baseAddress, true, self->_.fileName.original), shallow);
+        case FAT_CIGAM_64: return machoFile_parseFileThrows(self, macho_parseFat(baseAddress, true, self->_.fileName.original), shallow);
 
         default: break;
     }
-    if (success && !shallow) {
+    if (!shallow) {
         machoFile_fixupFunctions(self);
 
         const uintptr_t diff = (uintptr_t) baseAddress - self->text_vmaddr;
@@ -406,7 +405,16 @@ static inline bool machoFile_parseFile(struct machoFile* self, const void* baseA
         });
         BINARY_FILE_SUPER(self, sortRegions);
     }
-    return success;
+}
+
+static inline bool machoFile_parseFile(struct machoFile* self, const void* baseAddress, const bool shallow) {
+    bool result = true;
+    TRY({
+        machoFile_parseFileThrows(self, baseAddress, shallow);
+    }, CATCH_ALL(_, {
+        result = false;
+    }))
+    return result;
 }
 
 /**
