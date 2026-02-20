@@ -29,7 +29,6 @@
 #include "objectFile.h"
 #include "../exception.h"
 #include "../loader.h"
-#include "misc/allocations.h"
 
 /**
  * Creates name for the given file name indicating the archive it came from.
@@ -44,7 +43,7 @@ static inline char* macho_archive_constructName(const char* fileName, const char
     const size_t size = strlen(archiveName) + strlen(fileName) + 3;
     // Why +3: 1 byte for NULL termination and 2 bytes for the parentheses.    - mhahnFr
     
-    char* toReturn = ALLOC_T(size);
+    char* toReturn = BFE_ALLOC_MSG(size, "Failed to allocate memory for archive file name");
     strlcpy(toReturn, archiveName, size);
     strlcat(toReturn, "(", size);
     strlcat(toReturn, fileName, size);
@@ -115,14 +114,14 @@ static inline void macho_archive_parseImpl(void* buffer, const char* fileName, c
         size_t nameLength = 0;
         if (strncmp(fileHeader->ar_name, AR_EFMT1, exSize) == 0) {
             const size_t size = macho_archive_parseNumber(fileHeader->ar_name + exSize, sizeof fileHeader->ar_name / sizeof(char) - exSize, 10);
-            name = ALLOC_T(size + 1);
+            name = BFE_ALLOC_MSG(size + 1, "Failed to allocate memory for archive included file name");
             strlcpy(name, buffer + counter, size + 1);
             name[size] = '\0';
             counter += size;
             nameLength = size;
         } else {
             const size_t nameLength = macho_archive_stringLength(fileHeader->ar_name, sizeof fileHeader->ar_name);
-            name = ALLOC_T(nameLength + 1);
+            name = BFE_ALLOC_MSG(nameLength + 1, "Failed to allocate memory for archive included file name");
             strlcpy(name, fileHeader->ar_name, nameLength + 1);
             name[nameLength] = '\0';
         }
