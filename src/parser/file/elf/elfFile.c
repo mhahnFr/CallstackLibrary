@@ -23,6 +23,7 @@
 
 #include <elf.h>
 #include <stdlib.h>
+#include <try_catch.h>
 #include <elf/elfUtils.h>
 #include <file/pathUtils.h>
 #include <misc/string_utils.h>
@@ -30,6 +31,7 @@
 #include "lcs_stdio.h"
 #include "../bounds.h"
 #include "../debugInfo.h"
+#include "../exception.h"
 #include "../loader.h"
 #include "../../callstack_parser.h"
 #include "../dwarf/parser.h"
@@ -93,7 +95,7 @@ elfFile_loadSectionStrtab(64)
  * @param bits the amount of bits the implementation shall handle
  */
 #define elfFile_parseSymtab(bits)                                                                             \
-static inline bool elfFile_parseSymtab##bits(struct elfFile*   self,                                          \
+static inline void elfFile_parseSymtab##bits(struct elfFile*   self,                                          \
                                              Elf##bits##_Shdr* symtab,                                        \
                                              char*             strBegin,                                      \
                                              const void*       begin,                                         \
@@ -114,7 +116,6 @@ static inline bool elfFile_parseSymtab##bits(struct elfFile*   self,            
             vector_push_back(&self->symbols, f);                                                              \
         }                                                                                                     \
     }                                                                                                         \
-    return true;                                                                                              \
 }
 
 elfFile_parseSymtab(32)
@@ -167,11 +168,14 @@ elfFile_loadShnum(64)
  * @param bits the amount of bits the implementation shall handle
  */
 #define elfFile_parseFileImpl(bits)                                                                                   \
-static inline bool elfFile_parseFile##bits(struct elfFile* self, const Elf##bits##_Ehdr* buffer, bool littleEndian) { \
-    if (ELF_TO_HOST(bits, buffer->e_shoff, littleEndian) == 0) return false;                                          \
-                                                                                                                      \
+static inline void elfFile_parseFile##bits(struct elfFile* self, const Elf##bits##_Ehdr* buffer, bool littleEndian) { \
+    if (ELF_TO_HOST(bits, buffer->e_shoff, littleEndian) == 0) {                                                      \
+        BFE_THROW(unsupportedType, self);                                                                             \
+    }                                                                                                                 \
     char* sectStrBegin = elfFile_loadSectionStrtab##bits(buffer, littleEndian);                                       \
-    if (sectStrBegin == NULL) return false;                                                                           \
+    if (sectStrBegin == NULL) {                                                                                       \
+        BFE_THROW(failed, self);                                                                                      \
+    }                                                                                                                 \
                                                                                                                       \
     void* sectBegin = (void*) buffer + ELF_TO_HOST(bits, buffer->e_shoff, littleEndian);                              \
     Elf##bits##_Shdr* strtab   = NULL,                                                                                \
@@ -226,17 +230,13 @@ static inline bool elfFile_parseFile##bits(struct elfFile* self, const Elf##bits
     }                                                                                                                 \
     if (symtab == NULL || strtab == NULL) {                                                                           \
         if (dystrtab == NULL || dysymtab == NULL) {                                                                   \
-            return false;                                                                                             \
+            BFE_THROW(empty, self);                                                                                   \
         }                                                                                                             \
         symtab = dysymtab;                                                                                            \
         strtab = dystrtab;                                                                                            \
     }                                                                                                                 \
-                                                                                                                      \
-    return elfFile_parseSymtab##bits(self,                                                                            \
-                                     symtab,                                                                          \
-                                     (void*) buffer + ELF_TO_HOST(bits, strtab->sh_offset, littleEndian),             \
-                                     buffer,                                                                          \
-                                     littleEndian);                                                                   \
+    elfFile_parseSymtab##bits(self, symtab, (void*) buffer + ELF_TO_HOST(bits, strtab->sh_offset, littleEndian),      \
+                              buffer, littleEndian);                                                                  \
 }
 
 elfFile_parseFileImpl(32)
@@ -267,7 +267,7 @@ elfFile_loadEPHNum(64)
  * @param bits the amount of bits the implementation shall handle
  */
 #define elfFile_loadELF_impl(bits)                                                                  \
-static inline bool elfFile_loadELF##bits(struct elfFile* self, const void* base,                    \
+static inline void elfFile_loadELF##bits(struct elfFile* self, const void* base,                    \
                                          const bool littleEndian) {                                 \
     const Elf##bits##_Ehdr* header = base;                                                          \
                                                                                                     \
@@ -283,7 +283,6 @@ static inline bool elfFile_loadELF##bits(struct elfFile* self, const void* base,
         }                                                                                           \
     }                                                                                               \
     self->_.end = biggest;                                                                          \
-    return true;                                                                                    \
 }
 
 elfFile_loadELF_impl(32)
@@ -297,24 +296,23 @@ elfFile_loadELF_impl(64)
  * @param shallow whether to parse only the strictly necessary information
  * @return whether the file was parsed successfully
  */
-static inline bool elfFile_parseFile(struct elfFile* self, const Elf32_Ehdr* header, const bool shallow) {
-    bool success = false;
+static inline void elfFile_parseFile(struct elfFile* self, const Elf32_Ehdr* header, const bool shallow) {
     const bool littleEndian = header->e_ident[EI_DATA] == ELFDATA2LSB;
     switch (header->e_ident[EI_CLASS]) {
         case ELFCLASS32:
-            success = shallow ? elfFile_loadELF32(self, header, littleEndian)
-                              : elfFile_parseFile32(self, header, littleEndian);
+            shallow ? elfFile_loadELF32(self, header, littleEndian)
+                    : elfFile_parseFile32(self, header, littleEndian);
             break;
             
         case ELFCLASS64:
-            success = shallow ? elfFile_loadELF64(self, header, littleEndian)
-                              : elfFile_parseFile64(self, (void*) header, littleEndian);
+            shallow ? elfFile_loadELF64(self, header, littleEndian)
+                    : elfFile_parseFile64(self, (void*) header, littleEndian);
             break;
 
         default: break;
     }
 
-    if (!shallow && success && self->debugLine.size > 0) {
+    if (!shallow && self->debugLine.size > 0) {
         dwarf_parseLineProgram(self->debugLine,
                                self->debugLineStr,
                                self->debugStr,
@@ -323,8 +321,6 @@ static inline bool elfFile_parseFile(struct elfFile* self, const Elf32_Ehdr* hea
                                self->debugStrOffsets,
                                elfFile_lineProgramCallback, self);
     }
-
-    return success;
 }
 
 /**
@@ -373,26 +369,28 @@ static inline int elfFile_lineInfoCompare(const void* lhs, const void* rhs) {
  * @param header the ELF file header
  * @return whether the parsing was successful
  */
-static inline bool elfFile_parseFileComplete(struct elfFile* self, const Elf32_Ehdr* header) {
-    return elfFile_parseFile(self, header, false);
+static inline void elfFile_parseFileComplete(struct elfFile* self, const Elf32_Ehdr* header) {
+    elfFile_parseFile(self, header, false);
 }
 
-bool elfFile_parse(struct elfFile* self) {
-    const bool success = loader_loadFileAndExecute(self->_.fileName.original, (union loader_parserFunction) {
-        .parseFunc = (loader_parser) elfFile_parseFileComplete
-    }, false, self);
-    if (success) {
+void elfFile_parse(struct elfFile* self) {
+    TRY({
+        if (!loader_loadFileAndExecute(self->_.fileName.original, (union loader_parserFunction) {
+                .parseFunc = (loader_parser) elfFile_parseFileComplete
+            }, false, self)) {
+            BFE_THROW(failed, self);
+        }
         vector_sort(&self->symbols, elfFile_functionCompare);
         vector_sort(&self->lineInfos, elfFile_lineInfoCompare);
-    } else {
+    }, CATCH_ALL(_, {
         vector_destroyWithPtr(&self->symbols, symbol_destroy);
         vector_init(&self->symbols);
-    }
-    return success;
+        RETHROW;
+    }))
 }
 
-bool elfFile_parseShallow(struct elfFile* self) {
-    return elfFile_parseFile(self, self->_.startAddress, true);
+void elfFile_parseShallow(struct elfFile* self) {
+    elfFile_parseFile(self, self->_.startAddress, true);
 }
 
 /**

@@ -66,7 +66,7 @@ void elfFile_create(struct elfFile * self);
  * @param self the ELF file abstraction object
  * @return whether the ELF file was loaded successfully
  */
-bool elfFile_parse(struct elfFile* self);
+void elfFile_parse(struct elfFile* self);
 
 /**
  * Parses only the strictly necessary information of the represented ELF file.
@@ -74,7 +74,7 @@ bool elfFile_parse(struct elfFile* self);
  * @param self the ELF file object
  * @return whether the parsing was successful
  */
-bool elfFile_parseShallow(struct elfFile* self);
+void elfFile_parseShallow(struct elfFile* self);
 
 /**
  * Loads the debug information available for the given address into the given
