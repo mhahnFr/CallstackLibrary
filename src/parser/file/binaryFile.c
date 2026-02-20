@@ -80,11 +80,8 @@ struct binaryFile* binaryFile_new(const char* fileName, const void* startAddress
         LCS_FILE(tmp, parseShallow);
     }, CATCH_ALL(_, {
         binaryFile_delete(toReturn);
-        toReturn = NULL;
+        TC_RETURN NULL;
     }))
-    if (toReturn == NULL) {
-        return NULL;
-    }
     volatile const void* inside = NULL;
     inside = &binaryFile_new;
     toReturn->isSelf = inside >= startAddress && inside <= toReturn->end;
