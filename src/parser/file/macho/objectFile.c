@@ -144,9 +144,11 @@ static inline const char* objectFile_getSourceFileName(struct objectFile* self) 
  */
 static inline void objectFile_parse(struct objectFile* self) {
     const time_t lastModified = self->lastModified;
-    loader_loadFileAndExecuteTime(self->name, lastModified == 0 ? NULL : &lastModified, (union loader_parserFunction) {
+    if (!loader_loadFileAndExecuteTime(self->name, lastModified == 0 ? NULL : &lastModified, (union loader_parserFunction) {
         (loader_parser) objectFile_parseBuffer
-    }, false, self);
+    }, false, self)) {
+        M_THROW(failed, "Failed to load the object file");
+    }
 }
 
 /**
