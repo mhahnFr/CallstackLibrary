@@ -29,6 +29,7 @@
 #include "macho_parser.h"
 #include "../binaryFile.h"
 #include "../bounds.h"
+#include "../exception.h"
 #include "../loader.h"
 #include "../dwarf/parser.h"
 
@@ -147,7 +148,7 @@ static inline void objectFile_parse(struct objectFile* self) {
     if (!loader_loadFileAndExecuteTime(self->name, lastModified == 0 ? NULL : &lastModified, (union loader_parserFunction) {
         (loader_parser) objectFile_parseBuffer
     }, false, self)) {
-        M_THROW(failed, "Failed to load the object file");
+        BFE_THROW_MSG(failed, "Failed to load the object file");
     }
 }
 
@@ -327,7 +328,7 @@ objectFile_parseMachOImplFunc(64, _64)
  */
 static inline void objectFile_parseMachO(struct objectFile* self, const void* buffer) {
     if (buffer == NULL) {
-        M_THROW(empty, "No buffer to be parsed given");
+        BFE_THROW_MSG(empty, "No buffer to be parsed given");
     }
 
     const struct mach_header* header = buffer;
@@ -336,7 +337,7 @@ static inline void objectFile_parseMachO(struct objectFile* self, const void* bu
         header->magic == MH_MAGIC_64 || header->magic == MH_CIGAM_64) {
         const uint32_t fileType = macho_maybeSwap(32, header->magic == MH_CIGAM || header->magic == MH_CIGAM_64, header->filetype);
         if (fileType != MH_OBJECT && fileType != MH_DSYM) {
-            M_THROW(unsupported, "Mach-O file to parse is neither a dSYM bundle file nor an object file");
+            BFE_THROW_MSG(unsupportedType, "Mach-O file to parse is neither a dSYM bundle file nor an object file");
         }
     }
 
