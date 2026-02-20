@@ -22,6 +22,7 @@
 #include "cache.h"
 
 #include <string.h>
+#include <try_catch.h>
 
 #include "archive.h"
 
@@ -99,8 +100,13 @@ static inline void macho_cache_archiveCallback(struct objectFile* file) {
  */
 static inline bool macho_cache_loadArchive(const char* archiveName) {
     if (archiveName == NULL) return false;
-    
-    return macho_archive_parse(archiveName, macho_cache_archiveCallback);
+
+    TRY({
+        macho_archive_parse(archiveName, macho_cache_archiveCallback);
+    }, CATCH_ALL(_, {
+        TC_RETURN false;
+    }))
+    return true;
 }
 
 /**
