@@ -27,8 +27,8 @@
 #include <sys/stat.h>
 
 #include "objectFile.h"
+#include "../exception.h"
 #include "../loader.h"
-#include "macho/macho_utils.h"
 #include "misc/allocations.h"
 
 /**
@@ -98,7 +98,7 @@ static inline void macho_archive_parseImpl(void* buffer, const char* fileName, c
     size_t counter = 0;
     const char* magic = buffer;
     if (strncmp(magic, ARMAG, SARMAG) != 0) {
-        M_THROW(unsupported, "Given file is not an archive");
+        BFE_THROW_MSG(unsupportedType, "Given file is not an archive");
     }
     counter += SARMAG;
     
@@ -108,7 +108,7 @@ static inline void macho_archive_parseImpl(void* buffer, const char* fileName, c
         const struct ar_hdr* fileHeader = buffer + counter;
         counter += sizeof(struct ar_hdr);
         if (strncmp(fileHeader->ar_fmag, ARFMAG, endSize) != 0) {
-            M_THROW(failed, "Archive file inconsistent");
+            BFE_THROW_MSG(failed, "Archive file inconsistent");
         }
         
         char* name;
