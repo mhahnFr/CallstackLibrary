@@ -1,7 +1,7 @@
 /*
  * CallstackLibrary - Library creating human-readable call stacks.
  *
- * Copyright (C) 2024 - 2025  mhahnFr
+ * Copyright (C) 2024 - 2026  mhahnFr
  *
  * This file is part of the CallstackLibrary.
  *
@@ -23,10 +23,13 @@
 
 #include <ar.h>
 #include <stdlib.h>
+#include <try_catch.h>
 #include <sys/stat.h>
 
 #include "objectFile.h"
 #include "../loader.h"
+#include "macho/macho_utils.h"
+#include "misc/allocations.h"
 
 /**
  * Creates name for the given file name indicating the archive it came from.
@@ -41,10 +44,7 @@ static inline char* macho_archive_constructName(const char* fileName, const char
     const size_t size = strlen(archiveName) + strlen(fileName) + 3;
     // Why +3: 1 byte for NULL termination and 2 bytes for the parentheses.    - mhahnFr
     
-    char* toReturn = malloc(size);
-    if (toReturn == NULL) {
-        return NULL;
-    }
+    char* toReturn = ALLOC_T(size);
     strlcpy(toReturn, archiveName, size);
     strlcat(toReturn, "(", size);
     strlcat(toReturn, fileName, size);
@@ -94,11 +94,11 @@ static inline size_t macho_archive_stringLength(const char* string, const size_t
  * @param cb the callback to be called once an object file has been extracted
  * @return whether the archive was parsed successfully
  */
-static inline bool macho_archive_parseImpl(void* buffer, const char* fileName, const size_t totalSize, const macho_archive_callback cb) {
+static inline void macho_archive_parseImpl(void* buffer, const char* fileName, const size_t totalSize, const macho_archive_callback cb) {
     size_t counter = 0;
     const char* magic = buffer;
     if (strncmp(magic, ARMAG, SARMAG) != 0) {
-        return false;
+        M_THROW(unsupported, "Given file is not an archive");
     }
     counter += SARMAG;
     
@@ -107,47 +107,48 @@ static inline bool macho_archive_parseImpl(void* buffer, const char* fileName, c
     while (counter < totalSize) {
         const struct ar_hdr* fileHeader = buffer + counter;
         counter += sizeof(struct ar_hdr);
-        if (strncmp(fileHeader->ar_fmag, ARFMAG, endSize) != 0) return false;
+        if (strncmp(fileHeader->ar_fmag, ARFMAG, endSize) != 0) {
+            M_THROW(failed, "Archive file inconsistent");
+        }
         
         char* name;
         size_t nameLength = 0;
         if (strncmp(fileHeader->ar_name, AR_EFMT1, exSize) == 0) {
             const size_t size = macho_archive_parseNumber(fileHeader->ar_name + exSize, sizeof fileHeader->ar_name / sizeof(char) - exSize, 10);
-            name = malloc(size + 1);
-            if (name == NULL) {
-                return false;
-            }
+            name = ALLOC_T(size + 1);
             strlcpy(name, buffer + counter, size + 1);
             name[size] = '\0';
             counter += size;
             nameLength = size;
         } else {
             const size_t nameLength = macho_archive_stringLength(fileHeader->ar_name, sizeof fileHeader->ar_name);
-            name = malloc(nameLength + 1);
-            if (name == NULL) {
-                return false;
-            }
+            name = ALLOC_T(nameLength + 1);
             strlcpy(name, fileHeader->ar_name, nameLength + 1);
             name[nameLength] = '\0';
         }
-        
-        void* objectFile = buffer + counter;
+
+        const void* objectFile = buffer + counter;
         struct objectFile* file = objectFile_new();
         file->lastModified = (time_t) macho_archive_parseNumber(fileHeader->ar_date, sizeof fileHeader->ar_date / sizeof(char), 10);
         file->name = macho_archive_constructName(name, fileName);
         free(name);
-        
-        file->parsed = objectFile_parseBuffer(file, objectFile);
+
+        TRY({
+            objectFile_parseBuffer(file, objectFile);
+            file->parsed = true;
+        }, CATCH_ALL(_, {
+            objectFile_delete(file);
+            RETHROW;
+        }))
         cb(file);
         
         counter += macho_archive_parseNumber(fileHeader->ar_size, sizeof fileHeader->ar_size / sizeof(char), 10) - nameLength;
         for (; counter < totalSize && *(char*) (buffer + counter) == '\n'; ++counter);
     }
-    return true;
 }
 
-bool macho_archive_parse(const char* fileName, const macho_archive_callback cb) {
-    return loader_loadFileAndExecute(fileName, (union loader_parserFunction) { 
+void macho_archive_parse(const char* fileName, const macho_archive_callback cb) {
+    loader_loadFileAndExecute(fileName, (union loader_parserFunction) {
         .parseFuncExtended = (loader_parserExtended) macho_archive_parseImpl
     }, true, cb);
 }
