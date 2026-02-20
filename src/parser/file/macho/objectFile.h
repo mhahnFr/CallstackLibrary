@@ -103,18 +103,7 @@ struct objectFile * objectFile_new(void);
  * @param buffer the Mach-O buffer to be parsed
  * @return whether the parsing was successful
  */
-bool objectFile_parseBuffer(struct objectFile* self, const void* buffer);
-
-/**
- * @brief Parses the Mach-O file represented by the given object file object.
- *
- * The DWARF line information is extracted and for every line entry the given
- * callback is called with the additionally given arguments.
- *
- * @param self the object file object to be parsed
- * @return whether the parsing was successful
- */
-bool objectFile_parse(struct objectFile* self);
+void objectFile_parseBuffer(struct objectFile* self, const void* buffer);
 
 /**
  * @brief Returns the UUID of the given object file object.

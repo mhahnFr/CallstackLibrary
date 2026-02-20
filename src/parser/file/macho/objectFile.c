@@ -134,13 +134,38 @@ static inline const char* objectFile_getSourceFileName(struct objectFile* self) 
 }
 
 /**
+ * @brief Parses the Mach-O file represented by the given object file object.
+ *
+ * The DWARF line information is extracted and for every line entry the given
+ * callback is called with the additionally given arguments.
+ *
+ * @param self the object file object to be parsed
+ * @return whether the parsing was successful
+ */
+static inline void objectFile_parse(struct objectFile* self) {
+    const time_t lastModified = self->lastModified;
+    loader_loadFileAndExecuteTime(self->name, lastModified == 0 ? NULL : &lastModified, (union loader_parserFunction) {
+        (loader_parser) objectFile_parseBuffer
+    }, false, self);
+}
+
+/**
  * Parses the given object file if it has not already been parsed.
  *
  * @param self the object file
  * @return whether the object file has been parsed
  */
 static inline bool objectFile_maybeParse(struct objectFile* self) {
-    return self->parsed || ((self->parsed = objectFile_parse(self)));
+    if (self->parsed) {
+        return true;
+    }
+    TRY({
+        objectFile_parse(self);
+        self->parsed = true;
+    }, CATCH_ALL(_, {
+        self->parsed = false;
+    }))
+    return self->parsed;
 }
 
 optional_debugInfo_t objectFile_getDebugInfo(struct objectFile* self, const uint64_t address, const struct symbol symbol) {
@@ -339,7 +364,7 @@ static inline void objectFile_parseMachO(struct objectFile* self, const void* bu
     }
 }
 
-bool objectFile_parseBuffer(struct objectFile* self, const void* buffer) {
+void objectFile_parseBuffer(struct objectFile* self, const void* buffer) {
     TRY({
         objectFile_parseMachO(self, buffer);
         vector_sort(&self->lineInfos, objectFile_dwarfLineInfoSortCompare);
@@ -347,18 +372,9 @@ bool objectFile_parseBuffer(struct objectFile* self, const void* buffer) {
     }, CATCH_ALL(_, {
         vector_destroyWithPtr(&self->ownSymbols, symbol_destroy);
         vector_init(&self->ownSymbols);
-        TC_RETURN false;
+        RETHROW;
     }));
-    return true;
 }
-
-bool objectFile_parse(struct objectFile* self) {
-    const time_t lastModified = self->lastModified;
-    return loader_loadFileAndExecuteTime(self->name, lastModified == 0 ? NULL : &lastModified, (union loader_parserFunction) {
-        (loader_parser) objectFile_parseBuffer
-    }, false, self);
-}
-
 
 void objectFile_destroy(struct objectFile* self) {
     vector_destroyWithPtr(&self->ownSymbols, symbol_destroy);
