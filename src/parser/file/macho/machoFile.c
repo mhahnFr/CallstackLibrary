@@ -423,10 +423,13 @@ void machoFile_parseShallow(struct machoFile* self) {
 
 void machoFile_parse(struct machoFile* self) {
     TRY({
-        self->_.inMemory ? machoFile_parseFileComplete(self, self->_.startAddress)
-                         : loader_loadFileAndExecute(self->_.fileName.original,
-                                                     (union loader_parserFunction) { (loader_parser) machoFile_parseFileComplete },
-                                                     false, self);
+        if (self->_.inMemory) {
+            machoFile_parseFileComplete(self, self->_.startAddress);
+        } else if (!loader_loadFileAndExecute(self->_.fileName.original,
+            (union loader_parserFunction) { (loader_parser) machoFile_parseFileComplete },
+            false, self)) {
+            M_THROW(failed, "Failed to load the Mach-O file");
+        }
         vector_sort(&self->symbols, machoFile_functionSortCompare);
     }, CATCH_ALL(_, {
         vector_iterate(&self->symbols, symbol_destroy(&element->first););
