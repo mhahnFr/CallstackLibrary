@@ -34,6 +34,7 @@
 #include "cache.h"
 #include "macho_parser.h"
 #include "../bounds.h"
+#include "../exception.h"
 #include "../loader.h"
 #include "../../callstack_parser.h"
 #include "../dwarf/leb128.h"
@@ -376,7 +377,7 @@ machoFile_parseFileImpl(64, _64)
  */
 static inline void machoFile_parseFile(struct machoFile* self, const void* baseAddress, const bool shallow) {
     if (baseAddress == NULL) {
-        M_THROW(empty, "Buffer to be parsed is NULL");
+        BFE_THROW(empty, self);
     }
 
     const struct mach_header* header = baseAddress;
@@ -428,7 +429,7 @@ void machoFile_parse(struct machoFile* self) {
         } else if (!loader_loadFileAndExecute(self->_.fileName.original,
             (union loader_parserFunction) { (loader_parser) machoFile_parseFileComplete },
             false, self)) {
-            M_THROW(failed, "Failed to load the Mach-O file");
+            BFE_THROW(failed, self);
         }
         vector_sort(&self->symbols, machoFile_functionSortCompare);
     }, CATCH_ALL(_, {
