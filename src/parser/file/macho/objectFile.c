@@ -340,7 +340,6 @@ static inline void objectFile_parseMachO(struct objectFile* self, const void* bu
 }
 
 bool objectFile_parseBuffer(struct objectFile* self, const void* buffer) {
-    bool result = true;
     TRY({
         objectFile_parseMachO(self, buffer);
         vector_sort(&self->lineInfos, objectFile_dwarfLineInfoSortCompare);
@@ -348,9 +347,9 @@ bool objectFile_parseBuffer(struct objectFile* self, const void* buffer) {
     }, CATCH_ALL(_, {
         vector_destroyWithPtr(&self->ownSymbols, symbol_destroy);
         vector_init(&self->ownSymbols);
-        result = false;
+        TC_RETURN false;
     }));
-    return result;
+    return true;
 }
 
 bool objectFile_parse(struct objectFile* self) {
