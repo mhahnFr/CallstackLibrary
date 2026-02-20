@@ -48,6 +48,13 @@ struct binaryFileException {
         .payload.file = &(concreteFilePtr)->_,     \
     })
 
+#define BFE_THROW_MSG(theCode, theMessage)         \
+    THROW1(struct binaryFileException, {           \
+        .code = binaryFileExceptionType_##theCode, \
+        .hasMessage = true,                        \
+        .payload.message = (theMessage),           \
+    })
+
 #define BFE_ALLOC_RAW(size, throwExpr) ({ \
     void* _toReturn = malloc(size);       \
     if (_toReturn == NULL) {              \
@@ -58,11 +65,6 @@ struct binaryFileException {
 
 #define BFE_ALLOC_F(size, file) BFE_ALLOC_RAW(size, BFE_THROW(failedAllocation, file))
 
-#define BFE_ALLOC_MSG(size, theMessage)                  \
-BFE_ALLOC_RAW(size, THROW1(struct binaryFileException, { \
-    .code = binaryFileExceptionType_failedAllocation,    \
-    .hasMessage = true,                                  \
-    .payload.message = (theMessage),                     \
-}))
+#define BFE_ALLOC_MSG(size, theMessage) BFE_ALLOC_RAW(size, BFE_THROW_MSG(failedAllocation, theMessage))
 
 #endif //CALLSTACKLIBRARY_EXCEPTION_H
