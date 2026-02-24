@@ -28,6 +28,7 @@
 
 #include "definitions.h"
 #include "../leb128.h"
+#include "../../exception.h"
 
 /**
  * Reads an index that follows in the given data buffer.
@@ -38,7 +39,7 @@
  * @return the read index or an empty optional if the requested data type was
  * not allowed
  */
-static inline optional_uint64_t dwarf5_readIndex(const void* buffer, size_t* counter, const uint64_t type) {
+static inline uint64_t dwarf5_readIndex(const void* buffer, size_t* counter, const uint64_t type) {
     uint64_t toReturn;
     switch (type) {
         case DW_FORM_data1:
@@ -54,9 +55,9 @@ static inline optional_uint64_t dwarf5_readIndex(const void* buffer, size_t* cou
             toReturn = getULEB128(buffer, counter);
             break;
 
-        default: return (optional_uint64_t) { .has_value = false };
+        default: BFE_THROW_MSG(unsupported, "Unsupported DW_FORM_data for parsing index");
     }
-    return (optional_uint64_t) { true, toReturn };
+    return toReturn;
 }
 
 /**
@@ -68,7 +69,7 @@ static inline optional_uint64_t dwarf5_readIndex(const void* buffer, size_t* cou
  * @return the read timestamp or an empty optional if the given data type was
  * not allowed
  */
-static inline optional_uint64_t dwarf5_readTimestamp(const void* buffer, size_t* counter, const uint64_t type) {
+static inline uint64_t dwarf5_readTimestamp(const void* buffer, size_t* counter, const uint64_t type) {
     uint64_t toReturn;
     switch (type) {
         case DW_FORM_udata:
@@ -92,9 +93,9 @@ static inline optional_uint64_t dwarf5_readTimestamp(const void* buffer, size_t*
             break;
         }
 
-        default: return (optional_uint64_t) { .has_value = false };
+        default: BFE_THROW_MSG(unsupported, "Unsupported DW_FORM_data for parsing timestamp");
     }
-    return (optional_uint64_t) { true, toReturn };
+    return toReturn;
 }
 
 /**
@@ -106,7 +107,7 @@ static inline optional_uint64_t dwarf5_readTimestamp(const void* buffer, size_t*
  * @return the read size value or an empty optional if the given data type was
  * not allowed
  */
-static inline optional_uint64_t dwarf5_readSize(const void* buffer, size_t* counter, const uint64_t type) {
+static inline uint64_t dwarf5_readSize(const void* buffer, size_t* counter, const uint64_t type) {
     uint64_t toReturn;
     switch (type) {
         case DW_FORM_udata:
@@ -132,9 +133,9 @@ static inline optional_uint64_t dwarf5_readSize(const void* buffer, size_t* coun
             *counter += 8;
             break;
 
-        default: return (optional_uint64_t) { .has_value = false };
+        default: BFE_THROW_MSG(unsupported, "Unsupported DW_FORM_data for parsing size");
     }
-    return (optional_uint64_t) { true, toReturn };
+    return toReturn;
 }
 
 /**
@@ -157,7 +158,7 @@ static inline const uint8_t* dwarf5_readMD5(const void* buffer, size_t* counter)
  * @param counter the reading index
  * @return the parsed file attributes or an empty optional if the parsing failed
  */
-static inline optional_vector_fileAttribute_t dwarf5_parseFileAttributes(const struct dwarf_parser* self, size_t* counter) {
+static inline vector_fileAttribute_t dwarf5_parseFileAttributes(const struct dwarf_parser* self, size_t* counter) {
     const uint8_t entryFormatCount = *(uint8_t*) (self->debugLine.content + (*counter)++);
     vector_pair_uint64_t entryFormats = vector_initializer;
     vector_reserve(&entryFormats, entryFormatCount);
@@ -178,55 +179,44 @@ static inline optional_vector_fileAttribute_t dwarf5_parseFileAttributes(const s
             .index     = 0,
             .timestamp = 0,
         };
-        vector_iterate(&entryFormats, {
-            TRY(switch (element->first) {
+        TRY({
+            vector_iterate(&entryFormats, switch (element->first) {
                 case DW_LNCT_path:
                     attribute.path = dwarf_readString(self, self->debugLine.content, counter, element->second);
                     break;
 
-                case DW_LNCT_directory_index: {
-                    const optional_uint64_t value = dwarf5_readIndex(self->debugLine.content, counter, element->second);
-                    if (!value.has_value) THROW1(char*, "Failed to read DW_LNCT_directory_index");
-                    attribute.index = value.value;
+                case DW_LNCT_directory_index:
+                    attribute.index = dwarf5_readIndex(self->debugLine.content, counter, element->second);
                     break;
-                }
 
-                case DW_LNCT_timestamp: {
-                    const optional_uint64_t value = dwarf5_readTimestamp(self->debugLine.content, counter, element->second);
-                    if (!value.has_value) THROW1(char*, "Failed to read DW_LNCT_timestamp");
-                    attribute.timestamp = value.value;
+                case DW_LNCT_timestamp:
+                    attribute.timestamp = dwarf5_readTimestamp(self->debugLine.content, counter, element->second);
                     break;
-                }
 
-                case DW_LNCT_size: {
-                    const optional_uint64_t value = dwarf5_readSize(self->debugLine.content, counter, element->second);
-                    if (!value.has_value) THROW1(char*, "Failed to read DW_LNCT_size");
-                    attribute.size = value.value;
+                case DW_LNCT_size:
+                    attribute.size = dwarf5_readSize(self->debugLine.content, counter, element->second);
                     break;
-                }
 
                 case DW_LNCT_MD5:
-                    if (element->second != DW_FORM_data16) THROW1(char*, "Shall read DW_LNCT_MD5 but format is not DW_FORM_data16");
+                    if (element->second != DW_FORM_data16) {
+                        BFE_THROW_MSG(invalid, "Parsing DW_LNCT_MD5 but format is not DW_FORM_data16");
+                    }
                     attribute.md5 = dwarf5_readMD5(self->debugLine.content, counter);
                     break;
 
                 default:
-                    if (!dwarf_consumeSome(self, self->debugLine.content, counter, element->second)) {
-                        THROW1(char*, "Failed to skip unknown value");
-                    }
+                    dwarf_consumeSome(self, self->debugLine.content, counter, element->second);
                     break;
-            }, CATCH(char*, message, {
-                printf("LCS: Failed to parse DWARF 5: %s\n", message);
-                vector_destroy(&entryFormats);
-                vector_destroy(&attributes);
-                return (optional_vector_fileAttribute_t) { .has_value = false };
-            }))
-        });
-        vector_push_back(&attributes, attribute);
+            });
+            vector_push_back(&attributes, attribute);
+        }, CATCH_ALL(_, {
+            vector_destroy(&entryFormats);
+            vector_destroy(&attributes);
+            RETHROW;
+        }))
     }
     vector_destroy(&entryFormats);
-
-    return (optional_vector_fileAttribute_t) { true, attributes };
+    return attributes;
 }
 
 /**
@@ -245,12 +235,17 @@ static inline char* dwarf5_constructFileName(const struct fileAttribute*   file,
     const char* dirPath = directories->content[file->index].path;
     if (*dirPath != '/') {
         dirPath = dwarf_pathConcatenate(defaultDirectory, dirPath);
-        if (dirPath == NULL) {
-            return NULL;
-        }
         freeDir = true;
     }
-    char* toReturn = dwarf_pathConcatenate(dirPath, file->path);
+    char* toReturn;
+    TRY({
+        toReturn = dwarf_pathConcatenate(dirPath, file->path);
+    }, CATCH_ALL(_, {
+        if (freeDir) {
+            free((char*) dirPath);
+        }
+        RETHROW;
+    }))
     if (freeDir) {
         free((char*) dirPath);
     }
@@ -281,7 +276,7 @@ static inline struct dwarf_sourceFile dwarf5_getFileName(const struct dwarf_pars
  * @param counter the reading index
  * @return whether the parsing was successful
  */
-static inline bool dwarf5_parseLineProgramHeader(struct dwarf_parser* self, size_t* counter) {
+static inline void dwarf5_parseLineProgramHeader(struct dwarf_parser* self, size_t* counter) {
     const uint8_t addressSize = *(uint8_t*) (self->debugLine.content + (*counter)++);
     const uint8_t segmentSelectorSize = *(uint8_t*) (self->debugLine.content + (*counter)++);
     (void) addressSize;
@@ -308,19 +303,8 @@ static inline bool dwarf5_parseLineProgramHeader(struct dwarf_parser* self, size
     for (uint8_t i = 1; i < self->opCodeBase; ++i) {
         vector_push_back(&self->stdOpcodeLengths, *((uint8_t*) (self->debugLine.content + (*counter)++)));
     }
-
-    const optional_vector_fileAttribute_t maybeDirs = dwarf5_parseFileAttributes(self, counter);
-    if (!maybeDirs.has_value) {
-        return false;
-    }
-    self->specific.v5.directories = maybeDirs.value;
-
-    const optional_vector_fileAttribute_t maybeFiles = dwarf5_parseFileAttributes(self, counter);
-    if (!maybeFiles.has_value) {
-        return false;
-    }
-    self->specific.v5.files = maybeFiles.value;
-    return true;
+    self->specific.v5.directories = dwarf5_parseFileAttributes(self, counter);
+    self->specific.v5.files = dwarf5_parseFileAttributes(self, counter);
 }
 
 /**
