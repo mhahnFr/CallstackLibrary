@@ -313,13 +313,17 @@ static inline void elfFile_parseFile(struct elfFile* self, const Elf32_Ehdr* hea
     }
 
     if (!shallow && self->debugLine.size > 0) {
-        dwarf_parseLineProgram(self->debugLine,
-                               self->debugLineStr,
-                               self->debugStr,
-                               self->debugInfo,
-                               self->debugAbbrev,
-                               self->debugStrOffsets,
-                               elfFile_lineProgramCallback, self);
+        TRY({
+            dwarf_parseLineProgram(self->debugLine,
+                                   self->debugLineStr,
+                                   self->debugStr,
+                                   self->debugInfo,
+                                   self->debugAbbrev,
+                                   self->debugStrOffsets,
+                                   elfFile_lineProgramCallback, self);
+        }, CATCH_ALL(_, {
+            // TODO: Allowed to fail, handle anyway
+        }))
     }
 }
 
