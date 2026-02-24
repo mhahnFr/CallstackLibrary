@@ -25,16 +25,14 @@
 #include <misc/numberContainers.h>
 
 #include "leb128.h"
+#include "../exception.h"
 #include "v4/definitions.h"
 #include "v5/definitions.h"
 
 char* dwarf_pathConcatenate(const char* string1, const char* string2) {
     const size_t len1 = strlen(string1),
                  len2 = strlen(string2);
-    char* toReturn = malloc(len1 + len2 + 2);
-    if (toReturn == NULL) {
-        return NULL;
-    }
+    char* toReturn = BFE_ALLOC_MSG(len1 + len2 + 2, "Failed to concatenate string");
     memcpy(toReturn, string1, len1);
     toReturn[len1] = '/';
     memcpy(toReturn + len1 + 1, string2, len2);
@@ -54,11 +52,8 @@ char* dwarf_pathConcatenate(const char* string1, const char* string2) {
  * as read from the header
  * @return whether the parsing was successful
  */
-static inline bool dwarf_parser_parse(struct dwarf_parser* self, size_t counter, const size_t actualSize) {
-    if (!self->parseHeader(self, &counter)) {
-        return false;
-    }
-
+static inline void dwarf_parser_parse(struct dwarf_parser* self, size_t counter, const size_t actualSize) {
+    self->parseHeader(self, &counter);
     struct dwarf_lineInfoParser parser = dwarf_lineInfoParser_initializer(self->defaultIsStmt, self);
     while (counter - (self->bit64 ? 12 : 4) < actualSize) {
         const uint8_t opCode = *(uint8_t*) (self->debugLine.content + counter++);
@@ -73,12 +68,11 @@ static inline bool dwarf_parser_parse(struct dwarf_parser* self, size_t counter,
     }
     
     if (counter < self->debugLine.size - 2 - (self->bit64 ? 12 : 4)) {
-        return dwarf_parseLineProgram((struct lcs_section) {
+        dwarf_parseLineProgram((struct lcs_section) {
             self->debugLine.content + counter,
             self->debugLine.size - 2 - (self->bit64 ? 12 : 4) - counter
         }, self->debugLineStr, self->debugStr, self->debugInfo, self->debugAbbrev, self->debugStrOffsets, self->cb, self->args);
     }
-    return true;
 }
 
 /**
@@ -146,7 +140,7 @@ uint64_t dwarf_parseInitialSize(const void* buffer, size_t* counter, bool* bit64
     return toReturn;
 }
 
-bool dwarf_consumeSome(const struct dwarf_parser* self, const void* buffer, size_t* counter, const uint64_t type) {
+void dwarf_consumeSome(const struct dwarf_parser* self, const void* buffer, size_t* counter, const uint64_t type) {
     switch (type) {
         case DW_FORM_block: {
             const uint64_t length = getULEB128(buffer, counter);
@@ -196,9 +190,8 @@ bool dwarf_consumeSome(const struct dwarf_parser* self, const void* buffer, size
 
         case DW_FORM_sec_offset: *counter += self->bit64 ? 8 : 4; break;
 
-        default: return false;
+        default: BFE_THROW_MSG(unsupported, "Consuming unsupported DWARF data format");
     }
-    return true;
 }
 
 /**
@@ -236,7 +229,7 @@ static inline const char* dwarf_stringFromSection(const uint64_t offset,
  * @param offset the optional offset into the debug string offsets table
  * @return the optionally deducted string table offset
  */
-static inline optional_uint64_t dwarf_loadStringOffset(const uint64_t index,
+static inline uint64_t dwarf_loadStringOffset(const uint64_t index,
                                                        const struct lcs_section debugStrOffsets,
                                                        const optional_uint64_t offset) {
     bool bit64;
@@ -244,19 +237,14 @@ static inline optional_uint64_t dwarf_loadStringOffset(const uint64_t index,
     const uint64_t size = dwarf_parseInitialSize(debugStrOffsets.content, &counter, &bit64);
     if (bit64) {
         if (index >= size / 8) {
-            return (optional_uint64_t) { .has_value = false };
+            BFE_THROW_MSG(invalid, "Invalid string index given");
         }
-        if (offset.has_value) {
-            return (optional_uint64_t) { true, ((uint64_t*) (debugStrOffsets.content + offset.value))[index] };
-        }
-        return (optional_uint64_t) { true, ((uint64_t*) (debugStrOffsets.content + counter))[index] };
-    } else if (index >= size / 4) {
-        return (optional_uint64_t) { .has_value = false };
+        return ((uint64_t*) (debugStrOffsets.content + (offset.has_value ? offset.value : counter)))[index];
     }
-    if (offset.has_value) {
-        return (optional_uint64_t) { true, ((uint32_t*) (debugStrOffsets.content + offset.value))[index] };
+    if (index >= size / 4) {
+        BFE_THROW_MSG(invalid, "Invalid string index given");
     }
-    return (optional_uint64_t) { true, ((uint32_t*) (debugStrOffsets.content + counter))[index] };
+    return ((uint32_t*) (debugStrOffsets.content + (offset.has_value ? offset.value : counter)))[index];
 }
 
 const char* dwarf_readString(const struct dwarf_parser* self, const void* buffer, size_t* counter, uint64_t type) {
@@ -268,7 +256,7 @@ const char* dwarf_readString(const struct dwarf_parser* self, const void* buffer
     if (type != DW_FORM_line_strp && type != DW_FORM_strp && type != DW_FORM_strp_sup
         && type != DW_FORM_strx && type != DW_FORM_strx1 && type != DW_FORM_strx2
         && type != DW_FORM_strx3 && type != DW_FORM_strx4) {
-        return NULL;
+        BFE_THROW_MSG(unsupported, "Unsupported string type to be parsed");
     }
     uint64_t offset;
     if (type == DW_FORM_strp || type == DW_FORM_line_strp || type == DW_FORM_strp_sup) {
@@ -305,14 +293,10 @@ const char* dwarf_readString(const struct dwarf_parser* self, const void* buffer
                 *counter += 4;
                 break;
 
-            default: return NULL;
+            default: BFE_THROW_MSG(unsupported, "Unsupported string type to be parsed");
         }
         type = DW_FORM_strp;
-        const optional_uint64_t value = dwarf_loadStringOffset(index, self->debugStrOffsets, self->debugStrOffset);
-        if (!value.has_value) {
-            return NULL;
-        }
-        offset = value.value;
+        offset = dwarf_loadStringOffset(index, self->debugStrOffsets, self->debugStrOffset);
     }
     return dwarf_stringFromSection(offset, type, self->debugLineStr, self->debugStr);
 }
@@ -323,7 +307,7 @@ const char* dwarf_readString(const struct dwarf_parser* self, const void* buffer
  * @param self the DWARF parser object
  * @return whether the parsing was successful
  */
-static inline bool dwarf_parseCompDir(struct dwarf_parser* self) {
+static inline const char* dwarf_parseCompDir(struct dwarf_parser* self) {
     bool bit64;
     size_t counter = 0;
     const uint64_t size = dwarf_parseInitialSize(self->debugInfo.content, &counter, &bit64);
@@ -366,38 +350,39 @@ static inline bool dwarf_parseCompDir(struct dwarf_parser* self) {
 
     const uint64_t abbrevCode = getULEB128(self->debugInfo.content, &counter);
     const vector_pair_uint64_t abbrevs = dwarf_getAbbreviationTable(self->debugAbbrev, abbrevCode, abbrevOffset, version);
-    vector_iterate(&abbrevs, {
-        if (element->first == DW_AT_comp_dir) {
-            self->compilationDirectory = dwarf_readString(self,
-                                                          self->debugInfo.content,
-                                                          &counter,
-                                                          element->second);
-            break;
-        } else if (version >= 5 && element->first == DW_AT_str_offsets_base) {
-            if (self->bit64) {
-                self->debugStrOffset.value = *(uint64_t*) (self->debugInfo.content + counter);
-                counter += 8;
+    TRY({
+        vector_iterate(&abbrevs, {
+            if (element->first == DW_AT_comp_dir) {
+                const char* toReturn = dwarf_readString(self, self->debugInfo.content, &counter, element->second);
+                vector_destroy(&abbrevs);
+                return toReturn;
+            }
+            if (version >= 5 && element->first == DW_AT_str_offsets_base) {
+                if (self->bit64) {
+                    self->debugStrOffset.value = *(uint64_t*) (self->debugInfo.content + counter);
+                    counter += 8;
+                } else {
+                    self->debugStrOffset.value = *(uint32_t*) (self->debugInfo.content + counter);
+                    counter += 4;
+                }
+                self->debugStrOffset.has_value = true;
+            } else if (version >= 5 && element->second == DW_FORM_implicit_const) {
+                continue;
+            } else if (element->second == DW_FORM_indirect) {
+                const uint64_t actualForm = getULEB128(self->debugInfo.content, &counter);
+                dwarf_consumeSome(self, self->debugInfo.content, &counter, actualForm);
             } else {
-                self->debugStrOffset.value = *(uint32_t*) (self->debugInfo.content + counter);
-                counter += 4;
+                dwarf_consumeSome(self, self->debugInfo.content, &counter, element->second);
             }
-            self->debugStrOffset.has_value = true;
-        } else if (version >= 5 && element->second == DW_FORM_implicit_const) {
-            continue;
-        } else if (element->second == DW_FORM_indirect) {
-            const uint64_t actualForm = getULEB128(self->debugInfo.content, &counter);
-            if (!dwarf_consumeSome(self, self->debugInfo.content, &counter, actualForm)) {
-                break;
-            }
-        } else if (!dwarf_consumeSome(self, self->debugInfo.content, &counter, element->second)) {
-            break;
-        }
-    });
-    vector_destroy(&abbrevs);
-    return self->compilationDirectory != NULL;
+        });
+        BFE_THROW_MSG(failed, "Failed to parse DW_AT_comp_dir");
+    }, CATCH_ALL(_, {
+        vector_destroy(&abbrevs);
+        RETHROW;
+    }))
 }
 
-bool dwarf_parseLineProgram(const struct lcs_section debugLine,
+void dwarf_parseLineProgram(const struct lcs_section debugLine,
                             const struct lcs_section debugLineStr,
                             const struct lcs_section debugStr,
                             const struct lcs_section debugInfo,
@@ -425,20 +410,22 @@ bool dwarf_parseLineProgram(const struct lcs_section debugLine,
         .compilationDirectory = NULL,
         .debugStrOffset = (optional_uint64_t) { .has_value = false },
     };
-    if (!dwarf_parseCompDir(&parser)) {
-        return false;
-    }
+    parser.compilationDirectory = dwarf_parseCompDir(&parser);
     switch (version) {
         case 2:
         case 3:
         case 4: dwarf4_parser_create(&parser); break;
         case 5: dwarf5_parser_create(&parser); break;
 
-        default: return false;
+        default: BFE_THROW_MSG(unsupported, "Unsupported DWARF version");
     }
-
-    const bool toReturn = dwarf_parser_parse(&parser, counter, size);
+    TRY({
+        dwarf_parser_parse(&parser, counter, size);
+    }, CATCH_ALL(_, {
+        vector_destroy(&parser.stdOpcodeLengths);
+        parser.destroy(&parser);
+        RETHROW;
+    }))
     vector_destroy(&parser.stdOpcodeLengths);
     parser.destroy(&parser);
-    return toReturn;
 }

@@ -89,7 +89,7 @@ struct dwarf_parser {
     /** The function to destroy the version dependent part of this parser.              */
     void                    (*destroy)    (const struct dwarf_parser*);
     /** The function to parse the line number program's header for the current version. */
-    bool                    (*parseHeader)(struct dwarf_parser*, size_t*);
+    void                    (*parseHeader)(struct dwarf_parser*, size_t*);
     /** Creates the file reference for the given file index.                            */
     struct dwarf_sourceFile (*getFileName)(const struct dwarf_parser*, uint64_t);
 
@@ -116,7 +116,7 @@ struct dwarf_parser {
  * @param cb the line table row callback
  * @param args the payload to additionally pass to the callback function
  */
-bool dwarf_parseLineProgram(struct lcs_section debugLine,
+void dwarf_parseLineProgram(struct lcs_section debugLine,
                             struct lcs_section debugLineStr,
                             struct lcs_section debugStr,
                             struct lcs_section debugInfo,
@@ -153,7 +153,7 @@ uint64_t dwarf_parseInitialSize(const void* buffer, size_t* counter, bool* bit64
  * @param type the expected data type
  * @return whether the data was allowed and skipped successfully
  */
-bool dwarf_consumeSome(const struct dwarf_parser* self, const void* buffer, size_t* counter, uint64_t type);
+void dwarf_consumeSome(const struct dwarf_parser* self, const void* buffer, size_t* counter, uint64_t type);
 
 /**
  * @brief Reads a string.
