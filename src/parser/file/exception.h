@@ -32,6 +32,7 @@ struct binaryFileException {
         binaryFileExceptionType_unsupported,
         binaryFileExceptionType_failed,
         binaryFileExceptionType_failedAllocation,
+        binaryFileExceptionType_invalid,
         binaryFileExceptionType_empty,
     } code;
     bool hasMessage;

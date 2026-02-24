@@ -107,7 +107,7 @@ static inline void macho_archive_parseImpl(void* buffer, const char* fileName, c
         const struct ar_hdr* fileHeader = buffer + counter;
         counter += sizeof(struct ar_hdr);
         if (strncmp(fileHeader->ar_fmag, ARFMAG, endSize) != 0) {
-            BFE_THROW_MSG(failed, "Archive file inconsistent");
+            BFE_THROW_MSG(invalid, "Archive file inconsistent");
         }
         
         char* name;
