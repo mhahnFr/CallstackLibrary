@@ -23,6 +23,7 @@
 #include "../parser.h"
 
 #include "../leb128.h"
+#include "../../exception.h"
 
 /**
  * Parses the line number program header in version 2, 3 or 4.
@@ -31,7 +32,7 @@
  * @param counter the byte index
  * @return whether the parsing was successful
  */
-static inline bool dwarf4_parseLineProgramHeader(struct dwarf_parser* self, size_t* counter) {
+static inline void dwarf4_parseLineProgramHeader(struct dwarf_parser* self, size_t* counter) {
     uint64_t headerLength;
     if (self->bit64) {
         headerLength = *(uint64_t*) (self->debugLine.content + *counter);
@@ -75,7 +76,6 @@ static inline bool dwarf4_parseLineProgramHeader(struct dwarf_parser* self, size
         }));
     }
     ++*counter;
-    return true;
 }
 
 /**
@@ -92,7 +92,11 @@ static inline char* dwarf4_stringFrom(const struct dwarf_fileNameEntry* file,
                                       const struct vector_string* directories,
                                       const char* defaultDirectory) {
     if (*file->name == '/') {
-        return strdup(file->name);
+        char* toReturn = strdup(file->name);
+        if (toReturn == NULL) {
+            BFE_THROW_MSG(failedAllocation, "Failed to allocate memory for file name");
+        }
+        return toReturn;
     }
     const char* directory;
     bool freeDir = false;
@@ -102,13 +106,18 @@ static inline char* dwarf4_stringFrom(const struct dwarf_fileNameEntry* file,
         directory = directories->content[file->dirIndex - 1];
         if (*directory != '/') {
             directory = dwarf_pathConcatenate(defaultDirectory, directory);
-            if (directory == NULL) {
-                return NULL;
-            }
             freeDir = true;
         }
     }
-    char* toReturn = dwarf_pathConcatenate(directory, file->name);
+    char* toReturn;
+    TRY({
+        toReturn = dwarf_pathConcatenate(directory, file->name);
+    }, CATCH_ALL(_, {
+        if (freeDir) {
+            free((char*) directory);
+        }
+        RETHROW;
+    }))
     if (freeDir) {
         free((char*) directory);
     }
