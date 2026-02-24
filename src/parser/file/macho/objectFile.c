@@ -357,13 +357,17 @@ static inline void objectFile_parseMachO(struct objectFile* self, const void* bu
     }
 
     if (self->debugLine.size > 0) {
-        dwarf_parseLineProgram(self->debugLine,
-                               self->debugLineStr,
-                               self->debugStr,
-                               self->debugInfo,
-                               self->debugAbbrev,
-                               self->debugStrOffsets,
-                               objectFile_dwarfLineCallback, self);
+        TRY({
+            dwarf_parseLineProgram(self->debugLine,
+                                   self->debugLineStr,
+                                   self->debugStr,
+                                   self->debugInfo,
+                                   self->debugAbbrev,
+                                   self->debugStrOffsets,
+                                   objectFile_dwarfLineCallback, self);
+        }, CATCH_ALL(_, {
+            // TODO: Allowed to fail, but handle anyway
+        }))
     }
 }
 
