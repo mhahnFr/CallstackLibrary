@@ -337,7 +337,7 @@ static inline void objectFile_parseMachO(struct objectFile* self, const void* bu
         header->magic == MH_MAGIC_64 || header->magic == MH_CIGAM_64) {
         const uint32_t fileType = macho_maybeSwap(32, header->magic == MH_CIGAM || header->magic == MH_CIGAM_64, header->filetype);
         if (fileType != MH_OBJECT && fileType != MH_DSYM) {
-            BFE_THROW_MSG(unsupportedType, "Mach-O file to parse is neither a dSYM bundle file nor an object file");
+            BFE_THROW_MSG(unsupported, "Mach-O file to parse is neither a dSYM bundle file nor an object file");
         }
     }
 

@@ -29,7 +29,7 @@ struct binaryFileException {
     enum type {
         binaryFileExceptionType_unknown,
 
-        binaryFileExceptionType_unsupportedType,
+        binaryFileExceptionType_unsupported,
         binaryFileExceptionType_failed,
         binaryFileExceptionType_failedAllocation,
         binaryFileExceptionType_empty,

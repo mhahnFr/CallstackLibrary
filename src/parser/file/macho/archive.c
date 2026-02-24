@@ -97,7 +97,7 @@ static inline void macho_archive_parseImpl(void* buffer, const char* fileName, c
     size_t counter = 0;
     const char* magic = buffer;
     if (strncmp(magic, ARMAG, SARMAG) != 0) {
-        BFE_THROW_MSG(unsupportedType, "Given file is not an archive");
+        BFE_THROW_MSG(unsupported, "Given file is not an archive");
     }
     counter += SARMAG;
     
