@@ -148,6 +148,9 @@ endif
 
 default: $(NAME)
 
+debug: COM_FLAGS += -DDEBUG
+debug: default
+
 all:
 	$(MAKE) $(SHARED_N)
 	$(MAKE) $(STATIC_N)
