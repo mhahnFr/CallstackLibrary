@@ -361,7 +361,7 @@ static inline const char* dwarf_parseCompDir(struct dwarf_parser* self) {
             if (element->first == DW_AT_comp_dir) {
                 const char* toReturn = dwarf_readString(self, self->debugInfo.content, &counter, element->second);
                 vector_destroy(&abbrevs);
-                return toReturn;
+                TC_RETURN toReturn;
             }
             if (version >= 5 && element->first == DW_AT_str_offsets_base) {
                 if (self->bit64) {
