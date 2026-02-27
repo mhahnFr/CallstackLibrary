@@ -25,6 +25,8 @@
 #include <file/pathUtils.h>
 #include <sys/stat.h>
 
+#include "exception.h"
+
 #ifdef __APPLE__
 # include "macho/machoFile.h"
 # define LCS_MACHO
@@ -79,7 +81,8 @@ struct binaryFile* binaryFile_new(const char* fileName, const void* startAddress
     struct binaryFile* const volatile captureToReturn = toReturn;
     TRY({
         LCS_FILE(tmp, parseShallow);
-    }, CATCH_ALL(_, {
+    }, CATCH_ALL(exception, {
+        BFE_EXCEPTION_HANDLER(exception);
         binaryFile_delete(captureToReturn);
         TC_RETURN NULL;
     }))
@@ -133,7 +136,8 @@ bool binaryFile_maybeParse(struct binaryFile* self) {
         TRY({
             LCS_FILE(self, parse);
             self->parsed = true;
-        }, CATCH_ALL(_, {
+        }, CATCH_ALL(exception, {
+            BFE_EXCEPTION_HANDLER(exception);
             self->parsed = false;
         }))
     }

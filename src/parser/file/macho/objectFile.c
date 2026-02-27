@@ -165,7 +165,8 @@ static inline bool objectFile_maybeParse(struct objectFile* self) {
     TRY({
         objectFile_parse(self);
         self->parsed = true;
-    }, CATCH_ALL(_, {
+    }, CATCH_ALL(exception, {
+        BFE_EXCEPTION_HANDLER(exception);
         self->parsed = false;
     }))
     return self->parsed;
@@ -366,8 +367,8 @@ static inline void objectFile_parseMachO(struct objectFile* self, const void* bu
                                    self->debugAbbrev,
                                    self->debugStrOffsets,
                                    objectFile_dwarfLineCallback, self);
-        }, CATCH_ALL(_, {
-            // TODO: Allowed to fail, but handle anyway
+        }, CATCH_ALL(exception, {
+            BFE_EXCEPTION_HANDLER(exception);
         }))
     }
 }

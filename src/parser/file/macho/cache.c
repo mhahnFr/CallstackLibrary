@@ -25,6 +25,7 @@
 #include <try_catch.h>
 
 #include "archive.h"
+#include "../exception.h"
 
 /**
  * This structure represents the cache for the Mach-O implementation.
@@ -103,7 +104,8 @@ static inline bool macho_cache_loadArchive(const char* archiveName) {
 
     TRY({
         macho_archive_parse(archiveName, macho_cache_archiveCallback);
-    }, CATCH_ALL(_, {
+    }, CATCH_ALL(exception, {
+        BFE_EXCEPTION_HANDLER(exception);
         TC_RETURN false;
     }))
     return true;
