@@ -170,7 +170,7 @@ elfFile_loadShnum(64)
 #define elfFile_parseFileImpl(bits)                                                                                   \
 static inline void elfFile_parseFile##bits(struct elfFile* self, const Elf##bits##_Ehdr* buffer, bool littleEndian) { \
     if (ELF_TO_HOST(bits, buffer->e_shoff, littleEndian) == 0) {                                                      \
-        BFE_THROW(unsupportedType, self);                                                                             \
+        BFE_THROW(unsupported, self);                                                                                 \
     }                                                                                                                 \
     char* sectStrBegin = elfFile_loadSectionStrtab##bits(buffer, littleEndian);                                       \
     if (sectStrBegin == NULL) {                                                                                       \
