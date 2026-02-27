@@ -289,16 +289,16 @@ static inline void objectFile_parseMachOImpl##bits(struct objectFile* self,     
                 break;                                                                        \
                                                                                               \
             case LC_SYMTAB: {                                                                 \
-                struct machoParser parser = machoParser_create(                               \
+                volatile struct machoParser parser = machoParser_create(                      \
                     (void*) loadCommand, baseAddress, 0,                                      \
                     bytesSwapped, (bits) == 64,                                               \
                     (machoParser_addSymbol) objectFile_addSymbolCallback, self                \
                 );                                                                            \
                 TRY({                                                                         \
-                    machoParser_parseSymbolTable(&parser);                                    \
-                    machoParser_destroy(&parser);                                             \
+                    machoParser_parseSymbolTable((struct machoParser*) &parser);              \
+                    machoParser_destroy((struct machoParser*) &parser);                       \
                 }, CATCH_ALL(_, {                                                             \
-                    machoParser_destroy(&parser);                                             \
+                    machoParser_destroy((struct machoParser*) &parser);                       \
                     RETHROW;                                                                  \
                 }))                                                                           \
                 break;                                                                        \
