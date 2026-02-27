@@ -61,6 +61,7 @@ bool loader_loadFileAndExecuteTime(const char* fileName, const time_t* lastModif
             func.parseFunc(args, buffer);
         }
     }, CATCH_ALL(_, {
+        (void) _;
         free(buffer);
         RETHROW;
     }))

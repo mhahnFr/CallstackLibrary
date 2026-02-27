@@ -212,6 +212,7 @@ static inline vector_fileAttribute_t dwarf5_parseFileAttributes(const struct dwa
             vector_push_back(&attributes, attribute);
         }
     }, CATCH_ALL(_, {
+        (void) _;
         vector_destroy(&entryFormats);
         vector_destroy(&attributes);
         RETHROW;
@@ -244,6 +245,7 @@ static inline char* dwarf5_constructFileName(const struct fileAttribute*   file,
     TRY({
         toReturn = dwarf_pathConcatenate(dirPath, file->path);
     }, CATCH_ALL(_, {
+        (void) _;
         if (captureFreeDir) {
             free((char*) captureDirPath);
         }

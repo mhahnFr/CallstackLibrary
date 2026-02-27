@@ -114,6 +114,7 @@ static inline char* dwarf4_stringFrom(const struct dwarf_fileNameEntry* file,
     TRY({
         toReturn = dwarf_pathConcatenate(directory, file->name);
     }, CATCH_ALL(_, {
+        (void) _;
         if (freeDir) {
             free((char*) directory);
         }

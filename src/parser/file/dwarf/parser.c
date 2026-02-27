@@ -120,6 +120,7 @@ static inline vector_pair_uint64_t dwarf_getAbbreviationTable(const struct lcs_s
                 TRY({
                     vector_push_back_throw(&toReturn, ((pair_uint64_t) { name, form }));
                 }, CATCH_ALL(_, {
+                    (void) _;
                     vector_destroy(&toReturn);
                     RETHROW;
                 }))
@@ -383,6 +384,7 @@ static inline const char* dwarf_parseCompDir(struct dwarf_parser* self) {
         });
         BFE_THROW_MSG(failed, "Failed to parse DW_AT_comp_dir");
     }, CATCH_ALL(_, {
+        (void) _;
         vector_destroy(&abbrevs);
         RETHROW;
     }))
@@ -428,6 +430,7 @@ void dwarf_parseLineProgram(const struct lcs_section debugLine,
     TRY({
         dwarf_parser_parse(&parser, counter, size);
     }, CATCH_ALL(_, {
+        (void) _;
         vector_destroy(&parser.stdOpcodeLengths);
         parser.destroy(&parser);
         RETHROW;

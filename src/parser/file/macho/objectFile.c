@@ -298,6 +298,7 @@ static inline void objectFile_parseMachOImpl##bits(struct objectFile* self,     
                     machoParser_parseSymbolTable((struct machoParser*) &parser);              \
                     machoParser_destroy((struct machoParser*) &parser);                       \
                 }, CATCH_ALL(_, {                                                             \
+                    (void) _;                                                                 \
                     machoParser_destroy((struct machoParser*) &parser);                       \
                     RETHROW;                                                                  \
                 }))                                                                           \
@@ -377,6 +378,7 @@ void objectFile_parseBuffer(struct objectFile* self, const void* buffer) {
         vector_sort(&self->lineInfos, objectFile_dwarfLineInfoSortCompare);
         vector_sort(&self->ownSymbols, objectFile_symbolCompare);
     }, CATCH_ALL(_, {
+        (void) _;
         vector_destroyWithPtr(&self->ownSymbols, symbol_destroy);
         vector_init(&self->ownSymbols);
         RETHROW;

@@ -342,6 +342,7 @@ static inline void machoFile_parseFileImpl##bits(struct machoFile* self, const v
                     machoParser_parseSymbolTable((struct machoParser*) &parser);                              \
                     machoParser_destroy((struct machoParser*) &parser);                                       \
                 }, CATCH_ALL(_, {                                                                             \
+                    (void) _;                                                                                 \
                     machoParser_destroy((struct machoParser*) &parser);                                       \
                     RETHROW;                                                                                  \
                 }))                                                                                           \
@@ -434,6 +435,7 @@ void machoFile_parse(struct machoFile* self) {
         }
         vector_sort(&self->symbols, machoFile_functionSortCompare);
     }, CATCH_ALL(_, {
+        (void) _;
         vector_iterate(&self->symbols, symbol_destroy(&element->first););
         vector_clear(&self->symbols);
         RETHROW;

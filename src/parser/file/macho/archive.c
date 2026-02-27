@@ -137,6 +137,7 @@ static inline void macho_archive_parseImpl(void* buffer, const char* fileName, c
             objectFile_parseBuffer(file, objectFile);
             file->parsed = true;
         }, CATCH_ALL(_, {
+            (void) _;
             objectFile_delete(captureFile);
             RETHROW;
         }))
