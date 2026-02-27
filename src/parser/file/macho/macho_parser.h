@@ -72,16 +72,6 @@ struct machoParser {
     } private;
 };
 
-struct machoParserException {
-    enum code {
-        machoParserExceptionCode_unknown,
-
-        machoParserExceptionCode_invalidState,
-        machoParserExceptionCode_failed,
-    } code;
-    const char* message;
-};
-
 /**
  * Constructs a Mach-O symbol table parser using the given information.
  *
