@@ -27,6 +27,8 @@
 
 #ifdef DEBUG
 # include <stdio.h>
+
+# include "binaryFile.h"
 #endif
 
 struct binaryFileException {
@@ -74,7 +76,7 @@ struct binaryFileException {
 
 #ifdef DEBUG
 # define BFE_EXCEPTION_HANDLER(exception) do {                                                                     \
-    struct binaryFileException* theException = (exception);                                                        \
+    const struct binaryFileException* theException = (exception);                                                  \
     const char* codeString;                                                                                        \
     switch (theException->code) {                                                                                  \
         case binaryFileExceptionType_unsupported:      codeString = "unsupported";       break;                    \
