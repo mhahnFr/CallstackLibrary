@@ -25,6 +25,10 @@
 #include <stdbool.h>
 #include <try_catch.h>
 
+#ifdef DEBUG
+# include <stdio.h>
+#endif
+
 struct binaryFileException {
     enum type {
         binaryFileExceptionType_unknown,
@@ -67,5 +71,27 @@ struct binaryFileException {
 #define BFE_ALLOC_F(size, file) BFE_ALLOC_RAW(size, BFE_THROW(failedAllocation, file))
 
 #define BFE_ALLOC_MSG(size, theMessage) BFE_ALLOC_RAW(size, BFE_THROW_MSG(failedAllocation, theMessage))
+
+#ifdef DEBUG
+# define BFE_EXCEPTION_HANDLER(exception) do {                                                                     \
+    struct binaryFileException* theException = (exception);                                                        \
+    const char* codeString;                                                                                        \
+    switch (theException->code) {                                                                                  \
+        case binaryFileExceptionType_unsupported:      codeString = "unsupported";       break;                    \
+        case binaryFileExceptionType_failed:           codeString = "failed";            break;                    \
+        case binaryFileExceptionType_failedAllocation: codeString = "allocation failed"; break;                    \
+        case binaryFileExceptionType_invalid:          codeString = "invalid";           break;                    \
+        case binaryFileExceptionType_empty:            codeString = "empty";             break;                    \
+                                                                                                                   \
+        default: codeString = "unknown"; break;                                                                    \
+    }                                                                                                              \
+    printf("LCS: Binary file exception: %s, %s%s!\n", codeString, theException->hasMessage ? "" : "file name: ",   \
+        theException->hasMessage ? theException->payload.message : theException->payload.file->fileName.original); \
+} while (0)
+
+#else
+# define BFE_EXCEPTION_HANDLER(exception) (void) (exception)
+
+#endif
 
 #endif //CALLSTACKLIBRARY_EXCEPTION_H
