@@ -25,6 +25,7 @@
 #include <misc/numberContainers.h>
 
 #include "leb128.h"
+#include "../dc4c_exceptions.h"
 #include "../exception.h"
 #include "v4/definitions.h"
 #include "v5/definitions.h"
@@ -116,7 +117,12 @@ static inline vector_pair_uint64_t dwarf_getAbbreviationTable(const struct lcs_s
             }
 
             if (code == abbreviationCode && name != 0 && (version < 5 ? form != 0 : true)) {
-                vector_push_back(&toReturn, ((pair_uint64_t) { name, form }));
+                TRY({
+                    vector_push_back_throw(&toReturn, ((pair_uint64_t) { name, form }));
+                }, CATCH_ALL(_, {
+                    vector_destroy(&toReturn);
+                    RETHROW;
+                }))
             }
         } while (name != 0 && (version < 5 ? form != 0 : true));
     } while (code != abbreviationCode && counter < (size_t) section.size);
