@@ -34,6 +34,7 @@
 #include "cache.h"
 #include "macho_parser.h"
 #include "../bounds.h"
+#include "../dc4c_exceptions.h"
 #include "../exception.h"
 #include "../loader.h"
 #include "../../callstack_parser.h"
@@ -235,7 +236,7 @@ static inline void machoFile_handleSegment##bits(struct machoFile* self, const v
                 TLVDescriptor* begin = (TLVDescriptor*)                                         \
                     (macho_maybeSwap(bits, bytesSwapped, section->addr) + slide);               \
                 const size_t amount = sectionSize / sizeof(TLVDescriptor);                      \
-                vector_reserve(&self->tlvs, amount);                                            \
+                vector_reserve_throw(&self->tlvs, amount);                                            \
                 memcpy(self->tlvs.content, begin, sectionSize);                                 \
                 self->tlvs.count = amount;                                                      \
             }                                                                                   \
@@ -258,7 +259,7 @@ machoFile_handleSegment(64, _64)
  * @param pair the symbol and object file pair to be added
  */
 static inline void machoFile_addSymbol(struct machoFile* self, pair_symbolFile_t pair) {
-    vector_push_back(&self->symbols, pair);
+    vector_push_back_throw(&self->symbols, pair);
 }
 
 /**
@@ -292,7 +293,7 @@ static inline void machoFile_handleFunctionStarts(struct machoFile* self, struct
     uint64_t funcAddr = self->text_vmaddr; // <--- TODO: What is the appropriate start when read from disk?
     for (size_t i = 0; i < size;) {
         funcAddr += getULEB128(bytes, &i);
-        vector_push_back(&self->functionStarts, funcAddr);
+        vector_push_back_throw(&self->functionStarts, funcAddr);
     }
     vector_sort(&self->functionStarts, &machoFile_uint64Compare);
 }
