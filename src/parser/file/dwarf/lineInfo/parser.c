@@ -24,6 +24,7 @@
 
 #include "../definitions.h"
 #include "../leb128.h"
+#include "../../dc4c_exceptions.h"
 #include "../v3/definitions.h"
 #include "../v4/definitions.h"
 
@@ -178,7 +179,7 @@ static inline void dwarf_lineInfoParser_handleFileDefinition(const struct dwarf_
                    timeStamp = getULEB128(self->parser->debugLine.content, counter),
                         size = getULEB128(self->parser->debugLine.content, counter);
     if (self->parser->version < 5) {
-        vector_push_back(&self->parser->specific.v4.fileNames, ((struct dwarf_fileNameEntry) {
+        vector_push_back_throw(&self->parser->specific.v4.fileNames, ((struct dwarf_fileNameEntry) {
             fileName, dirIndex, timeStamp, size
         }));
     }
