@@ -132,11 +132,12 @@ static inline void macho_archive_parseImpl(void* buffer, const char* fileName, c
         file->name = macho_archive_constructName(name, fileName);
         free(name);
 
+        struct objectFile* const volatile captureFile = file;
         TRY({
             objectFile_parseBuffer(file, objectFile);
             file->parsed = true;
         }, CATCH_ALL(_, {
-            objectFile_delete(file);
+            objectFile_delete(captureFile);
             RETHROW;
         }))
         cb(file);
