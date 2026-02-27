@@ -239,11 +239,13 @@ static inline char* dwarf5_constructFileName(const struct fileAttribute*   file,
         freeDir = true;
     }
     char* toReturn;
+    volatile const bool captureFreeDir = freeDir;
+    const char* const volatile captureDirPath = dirPath;
     TRY({
         toReturn = dwarf_pathConcatenate(dirPath, file->path);
     }, CATCH_ALL(_, {
-        if (freeDir) {
-            free((char*) dirPath);
+        if (captureFreeDir) {
+            free((char*) captureDirPath);
         }
         RETHROW;
     }))
