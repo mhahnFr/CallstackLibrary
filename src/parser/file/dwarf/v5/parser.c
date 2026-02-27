@@ -28,6 +28,7 @@
 
 #include "definitions.h"
 #include "../leb128.h"
+#include "../../dc4c_exceptions.h"
 #include "../../exception.h"
 
 /**
@@ -161,7 +162,7 @@ static inline const uint8_t* dwarf5_readMD5(const void* buffer, size_t* counter)
 static inline vector_fileAttribute_t dwarf5_parseFileAttributes(const struct dwarf_parser* self, size_t* counter) {
     const uint8_t entryFormatCount = *(uint8_t*) (self->debugLine.content + (*counter)++);
     vector_pair_uint64_t entryFormats = vector_initializer;
-    vector_reserve(&entryFormats, entryFormatCount);
+    vector_reserve_throw(&entryFormats, entryFormatCount);
     for (uint8_t i = 0; i < entryFormatCount; ++i) {
         const uint64_t contentType = getULEB128(self->debugLine.content, counter),
                           formCode = getULEB128(self->debugLine.content, counter);
@@ -170,16 +171,16 @@ static inline vector_fileAttribute_t dwarf5_parseFileAttributes(const struct dwa
 
     const uint64_t attributeCount = getULEB128(self->debugLine.content, counter);
     vector_fileAttribute_t attributes = vector_initializer;
-    vector_reserve(&attributes, attributeCount);
-    for (uint64_t i = 0; i < attributeCount; ++i) {
-        struct fileAttribute attribute = {
-            .path = NULL,
-            .md5  = NULL,
-            .size      = 0,
-            .index     = 0,
-            .timestamp = 0,
-        };
-        TRY({
+    TRY({
+        vector_reserve_throw(&attributes, attributeCount);
+        for (uint64_t i = 0; i < attributeCount; ++i) {
+            struct fileAttribute attribute = ((struct fileAttribute) {
+                .path = NULL,
+                .md5  = NULL,
+                .size      = 0,
+                .index     = 0,
+                .timestamp = 0,
+            });
             vector_iterate(&entryFormats, switch (element->first) {
                 case DW_LNCT_path:
                     attribute.path = dwarf_readString(self, self->debugLine.content, counter, element->second);
@@ -209,12 +210,12 @@ static inline vector_fileAttribute_t dwarf5_parseFileAttributes(const struct dwa
                     break;
             });
             vector_push_back(&attributes, attribute);
-        }, CATCH_ALL(_, {
-            vector_destroy(&entryFormats);
-            vector_destroy(&attributes);
-            RETHROW;
-        }))
-    }
+        }
+    }, CATCH_ALL(_, {
+        vector_destroy(&entryFormats);
+        vector_destroy(&attributes);
+        RETHROW;
+    }))
     vector_destroy(&entryFormats);
     return attributes;
 }
@@ -299,7 +300,7 @@ static inline void dwarf5_parseLineProgramHeader(struct dwarf_parser* self, size
     self->lineRange                       = *(uint8_t*) (self->debugLine.content + (*counter)++);
     self->opCodeBase                      = *(uint8_t*) (self->debugLine.content + (*counter)++);
 
-    vector_reserve(&self->stdOpcodeLengths, self->opCodeBase - 1);
+    vector_reserve_throw(&self->stdOpcodeLengths, self->opCodeBase - 1);
     for (uint8_t i = 1; i < self->opCodeBase; ++i) {
         vector_push_back(&self->stdOpcodeLengths, *((uint8_t*) (self->debugLine.content + (*counter)++)));
     }
