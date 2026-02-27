@@ -76,10 +76,11 @@ struct binaryFile* binaryFile_new(const char* fileName, const void* startAddress
         vector_initializer,
     };
     LCS_FILE(tmp, create);
+    struct binaryFile* const volatile captureToReturn = toReturn;
     TRY({
         LCS_FILE(tmp, parseShallow);
     }, CATCH_ALL(_, {
-        binaryFile_delete(toReturn);
+        binaryFile_delete(captureToReturn);
         TC_RETURN NULL;
     }))
     volatile const void* inside = NULL;
