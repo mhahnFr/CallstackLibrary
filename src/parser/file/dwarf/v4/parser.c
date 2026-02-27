@@ -23,6 +23,7 @@
 #include "../parser.h"
 
 #include "../leb128.h"
+#include "../../dc4c_exceptions.h"
 #include "../../exception.h"
 
 /**
@@ -52,14 +53,14 @@ static inline void dwarf4_parseLineProgramHeader(struct dwarf_parser* self, size
     self->lineRange     = *(uint8_t*) (self->debugLine.content + (*counter)++);
     self->opCodeBase    = *(uint8_t*) (self->debugLine.content + (*counter)++);
 
-    vector_reserve(&self->stdOpcodeLengths, self->opCodeBase - 2);
+    vector_reserve_throw(&self->stdOpcodeLengths, self->opCodeBase - 2);
     for (uint8_t i = 1; i < self->opCodeBase; ++i) {
         vector_push_back(&self->stdOpcodeLengths, *((uint8_t*) (self->debugLine.content + (*counter)++)));
     }
 
     while (*(uint8_t*) (self->debugLine.content + *counter) != 0x0) {
         const char* string = self->debugLine.content + *counter;
-        vector_push_back(&self->specific.v4.includeDirectories, string);
+        vector_push_back_throw(&self->specific.v4.includeDirectories, string);
         *counter += strlen(string) + 1;
     }
     ++*counter;
@@ -71,7 +72,7 @@ static inline void dwarf4_parseLineProgramHeader(struct dwarf_parser* self, size
         const uint64_t dirIndex     = getULEB128(self->debugLine.content, counter),
                        modification = getULEB128(self->debugLine.content, counter),
                        size         = getULEB128(self->debugLine.content, counter);
-        vector_push_back(&self->specific.v4.fileNames, ((struct dwarf_fileNameEntry) {
+        vector_push_back_throw(&self->specific.v4.fileNames, ((struct dwarf_fileNameEntry) {
             string, dirIndex, modification, size
         }));
     }
