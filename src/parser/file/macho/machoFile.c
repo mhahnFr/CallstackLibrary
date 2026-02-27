@@ -145,10 +145,10 @@ static inline optional_debugInfo_t machoFile_getDebugInfo(struct machoFile* self
 
     const pair_symbolFile_t tmp = (pair_symbolFile_t) { .first.startAddress = searchAddress };
     const pair_symbolFile_t* closest = function(&tmp,
-                                              self->symbols.content,
-                                              self->symbols.count,
-                                              sizeof(pair_symbolFile_t),
-                                              machoFile_functionSortCompare);
+                                                self->symbols.content,
+                                                self->symbols.count,
+                                                sizeof(pair_symbolFile_t),
+                                                machoFile_functionSortCompare);
 
     optional_debugInfo_t info = { .has_value = false };
     if (closest == NULL
