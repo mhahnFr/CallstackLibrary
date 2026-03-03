@@ -380,7 +380,7 @@ machoFile_parseFileImpl(64, _64)
  */
 static inline void machoFile_parseFile(struct machoFile* self, const void* baseAddress, const bool shallow) {
     if (baseAddress == NULL) {
-        BFE_THROW(empty, self);
+        BFE_THROW_FILE(empty, self);
     }
 
     const struct mach_header* header = baseAddress;
@@ -432,7 +432,7 @@ void machoFile_parse(struct machoFile* self) {
         } else if (!loader_loadFileAndExecute(self->_.fileName.original,
             (union loader_parserFunction) { (loader_parser) machoFile_parseFileComplete },
             false, self)) {
-            BFE_THROW(failed, self);
+            BFE_THROW_FILE(failed, self);
         }
         vector_sort(&self->symbols, machoFile_functionSortCompare);
     }, CATCH_ALL(_, {
