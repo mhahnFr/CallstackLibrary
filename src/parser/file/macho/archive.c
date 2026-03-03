@@ -97,7 +97,7 @@ static inline void macho_archive_parseImpl(void* buffer, const char* fileName, c
     size_t counter = 0;
     const char* magic = buffer;
     if (strncmp(magic, ARMAG, SARMAG) != 0) {
-        BFE_THROW_MSG(unsupported, "Given file is not an archive");
+        BFE_THROW_RAW(unsupported, fileName, "Given file is not an archive");
     }
     counter += SARMAG;
     
@@ -107,7 +107,7 @@ static inline void macho_archive_parseImpl(void* buffer, const char* fileName, c
         const struct ar_hdr* fileHeader = buffer + counter;
         counter += sizeof(struct ar_hdr);
         if (strncmp(fileHeader->ar_fmag, ARFMAG, endSize) != 0) {
-            BFE_THROW_MSG(invalid, "Archive file inconsistent");
+            BFE_THROW_RAW(invalid, fileName, "Archive file inconsistent");
         }
         
         char* name;
