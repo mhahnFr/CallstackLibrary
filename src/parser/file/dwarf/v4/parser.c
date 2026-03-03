@@ -95,7 +95,7 @@ static inline char* dwarf4_stringFrom(const struct dwarf_fileNameEntry* file,
     if (*file->name == '/') {
         char* toReturn = strdup(file->name);
         if (toReturn == NULL) {
-            BFE_THROW_MSG(failedAllocation, "Failed to allocate memory for file name");
+            BFE_THROW_RAW(failedAllocation, file->name, "Failed to allocate memory for file name");
         }
         return toReturn;
     }
