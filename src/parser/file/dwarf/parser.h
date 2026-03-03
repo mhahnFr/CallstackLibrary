@@ -81,6 +81,7 @@ struct dwarf_parser {
     /** The payload for the DWARF line callback.                                        */
     void* args;
 
+    const char* fileName;
     /** The directory where the binary was compiled in.                                 */
     const char* compilationDirectory;
     /** The main offset into the debug string offsets table.                            */
@@ -122,6 +123,7 @@ void dwarf_parseLineProgram(struct lcs_section debugLine,
                             struct lcs_section debugInfo,
                             struct lcs_section debugAbbrev,
                             struct lcs_section debugStrOffsets,
+                            const char* fileName,
                             dwarf_line_callback cb, void* args);
 
 /**

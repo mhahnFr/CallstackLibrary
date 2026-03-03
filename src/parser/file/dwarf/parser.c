@@ -30,6 +30,8 @@
 #include "v4/definitions.h"
 #include "v5/definitions.h"
 
+#define throw(code, self, message) BFE_THROW_RAW(code, (self)->fileName, message)
+
 char* dwarf_pathConcatenate(const char* string1, const char* string2) {
     const size_t len1 = strlen(string1),
                  len2 = strlen(string2);
@@ -72,7 +74,8 @@ static inline void dwarf_parser_parse(struct dwarf_parser* self, size_t counter,
         dwarf_parseLineProgram((struct lcs_section) {
             self->debugLine.content + counter,
             self->debugLine.size - 2 - (self->bit64 ? 12 : 4) - counter
-        }, self->debugLineStr, self->debugStr, self->debugInfo, self->debugAbbrev, self->debugStrOffsets, self->cb, self->args);
+        }, self->debugLineStr, self->debugStr, self->debugInfo, self->debugAbbrev, self->debugStrOffsets, self->fileName,
+        self->cb, self->args);
     }
 }
 
@@ -197,7 +200,7 @@ void dwarf_consumeSome(const struct dwarf_parser* self, const void* buffer, size
 
         case DW_FORM_sec_offset: *counter += self->bit64 ? 8 : 4; break;
 
-        default: BFE_THROW_MSG(unsupported, "Consuming unsupported DWARF data format");
+        default: throw(unsupported, self, "Consuming unsupported DWARF data format");
     }
 }
 
@@ -237,8 +240,8 @@ static inline const char* dwarf_stringFromSection(const uint64_t offset,
  * @return the optionally deducted string table offset
  */
 static inline uint64_t dwarf_loadStringOffset(const uint64_t index,
-                                                       const struct lcs_section debugStrOffsets,
-                                                       const optional_uint64_t offset) {
+                                              const struct lcs_section debugStrOffsets,
+                                              const optional_uint64_t offset) {
     bool bit64;
     size_t counter = 0;
     const uint64_t size = dwarf_parseInitialSize(debugStrOffsets.content, &counter, &bit64);
@@ -263,7 +266,7 @@ const char* dwarf_readString(const struct dwarf_parser* self, const void* buffer
     if (type != DW_FORM_line_strp && type != DW_FORM_strp && type != DW_FORM_strp_sup
         && type != DW_FORM_strx && type != DW_FORM_strx1 && type != DW_FORM_strx2
         && type != DW_FORM_strx3 && type != DW_FORM_strx4) {
-        BFE_THROW_MSG(unsupported, "Unsupported string type to be parsed");
+        throw(unsupported, self, "Unsupported string type to be parsed");
     }
     uint64_t offset;
     if (type == DW_FORM_strp || type == DW_FORM_line_strp || type == DW_FORM_strp_sup) {
@@ -300,7 +303,7 @@ const char* dwarf_readString(const struct dwarf_parser* self, const void* buffer
                 *counter += 4;
                 break;
 
-            default: BFE_THROW_MSG(unsupported, "Unsupported string type to be parsed");
+            default: throw(unsupported, self, "Unsupported string type to be parsed");
         }
         type = DW_FORM_strp;
         offset = dwarf_loadStringOffset(index, self->debugStrOffsets, self->debugStrOffset);
@@ -382,7 +385,7 @@ static inline const char* dwarf_parseCompDir(struct dwarf_parser* self) {
                 dwarf_consumeSome(self, self->debugInfo.content, &counter, element->second);
             }
         });
-        BFE_THROW_MSG(failed, "Failed to parse DW_AT_comp_dir");
+        throw(failed, self, "Failed to parse DW_AT_comp_dir");
     }, CATCH_ALL(_, {
         (void) _;
         vector_destroy(&abbrevs);
@@ -396,6 +399,7 @@ void dwarf_parseLineProgram(const struct lcs_section debugLine,
                             const struct lcs_section debugInfo,
                             const struct lcs_section debugAbbrev,
                             const struct lcs_section debugStrOffsets,
+                            const char* fileName,
                             const dwarf_line_callback cb, void* args) {
     bool bit64;
     size_t counter = 0;
@@ -417,6 +421,7 @@ void dwarf_parseLineProgram(const struct lcs_section debugLine,
         .stdOpcodeLengths = vector_initializer,
         .compilationDirectory = NULL,
         .debugStrOffset = (optional_uint64_t) { .has_value = false },
+        .fileName = fileName,
     };
     parser.compilationDirectory = dwarf_parseCompDir(&parser);
     switch (version) {
@@ -425,7 +430,7 @@ void dwarf_parseLineProgram(const struct lcs_section debugLine,
         case 4: dwarf4_parser_create(&parser); break;
         case 5: dwarf5_parser_create(&parser); break;
 
-        default: BFE_THROW_MSG(unsupported, "Unsupported DWARF version");
+        default: throw(unsupported, &parser, "Unsupported DWARF version");
     }
     TRY({
         dwarf_parser_parse(&parser, counter, size);

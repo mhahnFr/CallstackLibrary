@@ -366,6 +366,7 @@ static inline void objectFile_parseMachO(struct objectFile* self, const void* bu
                                    self->debugInfo,
                                    self->debugAbbrev,
                                    self->debugStrOffsets,
+                                   self->name,
                                    objectFile_dwarfLineCallback, self);
         }, CATCH_ALL(exception, {
             BFE_EXCEPTION_HANDLER(exception);
