@@ -27,8 +27,6 @@
 
 #ifdef DEBUG
 # include <stdio.h>
-
-# include "binaryFile.h"
 #endif
 
 struct binaryFileException {
@@ -41,26 +39,25 @@ struct binaryFileException {
         binaryFileExceptionType_invalid,
         binaryFileExceptionType_empty,
     } code;
-    bool hasMessage;
-    union {
-        struct binaryFile* file;
-        const char* message;
-    } payload;
+    const char* fileName,
+              * message;
 };
 
-#define BFE_THROW(theCode, concreteFilePtr)        \
-    THROW1(struct binaryFileException, {           \
-        .code = binaryFileExceptionType_##theCode, \
-        .hasMessage = false,                       \
-        .payload.file = &(concreteFilePtr)->_,     \
+#define BFE_THROW_RAW(theCode, theFileName, theMessage) \
+    THROW1(struct binaryFileException, {                \
+        .code = binaryFileExceptionType_##theCode,      \
+        .fileName = (theFileName),                      \
+        .message = (theMessage),                        \
     })
 
-#define BFE_THROW_MSG(theCode, theMessage)         \
-    THROW1(struct binaryFileException, {           \
-        .code = binaryFileExceptionType_##theCode, \
-        .hasMessage = true,                        \
-        .payload.message = (theMessage),           \
-    })
+#define BFE_THROW(theCode, concreteFilePtr, theMessage) \
+    BFE_THROW_RAW(theCode, (concreteFilePtr)->_.fileName.original, theMessage)
+
+#define BFE_THROW_FILE(theCode, concreteFilePtr) \
+    BFE_THROW_RAW(theCode, (concreteFilePtr)->_.fileName.original, NULL)
+
+#define BFE_THROW_MSG(theCode, theMessage) \
+    BFE_THROW_RAW(theCode, NULL, theMessage)
 
 #define BFE_ALLOC_RAW(size, throwExpr) ({ \
     void* _toReturn = malloc(size);       \
@@ -70,25 +67,30 @@ struct binaryFileException {
     _toReturn;                            \
 })
 
-#define BFE_ALLOC_F(size, file) BFE_ALLOC_RAW(size, BFE_THROW(failedAllocation, file))
+#define BFE_ALLOC_F(size, file, ...) \
+    BFE_ALLOC_RAW(size, BFE_THROW(failedAllocation, file __VA_OPT__(,) __VA_ARGS__))
 
-#define BFE_ALLOC_MSG(size, theMessage) BFE_ALLOC_RAW(size, BFE_THROW_MSG(failedAllocation, theMessage))
+#define BFE_ALLOC_MSG(size, theMessage) \
+    BFE_ALLOC_RAW(size, BFE_THROW_MSG(failedAllocation, theMessage))
 
 #ifdef DEBUG
-# define BFE_EXCEPTION_HANDLER(exception) do {                                                                     \
-    const struct binaryFileException* theException = (exception);                                                  \
-    const char* codeString;                                                                                        \
-    switch (theException->code) {                                                                                  \
-        case binaryFileExceptionType_unsupported:      codeString = "unsupported";       break;                    \
-        case binaryFileExceptionType_failed:           codeString = "failed";            break;                    \
-        case binaryFileExceptionType_failedAllocation: codeString = "allocation failed"; break;                    \
-        case binaryFileExceptionType_invalid:          codeString = "invalid";           break;                    \
-        case binaryFileExceptionType_empty:            codeString = "empty";             break;                    \
-                                                                                                                   \
-        default: codeString = "unknown"; break;                                                                    \
-    }                                                                                                              \
-    printf("LCS: Binary file exception: %s, %s%s!\n", codeString, theException->hasMessage ? "" : "file name: ",   \
-        theException->hasMessage ? theException->payload.message : theException->payload.file->fileName.original); \
+# define BFE_EXCEPTION_HANDLER(exception) do {                                                            \
+    const struct binaryFileException* theException = (exception);                                         \
+    const char* codeString;                                                                               \
+    switch (theException->code) {                                                                         \
+        case binaryFileExceptionType_unsupported:      codeString = "unsupported";       break;           \
+        case binaryFileExceptionType_failed:           codeString = "failed";            break;           \
+        case binaryFileExceptionType_failedAllocation: codeString = "allocation failed"; break;           \
+        case binaryFileExceptionType_invalid:          codeString = "invalid";           break;           \
+        case binaryFileExceptionType_empty:            codeString = "empty";             break;           \
+                                                                                                          \
+        default: codeString = "unknown"; break;                                                           \
+    }                                                                                                     \
+    const bool hasFileName = theException->fileName != NULL,                                              \
+                hasMessage = theException->message != NULL;                                               \
+    printf("LCS: Binary file exception: %s, %s%s%s%s%s!\n", codeString, hasFileName ? "file name: " : "", \
+        hasFileName ? theException->fileName : "", hasFileName && hasMessage ? ", " : "",                 \
+        hasMessage ? "message: " : "", hasMessage ? theException->message : "");                          \
 } while (0)
 
 #else
