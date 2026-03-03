@@ -51,6 +51,7 @@ struct machoParser {
     machoParser_addSymbol symbolCallback;
     /** The payload to pass on to the symbol callback function. */
     void* object;
+    const char* fileName;
 
     /** Collection of the private member variables.             */
     struct {
@@ -88,7 +89,7 @@ struct machoParser {
 struct machoParser machoParser_create(
     struct symtab_command* command, const void* baseAddress,
     uintptr_t parsingOffset, bool bytesSwapped, bool bit64,
-    machoParser_addSymbol symbolCallback, void* object);
+    machoParser_addSymbol symbolCallback, void* object, const char* fileName);
 
 /**
  * Parses the symbol table the given Mach-O parser represents.

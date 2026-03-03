@@ -53,15 +53,16 @@
  * @param value the value
  */
 #define machoParser_swap(self, bits, value) macho_maybeSwap(bits, (self)->bytesSwapped, value)
+#define throw(code, self, message) BFE_THROW_RAW(code, (self)->fileName, message)
 
 struct machoParser machoParser_create(
     struct symtab_command* command, const void* baseAddress,
     const uintptr_t parsingOffset, const bool bytesSwapped, const bool bit64,
-    const machoParser_addSymbol symbolCallback, void* object)
+    const machoParser_addSymbol symbolCallback, void* object, const char* fileName)
 {
     return (struct machoParser) {
         command, baseAddress, bytesSwapped, bit64, parsingOffset,
-        symbolCallback, object, {
+        symbolCallback, object, fileName, {
             baseAddress + (macho_maybeSwap(32, bytesSwapped, command->stroff) + parsingOffset),
             bit64 ? sizeof(struct nlist_64) : sizeof(struct nlist),
             {
@@ -82,7 +83,7 @@ struct machoParser machoParser_create(
 static inline void machoParser_handleSymbolBegin##bits(struct machoParser* self,                                \
                                                        const struct nlist##suffix* entry) {                     \
     if (self->private.parsingState.currentSymbol.has_value) {                                                   \
-        BFE_THROW_MSG(invalid, "Symbol begin with active symbol");                                              \
+        throw(invalid, self, "Symbol begin with active symbol");                                                \
     }                                                                                                           \
     self->private.parsingState.currentSymbol = (optional_symbol_t) { true, symbol_initializer };                \
     self->private.parsingState.currentSymbol.value.startAddress = machoParser_swap(self, bits, entry->n_value); \
@@ -100,7 +101,7 @@ machoParser_handleSymbolBeginImpl(64, _64)
 #define machoParser_handleSymbolEndImpl(bits, suffix)                            \
 static inline void machoParser_handleSymbolEnd##bits(struct machoParser* self) { \
     if (!self->private.parsingState.currentSymbol.has_value) {                   \
-        BFE_THROW_MSG(invalid, "Symbol end without active symbol");              \
+        throw(invalid, self, "Symbol end without active symbol");                \
     }                                                                            \
     self->symbolCallback(self->object, (pair_symbolFile_t) {                     \
         self->private.parsingState.currentSymbol.value,                          \
@@ -149,12 +150,12 @@ machoParser_handleSourceInfoImpl(64, _64)
 static inline void machoParser_handleObjectFile##bits(struct machoParser* self,                                      \
                                                       const struct nlist##suffix* entry) {                           \
     if (self->private.parsingState.currentObjectFile != NULL) {                                                      \
-        BFE_THROW_MSG(invalid, "Handling object file without active object file");                                   \
+        throw(invalid, self, "Handling object file without active object file");                                     \
     }                                                                                                                \
     const char* fileName = self->private.stringTable + machoParser_swap(self, 32, entry->n_un.n_strx);               \
     const uint64_t modified = machoParser_swap(self, bits, entry->n_value);                                          \
     if ((self->private.parsingState.currentObjectFile = macho_cache_findOrAdd(fileName, modified)) == NULL) {        \
-        BFE_THROW_MSG(failed, "Failed to cache object file");                                                        \
+        throw(failed, self, "Failed to cache object file");                                                          \
     }                                                                                                                \
     if (self->private.parsingState.currentObjectFile->directory == NULL) {                                           \
         self->private.parsingState.currentObjectFile->directory = self->private.parsingState.path == NULL            \
@@ -179,7 +180,7 @@ machoParser_handleObjectFileImpl(64, _64)
 static inline void machoParser_handleSymbol##bits(struct machoParser* self,                                         \
                                                   const struct nlist##suffix* entry) {                              \
     if (!self->private.parsingState.currentSymbol.has_value) {                                                      \
-        BFE_THROW_MSG(invalid, "Handling symbol without active symbol");                                            \
+        throw(invalid, self, "Handling symbol without active symbol");                                              \
     }                                                                                                               \
     const char* value = self->private.stringTable + machoParser_swap(self, 32, entry->n_un.n_strx);                 \
     if (*value == '\0') {                                                                                           \

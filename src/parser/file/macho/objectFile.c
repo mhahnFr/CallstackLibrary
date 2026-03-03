@@ -293,7 +293,7 @@ static inline void objectFile_parseMachOImpl##bits(struct objectFile* self,     
                 volatile struct machoParser parser = machoParser_create(                      \
                     (void*) loadCommand, baseAddress, 0,                                      \
                     bytesSwapped, (bits) == 64,                                               \
-                    (machoParser_addSymbol) objectFile_addSymbolCallback, self                \
+                    (machoParser_addSymbol) objectFile_addSymbolCallback, self, self->name    \
                 );                                                                            \
                 TRY({                                                                         \
                     machoParser_parseSymbolTable((struct machoParser*) &parser);              \
