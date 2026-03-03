@@ -200,7 +200,7 @@ static inline vector_fileAttribute_t dwarf5_parseFileAttributes(const struct dwa
 
                 case DW_LNCT_MD5:
                     if (element->second != DW_FORM_data16) {
-                        BFE_THROW_MSG(invalid, "Parsing DW_LNCT_MD5 but format is not DW_FORM_data16");
+                        BFE_THROW_RAW(invalid, self->fileName, "Parsing DW_LNCT_MD5 but format is not DW_FORM_data16");
                     }
                     attribute.md5 = dwarf5_readMD5(self->debugLine.content, counter);
                     break;
