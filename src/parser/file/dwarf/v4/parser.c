@@ -31,7 +31,6 @@
  *
  * @param self the generified parser object
  * @param counter the byte index
- * @return whether the parsing was successful
  */
 static inline void dwarf4_parseLineProgramHeader(struct dwarf_parser* self, size_t* counter) {
     uint64_t headerLength;
