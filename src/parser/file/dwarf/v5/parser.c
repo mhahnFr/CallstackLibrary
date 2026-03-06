@@ -279,7 +279,6 @@ static inline struct dwarf_sourceFile dwarf5_getFileName(const struct dwarf_pars
  *
  * @param self the generified parser object
  * @param counter the reading index
- * @return whether the parsing was successful
  */
 static inline void dwarf5_parseLineProgramHeader(struct dwarf_parser* self, size_t* counter) {
     const uint8_t addressSize = *(uint8_t*) (self->debugLine.content + (*counter)++);
