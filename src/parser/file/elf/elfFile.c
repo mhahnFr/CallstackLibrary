@@ -170,11 +170,11 @@ elfFile_loadShnum(64)
 #define elfFile_parseFileImpl(bits)                                                                                   \
 static inline void elfFile_parseFile##bits(struct elfFile* self, const Elf##bits##_Ehdr* buffer, bool littleEndian) { \
     if (ELF_TO_HOST(bits, buffer->e_shoff, littleEndian) == 0) {                                                      \
-        BFE_THROW(unsupported, self);                                                                                 \
+        BFE_THROW(unsupported, self, "Invalid section offset");                                                       \
     }                                                                                                                 \
     char* sectStrBegin = elfFile_loadSectionStrtab##bits(buffer, littleEndian);                                       \
     if (sectStrBegin == NULL) {                                                                                       \
-        BFE_THROW(failed, self);                                                                                      \
+        BFE_THROW(failed, self, "Failed to load string section begin");                                               \
     }                                                                                                                 \
                                                                                                                       \
     void* sectBegin = (void*) buffer + ELF_TO_HOST(bits, buffer->e_shoff, littleEndian);                              \
@@ -230,7 +230,7 @@ static inline void elfFile_parseFile##bits(struct elfFile* self, const Elf##bits
     }                                                                                                                 \
     if (symtab == NULL || strtab == NULL) {                                                                           \
         if (dystrtab == NULL || dysymtab == NULL) {                                                                   \
-            BFE_THROW(empty, self);                                                                                   \
+            BFE_THROW(empty, self, "Found neither a symbol table nor a dynamic symbol table");                        \
         }                                                                                                             \
         symtab = dysymtab;                                                                                            \
         strtab = dystrtab;                                                                                            \
@@ -320,6 +320,7 @@ static inline void elfFile_parseFile(struct elfFile* self, const Elf32_Ehdr* hea
                                    self->debugInfo,
                                    self->debugAbbrev,
                                    self->debugStrOffsets,
+                                   self->_.fileName.original,
                                    elfFile_lineProgramCallback, self);
         }, CATCH_ALL(_, {
             // TODO: Allowed to fail, handle anyway
@@ -382,7 +383,7 @@ void elfFile_parse(struct elfFile* self) {
         if (!loader_loadFileAndExecute(self->_.fileName.original, (union loader_parserFunction) {
                 .parseFunc = (loader_parser) elfFile_parseFileComplete
             }, false, self)) {
-            BFE_THROW(failed, self);
+            BFE_THROW_FILE(failed, self);
         }
         vector_sort(&self->symbols, elfFile_functionCompare);
         vector_sort(&self->lineInfos, elfFile_lineInfoCompare);
