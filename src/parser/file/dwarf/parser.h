@@ -153,7 +153,6 @@ uint64_t dwarf_parseInitialSize(const void* buffer, size_t* counter, bool* bit64
  * @param buffer the data buffer
  * @param counter the reading index
  * @param type the expected data type
- * @return whether the data was allowed and skipped successfully
  */
 void dwarf_consumeSome(const struct dwarf_parser* self, const void* buffer, size_t* counter, uint64_t type);
 

@@ -53,7 +53,6 @@ char* dwarf_pathConcatenate(const char* string1, const char* string2) {
  * @param counter the counter of already read bytes (offset)
  * @param actualSize the size of the line number program including the header,
  * as read from the header
- * @return whether the parsing was successful
  */
 static inline void dwarf_parser_parse(struct dwarf_parser* self, size_t counter, const size_t actualSize) {
     self->parseHeader(self, &counter);
