@@ -294,7 +294,6 @@ elfFile_loadELF_impl(64)
  * @param self the ELF file abstraction object
  * @param header the start pointer of the ELF file
  * @param shallow whether to parse only the strictly necessary information
- * @return whether the file was parsed successfully
  */
 static inline void elfFile_parseFile(struct elfFile* self, const Elf32_Ehdr* header, const bool shallow) {
     const bool littleEndian = header->e_ident[EI_DATA] == ELFDATA2LSB;
@@ -372,7 +371,6 @@ static inline int elfFile_lineInfoCompare(const void* lhs, const void* rhs) {
  *
  * @param self the ELF file object
  * @param header the ELF file header
- * @return whether the parsing was successful
  */
 static inline void elfFile_parseFileComplete(struct elfFile* self, const Elf32_Ehdr* header) {
     elfFile_parseFile(self, header, false);
