@@ -25,34 +25,31 @@
 #include <stdlib.h>
 #include <sys/stat.h>
 
-#include "try_catch.h"
+#include "exception.h"
 
-bool loader_loadFileAndExecuteTime(const char* fileName, const time_t* lastModified,
+void loader_loadFileAndExecuteTime(const char* fileName, const time_t* lastModified,
                                    const union loader_parserFunction func, const bool extended, void* args) {
     if (fileName == NULL) {
-        return false;
+        BFE_THROW_RAW(empty, fileName, "No file name given");
     }
     struct stat fileStats;
     if (stat(fileName, &fileStats) != 0) {
-        return false;
+        BFE_THROW_RAW(failed, fileName, "Could not stat file name");
     }
     if (lastModified != NULL && fileStats.st_mtime != *lastModified) {
-        return false;
+        BFE_THROW_RAW(invalid, fileName, "File last modified timestamp does not match given last modified time");
     }
-    void* buffer = malloc(fileStats.st_size);
-    if (buffer == NULL) {
-        return false;
-    }
+    void* buffer = BFE_ALLOC_MSG(fileStats.st_size, "Failed to allocate file buffer");
     FILE* file = fopen(fileName, "r");
     if (file == NULL) {
         free(buffer);
-        return false;
+        BFE_THROW_RAW(failed, fileName, "Could not open file");
     }
     const size_t count = fread(buffer, 1, fileStats.st_size, file);
     fclose(file);
     if ((off_t) count != fileStats.st_size) {
         free(buffer);
-        return false;
+        BFE_THROW_RAW(failed, fileName, "Could not read file");
     }
     TRY({
         if (extended) {
@@ -66,5 +63,4 @@ bool loader_loadFileAndExecuteTime(const char* fileName, const time_t* lastModif
         RETHROW;
     }))
     free(buffer);
-    return true;
 }

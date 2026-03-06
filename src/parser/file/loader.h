@@ -73,7 +73,7 @@ union loader_parserFunction {
  * @param args the payload passed to the callback
  * @return whether the file was loaded successfully and the parsing was successful
  */
-bool loader_loadFileAndExecuteTime(const char* fileName, const time_t* lastModified,
+void loader_loadFileAndExecuteTime(const char* fileName, const time_t* lastModified,
                                    union loader_parserFunction func, bool extended, void* args);
 
 /**
@@ -93,9 +93,9 @@ bool loader_loadFileAndExecuteTime(const char* fileName, const time_t* lastModif
  * @param args the payload passed to the callback
  * @return whether the file was loaded successfully and the parsing was successful
  */
-static inline bool loader_loadFileAndExecute(const char* fileName, const union loader_parserFunction func,
+static inline void loader_loadFileAndExecute(const char* fileName, const union loader_parserFunction func,
                                              const bool extended, void* args) {
-    return loader_loadFileAndExecuteTime(fileName, NULL, func, extended, args);
+    loader_loadFileAndExecuteTime(fileName, NULL, func, extended, args);
 }
 
 #endif /* loader_h */
