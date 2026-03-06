@@ -76,7 +76,6 @@ void machoFile_create(struct machoFile* self);
  * Parses the minimal necessary information of the represented Mach-O file.
  *
  * @param self the Mach-O file object
- * @return whether the parsing was successful
  */
 void machoFile_parseShallow(struct machoFile* self);
 
@@ -125,7 +124,6 @@ vector_pair_ptr_t machoFile_getTLSRegions(struct machoFile* self);
  * abstraction object.
  *
  * @param self the Mach-O file abstraction object
- * @return whether the file was parsed successfully
  */
 void machoFile_parse(struct machoFile* self);
 

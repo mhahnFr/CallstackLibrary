@@ -282,7 +282,6 @@ static inline int machoFile_uint64Compare(const uint64_t* lhs, const uint64_t* r
  * @param command the Mach-O data command
  * @param baseAddress the start address of the runtime image
  * @param bitsReversed whether to swap the endianness of read numbers
- * @return whether the parsing was successful
  */
 static inline void machoFile_handleFunctionStarts(struct machoFile* self, struct linkedit_data_command* command,
                                                   const void* baseAddress, const bool bitsReversed) {
@@ -376,7 +375,6 @@ machoFile_parseFileImpl(64, _64)
  * @param baseAddress the Mach-O file buffer
  * @param shallow whether to only parse the strictly necessary information from
  * the represented file
- * @return whether the parsing was successful
  */
 static inline void machoFile_parseFile(struct machoFile* self, const void* baseAddress, const bool shallow) {
     if (baseAddress == NULL) {
@@ -415,7 +413,6 @@ static inline void machoFile_parseFile(struct machoFile* self, const void* baseA
  *
  * @param self the Mach-O file object
  * @param baseAddress the base address of the represented file
- * @return whether the parsing was successful
  */
 static inline void machoFile_parseFileComplete(struct machoFile* self, const void* baseAddress) {
     machoFile_parseFile(self, baseAddress, false);
