@@ -30,8 +30,6 @@
  *
  * The first passed parameter is the additional payload, the second one is the
  * loaded file buffer.
- *
- * Returns whether the parsing was successful.
  */
 typedef void (*loader_parser)(void*, void*);
 /**
@@ -40,8 +38,6 @@ typedef void (*loader_parser)(void*, void*);
  * The first passed parameter is the loaded file buffer, the second one the
  * file name, the third one the size of the file and the last parameter is the
  * additional payload.
- * <br><br>
- * Returns whether the parsing was successful.
  */
 typedef void (*loader_parserExtended)(void*, const char*, size_t, void*);
 
@@ -71,7 +67,6 @@ union loader_parserFunction {
  * @param func the parser function to be used
  * @param extended whether to use the complex version of the parser function
  * @param args the payload passed to the callback
- * @return whether the file was loaded successfully and the parsing was successful
  */
 void loader_loadFileAndExecuteTime(const char* fileName, const time_t* lastModified,
                                    union loader_parserFunction func, bool extended, void* args);
@@ -91,7 +86,6 @@ void loader_loadFileAndExecuteTime(const char* fileName, const time_t* lastModif
  * @param func the parser function to be used
  * @param extended whether to use the complex version of the parser function
  * @param args the payload passed to the callback
- * @return whether the file was loaded successfully and the parsing was successful
  */
 static inline void loader_loadFileAndExecute(const char* fileName, const union loader_parserFunction func,
                                              const bool extended, void* args) {
