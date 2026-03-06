@@ -101,7 +101,6 @@ struct objectFile * objectFile_new(void);
  *
  * @param self the object file object
  * @param buffer the Mach-O buffer to be parsed
- * @return whether the parsing was successful
  */
 void objectFile_parseBuffer(struct objectFile* self, const void* buffer);
 

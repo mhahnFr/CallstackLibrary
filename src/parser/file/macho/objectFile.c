@@ -143,7 +143,6 @@ static inline const char* objectFile_getSourceFileName(struct objectFile* self) 
  * callback is called with the additionally given arguments.
  *
  * @param self the object file object to be parsed
- * @return whether the parsing was successful
  */
 static inline void objectFile_parse(struct objectFile* self) {
     const time_t lastModified = self->lastModified;
@@ -326,7 +325,6 @@ objectFile_parseMachOImplFunc(64, _64)
  *
  * @param self the object file object
  * @param buffer the buffer of the Mach-O file
- * @return whether the parsing was successful
  */
 static inline void objectFile_parseMachO(struct objectFile* self, const void* buffer) {
     if (buffer == NULL) {
