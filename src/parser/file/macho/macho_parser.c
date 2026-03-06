@@ -249,7 +249,6 @@ machoParser_handleEntryImpl(64, _64)
  *
  * @param self the Mach-O symbol table parser
  * @param entryAddress the address of the entry to be handled
- * @return whether the handling was successful
  */
 static inline void machoParser_handleEntry(struct machoParser* self, const void* entryAddress) {
     if (self->bit64) {

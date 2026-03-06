@@ -95,7 +95,6 @@ struct machoParser machoParser_create(
  * Parses the symbol table the given Mach-O parser represents.
  *
  * @param self the Mach-O symbol table parser
- * @return whether the parsing was successful
  */
 void machoParser_parseSymbolTable(struct machoParser* self);
 
