@@ -129,7 +129,7 @@ ifeq ($(shell uname -s),Darwin)
 else ifeq ($(shell uname -s),Linux)
 	OBJS += $(LINUX_OBJS)
 	DEPS += $(LINUX_DEPS)
-	COM_FLAGS += -Ofast
+	COM_FLAGS += -Ofast -Wno-clobbered
 
 	NAME = $(SHARED_N)
 else
