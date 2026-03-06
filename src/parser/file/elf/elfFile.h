@@ -64,7 +64,6 @@ void elfFile_create(struct elfFile * self);
  * Loads the ELF file represented by the given abstraction object.
  *
  * @param self the ELF file abstraction object
- * @return whether the ELF file was loaded successfully
  */
 void elfFile_parse(struct elfFile* self);
 
@@ -72,7 +71,6 @@ void elfFile_parse(struct elfFile* self);
  * Parses only the strictly necessary information of the represented ELF file.
  *
  * @param self the ELF file object
- * @return whether the parsing was successful
  */
 void elfFile_parseShallow(struct elfFile* self);
 
