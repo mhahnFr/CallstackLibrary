@@ -91,7 +91,6 @@ static inline size_t macho_archive_stringLength(const char* string, const size_t
  * @param fileName the file name of the archive
  * @param totalSize the total size of the buffer
  * @param cb the callback to be called once an object file has been extracted
- * @return whether the archive was parsed successfully
  */
 static inline void macho_archive_parseImpl(void* buffer, const char* fileName, const size_t totalSize, const macho_archive_callback cb) {
     size_t counter = 0;

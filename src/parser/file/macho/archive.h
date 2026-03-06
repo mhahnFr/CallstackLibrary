@@ -39,7 +39,6 @@ typedef void (*macho_archive_callback)(struct objectFile*);
  *
  * @param fileName the name of the archive file
  * @param cb the callback to be called with an object file
- * @return whether the archive was parsed successfully
  */
 void macho_archive_parse(const char* fileName, macho_archive_callback cb);
 
