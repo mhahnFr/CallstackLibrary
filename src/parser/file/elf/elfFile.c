@@ -322,8 +322,8 @@ static inline void elfFile_parseFile(struct elfFile* self, const Elf32_Ehdr* hea
                                    self->debugStrOffsets,
                                    self->_.fileName.original,
                                    elfFile_lineProgramCallback, self);
-        }, CATCH_ALL(_, {
-            // TODO: Allowed to fail, handle anyway
+        }, CATCH_ALL(exception, {
+            BFE_EXCEPTION_HANDLER(exception);
         }))
     }
 }
@@ -388,6 +388,7 @@ void elfFile_parse(struct elfFile* self) {
         vector_sort(&self->symbols, elfFile_functionCompare);
         vector_sort(&self->lineInfos, elfFile_lineInfoCompare);
     }, CATCH_ALL(_, {
+        (void) _;
         vector_destroyWithPtr(&self->symbols, symbol_destroy);
         vector_init(&self->symbols);
         RETHROW;
