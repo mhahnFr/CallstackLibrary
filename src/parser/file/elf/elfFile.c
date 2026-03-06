@@ -380,11 +380,9 @@ static inline void elfFile_parseFileComplete(struct elfFile* self, const Elf32_E
 
 void elfFile_parse(struct elfFile* self) {
     TRY({
-        if (!loader_loadFileAndExecute(self->_.fileName.original, (union loader_parserFunction) {
-                .parseFunc = (loader_parser) elfFile_parseFileComplete
-            }, false, self)) {
-            BFE_THROW_FILE(failed, self);
-        }
+        loader_loadFileAndExecute(self->_.fileName.original, (union loader_parserFunction) {
+            .parseFunc = (loader_parser) elfFile_parseFileComplete
+        }, false, self);
         vector_sort(&self->symbols, elfFile_functionCompare);
         vector_sort(&self->lineInfos, elfFile_lineInfoCompare);
     }, CATCH_ALL(_, {
