@@ -28,6 +28,7 @@
  * @param bits the amount of bits of the given value
  * @param swap whether to swap the bytes
  * @param value the value in question
+ * @return the usable value
  */
 #define macho_maybeSwap(bits, swap, value) ((swap) ? OSSwapInt##bits(value) : (value))
 
