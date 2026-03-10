@@ -53,6 +53,14 @@
  * @param value the value
  */
 #define machoParser_swap(self, bits, value) macho_maybeSwap(bits, (self)->bytesSwapped, value)
+
+/**
+ * Throws an exception with the given code and meta information.
+ *
+ * @param code the exception code
+ * @param self the pointer to a Mach-O parser object instance
+ * @param message the message
+ */
 #define throw(code, self, message) BFE_THROW_RAW(code, (self)->fileName, message)
 
 struct machoParser machoParser_create(
