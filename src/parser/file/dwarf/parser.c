@@ -30,6 +30,13 @@
 #include "v4/definitions.h"
 #include "v5/definitions.h"
 
+/**
+ * Throws an exception with the given code and meta information.
+ *
+ * @param code the excerption code
+ * @param self the pointer to a DWARF main parser structure instance
+ * @param message the message
+ */
 #define throw(code, self, message) BFE_THROW_RAW(code, (self)->fileName, message)
 
 char* dwarf_pathConcatenate(const char* string1, const char* string2) {
