@@ -21,7 +21,10 @@
 
 #include "callstack_parser.h"
 
+#include <stdio.h>
+
 #include "../callstackInternal.h"
+#include "../dlMapper/dlMapper_platform.h"
 #include "demangling/demangler.h"
 #include "file/binaryFile.h"
 
@@ -43,6 +46,8 @@ static inline bool callstack_parser_parseImpl(const struct callstack_parser* sel
             continue;
         }
         if (!binaryFile_addr2String(file, callstack->backtrace[i], &callstack->frames[i])) {
+            callstack->frames[i].reserved2 = false;
+            asprintf(&callstack->frames[i].function, "0x%lx", dlMapper_platform_relativize(file, callstack->backtrace[i]));
             ++failed;
         }
     }
