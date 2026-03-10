@@ -137,21 +137,6 @@ static inline const char* objectFile_getSourceFileName(struct objectFile* self) 
 }
 
 /**
- * @brief Parses the Mach-O file represented by the given object file object.
- *
- * The DWARF line information is extracted and for every line entry the given
- * callback is called with the additionally given arguments.
- *
- * @param self the object file object to be parsed
- */
-static inline void objectFile_parse(struct objectFile* self) {
-    const time_t lastModified = self->lastModified;
-    loader_loadFileAndExecuteTime(self->name, lastModified == 0 ? NULL : &lastModified, (union loader_parserFunction) {
-        (loader_parser) objectFile_parseBuffer
-    }, false, self);
-}
-
-/**
  * Parses the given object file if it has not already been parsed.
  *
  * @param self the object file
@@ -162,7 +147,10 @@ static inline bool objectFile_maybeParse(struct objectFile* self) {
         return true;
     }
     TRY({
-        objectFile_parse(self);
+        const time_t lastModified = self->lastModified;
+        loader_loadFileAndExecuteTime(self->name, lastModified == 0 ? NULL : &lastModified, (union loader_parserFunction) {
+            (loader_parser) objectFile_parseBuffer
+        }, false, self);
         self->parsed = true;
     }, CATCH_ALL(exception, {
         BFE_EXCEPTION_HANDLER(exception);
