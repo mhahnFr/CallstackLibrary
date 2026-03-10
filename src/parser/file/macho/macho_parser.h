@@ -51,6 +51,7 @@ struct machoParser {
     machoParser_addSymbol symbolCallback;
     /** The payload to pass on to the symbol callback function. */
     void* object;
+    /** The name of the file currently being parsed.            */
     const char* fileName;
 
     /** Collection of the private member variables.             */
@@ -84,6 +85,7 @@ struct machoParser {
  * @param symbolCallback the callback to be called once a symbol has been
  * deducted
  * @param object the payload to be passed to the callback
+ * @param fileName the name of the file currently being parsed
  * @return the newly constructed Mach-O symbol table parser
  */
 struct machoParser machoParser_create(
