@@ -81,6 +81,7 @@ struct dwarf_parser {
     /** The payload for the DWARF line callback.                                        */
     void* args;
 
+    /** The name of the file currently being parsed.                                    */
     const char* fileName;
     /** The directory where the binary was compiled in.                                 */
     const char* compilationDirectory;
@@ -114,6 +115,7 @@ struct dwarf_parser {
  * @param debugInfo the section corresponding to the @c .debug_info section
  * @param debugAbbrev the section corresponding to the @c .debug_abbrev section
  * @param debugStrOffsets the section corresponding to the @c .debug_str_offsets section
+ * @param fileName the name of the file currently being parsed
  * @param cb the line table row callback
  * @param args the payload to additionally pass to the callback function
  */
