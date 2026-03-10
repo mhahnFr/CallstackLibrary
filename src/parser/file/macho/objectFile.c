@@ -33,6 +33,13 @@
 #include "../loader.h"
 #include "../dwarf/parser.h"
 
+/**
+ * Throws an exception with the given code and the provided meta information.
+ *
+ * @param code the exception code to be thrown
+ * @param self the pointer to an object file structure instance
+ * @param message the message to be thrown
+ */
 #define throw(code, self, message) BFE_THROW_RAW(code, (self)->name, message)
 
 struct objectFile* objectFile_new(void) {
