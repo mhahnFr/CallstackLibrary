@@ -148,7 +148,7 @@ endif
 
 default: $(NAME)
 
-debug: COM_FLAGS += -DDEBUG
+debug: COM_FLAGS += -DDEBUG -O0 -g
 debug: default
 
 all:
