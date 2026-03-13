@@ -240,7 +240,7 @@ struct callstack_frame* callstack_getBinariesCached(struct callstack* self);
 #endif
 
 /**
- * @brief Returns the number of frames stored in the given callstack.
+ * Returns the number of frames stored in the given callstack.
  *
  * @param self The callstack object.
  * @return The number of frames in the given callstack.
@@ -250,7 +250,7 @@ static inline size_t callstack_getFrameCount(const struct callstack* self) {
 }
 
 /**
- * @brief Returns the type of the given callstack.
+ * Returns the type of the given callstack.
  *
  * @param self The callstack object.
  * @return The type of the callstack.
@@ -260,7 +260,7 @@ static inline enum callstack_type callstack_getType(const struct callstack* self
 }
 
 /**
- * @brief Returns whether the given callstack is already translated.
+ * Returns whether the given callstack is already translated.
  *
  * @param self The callstack object.
  * @return Whether the callstack is already translated.

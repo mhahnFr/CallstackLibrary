@@ -1,9 +1,9 @@
 /*
  * CallstackLibrary - Library creating human-readable call stacks.
  *
- * Copyright (C) 2022 - 2025  mhahnFr
+ * Copyright (C) 2022 - 2026  mhahnFr
  *
- * This file is part of the CallstackLibrary. 
+ * This file is part of the CallstackLibrary.
  *
  * The CallstackLibrary is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -34,7 +34,7 @@ struct callstack_parser {
 };
 
 /**
- * @brief Constructs the given callstack parser object.
+ * Constructs the given callstack parser object.
  *
  * @param self The callstack parser object to construct.
  */
@@ -44,7 +44,7 @@ static inline void callstack_parser_create(struct callstack_parser* self) {
 }
 
 /**
- * @brief Destroys the given callstack parser object.
+ * Destroys the given callstack parser object.
  *
  * @param self The callstack parser object to destroy.
  */

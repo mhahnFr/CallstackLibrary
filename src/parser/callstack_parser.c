@@ -29,7 +29,7 @@
 #include "file/binaryFile.h"
 
 /**
- * @brief Translates the given callstack using the given parser.
+ * Translates the given callstack using the given parser.
  *
  * @param self the callstack parser to be used
  * @param callstack the callstack to be translated
