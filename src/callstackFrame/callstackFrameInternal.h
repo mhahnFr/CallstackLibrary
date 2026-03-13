@@ -1,7 +1,7 @@
 /*
  * CallstackLibrary - Library creating human-readable call stacks.
  *
- * Copyright (C) 2025  mhahnFr
+ * Copyright (C) 2025 - 2026  mhahnFr
  *
  * This file is part of the CallstackLibrary.
  *
@@ -31,6 +31,7 @@
  * @param self the callstack frame object to fill
  * @param address the address whose binary file information to deduct
  * @param useCache whether fill in cached values
+ * @param includeRegions whether to search within global regions, too
  */
 void callstackFrame_translateBinary(struct callstack_frame* self, const void* address, bool useCache, bool includeRegions);
 
