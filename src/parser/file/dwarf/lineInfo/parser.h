@@ -56,7 +56,7 @@ struct dwarf_lineInfoParser {
     /** Whether the current position is the beginning of the epilogue.    */
          epilogueBegin;
 
-    /** The main DWARF parser. */
+    /** The main DWARF parser.                                            */
     struct dwarf_parser* parser;
 };
 
