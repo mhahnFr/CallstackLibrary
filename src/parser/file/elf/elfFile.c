@@ -144,7 +144,7 @@ elfFile_sectionToLCSSection(64)
  *
  * @param bits the amount of bits the implementation shall handle
  */
-#define elfFile_loadShnum(bits) \
+#define elfFile_loadShnum(bits)                                                                                                 \
 static inline uint64_t elfFile_loadShnum##bits(const Elf##bits##_Ehdr* buffer, bool littleEndian) {                             \
     uint64_t shnum = ELF_TO_HOST(16, buffer->e_shnum, littleEndian);                                                            \
                                                                                                                                 \
