@@ -28,7 +28,7 @@
 #include <file/pathUtils.h>
 #include <misc/string_utils.h>
 
-#include "lcs_stdio.h"
+#include "../../lcs_stdio.h"
 #include "../bounds.h"
 #include "../debugInfo.h"
 #include "../exception.h"
