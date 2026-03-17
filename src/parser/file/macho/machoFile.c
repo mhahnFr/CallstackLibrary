@@ -236,7 +236,7 @@ static inline void machoFile_handleSegment##bits(struct machoFile* self, const v
                 TLVDescriptor* begin = (TLVDescriptor*)                                         \
                     (macho_maybeSwap(bits, bytesSwapped, section->addr) + slide);               \
                 const size_t amount = sectionSize / sizeof(TLVDescriptor);                      \
-                vector_reserve_throw(&self->tlvs, amount);                                            \
+                vector_reserve_throw(&self->tlvs, amount);                                      \
                 memcpy(self->tlvs.content, begin, sectionSize);                                 \
                 self->tlvs.count = amount;                                                      \
             }                                                                                   \
