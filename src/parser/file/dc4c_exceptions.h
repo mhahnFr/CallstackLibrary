@@ -26,18 +26,33 @@
 
 #include "exception.h"
 
+/**
+ * Invokes @c vector_reserve and throws an exception if it fails.
+ *
+ * @param ... the arguments to pass on
+ */
 #define vector_reserve_throw(...) do {                                           \
     if (!vector_reserve(__VA_ARGS__)) {                                          \
         BFE_THROW_MSG(failedAllocation, "Vector reserve allocation has failed"); \
     }                                                                            \
 } while (0)
 
+/**
+ * Invokes @c vector_push_back and throws an exception if it fails.
+ *
+ * @param ... the arguments to pass on
+ */
 #define vector_push_back_throw(...) do {                                           \
     if (!vector_push_back(__VA_ARGS__)) {                                          \
         BFE_THROW_MSG(failedAllocation, "Vector push_back allocation has failed"); \
     }                                                                              \
 } while (0)
 
+/**
+ * Invokes @c vector_insert and throws an exception if it fails.
+ *
+ * @param ... the arguments to pass on
+ */
 #define vector_insert_throw(...) do {                                           \
     if (!vector_insert(__VA_ARGS__)) {                                          \
         BFE_THROW_MSG(failedAllocation, "Vector insert allocation has failed"); \
