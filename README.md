@@ -24,82 +24,7 @@ Now, you can use the headers [`callstack.h`][2] and [`callstack_exception.hpp`][
 More explanation can be found in the [wiki][3]; the detailed explanation follows below.
 
 ## Usage
-### Installation
-Get started by either downloading a prebuilt version of this library [here][1].
-
-Alternatively you can also build it from source:
-1. Clone the repository: `git clone --recursive https://github.com/mhahnFr/CallstackLibrary.git`
-2. go into the cloned repository: `cd CallstackLibrary`
-3. and build the library: `make -j`
-
-Or in one step:
-```shell
-git clone --recursive https://github.com/mhahnFr/CallstackLibrary.git && cd CallstackLibrary && make -j
-```
-
-To enable the optional **C++** exclusive functions add `CXX_FUNCTIONS=true` as argument to `make`.
-
-> [!TIP]
-> **Example**:
-> ```shell
-> make -j CXX_FUNCTIONS=true
-> ```
-
-> [!NOTE]
-> When statically linking against the CallstackLibrary with **C++** exclusive functions enabled make sure to also link
-> against the C++ standard library of your compiler (this is usually already the case when linking C++ code).
-
-More information about the **C++** exclusive functions [here][6].
-
-If you want to install the library, which is *not* necessary for it to work properly, you can do so using the
-following command:
-```shell
-make INSTALL_PATH=/usr/local install
-```
-Adapt the value of the `INSTALL_PATH` argument to your needs.
-
-If you downloaded a [release][1] you can simply move the headers and the library anywhere you like.
-
-#### Build dependencies
-The following command line tools are required for a successful build:
-- GNU compatible `make` command line tool
-- The `uname` command line tool *(POSIX.2)*
-
-The following code dependencies are needed in order to successfully build the library:
-- C11 compatible compiler with GNU language extensions
-- Standard C library with the following additional functions:
-    - `strdup` *(POSIX.1-2001)*
-    - `asprintf` *(POSIX.1-2024)*
-    - `backtrace`
-
-For the optional C++ functionality a C++17 compatible compiler is necessary.
-
-##### Linux
-The following additional Linux specific dependencies are needed:
-- GNU standard C library
-
-##### macOS
-Currently, no additional macOS specific dependencies are necessary.
-
-### Uninstallation
-Uninstall the library by simply removing it and its header files from the installation directory.  
-This can be done using the following command:
-```shell
-make INSTALL_PATH=/usr/local uninstall
-```
-Adapt the value of the `INSTALL_PATH` argument to your needs.
-
-### How to use
-In order to use this library, simply include the header [`callstack.h`][2] and [`callstack_exception.hpp`][5].
-
-#### Linking
-> [!NOTE]
-> Add `-L<path/to/library>` if the CallstackLibrary has not been installed in one of the default directories.
-
-Link with `-lcallstack`
-
-> [!TIP]
-> Example: `-L<path/to/library> -lcallstack`
+After [installing][11] this library, simply include the header [`callstack.h`][2] and [`callstack_exception.hpp`][5].
 
 ### Callstacks
 ```C
@@ -292,6 +217,80 @@ in: (/usr/lib/x86_64-linux-gnu/libc.so.6) __libc_start_main + 133
 in: (a.out) _start + 33
 ```
 
+### Installation
+Get started by either downloading a prebuilt version of this library [here][1].
+
+Alternatively you can also build it from source:
+1. Clone the repository: `git clone --recursive https://github.com/mhahnFr/CallstackLibrary.git`
+2. go into the cloned repository: `cd CallstackLibrary`
+3. and build the library: `make -j`
+
+Or in one step:
+```shell
+git clone --recursive https://github.com/mhahnFr/CallstackLibrary.git && cd CallstackLibrary && make -j
+```
+
+To enable the optional **C++** exclusive functions add `CXX_FUNCTIONS=true` as argument to `make`.
+
+> [!TIP]
+> **Example**:
+> ```shell
+> make -j CXX_FUNCTIONS=true
+> ```
+
+> [!NOTE]
+> When statically linking against the CallstackLibrary with **C++** exclusive functions enabled make sure to also link
+> against the C++ standard library of your compiler (this is usually already the case when linking C++ code).
+
+More information about the **C++** exclusive functions [here][6].
+
+If you want to install the library, which is *not* necessary for it to work properly, you can do so using the
+following command:
+```shell
+make INSTALL_PATH=/usr/local install
+```
+Adapt the value of the `INSTALL_PATH` argument to your needs.
+
+If you have downloaded a [release][1] you can simply move the headers and the library anywhere you like.
+
+#### Build dependencies
+The following command line tools are required for a successful build:
+- GNU compatible `make` command line tool
+- The `uname` command line tool *(POSIX.2)*
+
+The following code dependencies are needed in order to successfully build the library:
+- C11 compatible compiler with GNU language extensions
+- Standard C library with the following additional functions:
+  - `strdup` *(POSIX.1-2001)*
+  - `asprintf` *(POSIX.1-2024)*
+  - `backtrace`
+
+For the optional C++ functionality a C++17 compatible compiler is necessary.
+
+##### Linux
+The following additional Linux specific dependencies are needed:
+- GNU standard C library
+
+##### macOS
+Currently, no additional macOS specific dependencies are necessary.
+
+### Uninstallation
+Uninstall the library by simply removing it and its header files from the installation directory.  
+This can be done using the following command:
+```shell
+make INSTALL_PATH=/usr/local uninstall
+```
+Adapt the value of the `INSTALL_PATH` argument to your needs.
+
+### Linking
+> [!NOTE]
+> Add `-L<path/to/library>` if the CallstackLibrary has not been installed in one of the default directories.
+
+Link with `-lcallstack`
+
+> [!TIP]
+> Example: `-L<path/to/library> -lcallstack`
+
 ## Symbolization
 The callstacks are generated using the function `backtrace` of the `libexecinfo`, which is commonly preinstalled.
 
@@ -333,3 +332,4 @@ This library is licensed under the terms of the GNU GPL in version 3 or later.
 [8]: https://github.com/mhahnFr/CallstackLibrary/wiki/callstack.hpp#class-callstack
 [9]: https://github.com/mhahnFr/CallstackLibrary/issues/new
 [10]: https://github.com/mhahnFr/CallstackLibrary/pulls
+[11]: #installation
