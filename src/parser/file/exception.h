@@ -29,7 +29,13 @@
 # include <stdio.h>
 #endif
 
+/**
+ * Represents an exception while handling runtime binary images.
+ */
 struct binaryFileException {
+    /**
+     * The possible exception types.
+     */
     enum type {
         binaryFileExceptionType_unknown,
 
@@ -39,10 +45,20 @@ struct binaryFileException {
         binaryFileExceptionType_invalid,
         binaryFileExceptionType_empty,
     } code;
+    /** The file name of the file that caused the error. */
     const char* fileName,
+    /** The message of the exception.                    */
               * message;
 };
 
+/**
+ * Throws a @c binaryFileException with the given code, the file name and the
+ * exception message.
+ *
+ * @param theCode the exception code
+ * @param theFileName the file name of the file that caused the exception
+ * @param theMessage the additional message of the exception
+ */
 #define BFE_THROW_RAW(theCode, theFileName, theMessage) \
     THROW1(struct binaryFileException, {                \
         .code = binaryFileExceptionType_##theCode,      \
@@ -50,15 +66,44 @@ struct binaryFileException {
         .message = (theMessage),                        \
     })
 
+/**
+ * Throws a @c binaryFileException with the given code and the given message
+ * for the given concrete @c binaryFile structure implementation.
+ *
+ * @param theCode the exception code
+ * @param concreteFilePtr the file object inheriting from the @c binaryFile structure
+ * @param theMessage the exception message
+ */
 #define BFE_THROW(theCode, concreteFilePtr, theMessage) \
     BFE_THROW_RAW(theCode, (concreteFilePtr)->_.fileName.original, theMessage)
 
+/**
+ * Throws a @c binaryFileException with the given code for the given concrete
+ * @c binaryFile structure implementation.
+ *
+ * @param theCode the exception code
+ * @param concreteFilePtr the file object inheriting from the @c binaryFile structure
+ */
 #define BFE_THROW_FILE(theCode, concreteFilePtr) \
     BFE_THROW_RAW(theCode, (concreteFilePtr)->_.fileName.original, NULL)
 
+/**
+ * Throws a @c binaryFileException with the given code and message.
+ *
+ * @param theCode the exception code
+ * @param theMessage the exception message
+ */
 #define BFE_THROW_MSG(theCode, theMessage) \
     BFE_THROW_RAW(theCode, NULL, theMessage)
 
+/**
+ * Allocates the requested amount of memory and invokes the given expression if
+ * the allocation has failed.
+ *
+ * @param size the requested amount of bytes to be allocated
+ * @param throwExpr the expression to be invoked when the allocation has failed
+ * @return the allocated piece of memory
+ */
 #define BFE_ALLOC_RAW(size, throwExpr) ({ \
     void* _toReturn = malloc(size);       \
     if (_toReturn == NULL) {              \
@@ -67,9 +112,26 @@ struct binaryFileException {
     _toReturn;                            \
 })
 
+/**
+ * Allocates the requested amount of memory and throws a @c binaryFileException
+ * for the given concrete @c binaryFile structure implementation if the
+ * allocation fails.
+ *
+ * @param size the requested amount of bytes to be allocated
+ * @param file the concrete @c binaryFile structure implementation
+ * @return the allocated piece of memory
+ */
 #define BFE_ALLOC_F(size, file, ...) \
     BFE_ALLOC_RAW(size, BFE_THROW(failedAllocation, file __VA_OPT__(,) __VA_ARGS__))
 
+/**
+ * Allocates the requested amount of memory and throws a @c binaryFileException
+ * with the given error message if the allocation fails.
+ *
+ * @param size the requested amount of bytes to be allocated
+ * @param theMessage the error message
+ * @return the allocated piece of memory
+ */
 #define BFE_ALLOC_MSG(size, theMessage) \
     BFE_ALLOC_RAW(size, BFE_THROW_MSG(failedAllocation, theMessage))
 
