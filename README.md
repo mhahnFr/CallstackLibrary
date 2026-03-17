@@ -212,7 +212,7 @@ in: (a.out) foo2() (main.cpp:14)
 in: (a.out) bar() (main.cpp:16)
 in: (a.out) foo() (main.cpp:17)
 in: (a.out) main (main.cpp:21)
-in: (/usr/lib/x86_64-linux-gnu/libc.so.6) << Unknown >>
+in: (/usr/lib/x86_64-linux-gnu/libc.so.6) 0x29ca8
 in: (/usr/lib/x86_64-linux-gnu/libc.so.6) __libc_start_main + 133
 in: (a.out) _start + 33
 ```
